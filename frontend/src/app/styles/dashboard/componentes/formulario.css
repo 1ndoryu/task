@@ -66,26 +66,7 @@
     color: var(--dashboard-estadoAlta);
 }
 
-/* 
- * BOTONES DE IMPORTANCIA 
- */
 
-.formularioBotonImportancia {
-    flex: 1;
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background-color: transparent;
-    border: 1px solid var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoMuyApagado);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionNormal);
-}
-
-.formularioBotonImportancia:hover:not(:disabled) {
-    border-color: var(--dashboard-textoMuyApagado);
-    color: var(--dashboard-textoSecundario);
-}
 
 /* 
  * CAMPO DE TAGS 
@@ -151,78 +132,12 @@
 
 /* 
  * BOTONES DE ACCION 
+ * [039A-1/F2] Reglas de .formularioBotonGuardar y .formularioBotonCancelar
+ * eliminadas: 0 consumidores repo-wide (ver nota al final de este archivo).
  */
 
-.formularioBotonCancelar {
-    flex: 1;
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background-color: transparent;
-    border: 1px solid var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoSecundario);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionNormal);
-}
 
-.formularioBotonCancelar:hover:not(:disabled) {
-    background-color: var(--dashboard-fondoHover);
-    border-color: var(--dashboard-bordeSutil);
-}
 
-.formularioBotonGuardar {
-    flex: 1;
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background-color: rgba(var(--dashboard-exitoRgb), 0.15);
-    border: 1px solid rgba(var(--dashboard-estadoExitoRgb), 0.4);
-    color: var(--dashboard-estadoExito);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionNormal);
-}
-
-.formularioBotonGuardar:hover:not(:disabled) {
-    background-color: rgba(var(--dashboard-exitoRgb), 0.25);
-    border-color: rgba(var(--dashboard-exitoRgb), 0.6);
-}
-
-.formularioBotonGuardar:disabled,
-.formularioBotonCancelar:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* 
- * ZONA DE PELIGRO (ELIMINAR) 
- */
-
-.formularioBotonEliminar {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background-color: transparent;
-    border: 1px solid var(--dashboard-estadoAltaBorde);
-    color: var(--dashboard-textoMuyApagado);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionNormal);
-}
-
-.formularioBotonEliminar:hover:not(:disabled) {
-    background-color: var(--dashboard-estadoAltaFondo);
-    border-color: var(--dashboard-estadoAlta);
-    color: var(--dashboard-estadoAlta);
-}
-
-.formularioBotonEliminar:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
 
 /* 
  * NOTA SOBRE ACCIONES Y ZONA PELIGRO:

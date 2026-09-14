@@ -70,15 +70,17 @@ async fn handle_socket(socket: WebSocket, user_id: Uuid) {
     loop {
         tokio::select! {
             incoming = receiver.next() => {
-                match incoming {
-                    Some(Ok(Message::Text(text))) => {
-                        // Ping/pong para mantener la conexión viva.
-                        if text.trim() == "ping" {
-                            if sender.send(Message::Text("pong".into())).await.is_err() {
-                                break;
-                            }
-                        }
+                // Ping/pong para mantener la conexión viva. Va fuera del
+                // `match`: el envío es async y no cabe en una guardia
+                // (`clippy::collapsible_match` lo exigiría dentro).
+                if matches!(&incoming, Some(Ok(Message::Text(t))) if t.trim() == "ping") {
+                    if sender.send(Message::Text("pong".into())).await.is_err() {
+                        break;
                     }
+                    continue;
+                }
+                match incoming {
+                    Some(Ok(Message::Text(_))) => {}
                     Some(Ok(Message::Close(_))) | None => break,
                     Some(Err(_)) => break,
                     _ => {}

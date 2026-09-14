@@ -5,7 +5,7 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 use validator::Validate;
 
-use super::dashboard::object_with_id;
+use super::dashboard::{fecha_iso, object_with_id};
 
 fn empty_payload() -> Value {
     Value::Object(Map::new())
@@ -57,10 +57,7 @@ impl UpsertProjectRequest {
             self.prioridad.clone().map_or(Value::Null, Value::String),
         );
         object.insert("urgencia".into(), Value::String(self.urgencia.clone()));
-        object.insert(
-            "fechaLimite".into(),
-            serde_json::to_value(self.fecha_limite).expect("valid datetime serializes"),
-        );
+        object.insert("fechaLimite".into(), self.fecha_limite.map_or(Value::Null, fecha_iso));
         object.insert("orden".into(), Value::from(self.orden));
         Value::Object(object)
     }
@@ -155,7 +152,7 @@ impl UpsertHabitRequest {
          * `cadaDias`/`diasSemana`/`vecesAlMes` y perdiendo el intervalo en el
          * round-trip (plan-paridad-sync-export). El string del tipo solo se usa
          * como fallback si el objeto no esta presente. */
-        let frecuencia_objeto = object.get("frecuencia").map_or(false, |v| matches!(v, Value::Object(_)));
+        let frecuencia_objeto = object.get("frecuencia").is_some_and(|v| matches!(v, Value::Object(_)));
         if !frecuencia_objeto {
             object.insert("frecuencia".into(), Value::String(self.frecuencia.clone()));
         }

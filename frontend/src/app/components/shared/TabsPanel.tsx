@@ -40,6 +40,9 @@ interface TabsPanelProps {
     onCancelarRenombrado?: () => void;
     /* Tooltip del botón cerrar (contexto: 'Cerrar conversación', 'Cerrar nota'...). */
     tituloCerrar?: string;
+    /* [P4-039A-1] Variante visual: 'tabs' (cajas con borde, defecto) o 'pills'
+     * (pastillas para filtros/segmentos). Solo cambia la receta CSS. */
+    variante?: 'tabs' | 'pills';
 }
 
 export function TabsPanel({
@@ -54,9 +57,10 @@ export function TabsPanel({
     onConfirmarRenombrado,
     onCancelarRenombrado,
     tituloCerrar = 'Cerrar',
+    variante = 'tabs',
 }: TabsPanelProps): JSX.Element {
     return (
-        <div className="tabsCompartidas">
+        <div className={`tabsCompartidas ${variante === 'pills' ? 'tabsCompartidas--pills' : ''}`}>
             {tabs.map(tab => {
                 const activa = tab.id === activaId;
                 const editando = editandoId === tab.id;

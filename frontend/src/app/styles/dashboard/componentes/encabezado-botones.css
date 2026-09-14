@@ -1,29 +1,5 @@
-/* [por que] Capa de estilos propia del proyecto (design system local).
- * sentinel-disable-file css-adhoc-button-style
- */
 
-.botonSeguridad {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoSecundario);
-    cursor: pointer;
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    border-radius: var(--dashboard-radioSm);
-    transition: all var(--dashboard-transicionNormal);
-}
 
-.botonSeguridad:hover {
-    color: var(--dashboard-textoActivo);
-    border-color: var(--dashboard-acento);
-    background: rgba(var(--dashboard-violetaRgb), 0.1);
-}
-
-.botonSeguridad:active {
-    transform: scale(0.95);
-}
 
 /* 
  * BADGE DE ADMINISTRACIÃ“N 
@@ -46,31 +22,8 @@
     transform: scale(0.95);
 }
 
-/* 
- * BOTON DE LAYOUT 
- */
-.botonLayout {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoSecundario);
-    cursor: pointer;
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    border-radius: var(--dashboard-radioSm);
-    transition: all var(--dashboard-transicionNormal);
-}
 
-.botonLayout:hover {
-    color: var(--dashboard-textoActivo);
-    border-color: var(--dashboard-bordeSutil);
-    background: var(--dashboard-fondoHover);
-}
 
-.botonLayout:active {
-    transform: scale(0.95);
-}
 
 /* 
  * BOTON ICONO UNIFICADO DEL ENCABEZADO 
@@ -173,18 +126,12 @@
 
 /* 
  * BOTON DE EQUIPOS 
+ * [039A-1/F2] .botonIconoEncabezado--equipo y .encabezadoContador eliminadas:
+ * 0 consumidores repo-wide. Sus únicos usos vivían dentro del bloque JSX
+ * comentado "TO-DO: Mi Equipo" de EncabezadoAcciones.tsx, aún pendiente.
+ * [318A-3 F5] Regla vigente para clases internas: sin prefijo "boton", son
+ * contenido del boton, no variantes (button-clase-especifica).
  */
-.botonIconoEncabezado--equipo {
-    gap: var(--dashboard-espacioXs);
-}
-
-/* [318A-3 F5] Clases internas sin prefijo "boton": son contenido del boton,
- * no variantes de boton (regla button-clase-especifica). */
-.encabezadoContador {
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    font-weight: 600;
-    color: var(--dashboard-estadoAlta);
-}
 
 /* 
  * BOTON DE NOTIFICACIONES 

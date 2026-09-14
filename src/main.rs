@@ -55,7 +55,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
      * `glory-harness-core::scheduler` (heartbeat, toma atómica, cron); aquí
      * solo se inyecta la persistencia (adaptador) y el runner del consumidor
      * (`ejecutar_tarea_harness`). El estado es el mismo AppState del router. */
-    let scheduler_state = handlers::estado_completo(pool.clone(), &config);
+    let scheduler_state = handlers::estado_completo(pool.clone(), &config)?;
     let persistencia = Arc::new(PersistenciaAgente::nuevo(pool.clone()));
     let runner_state = scheduler_state.clone();
     tokio::spawn(async move {
@@ -75,7 +75,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing::info!("Servidor iniciando en {addr}");
     tracing::info!("Swagger UI disponible en http://{addr}/swagger-ui/");
 
-    let app = handlers::create_router(pool, config);
+    let app = handlers::create_router(pool, config)?;
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     axum::serve(
         listener,

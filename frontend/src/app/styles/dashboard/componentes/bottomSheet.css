@@ -154,10 +154,6 @@
     background: var(--dashboard-fondoHover);
 }
 
-.bottomSheetItem--activo {
-    color: var(--dashboard-textoActivo);
-    background: var(--dashboard-superposicionSutil);
-}
 
 .bottomSheetItem--peligro {
     color: var(--dashboard-estadoAlta);
@@ -180,10 +176,6 @@
     margin-left: auto;
 }
 
-/* Icono azul cuando el item está activo (sin check) */
-.bottomSheetItem--activo .bottomSheetItem__icono {
-    color: var(--dashboard-acento);
-}
 
 /* Texto del item - a la izquierda */
 .bottomSheetItem__texto {

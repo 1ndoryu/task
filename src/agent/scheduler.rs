@@ -42,11 +42,14 @@ pub async fn ejecutar_tarea(
         persistencia: Arc::new(PersistenciaAgente::nuevo(state.pool.clone())),
         llm: Arc::new(state.ai_provider.clone()),
         web_search: Some(Arc::new(BuscadorWeb(state.web_search.clone()))),
-        dominio: Some(Arc::new(DominioAgente { pool: state.pool.clone() })),
-        /* [318A-16 F3] task-IA nunca ejecuta comandos (invariante de
-         * seguridad): sin runner, el núcleo no registra la tool `comando`. */
+        /* [318A-16 F3] task-IA nunca ejecuta comandos ni navega/lee URLs
+         * (invariante de seguridad): sin runner, ni navegador ni web_fetch,
+         * el núcleo no registra las tools `comando`/`navegador`/`web_fetch`. */
         ejecutor_comando: None,
         programador_tareas: None,
+        web_fetch: None,
+        navegador: None,
+        dominio: Some(Arc::new(DominioAgente { pool: state.pool.clone() })),
     };
     let runtime = AgentRuntime::nuevo(registry, puertos, TurnoConfig::default());
 

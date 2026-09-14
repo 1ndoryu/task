@@ -60,28 +60,20 @@
     }
 
     /* Ocultar elementos de control de panel en móvil */
-    .panelDashboard--movil .panelHandle,
-    .panelDashboard--movil .botonMinimizar,
-    .panelDashboard--movil .resizeHandle,
     .panelDashboard--movil .handleArrastre {
         display: none !important;
     }
 
     /* Ajustar cabecera de panel en móvil */
-    .panelDashboard--movil .panelHeader,
-    .panelDashboard--movil .panelCabecera {
+    .panelDashboard--movil .panelHeader {
         padding: var(--dashboard-espacioSm) 0;
         border-bottom: none;
         background: transparent;
     }
 
     /* Contenido del panel ocupa todo el espacio */
-    .panelDashboard--movil .panelContenido,
-    .panelDashboard--movil .listaScrolleable {
-        padding: 0;
-        height: auto;
-        max-height: none;
-    }
+/* [039A-1/F2] .panelDashboard--movil .panelContenido eliminada: 0 consumidores
+ * repo-wide; el reset de .dashboardPanelView.css ya cubre el contenedor. */
 
     /* [034A-10] internaColumna y dashboardPanel deben llenar el panel padre
      * para que el scratchpad y otros componentes con flex: 1 tomen
@@ -102,8 +94,7 @@
     }
 
     /* Secciones dentro del panel sin bordes extra */
-    .dashboardGridMovil .dashboardPanel > section,
-    .dashboardGridMovil .panelSeccion {
+    .dashboardGridMovil .dashboardPanel > section {
         border: none;
         border-radius: 0;
         padding: var(--dashboard-espacioMovilSm) 0;
@@ -115,7 +106,6 @@
      * Las opciones se muestran en el header móvil superior
      */
     .dashboardGridMovil .seccionEncabezado,
-    .dashboardGridMovil .panelHeader--seccion,
     .panelDashboard--movil > .seccionEncabezado,
     .panelDashboard--movil .seccionEncabezado:first-child {
         display: none !important;

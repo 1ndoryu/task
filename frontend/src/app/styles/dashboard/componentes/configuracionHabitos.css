@@ -215,10 +215,6 @@
     min-height: 32px;
 }
 
-/* Padding condicional para drag */
-.listaTareasHabito__item--conDrag {
-    padding-left: 0;
-}
 
 .listaTareasHabito__item:hover {
     background: var(--dashboard-fondoHover);
@@ -233,35 +229,9 @@
     color: var(--dashboard-textoApagado);
 }
 
-.listaTareasHabito__dragHandle {
-    touch-action: none;
-    cursor: grab;
-    display: flex;
-    align-items: center;
-    padding-right: var(--dashboard-espacioXs);
-    color: var(--dashboard-textoApagado);
-}
 
-.listaTareasHabito__checkbox {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--dashboard-textoApagado);
-    transition: color var(--dashboard-transicionRapida);
-    flex-shrink: 0;
-}
 
-.listaTareasHabito__checkbox:hover {
-    color: var(--dashboard-acento);
-}
 
-.listaTareasHabito__checkbox .iconoCheck {
-    color: var(--dashboard-estadoExito);
-}
 
 /* Override para el checkbox dentro de lista subtasks/habitos para igualar modo compacto */
 .listaTareasHabito__item .tareaCheckbox {
@@ -363,28 +333,4 @@
     align-self: center;
 }
 
-/* Boton agregar - compacto y centrado */
-.listaTareasHabito__botonAgregar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--dashboard-espacioXs);
-    margin-top: var(--dashboard-espacioXs);
-    padding: 4px 10px;
-    width: auto;
-    margin-left: auto;
-    margin-right: auto;
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    color: var(--dashboard-textoApagado);
-    background: transparent;
-    border: 1px dashed var(--dashboard-bordeSutil);
-    border-radius: var(--dashboard-radioSm);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-}
 
-.listaTareasHabito__botonAgregar:hover {
-    color: var(--dashboard-acento);
-    border-color: var(--dashboard-acento);
-    background: var(--dashboard-fondoSecundario);
-}

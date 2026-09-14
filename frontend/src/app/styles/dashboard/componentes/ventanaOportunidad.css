@@ -27,12 +27,6 @@
     color: var(--dashboard-textoNormal);
 }
 
-/* Botón principal (Estilo minimalista sin azul por defecto) */
-.selectorVentanaOportunidad__boton--activo {
-    background: var(--dashboard-superposicionClara);
-    border-color: var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoNormal);
-}
 
 /* Indicador cuando estamos dentro de la ventana */
 .selectorVentanaOportunidad__boton--enVentana {
@@ -204,8 +198,7 @@
     border-top: 1px solid var(--dashboard-bordeSutil);
 }
 
-.selectorVentanaOportunidad__toggle,
-.selectorVentanaOportunidad__eliminar {
+.selectorVentanaOportunidad__toggle{
     flex: 1;
     padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
     font-size: var(--dashboard-tamanoMuyPequeno);
@@ -231,12 +224,4 @@
     background: var(--dashboard-estadoInfoFondo);
 }
 
-.selectorVentanaOportunidad__eliminar {
-    background: transparent;
-    border: 1px solid var(--dashboard-estadoError);
-    color: var(--dashboard-estadoError);
-}
 
-.selectorVentanaOportunidad__eliminar:hover {
-    background: var(--dashboard-estadoErrorFondo);
-}

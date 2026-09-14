@@ -294,8 +294,14 @@ pub struct ApiDoc;
 
 /// Construye el AppState compartido (usado por create_router y por el scheduler
 /// de tareas programadas del agente, que necesita el mismo state).
-pub fn estado_completo(pool: sqlx::PgPool, config: &crate::config::AppConfig) -> AppState {
-    AppState {
+/// Es fallible porque el cliente HTTP de búsqueda web se crea aquí: propagar el
+/// error hace fallar el arranque con contexto en lugar de dejar el proceso
+/// sirviendo con un transporte roto que sólo se notaría al usar la búsqueda.
+pub fn estado_completo(
+    pool: sqlx::PgPool,
+    config: &crate::config::AppConfig,
+) -> Result<AppState, crate::errors::AppError> {
+    Ok(AppState {
         pool,
         cookie_secure: config.cookie_secure,
         trust_proxy_headers: config.trust_proxy_headers,
@@ -317,18 +323,21 @@ pub fn estado_completo(pool: sqlx::PgPool, config: &crate::config::AppConfig) ->
             config.ai_nutrition_rate_limit_per_hour,
             std::time::Duration::from_secs(60 * 60),
         )),
-        web_search: crate::services::WebSearchService::from_env(),
+        web_search: crate::services::WebSearchService::from_env()?,
         agente_limiter: std::sync::Arc::new(FixedWindowLimiter::new(
             crate::handlers::agente::MAX_TURNOS_HORA,
             std::time::Duration::from_secs(60 * 60),
         )),
         agente_permisos: crate::handlers::agente_aprobacion::AlmacenPermisos::nuevo(),
-    }
+    })
 }
 
 /// Crea el router principal con CORS, tracing, Swagger UI y todas las rutas
-pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Router {
-    let state = estado_completo(pool, &config);
+pub fn create_router(
+    pool: sqlx::PgPool,
+    config: crate::config::AppConfig,
+) -> Result<Router, crate::errors::AppError> {
+    let state = estado_completo(pool, &config)?;
 
     let cors = CorsLayer::new()
         .allow_origin(AllowOrigin::list(config.cors_origins))
@@ -373,9 +382,15 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
                 let index = index.clone();
                 let static_dir = static_dir.clone();
                 async move {
-                    let static_response = tower::ServiceExt::oneshot(static_dir, request)
+                    /* `ServeDir` declara `Error = Infallible`: la respuesta
+                     * siempre es `Ok`. Se consume el `Result` con un `match`
+                     * exhaustivo (`match imposible {}`) en lugar de paniquear. */
+                    let static_response = match tower::ServiceExt::oneshot(static_dir, request)
                         .await
-                        .expect("static directory service is infallible");
+                    {
+                        Ok(respuesta) => respuesta,
+                        Err(imposible) => match imposible {},
+                    };
                     if static_response.status() != axum::http::StatusCode::NOT_FOUND {
                         let (parts, body) = static_response.into_parts();
                         return Ok::<_, std::convert::Infallible>(Response::from_parts(
@@ -383,15 +398,23 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
                             Body::new(body),
                         ));
                     }
+                    /* Sin `Response::builder()`: el status y la cabecera son
+                     * constantes válidas, así que no hay `Result` que gestionar
+                     * ni motivo para un `expect`. */
                     let response = match tokio::fs::read(index).await {
-                        Ok(contents) => Response::builder()
-                            .header(CONTENT_TYPE, "text/html; charset=utf-8")
-                            .body(Body::from(contents))
-                            .expect("static fallback response is valid"),
-                        Err(_) => Response::builder()
-                            .status(axum::http::StatusCode::NOT_FOUND)
-                            .body(Body::empty())
-                            .expect("static 404 response is valid"),
+                        Ok(contents) => {
+                            let mut respuesta = Response::new(Body::from(contents));
+                            respuesta.headers_mut().insert(
+                                CONTENT_TYPE,
+                                HeaderValue::from_static("text/html; charset=utf-8"),
+                            );
+                            respuesta
+                        }
+                        Err(_) => {
+                            let mut respuesta = Response::new(Body::empty());
+                            *respuesta.status_mut() = axum::http::StatusCode::NOT_FOUND;
+                            respuesta
+                        }
                     };
                     Ok::<_, std::convert::Infallible>(response)
                 }
@@ -401,7 +424,7 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         None => router,
     };
 
-    router
+    Ok(router
         .layer(SetResponseHeaderLayer::if_not_present(
             HeaderName::from_static("x-content-type-options"),
             HeaderValue::from_static("nosniff"),
@@ -417,7 +440,7 @@ pub fn create_router(pool: sqlx::PgPool, config: crate::config::AppConfig) -> Ro
         .layer(SetResponseHeaderLayer::if_not_present(
             HeaderName::from_static("permissions-policy"),
             HeaderValue::from_static("camera=(), microphone=(), geolocation=()"),
-        ))
+        )))
 }
 
 fn api_routes(state: &AppState) -> Router<AppState> {

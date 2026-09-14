@@ -780,6 +780,101 @@ Gate por proyecto donde aplique, TABLA final 10/10, archivar este plan en `compl
   procesado cuando aterrice (F5) + **cada ítem de la fase final decidido y registrado** → 0 pendientes
   sin decisión, harness 9/9 verde con el registro decidido como única cobertura.
 
+### 9.5 Triaje Sentinel 0.7.10 (11-09) — WM/AGAPE/REST/coolify
+
+Re-medición con Sentinel `0.7.10` (`9f475d2`): 0 errores en los 12 proyectos; warnings con
+decisión total en 4 proyectos (293 ítems), firmados en sus `excepciones-varsense.json`.
+Autorización: decisión autónoma del agente (directiva usuario 11-09, sin 1x1).
+
+- **WM (28)**: 8 frontera-plataforma (viewport-clamp, Escape/scroll/resize, bootstrap #root,
+  portal `document.body` [318A-2]; `etiquetas.ts:78` FP: la propia doc de la allowlist) + 3 inline
+  coords runtime + 3 html-nativo (tabs/filtros custom + select JSON dinámico) + 7 limite-lineas
+  (trigger 1200) + 4 large-interface hints (store/dominio, precedente PT) + 2 sin-hook (un solo uso)
+  + 1 directorio (v2 plana intencional, trigger 20). 12 entradas en excepciones.
+- **AGAPE (140)**: 23 legacy `frontend/` FUERA-DE-ALCANCE (activo = frontend-v2, AGENTS 9.9.7) +
+  61 sqlx (sin `.sqlx`: migrar exige DB + prepare + CI; queries estáticas con binds $n; trigger
+  caché offline) + 12 sin-hook + 10 usestate (estado local de vista) + 9 html-nativo (selects con
+  label; ui/ sin Selector canónico) + 8 limite (vistas CRUD + admin.rs 792; trigger 600/1000) +
+  12 css-hardcoded (10 FP de regla + shadow sin token + máscara luminancia) + 3 modal-* FP
+  (clases canónicas inexistentes en frontend-v2, grep 0) + 1 key-index FP (slots fijos
+  NUMERO_IMAGENES, reemplazo in-place) + 1 inline ya firmada fase final. 12 entradas.
+- **REST (89)**: 2 shadcn FUERA + 5 broadcast EXC (SSE baja frecuencia; mpsc-por-suscriptor peor
+  remedio: registro/limpieza + leak) + TAREAS roadmap: 8 handler-DIP (existe repositories/),
+  4 funcion-larga >200, epic bdp_sync (3168) + weblink_catalog (1595) + 11 funcion 102-185 EXC
+  (trigger 200) + 10 limite-back EXC (trigger 1200) + 15 limite-front EXC incl. data-table 793
+  nivel-2 (seam dnd-kit; trigger 900; watch bdp.ts/data-table/ConfigBdp) + 23 hints EXC (DTOs/firmas)
+  + 1 usestate FP (3 estados) + 1 mocks EXC + plano_sala/weblink DIFERIDO-WIP + tests/bdp_push
+  DIFERIDO (plan activo monolito-bdp-simulator) + 1 todo FP ([F3.1-3.3] implementado debajo).
+  16 entradas en excepciones.
+- **coolify (76)**: ~24 funcion-larga ≤207 EXC (patrón 1-comando=1-execute + tablas match; trigger 250;
+  instancia tailscale DIFERIDA-WIP) + TAREAS roadmap: 6 splits >250 (deploy_service 547 = sub-plan
+  activo; mcp/tools 471+370+limite; diagnose 376; restore_pg_data 298; theme update 278) + 15
+  parámetros hints EXC + 10 css-hardcoded FP (var() y no-color) + portal.css EXC (órbita custom,
+  trigger 1200) + config/google_drive DIFERIDO-WIP + db_tmp todo FP (prosa española) + tipos.ts
+  hint EXC. Archivo `excepciones-varsense.json` nuevo (8 entradas).
+- **FP reportados a Sentinel**: css-hardcoded-value (props no-color + valores var(): AGAPE 10,
+  coolify 10), modal-* (canónico inexistente), todo-pendiente (prosa española, marcador
+  implementado), key-index-lista (slots fijos), usestate-excesivo (3 estados),
+  window-reference (doc de la allowlist).
+- Evidencia: `C:\tmp\final-0710-workspace-manager.json`,
+  `C:\tmp\final-0710-trabajos_clientes_ong_agape.json`, `C:\tmp\final-0710-restaurante.json`,
+  `C:\tmp\remedicion-0710-coolify.json`. Queda: GLORYPORT (cierre read-only), PT (37w+6h),
+  Fase 5 TABLA + archivar + lecciones.
+
+### 9.6 Triaje PT 0.7.10 (11-09) — 43 hallazgos, 1 fix real
+
+`C:\tmp\final-0710-proyecto_tasks.json`: 0 errores. Disposición total: 4 FP + 27 EXC + 2 FUERA
++ 8 DIFERIDO-WIP + 1 TAREA + 1 FIX (glow `rgba(255,255,255,0.3)` eliminado en
+`resizeHandleColumna.css:52`; feedback hover preservado vía background+height; sistema flat:
+todos los `--dashboard-sombra*` = none). 9 entradas nuevas en `excepciones-varsense.json` (15 total).
+
+- **FP (4)**: menu-override×3 (separador propio dentro de MenuContextual + div hermano en
+  EncabezadoPerfil:110, no hijo) + todo `agente_aprobacion.rs:191` (prosa "pendiente" en
+  doc-comment, endpoint implementado debajo).
+- **EXC framework (13)**: glory-core no importa de `app/components/ui` (verificado) — importar
+  ui/ invertiría la dependencia (regla 18). Trigger: primitivos propios de glory-core.
+- **FUERA (2)**: ExampleIsland (ejemplo documentado PHP+hidratación).
+- **EXC chrome (5+1+5+2+1)**: tabs/mensajes/pill (span con justificación en código: button
+  anidado inválido), barraContexto width% runtime (precedente F5), large-interface hints (precedente
+  F5), sin-hook un solo uso (precedente WM), ModalCrearRecordatorio quick-create sin header
+  (gemelo ModalCreacionRapida no flagged; <Modal> exige titulo+header).
+- **DIFERIDO-WIP (8)**: css adhoc×3 + hardcoded×4 + `handlers/agente.rs` funcion-larga (ficheros
+  en WIP ajeno; agente.rs ya diferido con ID).
+- **SubmenuNuevoInline → EXCEPCIÓN** (converge con decisión de la mañana 11-09):
+  dual inline/portal por CSS + semántica mousedown anti-blur; fusionarlo obligaría a
+  MenuContextual a ganar modo inline+portal para 3 opciones estáticas. Trigger: si
+  MenuContextual gana portal+posicionamiento inline, migrar. (OpcionMenu ya soporta
+  icono/subOpciones/marcada: verificado, pero no cubre portal/dirección/foco.)
+
+### 9.7 Cierre GLORYPORT read-only + TABLA final Sentinel 0.7.10 (11-09)
+
+GLORYPORT: `C:\tmp\remedicion-079-gloryport-b.json` (tool 0.7.10): 16 archivos, 0/0/0/0.
+Cierre read-only: WIP ajeno intacto (`ahead 7`, mismos ficheros preexistentes). Sin excepciones:
+no hay nada que firmar.
+
+TABLA final (re-medición 0.7.10 `9f475d2` + VarSense 2.2.1 `21d8a70`; 0 errores en los 12):
+
+| Proyecto | E/W/I/H | Estado |
+|---|---|---|
+| WANDORIUS | 0/0/0/0 (481) | cerrado |
+| Glory-Laminal | 0/0/0/0 (55) | cerrado |
+| workspace-manager | 0/24/0/4 (76) | 28 triados, 12 exc |
+| gloryapi | 0/1/0/0 (291) | 1 dif-WIP, 4 exc |
+| PROYECTO TASKS | 0/37/0/6 (1003) | 43 triados, 15 exc + 1 fix |
+| RESTAURANTE | 0/66/0/23 (470) | 89 triados, 16 exc |
+| ONG AGAPE | 0/139/0/1 (144) | 140 triados, 12 exc |
+| glory-harness | 0/0/0/1 (242) | 1 FP, 1 exc |
+| GLORYINSPECTOR | 0/0/0/0 (44) | cerrado |
+| freebuff-bridge | 0/0/0/0 (18) | cerrado |
+| coolify-manager-rs | 0/52/0/24 (193) | 76 triados, 8 exc + 119A-3 |
+| GLORYPORT | 0/0/0/0 (16) | read-only |
+
+Total triado 11-09: 379 ítems (28+140+89+76+43+1+1+1fix), 0 errores, 1 fix real
+(resizeHandleColumna glow), resto con excepción firmada + trigger. Hijas que sobreviven al plan:
+coolify 119A-3 (en roadmap), REST (DIP/splits/epic → roadmap cuando el WIP lo permita).
+PT queda sin hijas (SubmenuNuevoInline converge a EXCEPCIÓN con la mañana). Sin commit/push/deploy:
+todo el lote queda en working tree para revisión del usuario.
+
 ## 10. Planes absorbidos y su evidencia (no borrar; no re-crear duplicados)
 
 | Plan | Campaña / alcance | Estado | Dónde queda la evidencia |

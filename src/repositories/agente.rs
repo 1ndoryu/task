@@ -254,6 +254,7 @@ impl AgenteRepository {
     ///   (el mensaje objetivo se conserva).
     /// - `incluye_mensaje=true` (Editar): borra los mensajes con id >= `hasta_id`
     ///   (el mensaje objetivo también se elimina para reescribirlo).
+    ///
     /// Verifica propiedad de la conversación; devuelve filas borradas.
     pub async fn rebobinar_hasta(
         pool: &PgPool,

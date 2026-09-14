@@ -15,36 +15,11 @@
     }
 }
 
-/* 
- * MOSTRAR SOLO EN MOVIL
- * Elementos ocultos en desktop pero visibles en móvil
- */
-.mostrarSoloEnMovil {
-    display: none !important;
-}
 
 @media (max-width: 480px) {
-    .mostrarSoloEnMovil {
-        display: flex !important;
-    }
-
+    
 }
 
-/* 
- * OCULTAR EN TABLET
- * Elementos visibles en desktop pero ocultos en tablet y menor
- */
-
-/* 
- * MOSTRAR SOLO EN TABLET
- * Elementos visibles solo en tablet y menor
- */
-.mostrarSoloEnTablet {
-    display: none !important;
-}
 
 @media (max-width: 768px) {
-    .mostrarSoloEnTablet {
-        display: flex !important;
     }
-}

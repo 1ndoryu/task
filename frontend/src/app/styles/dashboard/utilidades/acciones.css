@@ -15,16 +15,7 @@
 }
 
 
-.botonAccionDatos:hover {
-    background-color: var(--dashboard-fondoHover);
-    border-color: var(--dashboard-bordeSutil);
-    color: var(--dashboard-textoActivo);
-}
 
-.botonAccionDatos:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
 
 /* [318A-3 F5] Icono interno del boton (no variante): sin prefijo "boton". */
 .accionIcono {

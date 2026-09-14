@@ -5,7 +5,7 @@ use chrono::{DateTime, Utc};
 use serde_json::{Map, Value};
 use uuid::Uuid;
 
-use crate::models::dashboard::object_with_id;
+use crate::models::dashboard::{fecha_iso, object_with_id};
 use super::lectura::{HabitRow, ProjectRow, SharedProjectRow, SharedTaskRow, TaskRow};
 
 /// Límite de ítems devueltos por categoría (proyectos, tareas, hábitos).
@@ -107,14 +107,14 @@ impl From<SharedTaskRow> for DatosTarea {
 pub(super) fn project_value(row: ProjectRow) -> Value {
     let updated_at = row.updated_at;
     let mut object = project_object(DatosProyecto::from(row));
-    object.insert(String::from("updatedAt"), updated_at_value(updated_at));
+    object.insert(String::from("updatedAt"), fecha_iso(updated_at));
     Value::Object(object)
 }
 
 pub(super) fn task_value(row: TaskRow) -> Value {
     let updated_at = row.updated_at;
     let mut object = task_object(DatosTarea::from(row));
-    object.insert(String::from("updatedAt"), updated_at_value(updated_at));
+    object.insert(String::from("updatedAt"), fecha_iso(updated_at));
     Value::Object(object)
 }
 
@@ -124,7 +124,7 @@ pub(super) fn habit_value(row: HabitRow) -> Value {
     insert_if_missing(&mut object, "importancia", row.importance.as_str());
     insert_if_missing(&mut object, "frecuencia", row.frequency_type.as_str());
     insert_if_missing(&mut object, "orden", row.sort_order);
-    object.insert(String::from("updatedAt"), updated_at_value(row.updated_at));
+    object.insert(String::from("updatedAt"), fecha_iso(row.updated_at));
     Value::Object(object)
 }
 
@@ -154,7 +154,7 @@ pub(super) fn shared_project_value(row: SharedProjectRow) -> Value {
         orden: sort_order,
         payload,
     });
-    object.insert(String::from("updatedAt"), updated_at_value(updated_at));
+    object.insert(String::from("updatedAt"), fecha_iso(updated_at));
     insert_shared_metadata(
         &mut object,
         owner_id,
@@ -193,7 +193,7 @@ pub(super) fn shared_task_value(row: SharedTaskRow) -> Value {
         orden: sort_order,
         payload,
     });
-    object.insert(String::from("updatedAt"), updated_at_value(updated_at));
+    object.insert(String::from("updatedAt"), fecha_iso(updated_at));
     insert_shared_metadata(
         &mut object,
         owner_id,
@@ -212,7 +212,7 @@ fn project_object(datos: DatosProyecto) -> Map<String, Value> {
     insert_if_missing(&mut object, "estado", datos.estado);
     insert_if_missing(&mut object, "prioridad", datos.prioridad);
     insert_if_missing(&mut object, "urgencia", datos.urgencia);
-    insert_if_missing(&mut object, "fechaLimite", datos.fecha_limite);
+    insert_if_missing(&mut object, "fechaLimite", datos.fecha_limite.map(fecha_iso));
     insert_if_missing(&mut object, "orden", datos.orden);
     object
 }
@@ -258,10 +258,6 @@ fn insert_shared_metadata(
     object.insert(String::from("miRol"), Value::String(role.to_owned()));
 }
 
-pub(super) fn updated_at_value(updated_at: DateTime<Utc>) -> Value {
-    serde_json::to_value(updated_at).expect("valid datetime serializes")
-}
-
 pub(super) fn truncate_at_limit<T>(items: &mut Vec<T>) -> bool {
     let truncated = items.len() > MAX_DASHBOARD_ITEMS;
     if truncated {
@@ -270,8 +266,9 @@ pub(super) fn truncate_at_limit<T>(items: &mut Vec<T>) -> bool {
     truncated
 }
 
-fn insert_if_missing<T: serde::Serialize>(object: &mut Map<String, Value>, key: &str, value: T) {
-    object.entry(key.to_owned()).or_insert_with(|| {
-        serde_json::to_value(value).expect("serializable dashboard projection value")
-    });
+/// Inserta el valor sólo si la clave falta en el payload legacy. El valor
+/// llega ya como `Into<Value>` en lugar de `Serialize`: así la conversión no
+/// puede fallar y la proyección no arrastra un `Result` imposible.
+fn insert_if_missing(object: &mut Map<String, Value>, key: &str, value: impl Into<Value>) {
+    object.entry(key.to_owned()).or_insert_with(|| value.into());
 }

@@ -55,8 +55,14 @@
     color: var(--dashboard-textoNormal);
 }
 
-/* Icono inline (dentro de texto, ej: icon + label) */
+/* Icono inline (dentro de texto, ej: icon + label).
+ * [P4-119A] Tamano canonico 14px enforced por CSS (gana al atributo size de
+ * lucide): los call sites ya no necesitan size={14} ad-hoc. Excepciones
+ * deliberadas por contexto viven en su CSS (sidebar 12px, badges 12px,
+ * encabezado movil 17px) y no se tocan. */
 .iconoInline {
+    width: 14px;
+    height: 14px;
     margin-right: var(--dashboard-espacioXs);
     vertical-align: middle;
 }

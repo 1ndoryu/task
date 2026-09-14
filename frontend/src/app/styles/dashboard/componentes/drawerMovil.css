@@ -242,11 +242,6 @@
     background: var(--dashboard-estadoAltaFondo);
 }
 
-.drawerMovilItem--secundario {
-    font-size: var(--dashboard-tamanoMuyPequeno);
-    min-height: 40px;
-    color: var(--dashboard-textoSecundario);
-}
 
 /* 
  * ICONOS Y TEXTO DEL ITEM 

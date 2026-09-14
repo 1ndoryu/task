@@ -81,11 +81,6 @@
 }
 
 
-.botonContador:hover {
-    background: var(--dashboard-superposicionSutil);
-    border-color: var(--dashboard-superposicionMedia);
-    transform: scale(1.05);
-}
 
 /* Hover botones migados a variantes atomicas (Fase 6.5) */
 

@@ -135,16 +135,8 @@
         font-size: var(--dashboard-tamanoMuyPequeno);
     }
 
-    /* Historial inline mas compacto */
-    .tablaFilaCompacta .historialHabitoInline {
-        gap: var(--dashboard-espacioXxs);
-    }
-
-    .tablaFilaCompacta .historialDia {
-        width: 14px;
-        height: 14px;
-    }
-
+    
+    
     /* Ocultar columnas secundarias en habitos movil compacto */
     .tablaFilaCompacta .tablaColumnaInactividad,
     .tablaFilaCompacta .tablaColumnaUrgencia,
@@ -196,8 +188,7 @@
      * El FAB central proporciona funcionalidad para hábitos y proyectos
      * pero se mantiene "+ Añadir" de tareas por ser la acción más frecuente
      */
-    .añadirHabito,
-    .tareaNuevoBoton {
+    .añadirHabito{
         display: none !important;
     }
 

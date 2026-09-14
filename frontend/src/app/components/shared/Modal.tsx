@@ -24,11 +24,14 @@ export interface ModalProps {
     accionesEncabezado?: React.ReactNode;
     /* Si true, no muestra la X de cerrar */
     ocultarBotonCerrar?: boolean;
+    /* [P4-039A-1] Si true, no renderiza el encabezado (título + acciones).
+     * El título sigue siendo obligatorio como nombre accesible del diálogo. */
+    sinEncabezado?: boolean;
     /* [303A-7] Clase CSS adicional para el div .modalContenido (permite overrides de padding por modal) */
     claseContenido?: string;
 }
 
-export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '', claseOverlay = '', accionesEncabezado, ocultarBotonCerrar = false, claseContenido = ''}: ModalProps): JSX.Element | null {
+export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '', claseOverlay = '', accionesEncabezado, ocultarBotonCerrar = false, sinEncabezado = false, claseContenido = ''}: ModalProps): JSX.Element | null {
     const {esMovil, esTablet, manejarClickOverlay} = useModal({estaAbierto, onCerrar});
 
     /* [034A-9] Mostrar flecha de retroceso en movil y tablet (<=768px) para que
@@ -44,7 +47,8 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
          * el contexto de apilamiento del panel; con portal el modal se abre
          * global como el resto de modales. */
         <div className={`modalOverlay ${claseOverlay}`} onClick={manejarClickOverlay}>
-            <div className={`modalContenedor ${claseExtra}`} role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+            <div className={`modalContenedor ${claseExtra}`} role="dialog" aria-modal="true" {...(sinEncabezado ? {'aria-label': titulo} : {'aria-labelledby': 'modal-titulo'})}>
+                {!sinEncabezado && (
                 <div className={`modalEncabezado ${esMovil ? 'modalEncabezado--movil' : ''}`}>
                     {/* Boton Volver en movil/tablet - solo icono, sin texto */}
                     {mostrarFlechaRetroceso && (
@@ -66,6 +70,7 @@ export function Modal({estaAbierto, onCerrar, titulo, children, claseExtra = '',
                         )}
                     </div>
                 </div>
+                )}
                 <div className={`modalContenido ${claseContenido}`}>{children}</div>
             </div>
         </div>,

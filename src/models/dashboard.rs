@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, SecondsFormat, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map, Value};
 use utoipa::ToSchema;
@@ -82,9 +82,21 @@ pub fn object_with_id(payload: Value, legacy_id: i64) -> Map<String, Value> {
     object
 }
 
+/// Fecha del contrato JSON del dashboard. chrono serializa un `DateTime<Utc>`
+/// como RFC 3339 **con `Z`** (`write_rfc3339(..., SecondsFormat::AutoSi,
+/// use_z = true)`), que NO es lo mismo que `to_rfc3339()` (`use_z = false` →
+/// `+00:00`). Se construye el `Value` directamente para que la proyección no
+/// arrastre un `Result` que nunca falla; el test
+/// `fecha_iso_coincide_con_serde` fija la equivalencia contra `serde_json`.
+#[must_use]
+pub fn fecha_iso(fecha: DateTime<Utc>) -> Value {
+    Value::String(fecha.to_rfc3339_opts(SecondsFormat::AutoSi, true))
+}
+
 #[cfg(test)]
 mod tests {
-    use super::object_with_id;
+    use super::{fecha_iso, object_with_id};
+    use chrono::{DateTime, Utc};
     use serde_json::json;
 
     #[test]
@@ -99,5 +111,22 @@ mod tests {
         let value = object_with_id(json!("legacy"), 12);
         assert_eq!(value.get("id"), Some(&json!(12)));
         assert_eq!(value.get("data"), Some(&json!("legacy")));
+    }
+
+    #[test]
+    fn fecha_iso_coincide_con_serde() {
+        /* El contrato del frontend depende del formato exacto (`Z`, no
+         * `+00:00`): se compara contra la serialización real de `serde_json`
+         * para que un cambio de formato en chrono rompa aquí y no en el
+         * cliente. `unwrap_or` sólo evita un `expect` en el test: si la
+         * serialización fallara, el assert fallaría con `Null`. */
+        for segundos in [0_i64, 1_787_000_000, -1] {
+            for nanos in [0_u32, 123_456_789] {
+                if let Some(fecha) = DateTime::<Utc>::from_timestamp(segundos, nanos) {
+                    let serializado = serde_json::to_value(fecha).unwrap_or(serde_json::Value::Null);
+                    assert_eq!(fecha_iso(fecha), serializado);
+                }
+            }
+        }
     }
 }

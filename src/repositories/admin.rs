@@ -122,7 +122,7 @@ impl AdminRepository {
              * (consistente con note.rs, que usa escape_like_literal compartido). */
             bindings.push(format!(
                 "%{}%",
-                crate::repositories::escape::escape_like_literal(&busqueda)
+                crate::repositories::escape::escape_like_literal(busqueda)
             ));
             idx += 1;
         }

@@ -4,50 +4,10 @@
 
 /* 
  * NAVEGACION INFERIOR
- * Barra de navegacion fija inferior para movil
+ * [039A-1/F2] .navegacionInferior y .dashboardContenedor--conNavegacion eliminadas:
+ * 0 consumidores repo-wide verificado en 039A-1/F2. La barra vigente emite
+ * .navegacionInferiorBarra, definida en su propio archivo.
  */
-.navegacionInferior {
-    display: none;
-}
-
-@media (max-width: 480px) {
-    .navegacionInferior {
-        display: flex;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 60px;
-        background: var(--dashboard-fondoSecundario);
-        border-top: 1px solid var(--dashboard-bordePrincipal);
-        z-index: 100;
-        padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    .navegacionInferior__item {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: var(--dashboard-espacioXs);
-        color: var(--dashboard-textoApagado);
-        text-decoration: none;
-        font-size: var(--dashboard-tamanoMuyPequeno);
-        transition: color var(--dashboard-transicionRapida);
-    }
-
-    .navegacionInferior__item:hover {
-        color: var(--dashboard-textoNormal);
-    }
-
-    /* FAB central destacado */
-
-    /* Compensar espacio para la barra inferior */
-    .dashboardContenedor--conNavegacion {
-        padding-bottom: calc(60px + env(safe-area-inset-bottom) + var(--dashboard-espacioLg));
-    }
-}
 
 /* 
  * HEADER MOVIL

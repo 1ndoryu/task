@@ -111,34 +111,11 @@ body {
 }
 
 /* 
- * GRID - FORZAR UNA COLUMNA EN MOVIL
- */
-@media (max-width: 768px) {
-    .dashboardGrid,
-    .dashboardGrid--2col,
-    .dashboardGrid--3col {
-        display: flex !important;
-        flex-direction: column !important;
-        grid-template-columns: 1fr !important;
-    }
-
-    .dashboardGrid .columnaHabitos,
-    .dashboardGrid .columnaTareas,
-    .dashboardGrid .columnaDashboard {
-        width: 100% !important;
-        grid-column: span 1 !important;
-    }
-}
-
-/* 
  * ESPACIADO ENTRE ELEMENTOS TACTILES
  * Aumentar área de toque para mejor usabilidad
  */
 @media (max-width: 480px) {
-    /* Botones y elementos interactivos */
-    .botonOpcion,
-    .pillOpcion,
-    .botonOpcionCompacta {
+    .pillOpcion{
         min-height: var(--dashboard-tamanoTactilMinimo);
         padding: var(--dashboard-espacioTactil);
     }
@@ -175,35 +152,18 @@ body {
  * Estados :active visibles para feedback inmediato
  */
 @media (max-width: 480px) {
-    /* Botones con feedback al tocar */
-    .botonAccion:active,
-    .botonOpcion:active,
-    .pillOpcion:active,
-    .botonOpcionCompacta:active,
-    .botonIconoEncabezado:active {
+    .pillOpcion:active, .botonIconoEncabezado:active{
         opacity: 0.7;
         transform: scale(0.97);
     }
 
     /* Items de lista con feedback */
-    .tareaItem:active,
-    .habitoItem:active,
-    .proyectoItem:active,
-    .drawerMovilItem:active {
+    .tareaItem:active, .proyectoItem:active, .drawerMovilItem:active{
         background: var(--dashboard-fondoHover);
         transform: scale(0.99);
     }
 
-    /* Transición suave para el feedback */
-    .botonAccion,
-    .botonOpcion,
-    .pillOpcion,
-    .botonOpcionCompacta,
-    .botonIconoEncabezado,
-    .tareaItem,
-    .habitoItem,
-    .proyectoItem,
-    .drawerMovilItem {
+    .pillOpcion, .botonIconoEncabezado, .tareaItem, .proyectoItem, .drawerMovilItem{
         transition:
             opacity 0.1s ease,
             transform 0.1s ease,

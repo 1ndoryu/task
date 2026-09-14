@@ -65,24 +65,7 @@
     color: var(--dashboard-estadoAdvertencia);
 }
 
-.modalExperimentos__cerrar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    border: none;
-    border-radius: var(--dashboard-radioSm);
-    background: transparent;
-    color: var(--dashboard-textoApagado);
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
 
-.modalExperimentos__cerrar:hover {
-    background: var(--dashboard-fondoHover);
-    color: var(--dashboard-textoActivo);
-}
 
 .modalExperimentos__contenido {
     padding: var(--dashboard-espacioLg);

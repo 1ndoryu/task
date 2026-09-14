@@ -167,32 +167,7 @@
     background: var(--dashboard-fondoPrincipal);
 }
 
-/* 
- * SECCIONES 
- */
-.landingSeccion {
-    padding: calc(var(--dashboard-espacioXl) * 4) var(--dashboard-espacioXl);
-    border-top: 1px solid var(--dashboard-bordeSutil);
-    max-width: 1300px;
-    margin: 0 auto;
-    width: 100%;
-}
 
-/* 
- * STEPS SECTION 
- */
-
-/* 
- * FOOTER / CTA FINAL 
- */
-.landingCta {
-    padding: calc(var(--dashboard-espacioXl) * 4) var(--dashboard-espacioXl);
-    text-align: center;
-    border-top: 1px solid var(--dashboard-bordeSutil);
-    max-width: 1300px;
-    margin: 0 auto;
-    width: 100%;
-}
 
 /* 
  * FOOTER 
@@ -252,11 +227,5 @@
         padding: calc(var(--dashboard-espacioXl) * 3) var(--dashboard-espacioMd);
     }
 
-    .landingSeccion {
-        padding: calc(var(--dashboard-espacioXl) * 2) var(--dashboard-espacioMd);
+    
     }
-
-    .landingCta {
-        padding: calc(var(--dashboard-espacioXl) * 2) var(--dashboard-espacioMd);
-    }
-}

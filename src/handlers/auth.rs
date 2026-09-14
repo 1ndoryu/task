@@ -1,6 +1,6 @@
 use axum::extract::State;
 use axum::http::header::SET_COOKIE;
-use axum::http::HeaderMap;
+use axum::http::{HeaderMap, HeaderValue};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
@@ -44,13 +44,13 @@ pub async fn register(
     let body = Json(AuthResponse {
         user: session.user.into(),
     });
-    Ok(with_session_cookies(
+    with_session_cookies(
         body.into_response(),
         &state,
         &session.session.raw_token,
         &session.session.csrf_token,
         StatusCode::CREATED,
-    ))
+    )
 }
 
 #[utoipa::path(
@@ -90,13 +90,13 @@ pub async fn login(
     let body = Json(AuthResponse {
         user: session.user.into(),
     });
-    Ok(with_session_cookies(
+    with_session_cookies(
         body.into_response(),
         &state,
         &session.session.raw_token,
         &session.session.csrf_token,
         StatusCode::OK,
-    ))
+    )
 }
 
 #[utoipa::path(
@@ -202,21 +202,22 @@ fn with_session_cookies(
     session: &str,
     csrf: &str,
     status: StatusCode,
-) -> Response {
+) -> Result<Response, AppError> {
     *response.status_mut() = status;
-    response.headers_mut().append(
-        SET_COOKIE,
-        cookie_header(SESSION_COOKIE, session, state, 60 * 60 * 24 * 7)
+    /* La conversión del `Set-Cookie` textual a cabecera puede fallar si el
+     * valor trae bytes no válidos en una cabecera HTTP: se propaga como error
+     * en lugar de paniquear dentro del handler de auth, igual que en
+     * `handlers/storage.rs`. */
+    for valor in [
+        cookie_header(SESSION_COOKIE, session, state, 60 * 60 * 24 * 7),
+        cookie_header("csrf_token", csrf, state, 60 * 60 * 24 * 7),
+    ] {
+        let cabecera: HeaderValue = valor
             .parse()
-            .expect("session cookie is valid"),
-    );
-    response.headers_mut().append(
-        SET_COOKIE,
-        cookie_header("csrf_token", csrf, state, 60 * 60 * 24 * 7)
-            .parse()
-            .expect("csrf cookie is valid"),
-    );
-    response
+            .map_err(|_| AppError::Internal("Cookie de sesión no convertible a cabecera".into()))?;
+        response.headers_mut().append(SET_COOKIE, cabecera);
+    }
+    Ok(response)
 }
 
 fn cookie_header(name: &str, value: &str, state: &AppState, max_age: u64) -> String {

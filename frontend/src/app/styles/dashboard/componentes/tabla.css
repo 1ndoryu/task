@@ -103,39 +103,13 @@
     background-color: var(--dashboard-fondoHover);
 }
 
-.tablaFila:hover .filaIndice {
-    color: var(--dashboard-textoMuyApagado);
-}
 
-.filaIndice {
-    font-weight: bold;
-    color: var(--dashboard-textoIndice);
-    transition: color var(--dashboard-transicionNormal);
-}
 
 .filaNombre {
     color: var(--dashboard-textoActivo);
     font-weight: 500;
 }
-/* 
- * INDICADOR DE FRECUENCIA EN TITULO 
- * Muestra icono de reloj y numero de intervalo junto al nombre
- */
-.filaNombreIndicadorFrecuencia {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXxs);
-    margin-left: var(--dashboard-espacioXs);
-    font-size: var(--dashboard-tamanoPequeno);
-    font-weight: 400;
-    color: var(--dashboard-textoApagado);
-    opacity: 0.8;
-}
 
-.filaNombreIndicadorFrecuencia svg {
-    position: relative;
-    top: 1px;
-}
 
 /* 
  * CONTENEDOR DE NOMBRE CON FRECUENCIA 
@@ -379,64 +353,12 @@
     cursor: pointer;
 }
 
-.tablaFilaEditable:hover .filaIndice {
-    color: var(--dashboard-textoSecundario);
-}
 
-/* 
- * BOTON COMPLETAR HABITO 
- */
-.botonCompletarHabito {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    background-color: transparent;
-    border: 1px solid var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoMuyApagado);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionNormal);
-    min-width: 60px;
-}
 
-.botonCompletarHabito:hover:not(:disabled) {
-    background-color: var(--dashboard-fondoHover);
-    border-color: var(--dashboard-estadoExito);
-    color: var(--dashboard-estadoExito);
-}
 
-.botonCompletarHabito:disabled {
-    cursor: default;
-}
 
-/* 
- * BOTON EDITAR HABITO 
- */
-.botonEditarHabito {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--dashboard-espacioXs);
-    background-color: transparent;
-    border: 1px solid var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoIndice);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionNormal);
-    opacity: 0;
-}
 
-.tablaFila:hover .botonEditarHabito {
-    opacity: 1;
-}
 
-.botonEditarHabito:hover {
-    background-color: var(--dashboard-fondoHover);
-    border-color: var(--dashboard-bordeSutil);
-    color: var(--dashboard-textoSecundario);
-}
 
 /* 
  * AÑADIR HABITO / AREA NUEVO INLINE
@@ -528,9 +450,6 @@ button.añadirHabito {
     align-items: center;
 }
 
-.tablaFilaCompacta .filaTags {
-    margin-top: 0;
-}
 
 /* 
  * SECCION HABITOS PAUSADOS 

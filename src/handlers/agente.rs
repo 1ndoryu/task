@@ -122,12 +122,15 @@ pub async fn agente_stream(
         persistencia: persistencia_port,
         llm: Arc::new(state.ai_provider.clone()),
         web_search: Some(Arc::new(BuscadorWeb(state.web_search.clone()))),
-        dominio: Some(Arc::new(DominioAgente { pool: state.pool.clone() })),
-        /* [318A-16 F3/F6] task-IA nunca ejecuta comandos ni programa tareas
-         * (invariante de seguridad): sin runner ni programador, el núcleo no
-         * registra las tools `comando`/`programar_tarea`. */
+        /* [318A-16 F3/F6] task-IA nunca ejecuta comandos, programa tareas ni
+         * navega/lee URLs (invariante de seguridad): sin runner, programador,
+         * navegador ni web_fetch, el núcleo no registra las tools
+         * `comando`/`programar_tarea`/`navegador`/`web_fetch`. */
         ejecutor_comando: None,
         programador_tareas: None,
+        web_fetch: None,
+        navegador: None,
+        dominio: Some(Arc::new(DominioAgente { pool: state.pool.clone() })),
     };
     let runtime = AgentRuntime::nuevo(
         registry,
@@ -231,7 +234,20 @@ pub async fn agente_stream(
 
     let stream: std::pin::Pin<Box<dyn Stream<Item = Result<Event, Infallible>> + Send>> =
         Box::pin(ReceiverStream::new(rx).map(|evento| {
-            Ok(Event::default().json_data(evento).expect("evento serializable"))
+            /* Un evento que no serialice no debe tumbar el stream: un pánico
+             * dentro del mapper cortaría el SSE a medias. Se degrada a un
+             * evento de error observable para que el cliente sepa que se perdió
+             * un mensaje en lugar de quedarse esperando uno que nunca llega. */
+            let evento = match Event::default().json_data(evento) {
+                Ok(evento) => evento,
+                Err(error) => {
+                    tracing::error!(%error, "evento SSE del agente no serializable");
+                    Event::default()
+                        .event("error")
+                        .data("evento no serializable")
+                }
+            };
+            Ok(evento)
         }));
     Ok(Sse::new(stream).keep_alive(KeepAlive::default()))
 }

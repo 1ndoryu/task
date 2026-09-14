@@ -106,22 +106,6 @@
     width: 100%;
 }
 
-.modalLimiteAlcanzadoBoton--primario {
-    background: var(--dashboard-botonPrimarioFondo);
-    color: var(--dashboard-botonPrimarioTexto);
-    border-color: var(--dashboard-botonPrimarioFondo);
-}
 
-.modalLimiteAlcanzadoBoton--primario:hover {
-    background: var(--dashboard-botonPrimarioHover);
-}
 
-.modalLimiteAlcanzadoBoton--secundario {
-    background: transparent;
-    color: var(--dashboard-textoSecundario);
-}
 
-.modalLimiteAlcanzadoBoton--secundario:hover {
-    color: var(--dashboard-textoNormal);
-    border-color: var(--dashboard-textoMuyApagado);
-}

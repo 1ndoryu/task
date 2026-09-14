@@ -128,7 +128,5 @@
     padding: 0 0 0 15px;
 }
 
-/* Tareas sin grupo (cuando secciones activas) */
-.tareasSinGrupo {
-    margin-bottom: var(--dashboard-espacioMd);
-}
+/* [039A-1/F2] .tareasSinGrupo eliminada: colisionaba con la variable JS
+ * `tareasSinGrupo` de ListaTareas.tsx y no se emitía como clase. */

@@ -110,14 +110,6 @@
     background: var(--dashboard-fondoHover);
 }
 
-/* ── Celda nombre con avatar ── */
-/* [024A-21] min-width:0 permite al flex container respetar el ancho de la celda td */
-.panelGruposFb__celdaNombre {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioSm);
-    min-width: 0;
-}
 
 .panelGruposFb__avatar {
     width: 28px;
@@ -361,16 +353,6 @@
     width: 40px;
 }
 
-/* ── Toggle ocultos ── */
-.panelGruposFb__toggleOcultos {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    font-size: var(--dashboard-tamanoPequeno);
-    color: var(--dashboard-textoApagado);
-    cursor: pointer;
-    user-select: none;
-}
 
 /* ── Columnas fijas ── */
 .panelGruposFb__colCheck {
@@ -445,11 +427,6 @@
     border-color: var(--dashboard-bordePrincipal);
 }
 
-.editorCategorias__ordenar {
-    cursor: grab;
-    color: var(--dashboard-textoApagado);
-    flex-shrink: 0;
-}
 
 .editorCategorias__grip {
     opacity: 0.5;

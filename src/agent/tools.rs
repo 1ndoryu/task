@@ -378,21 +378,30 @@ impl AgentTool for ToolWebSearch {
 /// local sin sufijo; el backend persiste UTC y el front muestra en hora local.
 fn parse_fecha_local(fecha: &str) -> HarnessResult<chrono::DateTime<chrono::Utc>> {
     let fecha = fecha.trim();
-    let naive = chrono::NaiveDateTime::parse_from_str(fecha, "%Y-%m-%dT%H:%M:%S")
-        .or_else(|_| {
-            chrono::NaiveDate::parse_from_str(fecha, "%Y-%m-%d")
-                .map(|d| d.and_hms_opt(9, 0, 0).expect("hora fija"))
-        })
-        .map_err(|_| {
-            HarnessError::Validacion(format!(
-                "Fecha inválida: {fecha} (use ISO 8601 local, ej. 2026-08-30T09:00:00)"
-            ))
-        })?;
+    /* Con hora (`%Y-%m-%dT%H:%M:%S`) o sólo día, que se interpreta a las 09:00
+     * locales. `and_hms_opt` no puede fallar con (9, 0, 0), pero devuelve
+     * `Option`: se propaga como fecha inválida en vez de paniquear. */
+    let naive = if let Ok(con_hora) =
+        chrono::NaiveDateTime::parse_from_str(fecha, "%Y-%m-%dT%H:%M:%S")
+    {
+        con_hora
+    } else {
+        chrono::NaiveDate::parse_from_str(fecha, "%Y-%m-%d")
+            .map_err(|_| fecha_invalida(fecha))?
+            .and_hms_opt(9, 0, 0)
+            .ok_or_else(|| fecha_invalida(fecha))?
+    };
     /* UTC-5 fijo (zona del usuario real): una hora local 09:00 (sin sufijo)
      * significa 09:00 en la zona del usuario, que en UTC es 14:00. Cuando el
      * front envíe offset explícito se respeta; hoy el contrato es hora local
      * sin sufijo, así que se suma el desplazamiento para obtener UTC. */
     Ok(chrono::TimeZone::from_utc_datetime(&chrono::Utc, &naive) + chrono::Duration::hours(5))
+}
+
+fn fecha_invalida(fecha: &str) -> HarnessError {
+    HarnessError::Validacion(format!(
+        "Fecha inválida: {fecha} (use ISO 8601 local, ej. 2026-08-30T09:00:00)"
+    ))
 }
 
 fn harness_de_app(error: crate::errors::AppError) -> HarnessError {

@@ -87,6 +87,10 @@ pub fn config_desde_guardada(
         nivel_razonamiento: texto.nivel_razonamiento,
         contexto: contexto_desde_guardada(&config, &defaults),
         modo,
+        /* [11-09-2026] 109A-8 (F0 Global temporal): el turno corre siempre en
+         * el ámbito global; se propaga el default del núcleo sin cambiar
+         * comportamiento. */
+        ambito_memoria: defaults.ambito_memoria,
         /* [318A-4] `..defaults` final es redundante: todos los campos de
          * TurnoConfig ya están listados explícitamente arriba (clippy
          * needless_update). */

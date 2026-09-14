@@ -61,43 +61,9 @@
     color: var(--dashboard-textoApagado);
 }
 
-/* 
- * Pie del modal
- */
-/* 
- * Pie del modal
- */
-.modalNotificaciones__pie {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end; /* Alineado a la derecha al quitar el texto */
-    padding: 8px 12px;
-    border-top: 1px solid var(--dashboard-bordeSutil);
-    background: var(--dashboard-fondoPrincipal);
-}
 
-.modalNotificaciones__resumen {
-    display: none; /* Oculto por si acaso */
-}
 
-.modalNotificaciones__botonAccion {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border: none;
-    border-radius: var(--dashboard-radioSm);
-    background: transparent;
-    color: var(--dashboard-textoNormal);
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
 
-.modalNotificaciones__botonAccion:hover {
-    background: var(--dashboard-fondoHover);
-    color: var(--dashboard-estadoExito);
-}
 
 /* 
  * Item de Notificación Individual
@@ -218,24 +184,7 @@
     opacity: 1;
 }
 
-.itemNotificacion__boton {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border: none;
-    border-radius: var(--dashboard-radioSm);
-    background: transparent;
-    color: var(--dashboard-textoApagado);
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
 
-.itemNotificacion__boton:hover {
-    background: var(--dashboard-fondoHover);
-    color: var(--dashboard-estadoExito);
-}
 
 /* 
  * Variantes de colores para iconos de notificación

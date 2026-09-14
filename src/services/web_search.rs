@@ -44,17 +44,22 @@ pub struct WebSearchService {
 }
 
 impl WebSearchService {
-    #[must_use]
-    pub fn from_env() -> Self {
+    /// Construye el servicio desde el entorno. El cliente HTTP puede fallar al
+    /// inicializar el backend TLS: se devuelve el error para que el arranque
+    /// falle con contexto en lugar de paniquear y dejar el proceso vivo con un
+    /// transporte roto.
+    pub fn from_env() -> Result<Self, AppError> {
         let client = reqwest::Client::builder()
             .timeout(std::time::Duration::from_secs(15))
             .build()
-            .expect("reqwest client builder is infallible");
-        Self {
+            .map_err(|error| {
+                AppError::Internal(format!("No se pudo construir el cliente HTTP: {error}"))
+            })?;
+        Ok(Self {
             serper_key: env_var("SERPER_API_KEY"),
             tavily_key: env_var("TAVILY_API_KEY"),
             client,
-        }
+        })
     }
 
     pub async fn search(&self, req: &WebSearchRequest) -> Result<WebSearchResult, AppError> {

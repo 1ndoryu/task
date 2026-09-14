@@ -50,7 +50,6 @@
 .resizeHandleColumna--arrastrando .resizeHandleColumnaLinea {
     background: var(--dashboard-textoNormal);
     height: 80px;
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
 }
 
 /* 

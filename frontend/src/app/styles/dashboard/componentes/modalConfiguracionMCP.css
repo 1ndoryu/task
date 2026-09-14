@@ -212,25 +212,7 @@
     border-bottom: 1px solid var(--dashboard-bordePrincipal);
 }
 
-.mcpPestana {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background: transparent;
-    border: none;
-    border-radius: var(--dashboard-radioSm);
-    color: var(--dashboard-textoApagado);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-}
 
-.mcpPestana:hover {
-    background-color: var(--dashboard-fondoHover);
-    color: var(--dashboard-textoNormal);
-}
 
 /* 
  * INSTRUCCIONES CLIENTE 

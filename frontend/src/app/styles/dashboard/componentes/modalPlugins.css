@@ -177,21 +177,7 @@
     color: var(--dashboard-textoApagado);
 }
 
-.configDeficitBotonOjo {
-    display: flex;
-    align-items: center;
-    padding: var(--dashboard-espacioS);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: var(--dashboard-radioSm);
-    background: transparent;
-    color: var(--dashboard-textoSecundario);
-    cursor: pointer;
-    transition: all 0.15s;
-}
 
-.configDeficitBotonOjo:hover {
-    color: var(--dashboard-acento);
-}
 
 .configDeficitPreview {
     display: flex;
@@ -226,37 +212,6 @@
     border-top: 1px solid var(--dashboard-bordePrincipal);
 }
 
-.configDeficitBotonCancelar {
-    padding: 6px 14px;
-    border-radius: var(--dashboard-radioSm);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    background: transparent;
-    color: var(--dashboard-textoSecundario);
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    transition: all 0.15s;
-}
 
-.configDeficitBotonCancelar:hover {
-    background: var(--dashboard-fondoHover);
-}
 
-.configDeficitBotonGuardar {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioS);
-    padding: 6px 14px;
-    border-radius: var(--dashboard-radioSm);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    background: transparent;
-    color: var(--dashboard-textoActivo);
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    transition: all 0.15s;
-}
 
-.configDeficitBotonGuardar:hover {
-    border-color: var(--dashboard-acento);
-    color: var(--dashboard-acento);
-    background: var(--dashboard-superposicionSutil);
-}

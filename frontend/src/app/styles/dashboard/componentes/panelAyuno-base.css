@@ -234,55 +234,11 @@
     border-color: var(--dashboard-acento);
 }
 
-/* Botones de acciÃ³n */
 
-.panelAyunoBoton {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioS);
-    padding: 8px 16px;
-    border-radius: var(--dashboard-radioMd);
-    border: 1px solid var(--dashboard-bordeSutil);
-    background: transparent;
-    color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-}
 
-.panelAyunoBoton:hover {
-    background: var(--dashboard-superposicionSutil);
-}
 
-.panelAyunoBoton--iniciar {
-    color: var(--dashboard-textoSobreAcento);
-    border-color: var(--dashboard-acento);
-}
 
-.panelAyunoBoton:disabled {
-    opacity: 0.6;
-    cursor: default;
-}
 
-.panelAyunoBoton--iniciar:hover {
-    opacity: 0.9;
-    background: var(--dashboard-acentoHover);
-}
 
-.panelAyunoBoton--terminar {
-    border-color: var(--dashboard-estadoExito);
-    color: var(--dashboard-estadoExito);
-}
 
-.panelAyunoBoton--terminar:hover {
-    background: var(--dashboard-estadoExitoFondo);
-}
 
-.panelAyunoBoton--reiniciar {
-    border-color: var(--dashboard-estadoAlta);
-    color: var(--dashboard-estadoAlta);
-}
-
-.panelAyunoBoton--reiniciar:hover {
-    background: var(--dashboard-estadoAltaFondo);
-}

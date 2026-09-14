@@ -86,33 +86,8 @@
     padding-bottom: var(--dashboard-espacioXs);
 }
 
-.equiposPestana {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: var(--dashboard-radioSm);
-    color: var(--dashboard-textoSecundario);
-    font-size: var(--dashboard-tamanoPequeno);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: all var(--dashboard-transicionNormal);
-}
 
-.equiposPestana:hover {
-    background: var(--dashboard-fondoHover);
-    color: var(--dashboard-textoNormal);
-}
 
-.equiposPestana.activa {
-    background: var(--dashboard-fondoHover);
-    border-color: var(--dashboard-bordeSutil);
-    color: var(--dashboard-textoActivo);
-}
 
 .equiposContador {
     display: inline-flex;
@@ -128,9 +103,6 @@
     font-weight: 600;
 }
 
-.equiposPestana.activa .equiposContador {
-    background: var(--dashboard-bordeSutil);
-}
 
 .equiposContador.alerta {
     background: var(--dashboard-estadoAltaFondo);
@@ -188,10 +160,6 @@
 }
 
 
-.botonReintentar:hover {
-    border-color: var(--dashboard-bordeSutil);
-    color: var(--dashboard-textoNormal);
-}
 
 /* 
  * Contenedor de listas
@@ -355,33 +323,7 @@
 }
 
 
-.solicitudBoton span {
-    font-size: var(--dashboard-tamanoPequeno);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    text-transform: uppercase;
-}
 
-.solicitudBoton:hover:not(:disabled),
-.companeroBoton:hover:not(:disabled) {
-    border-color: currentColor;
-}
 
-.solicitudBoton.aceptar:hover:not(:disabled) {
-    color: var(--dashboard-estadoExito);
-    background: var(--dashboard-estadoExitoFondo);
-    border-color: var(--dashboard-estadoExitoBorde);
-}
 
-.solicitudBoton.rechazar:hover:not(:disabled),
-.solicitudBoton.cancelar:hover:not(:disabled),
-.companeroBoton.eliminar:hover:not(:disabled) {
-    color: var(--dashboard-estadoAlta);
-    background: var(--dashboard-estadoAltaFondo);
-    border-color: var(--dashboard-estadoAltaBorde);
-}
 
-.solicitudBoton:disabled,
-.companeroBoton:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}

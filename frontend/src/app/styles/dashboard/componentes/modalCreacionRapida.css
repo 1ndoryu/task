@@ -50,23 +50,7 @@
     padding: 0;
 }
 
-/* New Selector Styles */
-.creacionRapidaIconoSelector {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    margin-right: var(--dashboard-espacioMd);
-    cursor: pointer;
-    color: var(--dashboard-textoSecundario);
-    transition: all var(--dashboard-transicionRapida);
-    padding: var(--dashboard-espacioS);
-    border-radius: var(--dashboard-radioSm);
-}
 
-.creacionRapidaIconoSelector:hover {
-    background-color: var(--dashboard-superposicionSutil);
-    color: var(--dashboard-textoActivo);
-}
 
 .creacionRapidaInput {
     flex: 1;

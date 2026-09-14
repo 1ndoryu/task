@@ -1,36 +1,5 @@
-/* [por que] Capa de estilos propia del proyecto (design system local).
- * sentinel-disable-file css-adhoc-button-style
- */
 
-/* 
- * ESTILOS MENU MOVIL GRID (Pantalla Completa)
- */
 
-.menuMovilBoton {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioLg);
-    background: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: var(--dashboard-radioMd);
-    color: var(--dashboard-textoSecundario);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionNormal);
-    text-align: center;
-}
-
-.menuMovilBoton:active {
-    transform: scale(0.96);
-    background: var(--dashboard-fondoHover);
-}
-
-.menuMovilBoton span {
-    font-size: var(--dashboard-tamanoPequeno);
-    font-weight: 500;
-}
 
 @keyframes fadeIn {
     from {

@@ -162,6 +162,3 @@
     font-size: var(--dashboard-tamanoPequeno);
 }
 
-.inputGrupoEjecucion:focus {
-    border-color: var(--dashboard-primario);
-}

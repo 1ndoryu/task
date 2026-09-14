@@ -74,6 +74,25 @@
     color: var(--dashboard-peligroClaro);
 }
 
+/* [P4-039A-1] Variante pills (TabsPanel variante="pills"): pastillas para
+ * filtros/segmentos. Reutiliza .tabCompartida y su --activa; solo cambia
+ * el contenedor (fondo + padding) y la forma (pastilla). Monocromo 318A-1. */
+.tabsCompartidas--pills {
+    background: var(--dashboard-fondoTarjeta);
+    border: 1px solid var(--dashboard-bordeSutil);
+    padding: var(--dashboard-espacioXs);
+}
+
+.tabsCompartidas--pills .tabCompartida {
+    border-color: transparent;
+    background: transparent;
+}
+
+.tabsCompartidas--pills .tabCompartida--activa {
+    background: var(--dashboard-superposicionSutil);
+    border-color: var(--dashboard-bordePrincipal);
+}
+
 /* Input de renombrado inline */
 .tabCompartidaInput {
     width: 100%;

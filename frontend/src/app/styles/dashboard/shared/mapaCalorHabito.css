@@ -19,10 +19,6 @@
     border: none;
 }
 
-.mapaCalorHabitoContenedor--guardando {
-    opacity: 0.7;
-    pointer-events: none;
-}
 
 /* 
  * Modo modal: se extiende al 100% del ancho
@@ -364,13 +360,6 @@
     color: var(--dashboard-textoSecundario);
 }
 
-.mapaCalorHabitoLeyendaItem--instruccion {
-    margin-left: auto;
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    font-size: var(--dashboard-tamanoMicro);
-    color: var(--dashboard-textoApagado);
-    font-style: italic;
-}
 
 /* 
  * Responsive 
@@ -388,10 +377,4 @@
         justify-content: center;
     }
 
-    .mapaCalorHabitoLeyendaItem--instruccion {
-        width: 100%;
-        text-align: center;
-        margin-left: 0;
-        margin-top: var(--dashboard-espacioXs);
     }
-}

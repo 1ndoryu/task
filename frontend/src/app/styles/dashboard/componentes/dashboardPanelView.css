@@ -47,9 +47,10 @@
 }
 
 /* [300A-5] Quitar fondos, bordes y sombras de los paneles dentro del sidebar */
+/* [039A-1/F2] .dashboardPanelView .panelContenido eliminada: 0 consumidores y
+ * redundante con el selector [class*="panel"] de la misma regla. */
 .dashboardPanelView .panelDashboard,
 .dashboardPanelView .panelDashboard > *,
-.dashboardPanelView .panelContenido,
 .dashboardPanelView [class*="panel"],
 .dashboardPanelView .mapaCalorContenedor {
     background-color: transparent !important;

@@ -174,27 +174,6 @@
     gap: var(--dashboard-espacioSm);
 }
 
-.alertaConfirmacionBoton--cancelar {
-    background-color: transparent;
-    color: var(--dashboard-textoSecundario);
-}
 
-.alertaConfirmacionBoton--cancelar:hover {
-    background-color: var(--dashboard-fondoHover);
-    color: var(--dashboard-textoNormal);
-}
 
-/* 
- * VARIANTES DE BOTON ACEPTAR 
- */
 
-.alertaConfirmacionBoton--peligro {
-    background-color: var(--dashboard-estadoAltaFondo);
-    border-color: var(--dashboard-estadoAltaBorde);
-    color: var(--dashboard-estadoAlta);
-}
-
-.alertaConfirmacionBoton--peligro:hover {
-    background-color: rgba(var(--dashboard-estadoErrorRgb), 0.25);
-    border-color: rgba(var(--dashboard-estadoErrorRgb), 0.5);
-}

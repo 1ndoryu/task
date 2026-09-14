@@ -265,18 +265,7 @@
     background-color: rgba(var(--dashboard-acentoRgb), 0.05);
 }
 
-/* Estado bloqueado (plan FREE) */
-.adjuntosAreaCarga--bloqueado {
-    cursor: pointer;
-    border-color: var(--dashboard-estadoAdvertencia);
-    border-style: dashed;
-    background-color: rgba(var(--dashboard-estadoAdvertenciaRgb), 0.05);
-}
 
-.adjuntosAreaCarga--bloqueado:hover {
-    border-color: var(--dashboard-estadoAdvertencia);
-    background-color: var(--dashboard-estadoAdvertenciaFondo);
-}
 
 /* Estado límite alcanzado */
 .adjuntosAreaCarga--limite {

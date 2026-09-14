@@ -89,7 +89,7 @@ export function SeccionConfigGruposFb(): JSX.Element {
             <FormCampo
                 titulo={
                     <>
-                        <Clock size={14} className="iconoInline" />
+                        <Clock className="iconoInline" />
                         Duración de publicado
                     </>
                 }

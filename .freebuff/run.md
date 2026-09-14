@@ -16,6 +16,11 @@ Este proyecto usa recursos PROPIOS para no pelearse:
   (via `VITE_API_PROXY_TARGET` + `VITE_PORT` + `VITE_HOST` en `frontend/vite.config.ts`)
 - BD: `glory_backend_local` en PostgreSQL local 5432 (`postgres:root`)
 
+> **07-09-2026:** además del stack dev manual (3001/5174) existe la
+> **página permanente local** (4190/4191) — ver sección homónima abajo. Usar
+> esa página como la "app siempre encendida"; el stack 3001/5174 queda para
+> desarrollo puntual sin pisarla.
+
 ### Por qué el frontend va en 127.0.0.1 (y no en localhost)
 
 WANDORIUS corre su app en `localhost:5173`. Las cookies host-only de `localhost`
@@ -24,8 +29,91 @@ se comparten entre PUERTOS del mismo host, y ambas apps usan los mismos nombres
 mitad de sesión, y el backend empieza a responder 401 a todo (dashboard congelado
 en "Cargando datos...", logout fallando con 401). Sirviendo en `127.0.0.1` el
 alcance de cookies es distinto y no hay colisión. Usar SIEMPRE
-`http://127.0.0.1:5174` en el navegador (si abres `localhost:5174`, vuelves al
-alcance compartido).
+`http://127.0.0.1:5174` (o `http://127.0.0.1:4191`) en el navegador (si abres
+`localhost:...`, vuelves al alcance compartido).
+
+## Página permanente local (07-09-2026)
+
+Página que corre SIEMPRE en local (autoinicio al iniciar sesión de Windows),
+sin interferir con otros agentes/proyectos. La URL y los puertos están
+definidos en el `.env` del repo (fuente única), NO hardcodeados.
+
+- **URL permanente:** `http://127.0.0.1:4191`
+- **Backend:** `http://127.0.0.1:4190` (health `GET /api/health`; Swagger `/swagger-ui/`)
+- **Frontend (Vite):** `http://127.0.0.1:4191`, proxy `/api` → `:4190`
+- **Env (`.env`):** `HOST=127.0.0.1`, `PORT=4190`, `VITE_PORT=4191`,
+  `CORS_ORIGINS=http://127.0.0.1:4191,http://localhost:4191`
+- **Binario backend:** `.runtime/target/debug/glory-backend.exe` (dentro del
+  repo, gitignored). Fuera de `C:\tmp` a propósito: la tarea programada
+  `GloryCargoTargetCleanup` borra `C:\tmp` y el binario "desaparecía".
+- **BD:** la misma `glory_backend_local` (PostgreSQL local 5432).
+- **Logs:** `.runtime/backend.{out,err}.log` y `.runtime/vite.{out,err}.log`
+- **PIDs:** `.runtime/backend.pid` y `.runtime/vite.pid` (del proceso real;
+  para Vite el node que escucha, no el wrapper `npm.cmd`).
+
+### Watchdog permanente (07-09-2026)
+
+El backend **puede caerse** aunque Vite siga vivo (no es un error de puertos).
+Para eso existe **`watchdog-permanente.ps1`**: un bucle cada 15 segundos que
+ejecuta `start-permanente.ps1`. Al ser idempotente, si todo está bien no hace
+nada; si backend o Vite murieron, los relanza. La tarea programada ejecuta el
+watchdog, no `start-permanente.ps1` directamente.
+
+- **PID propio** `.runtime/watchdog.pid` para que `stop-permanente.ps1` lo
+  detecte y lo pare antes de detener backend/Vite.
+- **`MultipleInstances=IgnoreNew`**: una sola instancia del watchdog aunque la
+  tarea se ejecute dos veces.
+- **Recuperación verificada**: backend muerto → watchdog lo relanza → health
+  HTTP 200 (evidencia 07-09).
+
+### Cómo funciona el arranque
+
+`.freebuff/start-permanente.ps1` (requiere PowerShell 7 — si se invoca con
+`powershell.exe` 5.1 se auto-relanza con `pwsh`) lee `PORT`/`VITE_PORT` del
+`.env`, lanza backend y Vite y es **idempotente**: si el puerto ya escucha por
+un proceso propio (pid file vivo), no duplica; si escucha un proceso ajeno,
+aborta sin matar a nadie.
+
+Instalado en esta máquina:
+
+1. **Acceso directo del escritorio `Task (local).lnk`** → arranca/verifica la
+   página sin duplicar **y abre la URL en el navegador por defecto** (pasa
+   `-AbrirNavegador` a `start-permanente.ps1`). Úsalo para reiniciar
+   manualmente si algo se cerró o para abrir la app.
+2. **Tarea programada `task-app-permanente`** → ejecuta el watchdog **al
+   iniciar sesión** del usuario (principal Interactive, RunLevel Limited,
+   sin límite de ejecución, `IgnoreNew`). **No** abre el navegador (no molesta
+   en cada login); la página queda disponible en `http://127.0.0.1:4191`.
+3. **Watchdog**: si el stack cae, lo relanza automáticamente en ≤15 segundos.
+
+### Comandos
+
+```powershell
+# Arrancar (idempotente) / ver estado
+powershell -NoProfile -ExecutionPolicy Bypass -File ".freebuff/start-permanente.ps1"
+
+# Detener: para watchdog, luego backend y Vite (mata SOLO los PIDs nuestros)
+powershell -NoProfile -ExecutionPolicy Bypass -File ".freebuff/stop-permanente.ps1"
+
+# (Re)instalar acceso directo + tarea programada  /  desinstalar
+pwsh -File ".freebuff/instalar-permanente.ps1"
+pwsh -File ".freebuff/instalar-permanente.ps1" -Quitar
+```
+
+### Por qué 127.0.0.1 y no localhost (aplica también aquí)
+
+Misma razón que el stack dev: las cookies host-only de `localhost` se comparten
+entre puertos con WANDORIUS (5173). `127.0.0.1` aísla el alcance de cookies.
+Abrir SIEMPRE `http://127.0.0.1:4191`.
+
+### Recompilar el backend (tras cambios Rust o migraciones nuevas)
+
+```bash
+cd "PROYECTO TASKS"
+$env:CARGO_TARGET_DIR = "...PROYECTO TASKS\.runtime\target"
+cargo build --bin glory-backend
+# luego reiniciar: .freebuff/stop-permanente.ps1 && .freebuff/start-permanente.ps1
+```
 
 ## Artefactos que necesita un checkout nuevo
 

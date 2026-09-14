@@ -51,25 +51,7 @@
     display: none;
 }
 
-.estadoVacioUnificadoBoton {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background-color: transparent;
-    border: 1px solid var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoSecundario);
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-}
 
-.estadoVacioUnificadoBoton:hover {
-    background-color: var(--dashboard-fondoHover);
-    border-color: var(--dashboard-bordeSutil);
-    color: var(--dashboard-textoNormal);
-}
 
 /*
  * CENTRADO VERTICAL EN MOVIL

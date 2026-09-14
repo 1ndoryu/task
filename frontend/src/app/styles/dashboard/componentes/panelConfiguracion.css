@@ -9,30 +9,7 @@
 
 /* 
  * NOTA: El contenedor principal y el encabezado ahora usan las clases
- * estandar .modalContenedor y .modalEncabezado de modal.css, gestionados
- * por el componente compartido Modal.
- */
-
-/* 
- * NOMBRE DE LA TAREA
- */
-
-/* 
- * CONTENIDO DEL PANEL
- */
-
-/* 
- * SECCION GENERICA
- */
-
-/* 
- * CAMPO CON ESTADOS
- */
-
-/* 
- * INPUT DE FECHA
- */
-.panelConfiguracionInputFecha {
+ * estandar .modalContenedor y .modalEncabezado de modal.css{
     padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
     background-color: var(--dashboard-fondoPrincipal);
     border: 1px solid var(--dashboard-bordePrincipal);
@@ -44,67 +21,12 @@
     min-width: 160px;
 }
 
-.panelConfiguracionInputFecha:focus {
-    border-color: var(--dashboard-textoApagado);
-}
 
-.panelConfiguracionInputFecha::-webkit-calendar-picker-indicator {
-    filter: invert(0.7);
-    cursor: pointer;
-}
 
-/* 
- * ALERTAS DE FECHA
- */
 
-/* 
- * BOTON LIMPIAR
- */
-.panelConfiguracionBotonLimpiar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.25rem;
-    height: 1.25rem;
-    background: transparent;
-    border: 1px solid transparent;
-    color: var(--dashboard-textoApagado);
-    cursor: pointer;
-    border-radius: var(--dashboard-radioSm);
-    transition: all var(--dashboard-transicionRapida);
-}
 
-.panelConfiguracionBotonLimpiar:hover {
-    color: var(--dashboard-estadoAlta);
-    border-color: var(--dashboard-estadoAltaBorde);
-}
 
-/* 
- * TEXTAREA DESCRIPCION
- */
-.panelConfiguracionTextarea {
-    width: 100%;
-    padding: var(--dashboard-espacioMd);
-    background-color: var(--dashboard-fondoPrincipal);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoBase);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    line-height: 1.5;
-    outline: none;
-    resize: vertical;
-    min-height: 80px;
-    border-radius: var(--dashboard-radioSm);
-    transition: border-color var(--dashboard-transicionNormal);
-}
 
-.panelConfiguracionTextarea:focus {
-    border-color: var(--dashboard-textoApagado);
-}
-
-.panelConfiguracionTextarea::placeholder {
-    color: var(--dashboard-textoPlaceholder);
-}
 
 /* 
  * TOGGLE SWITCH

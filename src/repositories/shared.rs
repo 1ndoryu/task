@@ -95,9 +95,13 @@ impl SharedRepository {
         .bind(owner_id).bind(recipient_id).bind(item_type).bind(item_id).bind(role)
         .fetch_one(&mut *transaction).await?;
         transaction.commit().await?;
-        Ok(SharedCreateOutcome::Created(Box::new(
-            Self::get(pool, id).await?.expect("inserted share exists"),
-        )))
+        /* La lectura se hace fuera de la transacción ya commiteada: el ítem
+         * puede desaparecer entre el INSERT y el SELECT, así que la ausencia
+         * es un error de fila, no un pánico. */
+        let creado = Self::get(pool, id)
+            .await?
+            .ok_or(sqlx::Error::RowNotFound)?;
+        Ok(SharedCreateOutcome::Created(Box::new(creado)))
     }
 
     pub async fn list_received(

@@ -282,13 +282,22 @@ pub async fn download_file(
     );
     let content_disposition = header::HeaderValue::from_str(&content_disposition)
         .map_err(|_| AppError::Internal("Nombre de archivo inválido para la descarga".into()))?;
+    /* `row.mime` viene de la base de datos y no está validado como cabecera:
+     * `Response::builder` sólo revela el fallo al llamar a `.body()`, lo que
+     * obligaba a un `.expect` que tumbaba el handler con un 500 sin contexto.
+     * Se convierte aquí, con error explícito, y la respuesta se arma directa:
+     * `Response::new` ya nace con 200 OK, así que no queda ningún `Result`. */
+    let content_type = header::HeaderValue::from_str(&row.mime)
+        .map_err(|_| AppError::Internal("MIME del archivo inválido para la descarga".into()))?;
 
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .header(header::CONTENT_TYPE, row.mime)
-        .header(header::CONTENT_DISPOSITION, content_disposition)
-        .body(Body::from(bytes))
-        .expect("respuesta de descarga válida"))
+    let mut respuesta = Response::new(Body::from(bytes));
+    respuesta
+        .headers_mut()
+        .insert(header::CONTENT_TYPE, content_type);
+    respuesta
+        .headers_mut()
+        .insert(header::CONTENT_DISPOSITION, content_disposition);
+    Ok(respuesta)
 }
 
 /// Recorta un string a un máximo de bytes sin partir un carácter UTF-8.

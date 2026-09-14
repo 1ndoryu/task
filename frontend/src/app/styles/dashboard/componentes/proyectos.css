@@ -88,9 +88,6 @@
     flex-shrink: 0;
 }
 
-.proyectoAcciones .botonIcono {
-    padding: var(--dashboard-espacioXs);
-}
 
 /* 
  * TAREAS DEL PROYECTO
@@ -101,10 +98,6 @@
     border-left: 3px solid var(--dashboard-textoActivo);
 }
 
-/* Margen superior para botón añadir dentro de proyectos */
-.proyectoTareas .inputNuevaTarea {
-    margin-top: var(--dashboard-espacioXxs);
-}
 
 .barraProgresoFondo {
     flex: 1;
@@ -125,23 +118,7 @@
     background-color: var(--dashboard-estadoExito);
 }
 
-/* 
- * VISTA DETALLE PROYECTO
- * Estilos para el panel de vista de proyecto individual
- */
 
-.botonVolver {
-    padding: 0;
-    background: transparent;
-    border: none;
-    color: var(--dashboard-textoApagado);
-    cursor: pointer;
-    transition: color var(--dashboard-transicionNormal);
-}
-
-.botonVolver:hover {
-    color: var(--dashboard-textoActivo);
-}
 
 .botonPeligro {
     color: var(--dashboard-estadoAlta);
@@ -152,10 +129,6 @@
 }
 
 
-.vistaProyectoProgreso .barraProgresoFondo {
-    flex: 1;
-    height: 6px;
-}
 
 /* 
  * ESTADO VACIO

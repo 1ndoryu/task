@@ -148,40 +148,12 @@
     gap: var(--dashboard-espacioSmMd);
 }
 
-.modalAyunoUltimaComidaBoton {
-    border: 1px solid var(--dashboard-bordeSutil);
-    background: transparent;
-    color: var(--dashboard-textoSecundario);
-    border-radius: var(--dashboard-radioMd);
-    padding: 8px 12px;
-    font-size: var(--dashboard-tamanoPequeno);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-    display: inline-flex;
-    align-items: center;
-    gap: var(--dashboard-espacioS);
-}
 
-.modalAyunoUltimaComidaBoton:hover {
-    background: var(--dashboard-superposicionSutil);
-    color: var(--dashboard-textoActivo);
-}
 
-.modalAyunoUltimaComidaBoton--primario {
-    border-color: var(--dashboard-acento);
-    color: var(--dashboard-textoActivo);
-}
 
-.modalAyunoUltimaComidaBoton--primario:hover {
-    background: var(--dashboard-acentoHover);
-    color: var(--dashboard-textoSobreAcento);
-}
 
-.modalAyunoFinalizarBoton--primario:hover {
-    background: var(--dashboard-acentoHover);
-    color: var(--dashboard-textoActivo);
-    opacity: 1;
-}
+/* [039A-1/F2] .modalAyunoFinalizarBoton--primario eliminada: 0 consumidores
+ * repo-wide verificado en 039A-1/F2. */
 .modalAyunoUltimaComidaInfo {
     display: flex;
     justify-content: center;

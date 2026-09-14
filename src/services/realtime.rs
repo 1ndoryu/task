@@ -29,22 +29,30 @@ impl RealtimeHub {
 }
 
 impl RealtimeHub {
+    /// Candado del mapa de canales, recuperando el contenido si el mutex quedó
+    /// envenenado por un pánico ajeno. El mapa de senders no tiene invariantes
+    /// entre campos que un pánico pueda romper, así que recuperarlo es seguro;
+    /// paniquear aquí dejaría el hub inutilizado para todo el proceso y cada
+    /// `publish` posterior tumbaría el handler que lo invoca.
+    fn canales(
+        &self,
+    ) -> std::sync::MutexGuard<'_, HashMap<Uuid, Vec<mpsc::UnboundedSender<RealtimeEvent>>>> {
+        self.channels
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+
     /// Suscribe un socket al usuario; cada llamada crea su propio canal.
     pub fn subscribe(&self, user_id: Uuid) -> mpsc::UnboundedReceiver<RealtimeEvent> {
         let (sender, receiver) = mpsc::unbounded_channel();
-        self.channels
-            .lock()
-            .expect("hub lock")
-            .entry(user_id)
-            .or_default()
-            .push(sender);
+        self.canales().entry(user_id).or_default().push(sender);
         receiver
     }
 
     /// Publica a los canales vivos del usuario (no bloquea: try_send lock-free)
     /// y poda en el mismo recorrido los canales cuyo socket ya se desconectó.
     pub fn publish(&self, user_id: Uuid, event: RealtimeEvent) {
-        let senders = self.channels.lock().expect("hub lock");
+        let senders = self.canales();
         let Some(canales) = senders.get(&user_id) else {
             return;
         };
@@ -56,7 +64,7 @@ impl RealtimeHub {
             .collect();
         drop(senders);
         if vivos.len() != previos {
-            let mut senders = self.channels.lock().expect("hub lock");
+            let mut senders = self.canales();
             senders.insert(user_id, vivos);
         }
     }

@@ -40,39 +40,9 @@
     box-shadow: var(--dashboard-sombraElevada);
 }
 
-.modalSeleccionPropiedad__encabezado {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    border-bottom: 1px solid var(--dashboard-bordePrincipal);
-}
 
-.modalSeleccionPropiedad__titulo {
-    font-size: var(--dashboard-tamanoPequeno);
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    color: var(--dashboard-textoActivo);
-    font-weight: 500;
-}
 
-.modalSeleccionPropiedad__cerrar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    color: var(--dashboard-textoApagado);
-    background: none;
-    border: none;
-    border-radius: var(--dashboard-radioSm);
-    cursor: pointer;
-    transition: all var(--dashboard-transicionRapida);
-}
 
-.modalSeleccionPropiedad__cerrar:hover {
-    color: var(--dashboard-textoActivo);
-    background: var(--dashboard-fondoHover);
-}
 
 /* [233A-37] Botones sin background dentro de la lista — override variante por defecto del Boton */
 .modalSeleccionPropiedad__lista .boton {

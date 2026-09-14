@@ -3,10 +3,12 @@
  */
 
 
-/* Clases base compartidas (.bottomSheetCreacion) - Usadas por Tarea, Hábito y Proyecto */
+/* Clases base compartidas - Usadas por Tarea, Hábito y Proyecto */
 
-/* Contenedor principal */
-.bottomSheetCreacion,
+/* Contenedor principal
+ * [039A-1/F2] .bottomSheetCreacion eliminada: 0 consumidores repo-wide; la
+ * regla se conserva porque sus hermanas (.bottomSheetTarea/Habito/Proyecto)
+ * sí están vivas. */
 .bottomSheetTarea,
 .bottomSheetHabito,
 .bottomSheetProyecto {
@@ -15,19 +17,12 @@
     gap: var(--dashboard-espacioSm);
 }
 
-/* Input principal */
-.bottomSheetCreacion__inputWrapper,
-.bottomSheetTarea__inputWrapper,
-.bottomSheetHabito__inputWrapper,
-.bottomSheetProyecto__inputWrapper {
+.bottomSheetTarea__inputWrapper, .bottomSheetHabito__inputWrapper, .bottomSheetProyecto__inputWrapper{
     display: flex;
     flex-direction: column;
 }
 
-.bottomSheetCreacion__input,
-.bottomSheetTarea__input,
-.bottomSheetHabito__input,
-.bottomSheetProyecto__input {
+.bottomSheetTarea__input, .bottomSheetHabito__input, .bottomSheetProyecto__input{
     width: 100%;
     padding: var(--dashboard-espacioSm);
     font-size: var(--dashboard-tamanoMovilPequeno);
@@ -39,43 +34,27 @@
     outline: none;
 }
 
-.bottomSheetCreacion__input:focus,
-.bottomSheetTarea__input:focus,
-.bottomSheetHabito__input:focus,
-.bottomSheetProyecto__input:focus {
+.bottomSheetTarea__input:focus, .bottomSheetHabito__input:focus, .bottomSheetProyecto__input:focus{
     outline: none;
 }
 
-.bottomSheetCreacion__input::placeholder,
-.bottomSheetTarea__input::placeholder,
-.bottomSheetHabito__input::placeholder,
-.bottomSheetProyecto__input::placeholder {
+.bottomSheetTarea__input::placeholder, .bottomSheetHabito__input::placeholder, .bottomSheetProyecto__input::placeholder{
     color: var(--dashboard-textoMuyApagado);
 }
 
-.bottomSheetCreacion__input:disabled,
-.bottomSheetTarea__input:disabled,
-.bottomSheetHabito__input:disabled,
-.bottomSheetProyecto__input:disabled {
+.bottomSheetTarea__input:disabled, .bottomSheetHabito__input:disabled, .bottomSheetProyecto__input:disabled{
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-/* Barra de acciones (iconos izq + guardar der) */
-.bottomSheetCreacion__acciones,
-.bottomSheetTarea__acciones,
-.bottomSheetHabito__acciones,
-.bottomSheetProyecto__acciones {
+.bottomSheetTarea__acciones, .bottomSheetHabito__acciones, .bottomSheetProyecto__acciones{
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--dashboard-espacioSm);
 }
 
-/* Grupo de opciones — la base y Proyecto usan el gap pequeño; Tarea y Hábito
- * tienen su propia variante en los overrides más abajo. */
-.bottomSheetCreacion__opcionesGrupo,
-.bottomSheetProyecto__opcionesGrupo {
+.bottomSheetProyecto__opcionesGrupo{
     display: flex;
     align-items: center;
     gap: var(--dashboard-espacioSm);
@@ -95,11 +74,7 @@
     gap: var(--dashboard-espacioMd);
 }
 
-/* Botón de acción (icono 16px) */
-.bottomSheetCreacion__accion,
-.bottomSheetTarea__accion,
-.bottomSheetHabito__accion,
-.bottomSheetProyecto__accion {
+.bottomSheetTarea__accion, .bottomSheetHabito__accion, .bottomSheetProyecto__accion{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -114,29 +89,16 @@
     padding: 0;
 }
 
-.bottomSheetCreacion__accion:hover,
-.bottomSheetCreacion__accion:active,
-.bottomSheetTarea__accion:hover,
-.bottomSheetTarea__accion:active,
-.bottomSheetHabito__accion:hover,
-.bottomSheetHabito__accion:active,
-.bottomSheetProyecto__accion:hover,
-.bottomSheetProyecto__accion:active {
+.bottomSheetTarea__accion:hover, .bottomSheetTarea__accion:active, .bottomSheetHabito__accion:hover, .bottomSheetHabito__accion:active, .bottomSheetProyecto__accion:hover, .bottomSheetProyecto__accion:active{
     color: var(--dashboard-textoNormal);
     background: var(--dashboard-fondoHover);
 }
 
-.bottomSheetCreacion__accion--activa,
-.bottomSheetTarea__accion--activa,
-.bottomSheetHabito__accion--activa,
-.bottomSheetProyecto__accion--activa {
+.bottomSheetTarea__accion--activa, .bottomSheetHabito__accion--activa, .bottomSheetProyecto__accion--activa{
     color: var(--dashboard-acento);
 }
 
-/* Botón Guardar/Enviar (icono Send) — Hábito tiene su variante blanca abajo */
-.bottomSheetCreacion__botonGuardar,
-.bottomSheetTarea__botonGuardar,
-.bottomSheetProyecto__botonGuardar {
+.bottomSheetTarea__botonGuardar, .bottomSheetProyecto__botonGuardar{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -170,12 +132,7 @@
     box-shadow: none !important;
 }
 
-.bottomSheetCreacion__botonGuardar:hover,
-.bottomSheetCreacion__botonGuardar:active,
-.bottomSheetTarea__botonGuardar:hover,
-.bottomSheetTarea__botonGuardar:active,
-.bottomSheetProyecto__botonGuardar:hover,
-.bottomSheetProyecto__botonGuardar:active {
+.bottomSheetTarea__botonGuardar:hover, .bottomSheetTarea__botonGuardar:active, .bottomSheetProyecto__botonGuardar:hover, .bottomSheetProyecto__botonGuardar:active{
     color: var(--dashboard-textoActivo);
     background: none;
     transform: scale(1.1);
@@ -188,9 +145,7 @@
     transform: scale(1.1);
 }
 
-.bottomSheetCreacion__botonGuardar:disabled,
-.bottomSheetTarea__botonGuardar:disabled,
-.bottomSheetProyecto__botonGuardar:disabled {
+.bottomSheetTarea__botonGuardar:disabled, .bottomSheetProyecto__botonGuardar:disabled{
     opacity: 0.3;
     cursor: not-allowed;
     background: none;

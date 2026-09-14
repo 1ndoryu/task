@@ -23,16 +23,6 @@
     min-height: 0;
 }
 
-.vistaNotasEncabezadoLista,
-
-.vistaNotasBusqueda {
-    padding: var(--dashboard-espacioMd) var(--dashboard-espacioLg);
-    border-bottom: 1px solid var(--dashboard-bordeSutil);
-    background: var(--dashboard-fondoSecundario);
-    display: flex;
-    flex-direction: column;
-    gap: var(--dashboard-espacioSm);
-}
 
 /*
  * Barra de acciones del modal de notas
@@ -151,8 +141,9 @@
         flex: 1;
     }
 
-    .scratchpadTextarea,
-    .scratchpadTextarea--resaltado {
+    /* [039A-1/F2] .scratchpadTextarea--resaltado eliminada: el resaltado está
+     * deshabilitado ([233A-3]) y no tenía consumidores repo-wide. */
+    .scratchpadTextarea {
         height: 100% !important;
         /* Padding inferior para que el texto no quede cubierto por el nav */
         padding-bottom: calc(var(--dashboard-alturaNavInferior) + var(--dashboard-espacioLg)) !important;

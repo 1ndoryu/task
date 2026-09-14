@@ -25,20 +25,11 @@
 }
 
 /*
- * Textarea y div de resaltado posicionados absolutamente.
- * Ambos usan inset:0 para ocupar todo el contenedor.
- * El div de resaltado tiene padding-right extra para compensar la scrollbar.
+ * Textarea posicionado absolutamente, con inset:0 para ocupar todo el
+ * contenedor.
+ * [039A-1/F2] .scratchpadTextarea--resaltado eliminada: el resaltado está
+ * deshabilitado ([233A-3]) y no tenía consumidores repo-wide.
  */
-
-.scratchpadTextarea--resaltado {
-    position: absolute;
-    inset: 0;
-    color: transparent;
-    caret-color: var(--dashboard-textoSecundario);
-    z-index: 1;
-    /* Scroll vertical siempre visible para mantener consistencia con el padding del resaltado */
-    overflow-y: scroll;
-}
 
 .scratchpadTextoTitulo {
     color: var(--dashboard-textoActivo);
@@ -197,43 +188,6 @@
     font-family: var(--dashboard-fuenteMonoespaciada);
 }
 
-/* Contenedor inferior de metas (modo lista) */
 
-/* Contador de caracteres (modo lista) */
 
-/* Fecha de modificaciÃ³n con icono (modo lista) */
 
-.listaNotasItemEliminar {
-    padding: var(--dashboard-espacioXs);
-    background: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordeSutil);
-    color: var(--dashboard-textoMuyApagado);
-    cursor: pointer;
-    border-radius: var(--dashboard-radioMd);
-    transition: all var(--dashboard-transicionRapida);
-}
-
-.listaNotasItemEliminar:hover {
-    color: var(--dashboard-estadoAlta);
-    background: var(--dashboard-estadoAltaFondo);
-}
-
-.modalNotasBotonAccion {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--dashboard-espacioXs);
-    padding: var(--dashboard-espacioXs) var(--dashboard-espacioSm);
-    background: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    color: var(--dashboard-textoSecundario);
-    cursor: pointer;
-    border-radius: var(--dashboard-radioSm);
-    transition: all var(--dashboard-transicionRapida);
-    font-size: var(--dashboard-tamanoPequeno);
-}
-
-.modalNotasBotonAccion:hover {
-    color: var(--dashboard-textoActivo);
-    border-color: var(--dashboard-bordeSutil);
-    background: var(--dashboard-fondoHover);
-}
