@@ -7,6 +7,7 @@ use crate::models::habit_history::{
     is_valid_status, HabitHistoryResponse, HabitHistoryStats, HabitHistorySummaryDay,
 };
 use crate::models::{HabitHistoryEntry, MarkHabitDayRequest};
+use crate::repositories::ActivityRepository;
 use crate::repositories::HabitHistoryRepository;
 
 pub struct HabitHistoryService;
@@ -82,6 +83,22 @@ impl HabitHistoryService {
             ));
         }
         HabitHistoryRepository::delete_day(pool, user_id, habit_id, date).await?;
+        /* La fecha vive en TRES sitios: tabla detallada, payload del hábito
+         * (historialCompletados/Pospuestos) y activity_events. Si solo se borra
+         * la tabla, el payload resucita la fecha como fila derivada `--:--`
+         * no borrable en el panel de Actividad. */
+        HabitHistoryRepository::strip_date_from_payload(pool, user_id, habit_id, date).await?;
+        for activity_type in ["habito_cumplido", "habito_pospuesto"] {
+            ActivityRepository::delete_for_element(
+                pool,
+                user_id,
+                activity_type,
+                "habito",
+                habit_id,
+                date,
+            )
+            .await?;
+        }
         Self::read_response(pool, user_id, habit_id, 30).await
     }
 }

@@ -9,6 +9,7 @@ import type {ConfiguracionActividad} from '../useConfiguracionActividad';
 import {useActividad} from '../useActividad';
 import {obtenerDetalleActividadDia, eliminarActividad, type DetalleActividadItem} from '../../services/actividadService';
 import {useSuscripcionStore} from '../../stores/suscripcionStore';
+import {useHabitosStore} from '../../stores/habitosStore';
 
 interface UsePanelActividadParams {
     configuracion: ConfiguracionActividad;
@@ -110,13 +111,27 @@ export function usePanelActividad({configuracion}: UsePanelActividadParams) {
         return item.proyectoNombre || nombreDetalles || null;
     }, []);
 
-    /* [024A-34] Eliminar una actividad individual. Optimista: quita del array y recarga.
-     * Los IDs sinteticos (<= 0) son historial derivado sin evento borrable:
-     * no se tocan (ni optimista ni DELETE) para no fingir un borrado que el
-     * backend rechazaria con 404. */
+    /* Eliminar una actividad individual. Optimista: quita del array y recarga.
+     * - Eventos reales (id > 0): DELETE /api/activity/{id}; el backend cae en
+     *   cascada al historial del hábito para que no resucite como `--:--`.
+     * - Filas derivadas de hábito (id sintético <= 0, `--:--`): no hay evento;
+     *   se desmarca el día en el historial (purga payload + tabla + eventos). */
+    const desmarcarDiaHabito = useHabitosStore(s => s.desmarcarDia);
     const eliminarItem = useCallback(
-        async (actividadId: number) => {
+        async (item: DetalleActividadItem) => {
+            const actividadId = item.id;
             if (!Number.isInteger(actividadId) || actividadId <= 0) {
+                if (
+                    (item.tipo === 'habito_cumplido' || item.tipo === 'habito_pospuesto') &&
+                    item.elementoTipo === 'habito' &&
+                    item.elementoId != null &&
+                    item.elementoId > 0 &&
+                    fechaDetalle
+                ) {
+                    setDetalleItems(prev => prev.filter(i => i.id !== item.id));
+                    await desmarcarDiaHabito(item.elementoId, fechaDetalle);
+                    cargarDetalleDia(fechaDetalle);
+                }
                 return;
             }
             setDetalleItems(prev => prev.filter(i => i.id !== actividadId));
@@ -125,7 +140,7 @@ export function usePanelActividad({configuracion}: UsePanelActividadParams) {
                 cargarDetalleDia(fechaDetalle);
             }
         },
-        [fechaDetalle, cargarDetalleDia]
+        [fechaDetalle, cargarDetalleDia, desmarcarDiaHabito]
     );
 
     return {

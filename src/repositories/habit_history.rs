@@ -131,4 +131,51 @@ impl HabitHistoryRepository {
         .await?;
         Ok(result.rows_affected() > 0)
     }
+
+    /// Quita una fecha (YYYY-MM-DD) de `payload.historialCompletados` y
+    /// `payload.historialPospuestos`. Sin esto, desmarcar solo borraba la tabla
+    /// detallada y la fecha del payload resucitaba como fila derivada `--:--`
+    /// no borrable en el panel de Actividad.
+    pub async fn strip_date_from_payload(
+        pool: &PgPool,
+        user_id: Uuid,
+        habit_id: i64,
+        date: NaiveDate,
+    ) -> Result<bool, sqlx::Error> {
+        let fecha = date.format("%Y-%m-%d").to_string();
+        let row: Option<(Value,)> = sqlx::query_as(
+            "SELECT payload FROM dashboard_habits
+             WHERE user_id = $1 AND legacy_id = $2 AND deleted_at IS NULL",
+        )
+        .bind(user_id)
+        .bind(habit_id)
+        .fetch_optional(pool)
+        .await?;
+        let Some((mut payload,)) = row else {
+            return Ok(false);
+        };
+        let mut changed = false;
+        for clave in ["historialCompletados", "historialPospuestos"] {
+            if let Some(arr) = payload.get_mut(clave).and_then(Value::as_array_mut) {
+                let antes = arr.len();
+                arr.retain(|v| v.as_str() != Some(fecha.as_str()));
+                if arr.len() != antes {
+                    changed = true;
+                }
+            }
+        }
+        if !changed {
+            return Ok(false);
+        }
+        sqlx::query(
+            "UPDATE dashboard_habits SET payload = $3, updated_at = NOW()
+             WHERE user_id = $1 AND legacy_id = $2 AND deleted_at IS NULL",
+        )
+        .bind(user_id)
+        .bind(habit_id)
+        .bind(payload)
+        .execute(pool)
+        .await?;
+        Ok(true)
+    }
 }

@@ -402,6 +402,27 @@ impl ActivityRepository {
         Ok(result.rows_affected() > 0)
     }
 
+    /// Localiza un evento antes de borrarlo para poder caer en cascada a su
+    /// fuente de verdad (el historial del hábito). Sin esto, borrar un evento
+    /// `habito_cumplido` con hora lo resucitaba como fila derivada `--:--`.
+    pub async fn find_by_id(
+        pool: &PgPool,
+        user_id: Uuid,
+        id: i64,
+    ) -> Result<Option<ActivityDetailRow>, sqlx::Error> {
+        sqlx::query_as::<_, ActivityDetailRow>(
+            "SELECT id, type AS activity_type, element_legacy_id AS element_id,
+                    element_type, project_legacy_id AS project_id, date,
+                    local_time, details,
+                    NULL::text AS element_name, NULL::text AS project_name
+             FROM activity_events WHERE id = $1 AND user_id = $2",
+        )
+        .bind(id)
+        .bind(user_id)
+        .fetch_optional(pool)
+        .await
+    }
+
     pub async fn delete_for_element(
         pool: &PgPool,
         user_id: Uuid,

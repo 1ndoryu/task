@@ -263,8 +263,32 @@ impl ActivityService {
     }
 
     pub async fn delete(pool: &sqlx::PgPool, user_id: Uuid, id: i64) -> Result<(), AppError> {
-        if id <= 0 || !ActivityRepository::delete(pool, user_id, id).await? {
+        if id <= 0 {
             return Err(AppError::NotFound("Actividad no encontrada".into()));
+        }
+        let existing = ActivityRepository::find_by_id(pool, user_id, id).await?;
+        let Some(event) = existing else {
+            return Err(AppError::NotFound("Actividad no encontrada".into()));
+        };
+        if !ActivityRepository::delete(pool, user_id, id).await? {
+            return Err(AppError::NotFound("Actividad no encontrada".into()));
+        }
+        /* Cascada a la fuente de verdad: si el evento era el cumplimiento de
+         * un hábito, el historial (tabla + payload) lo resucitaría como fila
+         * derivada `--:--`. Se purga el día completo para que el borrado sea
+         * definitivo. Las tareas no se desmarcan: borrar su evento no debe
+         * reabrir la tarea. */
+        if matches!(
+            event.activity_type.as_str(),
+            "habito_cumplido" | "habito_pospuesto"
+        ) && event.element_type.as_deref() == Some("habito")
+        {
+            if let Some(habit_id) = event.element_id {
+                use crate::repositories::HabitHistoryRepository;
+                HabitHistoryRepository::delete_day(pool, user_id, habit_id, event.date).await?;
+                HabitHistoryRepository::strip_date_from_payload(pool, user_id, habit_id, event.date)
+                    .await?;
+            }
         }
         Ok(())
     }

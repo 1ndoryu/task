@@ -149,10 +149,16 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
                                             {duracionTracking && <span className="panelActividadDetalleTrackingTag"> · {duracionTracking}</span>}
                                         </span>
                                         <span className="panelActividadDetalleHora">{formatearHora(item.hora)}</span>
-                                        {/* Las filas derivadas del historial (id sintetico <= 0) no tienen
-                                          * evento borrable: sin boton para no provocar DELETE /-1 con 404. */}
-                                        {item.id > 0 && (
-                                            <Boton variante="ghost" soloIcono claseAdicional="panelActividadDetalleEliminar" onClick={() => eliminarItem(item.id)} title="Eliminar actividad" icono={<X size={12} />} />
+                                        {/* Las filas derivadas de hábito (id sintético <= 0,
+                                          * `--:--`) se quitan desmarcando el día en el
+                                          * historial; el resto de sintéticas (tareas) no
+                                          * tiene borrado directo para no reabrir la tarea. */}
+                                        {(item.id > 0 ||
+                                            ((item.tipo === 'habito_cumplido' || item.tipo === 'habito_pospuesto') &&
+                                                item.elementoTipo === 'habito' &&
+                                                item.elementoId != null &&
+                                                item.elementoId > 0)) && (
+                                            <Boton variante="ghost" soloIcono claseAdicional="panelActividadDetalleEliminar" onClick={() => eliminarItem(item)} title="Eliminar actividad" icono={<X size={12} />} />
                                         )}
                                     </li>
                                 );
