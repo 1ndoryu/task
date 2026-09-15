@@ -154,8 +154,15 @@ export async function obtenerDetalleActividadDia(params: ObtenerDetalleActividad
     return data.detalle || [];
 }
 
-/** [024A-34] Elimina una actividad individual por su ID */
+/** [024A-34] Elimina una actividad individual por su ID.
+ * Los IDs sinteticos (<= 0) son filas derivadas del historial real
+ * (habitos/tareas) sin evento en activity_events: no son borrables
+ * via DELETE y el backend responde 404. Se rechazan en cliente sin
+ * emitir la peticion para no ensuciar la consola con 404 esperables. */
 export async function eliminarActividad(actividadId: number): Promise<boolean> {
+    if (!Number.isInteger(actividadId) || actividadId <= 0) {
+        return false;
+    }
     try {
         const response = await fetch(`${API_BASE}/${actividadId}`, {
             method: 'DELETE',

@@ -110,9 +110,15 @@ export function usePanelActividad({configuracion}: UsePanelActividadParams) {
         return item.proyectoNombre || nombreDetalles || null;
     }, []);
 
-    /* [024A-34] Eliminar una actividad individual. Optimista: quita del array y recarga. */
+    /* [024A-34] Eliminar una actividad individual. Optimista: quita del array y recarga.
+     * Los IDs sinteticos (<= 0) son historial derivado sin evento borrable:
+     * no se tocan (ni optimista ni DELETE) para no fingir un borrado que el
+     * backend rechazaria con 404. */
     const eliminarItem = useCallback(
         async (actividadId: number) => {
+            if (!Number.isInteger(actividadId) || actividadId <= 0) {
+                return;
+            }
             setDetalleItems(prev => prev.filter(i => i.id !== actividadId));
             const exito = await eliminarActividad(actividadId);
             if (!exito && fechaDetalle) {

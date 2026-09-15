@@ -9,21 +9,20 @@ import {crearFechaHaceNDias} from '../utils/fecha';
 
 /*
  * Habitos de demostracion
- * 3 habitos con diferentes estados:
- * - Uno atrasado (no completado ayer, deberia haberse hecho)
- * - Uno para mañana (proximo segun frecuencia)
- * - Uno para dentro de 3 dias
+ * Sin historial precargado: el historial alimenta el panel de Actividad
+ * (fuente de verdad = cumplimiento real) y unas fechas de ejemplo
+ * aparecerian como actividad que el usuario nunca hizo ni puede borrar
+ * (filas derivadas sin evento en activity_events).
  */
 export const habitosIniciales: Habito[] = [
     {
         id: 1,
         nombre: 'Deep Work / Coding',
         importancia: 'Alta',
-        diasInactividad: 3,
+        diasInactividad: 0,
         racha: 0,
         tags: ['dev', 'focus'],
-        historialCompletados: [crearFechaHaceNDias(5), crearFechaHaceNDias(4), crearFechaHaceNDias(3)],
-        ultimoCompletado: crearFechaHaceNDias(3),
+        historialCompletados: [],
         fechaCreacion: crearFechaHaceNDias(30),
         frecuencia: {tipo: 'diario'}
     },
@@ -32,10 +31,9 @@ export const habitosIniciales: Habito[] = [
         nombre: 'Lectura Tecnica',
         importancia: 'Media',
         diasInactividad: 0,
-        racha: 5,
+        racha: 0,
         tags: ['learning'],
-        historialCompletados: [crearFechaHaceNDias(10), crearFechaHaceNDias(8), crearFechaHaceNDias(6), crearFechaHaceNDias(4), crearFechaHaceNDias(2), crearFechaHaceNDias(0)],
-        ultimoCompletado: crearFechaHaceNDias(0),
+        historialCompletados: [],
         fechaCreacion: crearFechaHaceNDias(14),
         frecuencia: {tipo: 'cadaXDias', cadaDias: 2}
     },
@@ -43,11 +41,10 @@ export const habitosIniciales: Habito[] = [
         id: 3,
         nombre: 'Ejercicio Fisico',
         importancia: 'Baja',
-        diasInactividad: 1,
-        racha: 8,
+        diasInactividad: 0,
+        racha: 0,
         tags: ['salud'],
-        historialCompletados: [crearFechaHaceNDias(13), crearFechaHaceNDias(10), crearFechaHaceNDias(7), crearFechaHaceNDias(4), crearFechaHaceNDias(1)],
-        ultimoCompletado: crearFechaHaceNDias(1),
+        historialCompletados: [],
         fechaCreacion: crearFechaHaceNDias(20),
         frecuencia: {tipo: 'cadaXDias', cadaDias: 3}
     }

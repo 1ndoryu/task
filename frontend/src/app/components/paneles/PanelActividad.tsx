@@ -149,7 +149,11 @@ export function PanelActividad({configuracion, onAbrirModalConfigActividad, onAb
                                             {duracionTracking && <span className="panelActividadDetalleTrackingTag"> · {duracionTracking}</span>}
                                         </span>
                                         <span className="panelActividadDetalleHora">{formatearHora(item.hora)}</span>
-                                        <Boton variante="ghost" soloIcono claseAdicional="panelActividadDetalleEliminar" onClick={() => eliminarItem(item.id)} title="Eliminar actividad" icono={<X size={12} />} />
+                                        {/* Las filas derivadas del historial (id sintetico <= 0) no tienen
+                                          * evento borrable: sin boton para no provocar DELETE /-1 con 404. */}
+                                        {item.id > 0 && (
+                                            <Boton variante="ghost" soloIcono claseAdicional="panelActividadDetalleEliminar" onClick={() => eliminarItem(item.id)} title="Eliminar actividad" icono={<X size={12} />} />
+                                        )}
                                     </li>
                                 );
                             })}
