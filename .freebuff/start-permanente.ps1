@@ -86,6 +86,9 @@ $envs['CORS_ORIGINS'] = "http://127.0.0.1:$puertoVite,http://localhost:$puertoVi
 $envs['DATABASE_URL'] = 'postgres://postgres:root@127.0.0.1:5432/glory_backend_local'
 $envs['AGENTE_MODO'] = 'local'
 $envs['AGENTE_WORKSPACE_ROOT'] = $repo
+# [14-09-2026] Kill-switch temporal del agente IA (harness en obras): sin
+# scheduler ni rutas /api/agente (503). Reversible: comentar y relanzar.
+$envs['AGENTE_DESACTIVADO'] = '1'
 
 # --- BACKEND ---------------------------------------------------------------
 $logB = Join-Path $runtime 'backend.out.log'

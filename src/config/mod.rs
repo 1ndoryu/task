@@ -98,6 +98,11 @@ pub struct AppConfig {
     /// Límites por usuario/hora de los endpoints proxy IA (contrato PHP: 80 chat, 60 nutrición).
     pub ai_chat_rate_limit_per_hour: u32,
     pub ai_nutrition_rate_limit_per_hour: u32,
+    /// [14-09-2026] Kill-switch temporal del agente IA (harness en obras):
+    /// `AGENTE_DESACTIVADO=1` apaga el scheduler de tareas programadas y
+    /// responde 503 en `/api/agente/*` sin tocar el resto. Reversible: basta
+    /// quitar la env y reiniciar.
+    pub agente_desactivado: bool,
 }
 
 impl AppConfig {
@@ -175,6 +180,8 @@ impl AppConfig {
                 .map_err(|_| {
                     ConfigError::InvalidConfigValue("AI_NUTRITION_RATE_LIMIT_PER_HOUR".into())
                 })?,
+            agente_desactivado: std::env::var("AGENTE_DESACTIVADO")
+                .is_ok_and(|value| value == "1" || value.eq_ignore_ascii_case("true")),
         };
         if config.db_min_connections > config.db_max_connections {
             return Err(ConfigError::InvalidPoolBounds);

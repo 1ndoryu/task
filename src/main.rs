@@ -55,21 +55,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
      * `glory-harness-core::scheduler` (heartbeat, toma atómica, cron); aquí
      * solo se inyecta la persistencia (adaptador) y el runner del consumidor
      * (`ejecutar_tarea_harness`). El estado es el mismo AppState del router. */
-    let scheduler_state = handlers::estado_completo(pool.clone(), &config)?;
-    let persistencia = Arc::new(PersistenciaAgente::nuevo(pool.clone()));
-    let runner_state = scheduler_state.clone();
-    tokio::spawn(async move {
-        let ejecutar = move |tarea: TareaProgramadaPendiente, _ahora: DateTime<Utc>| {
-            let state = runner_state.clone();
-            async move { ejecutar_tarea_harness(&state, &tarea).await }
-        };
-        glory_backend::agent::correr_scheduler(
-            persistencia.as_ref(),
-            ejecutar,
-            Duration::from_secs(30),
-        )
-        .await;
-    });
+    /* [14-09-2026] Kill-switch `AGENTE_DESACTIVADO`: sin worker de tareas
+     * programadas mientras el harness está en obras (no hay turnos en
+     * background ni gasto de tokens). Reversible: quitar la env y reiniciar. */
+    if config.agente_desactivado {
+        tracing::warn!("Scheduler del agente desactivado (AGENTE_DESACTIVADO=1)");
+    } else {
+        let scheduler_state = handlers::estado_completo(pool.clone(), &config)?;
+        let persistencia = Arc::new(PersistenciaAgente::nuevo(pool.clone()));
+        let runner_state = scheduler_state.clone();
+        tokio::spawn(async move {
+            let ejecutar = move |tarea: TareaProgramadaPendiente, _ahora: DateTime<Utc>| {
+                let state = runner_state.clone();
+                async move { ejecutar_tarea_harness(&state, &tarea).await }
+            };
+            glory_backend::agent::correr_scheduler(
+                persistencia.as_ref(),
+                ejecutar,
+                Duration::from_secs(30),
+            )
+            .await;
+        });
+    }
 
     let addr = format!("{}:{}", config.host, config.port);
     tracing::info!("Servidor iniciando en {addr}");

@@ -358,7 +358,7 @@ pub fn create_router(
 
     let router = Router::new()
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", ApiDoc::openapi()))
-        .nest("/api", api_routes(&state))
+        .nest("/api", api_routes(&state, config.agente_desactivado))
         .layer(TraceLayer::new_for_http())
         // [H-B05-08] Límite de body configurable (default 6 MB: adjuntos 5 MB + multipart).
         .layer(RequestBodyLimitLayer::new(config.max_body_bytes))
@@ -443,16 +443,25 @@ pub fn create_router(
         )))
 }
 
-fn api_routes(state: &AppState) -> Router<AppState> {
+fn api_routes(state: &AppState, agente_desactivado: bool) -> Router<AppState> {
     let public_auth = auth::public_routes().layer(from_fn_with_state(
         state.clone(),
         crate::middleware::rate_limit::auth_rate_limit,
     ));
-    Router::new()
+    let router = Router::new()
         .merge(health::routes())
-        .merge(ai::routes())
-        .merge(agente::routes())
-        .merge(agente_aprobacion::rutas_aprobacion())
+        .merge(ai::routes());
+    /* [14-09-2026] Kill-switch `AGENTE_DESACTIVADO`: sin scheduler ni turnos
+     * mientras el harness está en obras; el panel IA recibe 503 explícito. */
+    let router = if agente_desactivado {
+        tracing::warn!("Agente IA desactivado (AGENTE_DESACTIVADO=1): /api/agente/* responde 503");
+        router.merge(agente_off_routes())
+    } else {
+        router
+            .merge(agente::routes())
+            .merge(agente_aprobacion::rutas_aprobacion())
+    };
+    router
         .merge(public_auth)
         .merge(auth::protected_routes())
         .merge(dashboard::routes())
@@ -472,4 +481,26 @@ fn api_routes(state: &AppState) -> Router<AppState> {
         .merge(security::routes())
         .merge(realtime::routes())
         .merge(admin::routes())
+}
+
+// [14-09-2026] Kill-switch `AGENTE_DESACTIVADO`: cualquier método/ruta bajo
+// `/api/agente/` + wildcard responde 503 con mensaje explícito (mejor que 404:
+// el front distingue "apagado temporal" de "ruta rota"). Reversible: basta
+// quitar la env y reiniciar.
+fn agente_off_routes() -> Router<AppState> {
+    use axum::routing::get;
+    Router::new().route(
+        "/agente/*path",
+        get(agente_off)
+            .post(agente_off)
+            .put(agente_off)
+            .delete(agente_off)
+            .patch(agente_off),
+    )
+}
+
+async fn agente_off() -> crate::errors::AppError {
+    crate::errors::AppError::NotConfigured(
+        "Agente IA desactivado temporalmente (AGENTE_DESACTIVADO=1)".into(),
+    )
 }

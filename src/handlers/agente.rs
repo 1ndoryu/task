@@ -33,7 +33,7 @@ use crate::errors::AppError;
 use crate::middleware::auth::AuthUser;
 use crate::repositories::AgenteRepository;
 use crate::AppState;
-use glory_harness_core::ports::TurnoPersistido;
+use glory_harness_core::ports::{PersistenciaTurnos, TurnoPersistido};
 use glory_harness_core::AgentPersistence;
 
 use super::agente_config::config_desde_guardada;

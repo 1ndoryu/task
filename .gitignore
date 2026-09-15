@@ -72,3 +72,6 @@ sentinel.lock.json.bak
 # Artefactos de arranque del preview (Freebuff)
 .freebuff/*.err
 .freebuff/*-boot.log
+# Metadata local de herramienta (UUID proyecto Coolify, manifest VarSense)
+.freebuff/project-id
+.varsense-f5-manifest.txt

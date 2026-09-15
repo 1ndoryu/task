@@ -15,8 +15,9 @@ use uuid::Uuid;
 
 use glory_harness_core::context::estimar_tokens;
 use glory_harness_core::ports::{
-    AccionAuditable, AgentPersistence, AmbitoMemoria, MemoriaEntrada, MensajePersistido,
-    SkillEntrada, TareaProgramadaPendiente, TurnoPersistido,
+    AccionAuditable, AgentPersistence, AmbitoMemoria, ColaTareas, MemoriaEntrada,
+    MensajePersistido, PersistenciaAuditoria, PersistenciaMemoria, PersistenciaSkills,
+    PersistenciaTurnos, SkillEntrada, TareaProgramadaPendiente, TurnoPersistido,
 };
 use glory_harness_core::scheduler::HEARTBEAT_STALE;
 use glory_harness_core::HarnessResult;
@@ -153,8 +154,12 @@ impl PersistenciaAgente {
     }
 }
 
+/* [139A-8] El núcleo segregó `AgentPersistence` en 5 traits por dominio
+ * (ISP): la tienda implementa cada cara por separado y el compuesto
+ * `AgentPersistence` se satisface automáticamente (supertraits). */
+
 #[async_trait]
-impl AgentPersistence for PersistenciaAgente {
+impl PersistenciaTurnos for PersistenciaAgente {
     async fn guardar_turno(&self, turno: &TurnoPersistido) -> HarnessResult<()> {
         let estado = estado_turno_db(&turno.estado);
         let conversacion_id: Option<Uuid> = if turno.conversacion_id.is_nil() {
@@ -268,6 +273,10 @@ impl AgentPersistence for PersistenciaAgente {
             .map_err(harness_err)?;
         Ok(())
     }
+}
+
+#[async_trait]
+impl PersistenciaAuditoria for PersistenciaAgente {
 
     async fn registrar_accion(&self, accion: &AccionAuditable) -> HarnessResult<()> {
         let argumentos = accion
@@ -290,7 +299,10 @@ impl AgentPersistence for PersistenciaAgente {
         .map_err(harness_err)?;
         Ok(())
     }
+}
 
+#[async_trait]
+impl PersistenciaMemoria for PersistenciaAgente {
     async fn memoria_listar(
         &self,
         user_id: Uuid,
@@ -382,12 +394,15 @@ impl AgentPersistence for PersistenciaAgente {
         sqlx::query("DELETE FROM agente_memoria WHERE user_id = $1 AND clave = $2")
             .bind(user_id)
             .bind(clave)
-            .execute(&self.pool)
-            .await
-            .map_err(harness_err)?;
+        .execute(&self.pool)
+        .await
+        .map_err(harness_err)?;
         Ok(())
     }
+}
 
+#[async_trait]
+impl PersistenciaSkills for PersistenciaAgente {
     async fn skills_listar(&self, user_id: Uuid) -> HarnessResult<Vec<SkillEntrada>> {
         let filas: Vec<(Uuid, String, String, String, bool)> = sqlx::query_as(
             "SELECT id, nombre, descripcion, instrucciones, activa FROM agente_skills
@@ -410,7 +425,10 @@ impl AgentPersistence for PersistenciaAgente {
             )
             .collect())
     }
+}
 
+#[async_trait]
+impl ColaTareas for PersistenciaAgente {
     async fn tareas_recuperar_interrumpidas(&self) -> HarnessResult<u64> {
         sqlx::query(
             "UPDATE agente_tareas_programadas
@@ -514,3 +532,8 @@ impl AgentPersistence for PersistenciaAgente {
         Ok(())
     }
 }
+
+/* [139A-8 F4/S3] Compuesto vacío (patrón del núcleo): la tienda implementa
+ * las 5 caras por separado y no declara capacidades S4 (sin ámbitos ni
+ * registro de skills: el curador deja nota en vez de romper la pasada). */
+impl AgentPersistence for PersistenciaAgente {}
