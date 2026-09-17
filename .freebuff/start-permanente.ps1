@@ -137,6 +137,20 @@ if (Test-PuertoEscucha $puertoVite) {
             Start-Sleep -Milliseconds 500
         }
     }
+    # [17-09-2026] Auto-reparación: si una limpieza borró frontend/node_modules
+    # (total o parcial), Vite arranca roto (HTTP 500 por chunks inexistentes).
+    # Se detecta por el shim .bin/vite (un directorio a medias no basta) y se
+    # reinstala antes de lanzar, para que el acceso abra siempre.
+    $viteShim = Join-Path $repo 'frontend\node_modules\.bin\vite.cmd'
+    if (-not (Test-Path -LiteralPath $viteShim -PathType Leaf)) {
+        Write-Output 'frontend/node_modules ausente o incompleto: reinstalando dependencias (npm install)...'
+        & npm.cmd install --no-audit --no-fund --prefix (Join-Path $repo 'frontend')
+        if ($LASTEXITCODE -ne 0) { throw "npm install en frontend falló con código $LASTEXITCODE." }
+        if (-not (Test-Path -LiteralPath $viteShim -PathType Leaf)) {
+            throw 'npm install terminó pero sigue faltando el shim de vite; revisa el log de npm.'
+        }
+        Write-Output 'Dependencias del frontend restauradas.'
+    }
     # npm run dev hereda vars del terminal: fijamos solo VITE_* (vite.config los lee).
     $env:VITE_PORT = "$puertoVite"
     $env:VITE_HOST = '127.0.0.1'
