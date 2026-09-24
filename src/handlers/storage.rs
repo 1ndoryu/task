@@ -166,7 +166,11 @@ fn tipo_inferido(mime: Option<&str>, tipo: Option<String>) -> Result<String, App
 }
 
 /* [F5-PT] Persistencia de archivo en disco extraída de upload_file para
-acotar la longitud y permisos del manejador HTTP. */
+acotar la longitud y permisos del manejador HTTP.
+Contencion: `user_id`/`file_id` son Uuid (hex con guiones, sin
+separadores por tipo) y la extension se restringe a ASCII alfanumerico;
+ademas el directorio se canonicaliza y se exige contenido en `uploads`
+(canonicalize + contencion fail-closed ante futuros refactors). */
 async fn persistir_archivo(
     user_id: &Uuid,
     nombre: &str,
@@ -177,9 +181,19 @@ async fn persistir_archivo(
     tokio::fs::create_dir_all(&dir)
         .await
         .map_err(|error| AppError::Internal(format!("No se pudo crear el directorio de subida: {error}")))?;
+    let dir_canon = tokio::fs::canonicalize(&dir)
+        .await
+        .map_err(|error| AppError::Internal(format!("No se pudo verificar el directorio de subida: {error}")))?;
+    let base_canon = tokio::fs::canonicalize("uploads")
+        .await
+        .map_err(|error| AppError::Internal(format!("No se pudo verificar la base de subidas: {error}")))?;
+    if !dir_canon.starts_with(&base_canon) {
+        return Err(AppError::Validation("directorio de subida fuera de la base".into()));
+    }
     let ext = std::path::Path::new(nombre)
         .extension()
         .and_then(|e| e.to_str())
+        .filter(|e| e.len() <= 16 && e.chars().all(|c| c.is_ascii_alphanumeric()))
         .map(|e| format!(".{e}"))
         .unwrap_or_default();
     let ruta = dir.join(format!("{file_id}{ext}"));

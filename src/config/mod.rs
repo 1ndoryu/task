@@ -34,9 +34,12 @@ pub struct AiProviderKeys {
     pub groq: Vec<String>,
     pub deepseek: Vec<String>,
     pub glory: Vec<String>,
-    /// [02-09-2026] Command Code Provider API directa (api.commandcode.ai).
-    /// Env: COMMAND_CODE_API_KEY (la misma key del Studio/CLI).
+    /// [02-09-2026] Command Code Provider API directa (`api.commandcode.ai`).
+    /// Env: `COMMAND_CODE_API_KEY` (la misma key del Studio/CLI).
     pub commandcode: Vec<String>,
+    /// [20-09-2026] `OpenCode` Go directo (`opencode.ai/zen/go/v1`), paridad con
+    /// `LlavesProveedor::opencode_go` del núcleo. Env: `OPENCODE_GO_API_KEY`.
+    pub opencode_go: Vec<String>,
 }
 
 /* [Fase 2 Glory Harness] El proxy LLM vive en el núcleo; esta conversión
@@ -49,6 +52,7 @@ impl From<AiProviderKeys> for glory_harness_core::llm::LlavesProveedor {
             deepseek: keys.deepseek,
             glory: keys.glory,
             commandcode: keys.commandcode,
+            opencode_go: keys.opencode_go,
         }
     }
 }
@@ -69,6 +73,7 @@ impl AiProviderKeys {
             deepseek: env_list(&["DEEPSEEK_API", "DEEPSEEK-API", "DEEPSEEK_API_KEY"]),
             glory: env_list(&["GLORY_API_KEY", "GLORY_API", "EMPERO_API_KEY"]),
             commandcode: env_list(&["COMMAND_CODE_API_KEY"]),
+            opencode_go: env_list(&["OPENCODE_GO_API_KEY"]),
         }
     }
 }

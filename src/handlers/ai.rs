@@ -121,6 +121,9 @@ pub async fn ai_chat(
                 temperature: req.temperature.unwrap_or(0.7),
                 max_tokens: req.maxTokens.unwrap_or(2048).clamp(64, 4096),
                 reasoning_effort: None,
+                /* Llamada puntual sin sesion de conversacion: el transporte
+                genera un UUID por llamada (igual que el núcleo). */
+                sesion_externa: None,
             },
         )
         .await?;
