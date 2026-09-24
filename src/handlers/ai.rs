@@ -107,7 +107,9 @@ pub async fn ai_chat(
         .ai_chat_limiter
         .check(&auth.user_id.to_string())
     {
-        return Err(AppError::TooManyRequests);
+        return Err(AppError::TooManyRequests(
+            state.ai_chat_limiter.ventana_secs(),
+        ));
     }
     let resultado = state
         .ai_provider
@@ -152,7 +154,9 @@ pub async fn ai_nutricion(
         .ai_nutrition_limiter
         .check(&auth.user_id.to_string())
     {
-        return Err(AppError::TooManyRequests);
+        return Err(AppError::TooManyRequests(
+            state.ai_nutrition_limiter.ventana_secs(),
+        ));
     }
     let resultado = state
         .ai_provider
@@ -195,9 +199,18 @@ pub async fn ai_web_search(
     Ok(Json(state.web_search.search(&req).await?))
 }
 
-pub fn routes() -> Router<AppState> {
+pub fn routes(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/ai/chat", post(ai_chat))
         .route("/ai/nutricion", post(ai_nutricion))
         .route("/ai/tools/web-search", post(ai_web_search))
+        /* [249A-1] Cuota del grupo IA (IP/min): el coste de proveedor lo
+         * frena el límite por usuario; esto frena el abuso por IP. */
+        .route_layer(axum::middleware::from_fn_with_state(
+            (
+                state.api_ia_limiter.clone(),
+                state.trust_proxy_headers,
+            ),
+            crate::middleware::rate_limit::limite_ia_api,
+        ))
 }

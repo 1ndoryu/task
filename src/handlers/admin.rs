@@ -185,7 +185,7 @@ pub async fn extend_trial(
     }))
 }
 
-pub fn routes() -> Router<AppState> {
+pub fn routes(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/admin/users", get(list_users))
         .route("/admin/users/:id", get(get_user))
@@ -193,4 +193,13 @@ pub fn routes() -> Router<AppState> {
         .route("/admin/users/:id/premium", post(activate_premium))
         .route("/admin/users/:id/cancel-premium", post(cancel_premium))
         .route("/admin/users/:id/trial", post(extend_trial))
+        /* [249A-1] Cuota del grupo admin (IP/min): superficie privilegiada
+         * con poco volumen legítimo. */
+        .route_layer(axum::middleware::from_fn_with_state(
+            (
+                state.api_admin_limiter.clone(),
+                state.trust_proxy_headers,
+            ),
+            crate::middleware::rate_limit::limite_admin_api,
+        ))
 }

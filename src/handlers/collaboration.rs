@@ -135,11 +135,19 @@ pub async fn remove_connection(
     Ok(StatusCode::NO_CONTENT)
 }
 
-pub fn routes() -> Router<AppState> {
+pub fn routes(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/teams", get(get_team))
         .route("/teams/pending-count", get(pending_count))
         .route("/teams/requests", post(send_request))
         .route("/teams/requests/:id", put(respond_request))
         .route("/teams/:id", delete(remove_connection))
+        /* [249A-1] Cuota del grupo escritura (IP/min): ver `auth.rs`. */
+        .route_layer(axum::middleware::from_fn_with_state(
+            (
+                state.api_escritura_limiter.clone(),
+                state.trust_proxy_headers,
+            ),
+            crate::middleware::rate_limit::limite_escritura_api,
+        ))
 }

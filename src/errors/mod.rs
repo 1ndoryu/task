@@ -19,8 +19,10 @@ pub enum AppError {
     #[error("Prohibido: {0}")]
     Forbidden(String),
 
+    /* [249A-1] Lleva los segundos de espera para emitir `Retry-After`
+     * junto al 429: el cliente reintenta con fundamento, no a ciegas. */
     #[error("Demasiadas solicitudes")]
-    TooManyRequests,
+    TooManyRequests(u64),
 
     #[error("Servicio no disponible: {0}")]
     ServiceUnavailable(String),
@@ -69,7 +71,7 @@ impl From<glory_harness_core::HarnessError> for AppError {
             HarnessError::Persistencia(msg) => AppError::Internal(msg),
             HarnessError::Sandbox(msg) => AppError::Forbidden(msg),
             HarnessError::NoEncontrado(msg) => AppError::NotFound(msg),
-            HarnessError::Limite(_) => AppError::TooManyRequests,
+            HarnessError::Limite(_) => AppError::TooManyRequests(60),
             HarnessError::Cancelado => AppError::Cancelado,
             HarnessError::Interno(msg) => AppError::Internal(msg),
         }
@@ -96,7 +98,7 @@ impl IntoResponse for AppError {
                 "Credenciales inválidas o ausentes".to_string(),
             ),
             Self::Forbidden(msg) => (StatusCode::FORBIDDEN, "forbidden", msg.clone()),
-            Self::TooManyRequests => (
+            Self::TooManyRequests(_) => (
                 StatusCode::TOO_MANY_REQUESTS,
                 "rate_limited",
                 "Demasiadas solicitudes; inténtalo más tarde".to_string(),
@@ -154,7 +156,18 @@ impl IntoResponse for AppError {
             message,
         };
 
-        (status, Json(body)).into_response()
+        let mut respuesta = (status, Json(body)).into_response();
+        /* [249A-1] El 429 viaja con `Retry-After`: el cliente sabe cuándo
+         * reintentar y el gate `ruta-post-sin-rate-limit` exige evidencia. */
+        if let Self::TooManyRequests(secs) = &self {
+            if let Ok(valor) = axum::http::HeaderValue::from_str(&secs.to_string()) {
+                respuesta.headers_mut().insert(
+                    axum::http::header::RETRY_AFTER,
+                    valor,
+                );
+            }
+        }
+        respuesta
     }
 }
 

@@ -33,6 +33,11 @@ pub struct AppState {
     pub cors_origins: Vec<HeaderValue>,
     pub auth_rate_limiter: Arc<FixedWindowLimiter>,
     pub auth_crypto_semaphore: Arc<Semaphore>,
+    /* [249A-1] Limitadores por grupo de la API (IP/minuto, ventana 1 min):
+     * los montan los `routes()` con `route_layer(from_fn(...))`. */
+    pub api_escritura_limiter: Arc<FixedWindowLimiter>,
+    pub api_ia_limiter: Arc<FixedWindowLimiter>,
+    pub api_admin_limiter: Arc<FixedWindowLimiter>,
     /// [AI] Proxy LLM del admin (keys de las envs del proyecto anterior).
     pub ai_provider: LlmProviderService,
     /// [AI] Límites por usuario/hora de los endpoints proxy IA.

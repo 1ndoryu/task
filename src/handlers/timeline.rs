@@ -128,7 +128,7 @@ pub async fn mark_read(
     ))
 }
 
-pub fn routes() -> Router<AppState> {
+pub fn routes(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/timeline", post(send))
         .route("/timeline/events", post(event))
@@ -136,4 +136,12 @@ pub fn routes() -> Router<AppState> {
         .route("/timeline/:item_type/:item_id", get(list))
         .route("/timeline/count/:item_type/:item_id", get(count))
         .route("/timeline/unread/:item_type/:item_id", get(unread))
+        /* [249A-1] Cuota del grupo escritura (IP/min): ver `auth.rs`. */
+        .route_layer(axum::middleware::from_fn_with_state(
+            (
+                state.api_escritura_limiter.clone(),
+                state.trust_proxy_headers,
+            ),
+            crate::middleware::rate_limit::limite_escritura_api,
+        ))
 }

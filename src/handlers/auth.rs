@@ -189,11 +189,20 @@ pub fn public_routes() -> Router<AppState> {
         .route("/auth/login", post(login))
 }
 
-pub fn protected_routes() -> Router<AppState> {
+pub fn protected_routes(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/auth/me", get(me))
         .route("/auth/logout", post(logout))
         .route("/profile", get(profile).put(update_profile))
+        /* [249A-1] Cuota del grupo escritura (IP/min): frena abuso
+         * automatizado sin tocar el flujo legítimo. */
+        .route_layer(axum::middleware::from_fn_with_state(
+            (
+                state.api_escritura_limiter.clone(),
+                state.trust_proxy_headers,
+            ),
+            crate::middleware::rate_limit::limite_escritura_api,
+        ))
 }
 
 fn with_session_cookies(

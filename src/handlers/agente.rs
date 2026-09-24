@@ -91,7 +91,9 @@ pub async fn agente_stream(
         return Err(AppError::BadRequest("El mensaje no puede exceder 4000 caracteres".into()));
     }
     if !state.agente_limiter.check(&auth.user_id.to_string()) {
-        return Err(AppError::TooManyRequests);
+        return Err(AppError::TooManyRequests(
+            state.agente_limiter.ventana_secs(),
+        ));
     }
 
     /* Verificar propiedad de la conversación (nunca confiar en el front) y
@@ -594,7 +596,7 @@ pub async fn compactar_conversacion(
  * `validar_estilo`, `validar_nivel_razonamiento`, `validar_preferencias`) →
  * `handlers/agente_config.rs` (los usa `config_desde_guardada`). */
 
-pub fn routes() -> Router<AppState> {
+pub fn routes(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/agente/stream", post(agente_stream))
         .route(
@@ -625,4 +627,12 @@ pub fn routes() -> Router<AppState> {
         .merge(super::agente_tareas::rutas_tareas())
         .merge(super::agente_memoria::rutas_memoria())
         .merge(super::agente_skills::rutas_skills())
+        /* [249A-1] Cuota del grupo IA (IP/min): ver `ai.rs`. */
+        .route_layer(axum::middleware::from_fn_with_state(
+            (
+                state.api_ia_limiter.clone(),
+                state.trust_proxy_headers,
+            ),
+            crate::middleware::rate_limit::limite_ia_api,
+        ))
 }

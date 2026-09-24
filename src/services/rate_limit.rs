@@ -35,6 +35,13 @@ impl FixedWindowLimiter {
         }
     }
 
+    /* [249A-1] Ventana en segundos: alimenta el `Retry-After` del 429 para
+     * que el cliente sepa cuánto esperar sin adivinar. */
+    #[must_use]
+    pub fn ventana_secs(&self) -> u64 {
+        self.window.as_secs().max(1)
+    }
+
     pub fn check(&self, key: &str) -> bool {
         let now = Instant::now();
         let mut state = self

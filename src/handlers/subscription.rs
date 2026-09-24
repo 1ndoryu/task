@@ -52,9 +52,17 @@ pub async fn checkout(
     Ok(Json(SubscriptionService::checkout(&state.pool, auth.user_id).await?))
 }
 
-pub fn routes() -> Router<AppState> {
+pub fn routes(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/subscription", get(get_subscription))
         .route("/subscription/trial", post(activate_trial))
         .route("/subscription/checkout", post(checkout))
+        /* [249A-1] Cuota del grupo escritura (IP/min): ver `auth.rs`. */
+        .route_layer(axum::middleware::from_fn_with_state(
+            (
+                state.api_escritura_limiter.clone(),
+                state.trust_proxy_headers,
+            ),
+            crate::middleware::rate_limit::limite_escritura_api,
+        ))
 }

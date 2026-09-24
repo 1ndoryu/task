@@ -314,6 +314,20 @@ pub fn estado_completo(
         auth_crypto_semaphore: std::sync::Arc::new(tokio::sync::Semaphore::new(
             config.auth_crypto_semaphore_permits,
         )),
+        /* [249A-1] Cuotas por grupo de la API (IP/minuto, ventana 1 min):
+         * los `routes()` las montan con `route_layer(from_fn(...))`. */
+        api_escritura_limiter: std::sync::Arc::new(FixedWindowLimiter::new(
+            config.api_escritura_por_minuto,
+            std::time::Duration::from_mins(1),
+        )),
+        api_ia_limiter: std::sync::Arc::new(FixedWindowLimiter::new(
+            config.api_ia_por_minuto,
+            std::time::Duration::from_mins(1),
+        )),
+        api_admin_limiter: std::sync::Arc::new(FixedWindowLimiter::new(
+            config.api_admin_por_minuto,
+            std::time::Duration::from_mins(1),
+        )),
         ai_provider: crate::services::LlmProviderService::new(config.ai_provider_keys.clone().into()),
         ai_chat_limiter: std::sync::Arc::new(FixedWindowLimiter::new(
             config.ai_chat_rate_limit_per_hour,
@@ -450,7 +464,7 @@ fn api_routes(state: &AppState, agente_desactivado: bool) -> Router<AppState> {
     ));
     let router = Router::new()
         .merge(health::routes())
-        .merge(ai::routes());
+        .merge(ai::routes(state));
     /* [14-09-2026] Kill-switch `AGENTE_DESACTIVADO`: sin scheduler ni turnos
      * mientras el harness está en obras; el panel IA recibe 503 explícito. */
     let router = if agente_desactivado {
@@ -458,29 +472,29 @@ fn api_routes(state: &AppState, agente_desactivado: bool) -> Router<AppState> {
         router.merge(agente_off_routes())
     } else {
         router
-            .merge(agente::routes())
-            .merge(agente_aprobacion::rutas_aprobacion())
+            .merge(agente::routes(state))
+            .merge(agente_aprobacion::rutas_aprobacion(state))
     };
     router
         .merge(public_auth)
-        .merge(auth::protected_routes())
+        .merge(auth::protected_routes(state))
         .merge(dashboard::routes())
         .merge(habit_history::routes())
         .merge(activity::routes())
         .merge(productivity::routes())
-        .merge(collaboration::routes())
-        .merge(shared::routes())
+        .merge(collaboration::routes(state))
+        .merge(shared::routes(state))
         .merge(notifications::routes())
-        .merge(timeline::routes())
-        .merge(notes::routes())
-        .merge(reminders::routes())
-        .merge(subscription::routes())
-        .merge(storage::routes())
-        .merge(backup::routes())
-        .merge(feedback::routes())
+        .merge(timeline::routes(state))
+        .merge(notes::routes(state))
+        .merge(reminders::routes(state))
+        .merge(subscription::routes(state))
+        .merge(storage::routes(state))
+        .merge(backup::routes(state))
+        .merge(feedback::routes(state))
         .merge(security::routes())
         .merge(realtime::routes())
-        .merge(admin::routes())
+        .merge(admin::routes(state))
 }
 
 // [14-09-2026] Kill-switch `AGENTE_DESACTIVADO`: cualquier método/ruta bajo

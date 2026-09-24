@@ -40,7 +40,10 @@ impl FeedbackService {
         let hoy = Utc::now().date_naive();
         let enviados = FeedbackRepository::count_since(pool, user_id, hoy).await?;
         if enviados >= LIMITE_DIARIO {
-            return Err(AppError::TooManyRequests);
+            /* [249A-1] El cupo se renueva con el día UTC (igual que `hoy`):
+             * el `Retry-After` apunta a la medianoche UTC. */
+            let restante = 86_400 - Utc::now().timestamp() % 86_400;
+            return Err(AppError::TooManyRequests(restante.max(1) as u64));
         }
 
         FeedbackRepository::create(pool, user_id, &req.tipo, &req.mensaje).await?;

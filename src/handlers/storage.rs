@@ -368,10 +368,18 @@ pub async fn delete_file(
     Ok(StatusCode::NO_CONTENT)
 }
 
-pub fn routes() -> Router<AppState> {
+pub fn routes(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/storage", get(storage_info))
         .route("/storage/verify", post(verify_space))
         .route("/storage/files", get(list_files).post(upload_file))
         .route("/storage/files/:id", get(download_file).delete(delete_file))
+        /* [249A-1] Cuota del grupo escritura (IP/min): ver `auth.rs`. */
+        .route_layer(axum::middleware::from_fn_with_state(
+            (
+                state.api_escritura_limiter.clone(),
+                state.trust_proxy_headers,
+            ),
+            crate::middleware::rate_limit::limite_escritura_api,
+        ))
 }

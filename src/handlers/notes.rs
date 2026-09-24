@@ -277,7 +277,7 @@ pub async fn delete_note(
     Ok(StatusCode::NO_CONTENT)
 }
 
-pub fn routes() -> Router<AppState> {
+pub fn routes(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/notes", post(create_note).get(list_notes))
         .route("/notes/folders", post(create_folder).get(list_folders))
@@ -290,4 +290,12 @@ pub fn routes() -> Router<AppState> {
             get(get_note).put(update_note).delete(delete_note),
         )
         .route("/notes/:id/folder", axum::routing::put(move_note))
+        /* [249A-1] Cuota del grupo escritura (IP/min): ver `auth.rs`. */
+        .route_layer(axum::middleware::from_fn_with_state(
+            (
+                state.api_escritura_limiter.clone(),
+                state.trust_proxy_headers,
+            ),
+            crate::middleware::rate_limit::limite_escritura_api,
+        ))
 }

@@ -126,10 +126,18 @@ pub async fn remove(
     Ok(StatusCode::NO_CONTENT)
 }
 
-pub fn routes() -> Router<AppState> {
+pub fn routes(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/reminders", get(list).post(create))
         .route("/reminders/:id", put(update).delete(remove))
         .route("/reminders/:id/complete", post(complete))
         .route("/reminders/:id/cancel", post(cancel))
+        /* [249A-1] Cuota del grupo escritura (IP/min): ver `auth.rs`. */
+        .route_layer(axum::middleware::from_fn_with_state(
+            (
+                state.api_escritura_limiter.clone(),
+                state.trust_proxy_headers,
+            ),
+            crate::middleware::rate_limit::limite_escritura_api,
+        ))
 }

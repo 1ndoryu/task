@@ -149,7 +149,7 @@ impl AlmacenPermisos {
 
 /* ── Rutas ─────────────────────────────────────────────────────────────── */
 
-pub fn rutas_aprobacion() -> Router<AppState> {
+pub fn rutas_aprobacion(state: &AppState) -> Router<AppState> {
     Router::new()
         .route(
             "/agente/conversaciones/:id/aprobacion",
@@ -159,6 +159,14 @@ pub fn rutas_aprobacion() -> Router<AppState> {
             "/agente/conversaciones/:id/reglas",
             get(listar_reglas).delete(borrar_reglas_categoria),
         )
+        /* [249A-1] Cuota del grupo IA (IP/min): ver `ai.rs`. */
+        .route_layer(axum::middleware::from_fn_with_state(
+            (
+                state.api_ia_limiter.clone(),
+                state.trust_proxy_headers,
+            ),
+            crate::middleware::rate_limit::limite_ia_api,
+        ))
 }
 
 #[derive(Debug, Deserialize)]

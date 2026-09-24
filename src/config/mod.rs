@@ -91,6 +91,12 @@ pub struct AppConfig {
     pub db_max_lifetime_seconds: u64,
     pub request_timeout_seconds: u64,
     pub auth_rate_limit_per_minute: u32,
+    /* [249A-1] Cuotas por grupo de la API (IP/minuto): escritura general,
+     * tráfico IA/agente y administración. Generosas por defecto: el freno
+     * duro contra abuso sigue en los límites por usuario de cada handler. */
+    pub api_escritura_por_minuto: u32,
+    pub api_ia_por_minuto: u32,
+    pub api_admin_por_minuto: u32,
     pub auth_crypto_semaphore_permits: usize,
     pub max_body_bytes: usize,
     pub cors_origins: Vec<HeaderValue>,
@@ -148,6 +154,17 @@ impl AppConfig {
             auth_rate_limit_per_minute: env_positive("AUTH_RATE_LIMIT_PER_MINUTE", 10)?
                 .try_into()
                 .map_err(|_| ConfigError::InvalidConfigValue("AUTH_RATE_LIMIT_PER_MINUTE".into()))?,
+            /* [249A-1] Cuotas por grupo (ver campos): la ventana es siempre
+             * 1 minuto; el `Retry-After` del 429 vale 60. */
+            api_escritura_por_minuto: env_positive("API_ESCRITURA_POR_MINUTO", 300)?
+                .try_into()
+                .map_err(|_| ConfigError::InvalidConfigValue("API_ESCRITURA_POR_MINUTO".into()))?,
+            api_ia_por_minuto: env_positive("API_IA_POR_MINUTO", 120)?
+                .try_into()
+                .map_err(|_| ConfigError::InvalidConfigValue("API_IA_POR_MINUTO".into()))?,
+            api_admin_por_minuto: env_positive("API_ADMIN_POR_MINUTO", 60)?
+                .try_into()
+                .map_err(|_| ConfigError::InvalidConfigValue("API_ADMIN_POR_MINUTO".into()))?,
             auth_crypto_semaphore_permits: env_positive("AUTH_CRYPTO_SEMAPHORE_PERMITS", 4)?
                 .try_into()
                 .map_err(|_| {

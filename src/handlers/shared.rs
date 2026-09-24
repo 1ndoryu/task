@@ -191,7 +191,7 @@ pub async fn access(
     ))
 }
 
-pub fn routes() -> Router<AppState> {
+pub fn routes(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/shared", post(create).get(received))
         .route("/shared/mine", get(owned))
@@ -203,4 +203,12 @@ pub fn routes() -> Router<AppState> {
         .route("/shared/:id", delete(remove))
         .route("/shared/counts", get(counts))
         .route("/shared/access/:item_type/:item_id/:owner_id", get(access))
+        /* [249A-1] Cuota del grupo escritura (IP/min): ver `auth.rs`. */
+        .route_layer(axum::middleware::from_fn_with_state(
+            (
+                state.api_escritura_limiter.clone(),
+                state.trust_proxy_headers,
+            ),
+            crate::middleware::rate_limit::limite_escritura_api,
+        ))
 }

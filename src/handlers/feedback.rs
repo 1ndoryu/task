@@ -121,7 +121,7 @@ pub async fn admin_feedback_read(
     Ok(axum::http::StatusCode::NO_CONTENT)
 }
 
-pub fn routes() -> Router<AppState> {
+pub fn routes(state: &AppState) -> Router<AppState> {
     Router::new()
         .route("/feedback", post(create_feedback))
         .route("/feedback/state", get(feedback_state))
@@ -129,4 +129,12 @@ pub fn routes() -> Router<AppState> {
         .route("/admin/feedback", get(admin_feedback))
         .route("/admin/feedback/stats", get(admin_feedback_stats))
         .route("/admin/feedback/:id/read", post(admin_feedback_read))
+        /* [249A-1] Cuota del grupo escritura (IP/min): ver `auth.rs`. */
+        .route_layer(axum::middleware::from_fn_with_state(
+            (
+                state.api_escritura_limiter.clone(),
+                state.trust_proxy_headers,
+            ),
+            crate::middleware::rate_limit::limite_escritura_api,
+        ))
 }
