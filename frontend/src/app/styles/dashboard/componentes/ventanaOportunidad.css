@@ -148,7 +148,8 @@
 /* Indicador de hora actual (punto de contraste según tema) */
 .indicadorHoraActual {
     fill: var(--dashboard-textoActivo);
-    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.9));
+    /* Sistema monocromo sin sombras: token (none) en vez de rgba hardcodeado. */
+    filter: var(--dashboard-sombraSutil);
     pointer-events: none;
     z-index: 10;
 }

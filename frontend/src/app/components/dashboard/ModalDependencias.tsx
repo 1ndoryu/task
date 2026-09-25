@@ -20,17 +20,19 @@ interface ModalDependenciasProps {
     habitos: Habito[];
 }
 
-export function ModalDependencias({
-    estaAbierto,
-    onCerrar,
-    tipoActual,
-    idActual,
-    padreIdActual,
-    dependencias,
-    onGuardar,
-    tareas,
-    habitos
-}: ModalDependenciasProps): JSX.Element | null {
+/* Estado + filtrado + mutaciones del picker en hook co-ubicado: el
+ * componente solo renderiza. */
+function useModalDependencias(
+    dependencias: ReferenciaDependencia[],
+    estaAbierto: boolean,
+    tipoActual: TipoElementoDependencia,
+    idActual: number,
+    padreIdActual: number | undefined,
+    onGuardar: (dependencias: ReferenciaDependencia[]) => void,
+    onCerrar: () => void,
+    tareas: Tarea[],
+    habitos: Habito[]
+) {
     const [busqueda, setBusqueda] = useState('');
     const [dependenciasLocal, setDependenciasLocal] = useState<ReferenciaDependencia[]>(dependencias || []);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -102,6 +104,22 @@ export function ModalDependencias({
         onGuardar(dependenciasLocal);
         onCerrar();
     }, [dependenciasLocal, onGuardar, onCerrar]);
+
+    return {busqueda, setBusqueda, dependenciasLocal, inputRef, opcionesFiltradas, agregarDependencia, eliminarDependencia, cambiarModoDependencia, handleCerrar};
+}
+
+export function ModalDependencias({
+    estaAbierto,
+    onCerrar,
+    tipoActual,
+    idActual,
+    padreIdActual,
+    dependencias,
+    onGuardar,
+    tareas,
+    habitos
+}: ModalDependenciasProps): JSX.Element | null {
+    const {busqueda, setBusqueda, dependenciasLocal, inputRef, opcionesFiltradas, agregarDependencia, eliminarDependencia, cambiarModoDependencia, handleCerrar} = useModalDependencias(dependencias, estaAbierto, tipoActual, idActual, padreIdActual, onGuardar, onCerrar, tareas, habitos);
 
     return (
         /* [20-08-2026] Sin encabezado: picker compacto como ModalSeleccionPropiedad.

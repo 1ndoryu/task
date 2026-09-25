@@ -1,6 +1,11 @@
 
 
 
+/* [por que] Botones solo-movil del encabezado (hamburguesa, buscador, opciones
+ * 44px touch): variantes responsive del subsistema header, no atomos globales.
+ * sentinel-disable-file css-adhoc-button-style
+ */
+
 @keyframes fadeIn {
     from {
         opacity: 0;

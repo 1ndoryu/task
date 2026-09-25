@@ -310,7 +310,8 @@
 }
 
 .selectorRelojCircular__knob {
-    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.3));
+    /* Sistema monocromo sin sombras: token (none) en vez de rgba hardcodeado. */
+    filter: var(--dashboard-sombraSutil);
     transition: r 0.2s ease;
 }
 

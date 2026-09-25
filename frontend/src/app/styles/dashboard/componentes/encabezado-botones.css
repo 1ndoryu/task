@@ -1,8 +1,13 @@
 
 
 
-/* 
- * BADGE DE ADMINISTRACIÃ“N 
+/* [por que] Subsistema de botones del encabezado (badges + botonIconoEncabezado
+ * compartido): variantes con tokens, no botones ad-hoc globales.
+ * sentinel-disable-file css-adhoc-button-style
+ */
+
+/*
+ * BADGE DE ADMINISTRACIÓN
  */
 .badgeEncabezado--admin {
     cursor: pointer;

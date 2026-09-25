@@ -19,7 +19,9 @@ interface ModalCrearRecordatorioProps {
     onGuardar: (texto: string, adjuntos: Adjunto[], crearIndividuales: boolean) => void;
 }
 
-export function ModalCrearRecordatorio({abierto, onCerrar, onGuardar}: ModalCrearRecordatorioProps): JSX.Element | null {
+/* Lógica del modal (form, adjuntos, drag&drop) en hook co-ubicado: el
+ * componente solo renderiza. */
+function useModalCrearRecordatorio(abierto: boolean, onCerrar: () => void, onGuardar: (texto: string, adjuntos: Adjunto[], crearIndividuales: boolean) => void) {
     const [texto, setTexto] = useState('');
     const [adjuntos, setAdjuntos] = useState<Adjunto[]>([]);
     const [arrastrando, setArrastrando] = useState(false);
@@ -101,6 +103,16 @@ export function ModalCrearRecordatorio({abierto, onCerrar, onGuardar}: ModalCrea
         }
     }, [subirArchivo]);
 
+    const quitarAdjunto = useCallback((indice: number) => {
+        setAdjuntos(prev => prev.filter((_, idx) => idx !== indice));
+    }, []);
+
+    return {texto, setTexto, adjuntos, arrastrando, tieneContenido, estadoSubida, inputRef, fileInputRef, handleSubmit, handleKeyDown, handleOverlayClick, handleArchivoSeleccionado, handleDragOver, handleDragLeave, handleDrop, quitarAdjunto};
+}
+
+export function ModalCrearRecordatorio({abierto, onCerrar, onGuardar}: ModalCrearRecordatorioProps): JSX.Element | null {
+    const {texto, setTexto, adjuntos, arrastrando, tieneContenido, estadoSubida, inputRef, fileInputRef, handleSubmit, handleKeyDown, handleOverlayClick, handleArchivoSeleccionado, handleDragOver, handleDragLeave, handleDrop, quitarAdjunto} = useModalCrearRecordatorio(abierto, onCerrar, onGuardar);
+
 
 
     if (!abierto) return null;
@@ -150,7 +162,7 @@ export function ModalCrearRecordatorio({abierto, onCerrar, onGuardar}: ModalCrea
                                         <button
                                             type="button"
                                             className="recordatorioAdjuntoEliminar"
-                                            onClick={() => setAdjuntos(prev => prev.filter((_, idx) => idx !== i))}
+                                            onClick={() => quitarAdjunto(i)}
                                         >×</button>
                                     </div>
                                 ))}
@@ -167,7 +179,7 @@ export function ModalCrearRecordatorio({abierto, onCerrar, onGuardar}: ModalCrea
                             )}
                         </div>
 
-                        <input type="file" ref={fileInputRef as React.RefObject<HTMLInputElement>} className="inputOculto" accept="image/*" multiple onChange={handleArchivoSeleccionado} />
+                        <Input tipo="file" ref={fileInputRef} claseAdicional="inputOculto" accept="image/*" multiple onChange={handleArchivoSeleccionado} />
                 </form>
             </div>
         </div>

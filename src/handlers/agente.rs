@@ -67,23 +67,12 @@ pub struct AgenteStreamRequest {
 /// Límite por usuario/hora de turnos de agente (reutiliza el patrón del chat).
 pub const MAX_TURNOS_HORA: u32 = 30;
 
-#[utoipa::path(
-    post,
-    tag = "agente",
-    path = "/api/agente/stream",
-    request_body = AgenteStreamRequest,
-    responses(
-        (status = 200, description = "Stream SSE de eventos del agente"),
-        (status = 401, description = "No autorizado"),
-        (status = 429, description = "Rate limit por hora excedido")
-    ),
-    security(("session_cookie" = []))
-)]
-pub async fn agente_stream(
-    State(state): State<AppState>,
-    auth: AuthUser,
-    Json(req): Json<AgenteStreamRequest>,
-) -> Result<impl IntoResponse, AppError> {
+/* Validación del request + cuota del limiter, antes de tocar la BD. */
+fn verificar_mensaje_y_cuota(
+    state: &AppState,
+    auth: &AuthUser,
+    req: &AgenteStreamRequest,
+) -> Result<(), AppError> {
     if req.mensaje.trim().is_empty() {
         return Err(AppError::BadRequest("El mensaje no puede estar vacío".into()));
     }
@@ -95,27 +84,21 @@ pub async fn agente_stream(
             state.agente_limiter.ventana_secs(),
         ));
     }
+    Ok(())
+}
 
-    /* Verificar propiedad de la conversación (nunca confiar en el front) y
-     * leer su modo de operación (sección 9.2). */
-    let conversacion: Option<(Uuid, String, serde_json::Value)> = AgenteRepository::buscar_conversacion(
-        &state.pool,
-        req.conversacionId,
-        auth.user_id,
-    )
-    .await?;
-    let Some((_, modo, config_guardada)) = conversacion else {
-        return Err(AppError::NotFound("Conversación no encontrada".into()));
-    };
-
-    let turno_id = Uuid::new_v4();
-    let (tx, rx) = mpsc::channel::<AgenteEvento>(128);
-    /* Glory/commandcode es política del servidor. Los parámetros avanzados se
-     * toman de la conversación; el request solo conserva compatibilidad con
-     * clientes antiguos y no puede cambiar proveedor/modelo. Fase 2 (Glory
-     * Harness): el runtime del núcleo recibe el registro de tools de dominio
-     * (task) y los puertos (persistencia = adaptador, LLM = provider del
-     * estado, web = BuscadorWeb, dominio = pool para downcast). */
+/* Construye el runtime del turno con sus puertos (persistencia, LLM, web,
+ * dominio). Glory/commandcode es política del servidor: los parámetros
+ * avanzados se toman de la conversación; el request solo conserva
+ * compatibilidad con clientes antiguos. */
+fn construir_runtime_turno(
+    state: &AppState,
+    modo: String,
+    config_guardada: serde_json::Value,
+) -> Result<(AgentRuntime, Arc<PersistenciaAgente>), AppError> {
+    /* Fase 2 (Glory Harness): el runtime del núcleo recibe el registro de
+     * tools de dominio (task) y los puertos (persistencia = adaptador,
+     * LLM = provider del estado, web = BuscadorWeb, dominio = pool). */
     let persistencia = Arc::new(PersistenciaAgente::nuevo(state.pool.clone()));
     let persistencia_port: Arc<dyn AgentPersistence> = persistencia.clone();
     let mut registry = AgentToolRegistry::new();
@@ -139,32 +122,90 @@ pub async fn agente_stream(
         puertos,
         config_desde_guardada(config_guardada, modo)?,
     );
+    Ok((runtime, persistencia))
+}
 
-    /* [318A-16 F2] Sembrar permisos por conversación: el runtime se
-     * reconstruye POR TURNO en PT, así que las decisiones de los botones de
-     * aprobación (endpoint agente_aprobacion) se inyectan aquí, antes de la
-     * primera tool_call: reglas de clase (Siempre/Rechazar) y tokens de una
-     * vez (Permitir). El token se consume en la primera llamada cuya clase
-     * coincida; la regla persiste mientras no se borre. */
-    {
-        use glory_harness_core::permiso::Permiso as PermisoCore;
-        use glory_harness_core::regla::ReglaPermiso;
-        for regla in state.agente_permisos.reglas_de(req.conversacionId) {
-            let accion = if regla.accion == "deny" {
-                PermisoCore::Deny
-            } else {
-                PermisoCore::Allow
-            };
-            runtime.registry.establecer_regla(ReglaPermiso::nueva(
-                regla.categoria,
-                regla.patron,
-                accion,
-            ));
-        }
-        for (categoria, patron) in state.agente_permisos.tomar_tokens_una_vez(req.conversacionId) {
-            runtime.registry.aprobacion_una_vez(categoria, patron);
-        }
+/* [318A-16 F2] Siembra permisos por conversación: el runtime se reconstruye
+ * POR TURNO en PT, así que las decisiones de los botones de aprobación se
+ * inyectan antes de la primera tool_call (reglas de clase + tokens de un uso). */
+fn sembrar_permisos_turno(
+    runtime: &AgentRuntime,
+    state: &AppState,
+    conversacion_id: Uuid,
+) {
+    use glory_harness_core::permiso::Permiso as PermisoCore;
+    use glory_harness_core::regla::ReglaPermiso;
+    for regla in state.agente_permisos.reglas_de(conversacion_id) {
+        let accion = if regla.accion == "deny" {
+            PermisoCore::Deny
+        } else {
+            PermisoCore::Allow
+        };
+        runtime.registry.establecer_regla(ReglaPermiso::nueva(
+            regla.categoria,
+            regla.patron,
+            accion,
+        ));
     }
+    for (categoria, patron) in state.agente_permisos.tomar_tokens_una_vez(conversacion_id) {
+        runtime.registry.aprobacion_una_vez(categoria, patron);
+    }
+}
+
+/* Un evento que no serialice no debe tumbar el stream: un pánico dentro del
+ * mapper cortaría el SSE a medias. Se degrada a un evento de error observable
+ * para que el cliente sepa que se perdió un mensaje en lugar de quedarse
+ * esperando uno que nunca llega. */
+/* El Result es exigido por `Stream::map` + `Sse` (Item = Result<Event, _>). */
+#[allow(clippy::unnecessary_wraps)]
+fn mapear_evento_sse(evento: AgenteEvento) -> Result<Event, Infallible> {
+    let evento = match Event::default().json_data(evento) {
+        Ok(evento) => evento,
+        Err(error) => {
+            tracing::error!(%error, "evento SSE del agente no serializable");
+            Event::default()
+                .event("error")
+                .data("evento no serializable")
+        }
+    };
+    Ok(evento)
+}
+
+#[utoipa::path(
+    post,
+    tag = "agente",
+    path = "/api/agente/stream",
+    request_body = AgenteStreamRequest,
+    responses(
+        (status = 200, description = "Stream SSE de eventos del agente"),
+        (status = 401, description = "No autorizado"),
+        (status = 429, description = "Rate limit por hora excedido")
+    ),
+    security(("session_cookie" = []))
+)]
+pub async fn agente_stream(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Json(req): Json<AgenteStreamRequest>,
+) -> Result<impl IntoResponse, AppError> {
+    verificar_mensaje_y_cuota(&state, &auth, &req)?;
+
+    /* Verificar propiedad de la conversación (nunca confiar en el front) y
+     * leer su modo de operación (sección 9.2). */
+    let conversacion: Option<(Uuid, String, serde_json::Value)> = AgenteRepository::buscar_conversacion(
+        &state.pool,
+        req.conversacionId,
+        auth.user_id,
+    )
+    .await?;
+    let Some((_, modo, config_guardada)) = conversacion else {
+        return Err(AppError::NotFound("Conversación no encontrada".into()));
+    };
+
+    let turno_id = Uuid::new_v4();
+    let (tx, rx) = mpsc::channel::<AgenteEvento>(128);
+    let (runtime, persistencia) = construir_runtime_turno(&state, modo, config_guardada)?;
+    sembrar_permisos_turno(&runtime, &state, req.conversacionId);
 
     /* Persistir el turno como ejecutando y el mensaje del usuario ANTES de
      * arrancar (recuperación de fallos). */
@@ -235,22 +276,7 @@ pub async fn agente_stream(
     });
 
     let stream: std::pin::Pin<Box<dyn Stream<Item = Result<Event, Infallible>> + Send>> =
-        Box::pin(ReceiverStream::new(rx).map(|evento| {
-            /* Un evento que no serialice no debe tumbar el stream: un pánico
-             * dentro del mapper cortaría el SSE a medias. Se degrada a un
-             * evento de error observable para que el cliente sepa que se perdió
-             * un mensaje en lugar de quedarse esperando uno que nunca llega. */
-            let evento = match Event::default().json_data(evento) {
-                Ok(evento) => evento,
-                Err(error) => {
-                    tracing::error!(%error, "evento SSE del agente no serializable");
-                    Event::default()
-                        .event("error")
-                        .data("evento no serializable")
-                }
-            };
-            Ok(evento)
-        }));
+        Box::pin(ReceiverStream::new(rx).map(mapear_evento_sse));
     Ok(Sse::new(stream).keep_alive(KeepAlive::default()))
 }
 
@@ -547,7 +573,7 @@ pub async fn compactar_conversacion(
 
     /* Dejar el último turno verbatim (el último par user+assistant). Retroceder
      * desde el final hasta el último mensaje `user` (inicio del último turno). */
-    let mut umbral = filas.last().map(|(id, _, _, _)| *id).unwrap_or(0);
+    let mut umbral = filas.last().map_or(0, |(id, _, _, _)| *id);
     for (id, rol, _, _) in filas.iter().rev() {
         if rol == "user" {
             umbral = *id;
@@ -636,3 +662,4 @@ pub fn routes(state: &AppState) -> Router<AppState> {
             crate::middleware::rate_limit::limite_ia_api,
         ))
 }
+

@@ -45,50 +45,35 @@ export function useConfiguracionTareas() {
         valorPorDefecto: CONFIG_POR_DEFECTO
     });
 
-    const toggleOcultarCompletadas = () => {
-        setValor(prev => ({...prev, ocultarCompletadas: !prev.ocultarCompletadas}));
+    /* Los 11 flags son booleanos: un toggle genérico por clave evita 11
+     * callbacks idénticos. Los wrappers con nombre preservan la API pública. */
+    type ClaveBooleana = keyof ConfiguracionTareas;
+    const toggle = (clave: ClaveBooleana) => {
+        setValor(prev => ({...prev, [clave]: !prev[clave]}));
     };
 
-    const toggleOcultarBadgeProyecto = () => {
-        setValor(prev => ({...prev, ocultarBadgeProyecto: !prev.ocultarBadgeProyecto}));
-    };
+    const toggleOcultarCompletadas = () => toggle('ocultarCompletadas');
 
-    const toggleEliminarCompletadasDespuesDeUnDia = () => {
-        setValor(prev => ({...prev, eliminarCompletadasDespuesDeUnDia: !prev.eliminarCompletadasDespuesDeUnDia}));
-    };
+    const toggleOcultarBadgeProyecto = () => toggle('ocultarBadgeProyecto');
 
-    const toggleMostrarHabitosEnEjecucion = () => {
-        setValor(prev => ({...prev, mostrarHabitosEnEjecucion: !prev.mostrarHabitosEnEjecucion}));
-    };
+    const toggleEliminarCompletadasDespuesDeUnDia = () => toggle('eliminarCompletadasDespuesDeUnDia');
 
-    const toggleModoCompacto = () => {
-        setValor(prev => ({...prev, modoCompacto: !prev.modoCompacto}));
-    };
+    const toggleMostrarHabitosEnEjecucion = () => toggle('mostrarHabitosEnEjecucion');
 
-    const toggleOcultarSubtareasAutomaticamente = () => {
-        setValor(prev => ({...prev, ocultarSubtareasAutomaticamente: !prev.ocultarSubtareasAutomaticamente}));
-    };
+    const toggleModoCompacto = () => toggle('modoCompacto');
 
-    const toggleIgnorarUrgenciaEnPrioridad = () => {
-        setValor(prev => ({...prev, ignorarUrgenciaEnPrioridad: !prev.ignorarUrgenciaEnPrioridad}));
-    };
+    const toggleOcultarSubtareasAutomaticamente = () => toggle('ocultarSubtareasAutomaticamente');
 
-    const toggleOcultarBadgeUrgencia = () => {
-        setValor(prev => ({...prev, ocultarBadgeUrgencia: !prev.ocultarBadgeUrgencia}));
-    };
+    const toggleIgnorarUrgenciaEnPrioridad = () => toggle('ignorarUrgenciaEnPrioridad');
 
-    const toggleOcultarBadgeImportancia = () => {
-        setValor(prev => ({...prev, ocultarBadgeImportancia: !prev.ocultarBadgeImportancia}));
-    };
+    const toggleOcultarBadgeUrgencia = () => toggle('ocultarBadgeUrgencia');
 
-    const toggleOcultarBadgeDificultad = () => {
-        setValor(prev => ({...prev, ocultarBadgeDificultad: !prev.ocultarBadgeDificultad}));
-    };
+    const toggleOcultarBadgeImportancia = () => toggle('ocultarBadgeImportancia');
+
+    const toggleOcultarBadgeDificultad = () => toggle('ocultarBadgeDificultad');
 
     /* [318A-14] Toggle de tabs de grupos en el panel de tareas. */
-    const toggleUsarTabsGrupos = () => {
-        setValor(prev => ({...prev, usarTabsGrupos: !prev.usarTabsGrupos}));
-    };
+    const toggleUsarTabsGrupos = () => toggle('usarTabsGrupos');
 
     return {
         /* [318A-14] Merge con defaults: la config guardada puede ser anterior a

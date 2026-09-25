@@ -108,9 +108,8 @@ export function EncabezadoPerfil({usuario, version, avatarUrl, suscripcion, esta
 
             {menuUsuario.visible && <MenuContextual opciones={opcionesMenuUsuario} posicionX={menuUsuario.x} posicionY={menuUsuario.y} onSeleccionar={manejarOpcionMenu} onCerrar={() => setMenuUsuario({...menuUsuario, visible: false})} />}
 
-            <div className="inputOculto">
-                <Input ref={inputArchivoRef} tipo="file" accept=".json" onChange={manejarCambioArchivo} />
-            </div>
+            {/* Input de archivo oculto sin wrapper: la clase va directa al Input. */}
+            <Input ref={inputArchivoRef} tipo="file" claseAdicional="inputOculto" accept=".json" onChange={manejarCambioArchivo} />
         </>
     );
 }

@@ -332,7 +332,7 @@
  */
 .mapaCalorHabitoCelda--noRelevante.mapaCalorHabitoCelda--omitido {
     background: rgba(var(--dashboard-estadoMediaRgb), 0.25);
-    border: 1px solid rgba(107, 114, 128, 0.4);
+    border: 1px solid rgba(var(--dashboard-estadoMediaRgb), 0.4);
 }
 
 /* 

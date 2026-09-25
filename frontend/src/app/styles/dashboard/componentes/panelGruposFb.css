@@ -584,7 +584,7 @@
 .editorCategorias__error {
     padding: 4px 8px;
     background: rgba(var(--dashboard-estadoErrorRgb), 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    border: 1px solid rgba(var(--dashboard-estadoErrorRgb), 0.3);
     border-radius: var(--dashboard-radioSm);
     color: var(--dashboard-estadoError);
     font-size: var(--dashboard-tamanoDetalle);

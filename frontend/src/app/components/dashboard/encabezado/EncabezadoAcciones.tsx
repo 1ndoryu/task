@@ -41,17 +41,10 @@ interface EncabezadoAccionesAcciones {
 
 interface EncabezadoAccionesProps extends EncabezadoAccionesContexto, EncabezadoAccionesAcciones {}
 
-export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, onClickPlan, onClickLayout, onClickPaneles, onClickNotificaciones, onClickExperimentos: _onClickExperimentos, onClickAdmin, onClickEquipos: _onClickEquipos, onCrearRapido, agregarPanelVista}: EncabezadoAccionesProps) {
+/* Estado + anclaje del menú "Crear nuevo" (posición bajo el botón que lo abre).
+ * Hook co-ubicado: evita que el componente mezcle lógica de menú con el nav. */
+function useMenuCrear(onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void) {
     const [menuCrear, setMenuCrear] = useState<{visible: boolean; x: number; y: number}>({visible: false, x: 0, y: 0});
-
-    const esPremiumActivo = suscripcion?.plan === 'premium' && suscripcion?.estado === 'activa';
-    const mostrarBadgePlanEnHeader = suscripcion && !esPremiumActivo;
-
-    const opcionesMenuCrear = [
-        {id: 'tarea', etiqueta: 'Tarea', icono: <CheckSquare size={12} />},
-        {id: 'habito', etiqueta: 'Hábito', icono: <Activity size={12} />},
-        {id: 'proyecto', etiqueta: 'Proyecto', icono: <Folder size={12} />}
-    ];
 
     const manejarClickCrear = (evento: React.MouseEvent) => {
         evento.preventDefault();
@@ -64,11 +57,26 @@ export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _eq
     };
 
     const manejarSeleccionCrear = (opcionId: string) => {
-        if (onCrearRapido) {
-            onCrearRapido(opcionId as 'tarea' | 'habito' | 'proyecto');
-        }
-        setMenuCrear({...menuCrear, visible: false});
+        onCrearRapido?.(opcionId as 'tarea' | 'habito' | 'proyecto');
+        setMenuCrear(prev => ({...prev, visible: false}));
     };
+
+    const cerrarMenuCrear = () => setMenuCrear(prev => ({...prev, visible: false}));
+
+    return {menuCrear, manejarClickCrear, manejarSeleccionCrear, cerrarMenuCrear};
+}
+
+export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, onClickPlan, onClickLayout, onClickPaneles, onClickNotificaciones, onClickExperimentos: _onClickExperimentos, onClickAdmin, onClickEquipos: _onClickEquipos, onCrearRapido, agregarPanelVista}: EncabezadoAccionesProps) {
+    const {menuCrear, manejarClickCrear, manejarSeleccionCrear, cerrarMenuCrear} = useMenuCrear(onCrearRapido);
+
+    const esPremiumActivo = suscripcion?.plan === 'premium' && suscripcion?.estado === 'activa';
+    const mostrarBadgePlanEnHeader = suscripcion && !esPremiumActivo;
+
+    const opcionesMenuCrear = [
+        {id: 'tarea', etiqueta: 'Tarea', icono: <CheckSquare size={12} />},
+        {id: 'habito', etiqueta: 'Hábito', icono: <Activity size={12} />},
+        {id: 'proyecto', etiqueta: 'Proyecto', icono: <Folder size={12} />}
+    ];
 
     return (
         <>
@@ -81,7 +89,7 @@ export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _eq
                     <Boton type="button" claseAdicional="botonIconoEncabezado" onClick={manejarClickCrear} title={esTablet ? undefined : 'Crear nuevo...'}>
                         <Plus size={14} />
                     </Boton>
-                    {menuCrear.visible && <MenuContextual opciones={opcionesMenuCrear} posicionX={menuCrear.x} posicionY={menuCrear.y} onSeleccionar={manejarSeleccionCrear} onCerrar={() => setMenuCrear({...menuCrear, visible: false})} />}
+                    {menuCrear.visible && <MenuContextual opciones={opcionesMenuCrear} posicionX={menuCrear.x} posicionY={menuCrear.y} onSeleccionar={manejarSeleccionCrear} onCerrar={cerrarMenuCrear} />}
                 </>
             )}
 

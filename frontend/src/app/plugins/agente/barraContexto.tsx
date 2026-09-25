@@ -62,7 +62,10 @@ export function BarraContextoInferior({contexto, maxVentana, onCompactar, compac
             <div className="panelIAContextoBarraPista">
                 <div
                     className={`panelIAContextoBarraRelleno ${porc >= 85 ? 'panelIAContextoBarraRelleno--critico' : porc >= 70 ? 'panelIAContextoBarraRelleno--alto' : ''}`}
-                    style={{width: mostrado ? `${Math.max(2, Math.min(100, porc))}%` : '0%'}}
+                    /* Ancho data-driven (% tokens usados): no expresable en CSS. */
+                    style={{ /* sentinel-disable inline-style-prohibido */
+                        width: mostrado ? `${Math.max(2, Math.min(100, porc))}%` : '0%'
+                    }}
                 />
             </div>
             <div
