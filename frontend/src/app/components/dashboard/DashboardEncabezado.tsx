@@ -223,7 +223,7 @@ export function DashboardEncabezado({
                     </Boton>
                 )}
 
-                <EncabezadoAcciones suscripcion={suscripcion} esAdmin={esAdmin} equiposPendientes={equiposPendientes} notificacionesPendientes={notificacionesPendientes} estaConectado={estaConectado} esTablet={esTablet} onClickPlan={onClickPlan} onClickLayout={onClickLayout} onClickPaneles={onClickPaneles} onClickNotificaciones={onClickNotificaciones} onClickExperimentos={onClickExperimentos} onClickAdmin={onClickAdmin} onClickEquipos={onClickEquipos} onCrearRapido={onCrearRapido} agregarPanelVista={agregarPanelVista} />
+                <EncabezadoAcciones suscripcion={suscripcion} esAdmin={esAdmin} equiposPendientes={equiposPendientes} notificaciones={{pendientes: notificacionesPendientes, onAbrir: onClickNotificaciones}} creacion={{onCrearRapido, agregarPanelVista}} navegacion={{onClickPlan, onClickLayout, onClickPaneles, onClickExperimentos, onClickAdmin, onClickEquipos}} estaConectado={estaConectado} esTablet={esTablet} />
 
                 <EncabezadoEstado sincronizacion={sincronizacion} />
 

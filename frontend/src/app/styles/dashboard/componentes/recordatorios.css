@@ -201,7 +201,9 @@
     object-fit: cover;
 }
 
-.recordatorioAdjuntoEliminar {
+/* [25-09-2026] El quitar es <Boton icono> del DS: se compone con .boton
+ * para ganar especificidad y conservar la pastilla de 16px. */
+.recordatorioAdjuntoEliminar.boton {
     position: absolute;
     top: -2px;
     right: -2px;

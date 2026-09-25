@@ -1,8 +1,18 @@
 import {useLocalStorage} from './useLocalStorage';
 
-export interface ConfiguracionTareas {
+/* Configuración dividida por responsabilidad (ISP): visibilidad de la lista
+ * + comportamiento. `ConfiguracionTareas` conserva la forma completa. */
+export interface VisibilidadTareas {
     ocultarCompletadas: boolean;
     ocultarBadgeProyecto: boolean;
+    /* [28-08-2026] Ocultar badges en las filas de tareas del panel (global).
+     * La de dificultad solo aplica cuando el plugin EXP está activo. */
+    ocultarBadgeUrgencia: boolean;
+    ocultarBadgeImportancia: boolean;
+    ocultarBadgeDificultad: boolean;
+}
+
+export interface ComportamientoTareas {
     eliminarCompletadasDespuesDeUnDia: boolean;
     /* Mostrar hábitos que "tocan hoy" como tareas en Ejecución */
     mostrarHabitosEnEjecucion: boolean;
@@ -11,14 +21,11 @@ export interface ConfiguracionTareas {
     ocultarSubtareasAutomaticamente: boolean;
     /* Ignorar urgencia en el ordenamiento por prioridad para permitir drag reorder */
     ignorarUrgenciaEnPrioridad: boolean;
-    /* [28-08-2026] Ocultar badges en las filas de tareas del panel (global).
-     * La de dificultad solo aplica cuando el plugin EXP está activo. */
-    ocultarBadgeUrgencia: boolean;
-    ocultarBadgeImportancia: boolean;
-    ocultarBadgeDificultad: boolean;
     /* [318A-14] Tabs de grupos en el panel de tareas (cada grupo es una tab). */
     usarTabsGrupos: boolean;
 }
+
+export interface ConfiguracionTareas extends VisibilidadTareas, ComportamientoTareas {}
 
 /* 
  * Configuración por defecto de tareas

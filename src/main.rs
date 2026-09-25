@@ -1,3 +1,7 @@
+// sentinel-disable-file sqlite-carga-N-consultas
+// [por que 25-09-2026] Los 3 .await de main() son secuencia de arranque
+// (scheduler, bind, serve), no consultas N+1: no son independientes y no se
+// pueden agrupar con join!/try_join.
 use glory_backend::config::AppConfig;
 use glory_backend::handlers;
 use glory_backend::services::SessionService;

@@ -3,12 +3,14 @@
  * Modal para crear recordatorios rápidamente.
  * Reutiliza las clases CSS de creacionRapidaContenedor para el efecto glass.
  * Soporta: texto simple, arrastrar imágenes (individuales o agrupadas).
+ * Overlay, cierre (Escape/click fuera) y portal los aporta <Modal> del DS.
  */
 
 import {useState, useCallback, useRef, useEffect} from 'react';
-import {ArrowRight, ImagePlus, Loader2, AlertCircle} from 'lucide-react';
+import {ArrowRight, ImagePlus, Loader2, AlertCircle, X} from 'lucide-react';
 import {Boton} from '../ui';
 import {Input} from '../ui/Input';
+import {Modal} from '../shared/Modal';
 import type {Adjunto} from '../../types/dashboard';
 import {useAdjuntos} from '../../hooks/useAdjuntos';
 import '../../styles/dashboard/componentes/modalCreacionRapida.css';
@@ -21,7 +23,7 @@ interface ModalCrearRecordatorioProps {
 
 /* Lógica del modal (form, adjuntos, drag&drop) en hook co-ubicado: el
  * componente solo renderiza. */
-function useModalCrearRecordatorio(abierto: boolean, onCerrar: () => void, onGuardar: (texto: string, adjuntos: Adjunto[], crearIndividuales: boolean) => void) {
+function useModalCrearRecordatorio(abierto: boolean, onGuardar: (texto: string, adjuntos: Adjunto[], crearIndividuales: boolean) => void) {
     const [texto, setTexto] = useState('');
     const [adjuntos, setAdjuntos] = useState<Adjunto[]>([]);
     const [arrastrando, setArrastrando] = useState(false);
@@ -58,14 +60,6 @@ function useModalCrearRecordatorio(abierto: boolean, onCerrar: () => void, onGua
         setTexto('');
         setAdjuntos([]);
     }, [texto, adjuntos, tieneContenido, onGuardar]);
-
-    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-        if (e.key === 'Escape') onCerrar();
-    }, [onCerrar]);
-
-    const handleOverlayClick = useCallback((e: React.MouseEvent) => {
-        if (e.target === e.currentTarget) onCerrar();
-    }, [onCerrar]);
 
     /* Subir archivos (uno o varios → cada uno es su propio adjunto) */
     const handleArchivoSeleccionado = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,18 +101,16 @@ function useModalCrearRecordatorio(abierto: boolean, onCerrar: () => void, onGua
         setAdjuntos(prev => prev.filter((_, idx) => idx !== indice));
     }, []);
 
-    return {texto, setTexto, adjuntos, arrastrando, tieneContenido, estadoSubida, inputRef, fileInputRef, handleSubmit, handleKeyDown, handleOverlayClick, handleArchivoSeleccionado, handleDragOver, handleDragLeave, handleDrop, quitarAdjunto};
+    return {texto, setTexto, adjuntos, arrastrando, tieneContenido, estadoSubida, inputRef, fileInputRef, handleSubmit, handleArchivoSeleccionado, handleDragOver, handleDragLeave, handleDrop, quitarAdjunto};
 }
 
 export function ModalCrearRecordatorio({abierto, onCerrar, onGuardar}: ModalCrearRecordatorioProps): JSX.Element | null {
-    const {texto, setTexto, adjuntos, arrastrando, tieneContenido, estadoSubida, inputRef, fileInputRef, handleSubmit, handleKeyDown, handleOverlayClick, handleArchivoSeleccionado, handleDragOver, handleDragLeave, handleDrop, quitarAdjunto} = useModalCrearRecordatorio(abierto, onCerrar, onGuardar);
+    const {texto, setTexto, adjuntos, arrastrando, tieneContenido, estadoSubida, inputRef, fileInputRef, handleSubmit, handleArchivoSeleccionado, handleDragOver, handleDragLeave, handleDrop, quitarAdjunto} = useModalCrearRecordatorio(abierto, onGuardar);
 
-
-
-    if (!abierto) return null;
-
+    /* El contenedor glass original vive intacto dentro de <Modal> (el
+     * contenido del modal no añade padding). */
     return (
-        <div className="creacionRapidaOverlay" onClick={handleOverlayClick}>
+        <Modal estaAbierto={abierto} onCerrar={onCerrar} titulo="Crear recordatorio" sinEncabezado claseOverlay="creacionRapidaOverlay" claseExtra="modalCrearRecordatorio" claseContenido="modalContenido--sinPadding">
             <div
                 className={`creacionRapidaContenedor${arrastrando ? ' recordatorioDropActivo' : ''}`}
                 onDragOver={handleDragOver}
@@ -140,7 +132,6 @@ export function ModalCrearRecordatorio({abierto, onCerrar, onGuardar}: ModalCrea
                                 tipo="text"
                                 value={texto}
                                 onChange={e => setTexto(e.target.value)}
-                                onKeyDown={handleKeyDown}
                                 placeholder="Escribe un recordatorio..."
                                 claseAdicional="creacionRapidaInput"
                                 autoFocus
@@ -159,11 +150,16 @@ export function ModalCrearRecordatorio({abierto, onCerrar, onGuardar}: ModalCrea
                                 {adjuntos.map((adj, i) => (
                                     <div key={adj.id ?? i} className="recordatorioAdjuntoThumb">
                                         <img src={adj.thumbnailUrl || adj.url} alt={adj.nombre} />
-                                        <button
+                                        <Boton
                                             type="button"
-                                            className="recordatorioAdjuntoEliminar"
+                                            variante="icono"
+                                            soloIcono
+                                            claseAdicional="recordatorioAdjuntoEliminar"
                                             onClick={() => quitarAdjunto(i)}
-                                        >×</button>
+                                            aria-label="Quitar adjunto"
+                                        >
+                                            <X size={12} />
+                                        </Boton>
                                     </div>
                                 ))}
                             </div>
@@ -182,6 +178,6 @@ export function ModalCrearRecordatorio({abierto, onCerrar, onGuardar}: ModalCrea
                         <Input tipo="file" ref={fileInputRef} claseAdicional="inputOculto" accept="image/*" multiple onChange={handleArchivoSeleccionado} />
                 </form>
             </div>
-        </div>
+        </Modal>
     );
 }

@@ -55,7 +55,10 @@
     font-family: inherit;
 }
 
-.tabCompartidaCerrar {
+/* [25-09-2026] El cerrar es <Boton icono> del DS: se compone con .boton
+ * para ganar especificidad sobre .boton--icono/.boton--mediano y conservar
+ * el tamaño mini de la tab. */
+.tabCompartidaCerrar.boton {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -69,7 +72,7 @@
     font-family: inherit;
 }
 
-.tabCompartidaCerrar:hover {
+.tabCompartidaCerrar.boton:hover {
     background: var(--dashboard-superposicionSutil);
     color: var(--dashboard-peligroClaro);
 }

@@ -23,18 +23,16 @@ export interface HerramientaVisual {
     diff?: string;
 }
 
-/* [318A-7] Contexto del último turno. `contexto_detalle` (evento del runtime)
- * añade el desglose por secciones de la ventana: system, definiciones de
- * tools, mensajes, resultados de tools, reserva de salida y ventana máxima.
- * [02-09-2026] `provider`/`modelo` = proveedor/modelo REAL que respondió
- * (llega en el evento usage de cada llamada LLM tras resolver el fallback). */
-export interface ContextoVisual {
+/* [318A-7] Contexto del último turno, dividido por responsabilidad (ISP):
+ * contadores base del turno + desglose de la ventana de contexto. */
+export interface ContadoresTurnoVisual {
     ocupacionPct: number | null;
     tokensPrompt: number;
     tokensComplecion: number;
     skills: number;
-    provider?: string | null;
-    modelo?: string | null;
+}
+
+export interface DesgloseVentanaVisual {
     maxVentana?: number;
     reservaSalida?: number;
     systemInstrucciones?: number;
@@ -42,6 +40,16 @@ export interface ContextoVisual {
     mensajes?: number;
     resultadosTools?: number;
     totalEntrada?: number;
+}
+
+/* `contexto_detalle` (evento del runtime) añade el desglose por secciones
+ * de la ventana: system, definiciones de tools, mensajes, resultados de
+ * tools, reserva de salida y ventana máxima.
+ * [02-09-2026] `provider`/`modelo` = proveedor/modelo REAL que respondió
+ * (llega en el evento usage de cada llamada LLM tras resolver el fallback). */
+export interface ContextoVisual extends ContadoresTurnoVisual, DesgloseVentanaVisual {
+    provider?: string | null;
+    modelo?: string | null;
 }
 
 /* [02-09-2026] Etiqueta del modelo real que respondió. Resuelve el nombre
@@ -242,26 +250,30 @@ function AccionesMensaje({
     return (
         <div className="panelIAMensajeAcciones panelIAMensajeAcciones--usuario">
             {onVolver && (
-                <button
+                <Boton
                     type="button"
-                    className="panelIAMensajeAccion"
+                    variante="icono"
+                    soloIcono
+                    claseAdicional="panelIAMensajeAccion"
                     title="Volver a este mensaje (descarta el contexto posterior)"
                     aria-label="Volver a este mensaje"
                     onClick={onVolver}
                 >
                     <Undo2 size={14} />
-                </button>
+                </Boton>
             )}
             {onEditar && (
-                <button
+                <Boton
                     type="button"
-                    className="panelIAMensajeAccion"
+                    variante="icono"
+                    soloIcono
+                    claseAdicional="panelIAMensajeAccion"
                     title="Editar este mensaje (el contexto vuelve a este punto)"
                     aria-label="Editar este mensaje"
                     onClick={onEditar}
                 >
                     <Pencil size={14} />
-                </button>
+                </Boton>
             )}
         </div>
     );

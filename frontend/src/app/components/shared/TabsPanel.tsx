@@ -19,18 +19,33 @@
  */
 
 import {X} from 'lucide-react';
+import {Boton} from '../ui/Boton';
+import {Input} from '../ui/Input';
 
 export interface TabPanelVisual {
     id: string;
     titulo: string;
 }
 
-interface TabsPanelProps {
+/* Props divididas por responsabilidad (ISP): navegación, cierre y edición.
+ * Se consumen como intersección; la forma resultante no cambia. */
+interface TabsPanelNavegacion {
     tabs: TabPanelVisual[];
     activaId: string | null;
     onActivar: (id: string) => void;
+    /* [P4-039A-1] Variante visual: 'tabs' (cajas con borde, defecto) o 'pills'
+     * (pastillas para filtros/segmentos). Solo cambia la receta CSS. */
+    variante?: 'tabs' | 'pills';
+}
+
+interface TabsPanelCierre {
     /* Opcional: botón de cerrar por tab (solo si se pasa). */
     onCerrar?: (id: string) => void;
+    /* Tooltip del botón cerrar (contexto: 'Cerrar conversación', 'Cerrar nota'...). */
+    tituloCerrar?: string;
+}
+
+interface TabsPanelEdicion {
     /* Opcional: renombrado inline por doble clic (solo si se pasa). */
     editandoId?: string | null;
     tituloEdicion?: string;
@@ -38,11 +53,6 @@ interface TabsPanelProps {
     onCambiarTituloEdicion?: (titulo: string) => void;
     onConfirmarRenombrado?: (id: string) => void;
     onCancelarRenombrado?: () => void;
-    /* Tooltip del botón cerrar (contexto: 'Cerrar conversación', 'Cerrar nota'...). */
-    tituloCerrar?: string;
-    /* [P4-039A-1] Variante visual: 'tabs' (cajas con borde, defecto) o 'pills'
-     * (pastillas para filtros/segmentos). Solo cambia la receta CSS. */
-    variante?: 'tabs' | 'pills';
 }
 
 export function TabsPanel({
@@ -58,7 +68,7 @@ export function TabsPanel({
     onCancelarRenombrado,
     tituloCerrar = 'Cerrar',
     variante = 'tabs',
-}: TabsPanelProps): JSX.Element {
+}: TabsPanelNavegacion & TabsPanelCierre & TabsPanelEdicion): JSX.Element {
     return (
         <div className={`tabsCompartidas ${variante === 'pills' ? 'tabsCompartidas--pills' : ''}`}>
             {tabs.map(tab => {
@@ -73,8 +83,9 @@ export function TabsPanel({
                         title={tab.titulo}
                     >
                         {editando ? (
-                            <input
-                                className="tabCompartidaInput"
+                            <Input
+                                tipo="text"
+                                claseAdicional="tabCompartidaInput"
                                 value={tituloEdicion ?? ''}
                                 autoFocus
                                 onChange={e => onCambiarTituloEdicion?.(e.target.value)}
@@ -89,17 +100,20 @@ export function TabsPanel({
                             <span className="tabCompartidaTitulo">{tab.titulo}</span>
                         )}
                         {onCerrar && (
-                            <button
+                            <Boton
                                 type="button"
-                                className="tabCompartidaCerrar"
+                                variante="icono"
+                                soloIcono
+                                claseAdicional="tabCompartidaCerrar"
                                 title={tituloCerrar}
+                                aria-label={tituloCerrar}
                                 onClick={e => {
                                     e.stopPropagation();
                                     onCerrar(tab.id);
                                 }}
                             >
                                 <X size={10} />
-                            </button>
+                            </Boton>
                         )}
                     </div>
                 );

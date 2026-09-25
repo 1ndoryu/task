@@ -144,3 +144,13 @@
         transform: translateY(0);
     }
 }
+
+/* [25-09-2026] El recordatorio vive dentro de <Modal> del DS: el contenedor
+ * del modal es solo un envoltorio transparente (el glass lo pone
+ * .creacionRapidaContenedor, intacto). Solo layout, sin colores propios. */
+.modalContenedor.modalCrearRecordatorio {
+    max-width: 600px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}

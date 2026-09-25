@@ -145,7 +145,9 @@
     opacity: 1;
 }
 
-.panelIAMensajeAccion {
+/* [25-09-2026] Las acciones son <Boton icono> del DS: se compone con .boton
+ * para ganar especificidad sobre .boton--icono y conservar la receta. */
+.panelIAMensajeAccion.boton {
     display: inline-flex;
     align-items: center;
     gap: 2px;
@@ -162,7 +164,7 @@
     transition: background var(--dashboard-transicionRapida), color var(--dashboard-transicionRapida), border-color var(--dashboard-transicionRapida);
 }
 
-.panelIAMensajeAccion:hover {
+.panelIAMensajeAccion.boton:hover {
     background: var(--dashboard-superposicionSutil);
     color: var(--dashboard-textoActivo);
     border-color: var(--dashboard-bordePrincipal);

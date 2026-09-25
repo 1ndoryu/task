@@ -17,10 +17,15 @@ import type {DashboardCompletoRetorno} from '../../../hooks/useDashboardCompleto
 import type {PanelId} from '../../../hooks/useConfiguracionLayout';
 import {Boton} from '../../ui';
 
-interface VistaCeldaProps {
+/* Props divididas por responsabilidad (ISP): identidad, layout del área y
+ * acciones. `VistaCeldaProps` conserva la forma completa. */
+interface VistaCeldaIdentidad {
     celdaId: string;
     panelId: PanelId;
     ctx: DashboardCompletoRetorno;
+}
+
+interface VistaCeldaArea {
     /* Estilos del área en el grid (gridRow/gridColumn con spans) */
     estiloArea: React.CSSProperties;
     /* Si hay más de una celda → se muestran acciones de mover/quitar */
@@ -31,6 +36,9 @@ interface VistaCeldaProps {
     estaOrigenMover?: boolean;
     /* Handles de resize en los bordes reales de esta celda (opcional) */
     handles?: React.ReactNode;
+}
+
+interface VistaCeldaAcciones {
     /* Permitir elegir qué panel muestra esta celda */
     onElegirPanel?: (celdaId: string, x: number, y: number) => void;
     /* Intercambiar el panel de esta celda con otra */
@@ -40,6 +48,8 @@ interface VistaCeldaProps {
     /* Dividir panel en modo vistas (crea instancia baseId-N) */
     onDividirPanel?: (baseId: PanelId) => void;
 }
+
+interface VistaCeldaProps extends VistaCeldaIdentidad, VistaCeldaArea, VistaCeldaAcciones {}
 
 export function VistaCelda({
     celdaId,

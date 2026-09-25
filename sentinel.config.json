@@ -5,15 +5,42 @@
     "primaryBranch": "main"
   },
   "gate": {
-    "command": ["sentinel", "check", "--"],
+    "command": [
+      "sentinel",
+      "check",
+      "--"
+    ],
     "taskIdRequired": true
   },
   "guard": {
     "directCommands": {
-      "npmScripts": ["test", "build", "type-check", "check", "lint", "fmt"],
-      "npxTools": ["tsc", "eslint", "prettier", "rustfmt"],
-      "cargoSubcommands": ["check", "clippy", "test", "bench", "fmt"],
-      "tools": ["tsc", "eslint", "prettier", "rustfmt"]
+      "npmScripts": [
+        "test",
+        "build",
+        "type-check",
+        "check",
+        "lint",
+        "fmt"
+      ],
+      "npxTools": [
+        "tsc",
+        "eslint",
+        "prettier",
+        "rustfmt"
+      ],
+      "cargoSubcommands": [
+        "check",
+        "clippy",
+        "test",
+        "bench",
+        "fmt"
+      ],
+      "tools": [
+        "tsc",
+        "eslint",
+        "prettier",
+        "rustfmt"
+      ]
     }
   },
   "runtime": {
@@ -47,7 +74,8 @@
           "**/.sentinel/**",
           "glory-sentinel/**",
           "tools/**",
-          "frontend/src/api/generated/**"
+          "frontend/src/api/generated/**",
+          "glory-rs/**"
         ],
         "directoryExceptions": [
           "migrations",
@@ -60,33 +88,107 @@
           "src/services"
         ],
         "portableBoundaries": {
-          "dom": ["/frontend/src/utils/dom.ts", "/frontend/src/platform/", "/frontend/src/adapters/", "/frontend/src/app/hooks/", "/frontend/src/app/stores/", "/frontend/src/app/components/", "/frontend/src/glory-core/", "/frontend/src/app/islands/", "/frontend/src/app/utils/", "/frontend/src/app/services/", "frontend/src/main.tsx", "frontend/src/app/main.tsx"],
-          "window": ["/frontend/src/platform/", "/frontend/src/adapters/", "/frontend/src/navigation/", "/frontend/src/app/hooks/", "/frontend/src/app/stores/", "/frontend/src/app/components/", "/frontend/src/glory-core/", "/frontend/src/app/islands/", "/frontend/src/app/utils/", "/frontend/src/app/services/", "frontend/src/main.tsx", "frontend/src/app/main.tsx"],
-          "services": ["/frontend/src/services/", "/frontend/src/api/", "/frontend/src/adapters/"],
-          "loggerModules": ["/frontend/src/app/utils/logger"]
+          "dom": [
+            "/frontend/src/utils/dom.ts",
+            "/frontend/src/platform/",
+            "/frontend/src/adapters/",
+            "/frontend/src/app/hooks/",
+            "/frontend/src/app/stores/",
+            "/frontend/src/app/components/",
+            "/frontend/src/glory-core/",
+            "/frontend/src/app/islands/",
+            "/frontend/src/app/utils/",
+            "/frontend/src/app/services/",
+            "frontend/src/main.tsx",
+            "frontend/src/app/main.tsx"
+          ],
+          "window": [
+            "/frontend/src/platform/",
+            "/frontend/src/adapters/",
+            "/frontend/src/navigation/",
+            "/frontend/src/app/hooks/",
+            "/frontend/src/app/stores/",
+            "/frontend/src/app/components/",
+            "/frontend/src/glory-core/",
+            "/frontend/src/app/islands/",
+            "/frontend/src/app/utils/",
+            "/frontend/src/app/services/",
+            "frontend/src/main.tsx",
+            "frontend/src/app/main.tsx"
+          ],
+          "services": [
+            "/frontend/src/services/",
+            "/frontend/src/api/",
+            "/frontend/src/adapters/"
+          ],
+          "loggerModules": [
+            "/frontend/src/app/utils/logger"
+          ]
         },
         "rules": {
-          "barras-decorativas": { "severidad": "warning" },
-          "catch-vacio": { "severidad": "error" },
-          "hardcoded-secret": { "severidad": "error" },
-          "innerhtml-variable": { "severidad": "error" },
-          "unwrap-produccion-rs": { "severidad": "error" },
-          "panic-produccion-rs": { "severidad": "error" },
-          "git-add-all": { "severidad": "error" },
-          "css-especificacion-diseno-local": { "severidad": "warning" },
-          "console-production": { "severidad": "information" },
-          "unsafe-process-shell": { "severidad": "error" },
-          "default-export": { "habilitada": false },
-          "mixed-barrel-logic": { "habilitada": false },
-          "modal-semantica-no-canonica": { "habilitada": false },
-          "modal-con-titulo": { "habilitada": false },
-          "modal-estructura-no-canonica": { "habilitada": false },
-          "modal-acciones-no-canonico": { "habilitada": false },
-          "html-nativo-en-vez-de-componente": { "severidad": "warning" },
-          "button-clase-especifica": { "severidad": "warning" },
-          "componente-sin-hook-glory": { "severidad": "warning" },
-          "menu-contextual-override-diseno": { "severidad": "warning" },
-          "componente-artesanal": { "severidad": "warning" }
+          "barras-decorativas": {
+            "severidad": "warning"
+          },
+          "catch-vacio": {
+            "severidad": "error"
+          },
+          "hardcoded-secret": {
+            "severidad": "error"
+          },
+          "innerhtml-variable": {
+            "severidad": "error"
+          },
+          "unwrap-produccion-rs": {
+            "severidad": "error"
+          },
+          "panic-produccion-rs": {
+            "severidad": "error"
+          },
+          "git-add-all": {
+            "severidad": "error"
+          },
+          "css-especificacion-diseno-local": {
+            "severidad": "warning"
+          },
+          "console-production": {
+            "severidad": "information"
+          },
+          "unsafe-process-shell": {
+            "severidad": "error"
+          },
+          "default-export": {
+            "habilitada": false
+          },
+          "mixed-barrel-logic": {
+            "habilitada": false
+          },
+          "modal-semantica-no-canonica": {
+            "habilitada": false
+          },
+          "modal-con-titulo": {
+            "habilitada": false
+          },
+          "modal-estructura-no-canonica": {
+            "habilitada": false
+          },
+          "modal-acciones-no-canonico": {
+            "habilitada": false
+          },
+          "html-nativo-en-vez-de-componente": {
+            "severidad": "warning"
+          },
+          "button-clase-especifica": {
+            "severidad": "warning"
+          },
+          "componente-sin-hook-glory": {
+            "severidad": "warning"
+          },
+          "menu-contextual-override-diseno": {
+            "severidad": "warning"
+          },
+          "componente-artesanal": {
+            "severidad": "warning"
+          }
         }
       }
     },

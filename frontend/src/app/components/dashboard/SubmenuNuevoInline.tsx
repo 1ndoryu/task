@@ -2,69 +2,69 @@
  * SubmenuNuevoInline
  * [20-08-2026] Submenu compartido "Tarea / Hábito" extraído de InputNuevaTarea
  * para reutilizarlo también en el botón "+" del header del panel de ejecución.
- * Mismas opciones y mismo lenguaje visual que el "+ Añadir" del área inline.
+ * [25-09-2026] Adaptador fino sobre <MenuContextual> del DS: misma API
+ * (onSeleccionar/onCerrar/direccion/anclaje), el menú real, su posicionamiento
+ * con anti-desbordamiento, cierre fuera/Escape y portal los aporta el DS.
  */
 
-import {useEffect, useRef, type CSSProperties} from 'react';
-import {createPortal} from 'react-dom';
+import {useRef, useState, useLayoutEffect, type CSSProperties} from 'react';
 import {ListTodo, Repeat} from 'lucide-react';
-import {obtenerRaizPortales} from '../../utils/portales';
+import {MenuContextual, type OpcionMenu} from '../shared/MenuContextual';
 
 interface SubmenuNuevoInlineProps {
     onSeleccionar: (tipo: 'tarea' | 'habito') => void;
     onCerrar: () => void;
-    /* [20-08-2026] En el header del panel el submenu se abre hacia abajo
-     * (--debajo); en el área inline se abre hacia arriba (comportamiento
-     * original). La posición la controla el CSS según la clase del contenedor. */
+    /* En el header del panel el submenu se abre hacia abajo; en el área
+     * inline se abre hacia arriba (comportamiento original). */
     direccion?: 'arriba' | 'abajo';
-    /* [25-08-2026] Anclaje a coordenadas dinámicas (p. ej. el botón del estado
-     * vacío de tareas): la clase --fijado fija el posicionamiento y el estilo
-     * aporta solo left/top desde el rect del botón. */
+    /* Anclaje a coordenadas dinámicas (p. ej. el botón del estado vacío de
+     * tareas): posiciona el menú en ese punto del viewport. */
     claseAdicional?: string;
     estiloPosicion?: CSSProperties;
-    /* [25-08-2026] Portar a body cuando se ancla con coordenadas fijas: los
-     * paneles tienen backdrop-filter (glass), que convierte el contenedor en
-     * containing block de position:fixed y desplaza el submenu (aparecía muy a
-     * la derecha). Mismo patrón que los popovers del quick-create. */
+    /* Aceptado por compatibilidad: <MenuContextual> siempre se portalea a
+     * body, así que el flag ya no cambia nada. */
     usarPortal?: boolean;
 }
 
-export function SubmenuNuevoInline({onSeleccionar, onCerrar, direccion = 'arriba', claseAdicional, estiloPosicion, usarPortal = false}: SubmenuNuevoInlineProps): JSX.Element {
-    const submenuRef = useRef<HTMLDivElement>(null);
+const OPCIONES_SUBMENU: OpcionMenu[] = [
+    {id: 'tarea', etiqueta: 'Tarea', icono: <ListTodo size={14} />},
+    {id: 'habito', etiqueta: 'Hábito', icono: <Repeat size={14} />}
+];
 
-    /* Cerrar al hacer click fuera (mismo patrón que el submenu original) */
-    useEffect(() => {
-        const manejarClickFuera = (e: MouseEvent) => {
-            if (submenuRef.current && !submenuRef.current.contains(e.target as Node)) {
-                onCerrar();
-            }
-        };
-        document.addEventListener('mousedown', manejarClickFuera);
-        return () => document.removeEventListener('mousedown', manejarClickFuera);
-    }, [onCerrar]);
+/* Alto estimado del menú (2 opciones): para abrir hacia arriba se resta del
+ * borde superior del ancla; si se sale por arriba, el DS lo reajusta. */
+const ALTO_ESTIMADO_MENU = 110;
 
-    const submenu = (
-        <div
-            ref={submenuRef}
-            className={`submenuNuevoInline ${direccion === 'abajo' ? 'submenuNuevoInline--abajo' : ''} ${claseAdicional ?? ''}`}
-            style={estiloPosicion}
-        >
-            <button
-                type="button"
-                className="submenuNuevoInline__opcion"
-                onMouseDown={e => { e.preventDefault(); e.stopPropagation(); onSeleccionar('tarea'); }}>
-                <ListTodo size={14} />
-                <span>Tarea</span>
-            </button>
-            <button
-                type="button"
-                className="submenuNuevoInline__opcion"
-                onMouseDown={e => { e.preventDefault(); e.stopPropagation(); onSeleccionar('habito'); }}>
-                <Repeat size={14} />
-                <span>Hábito</span>
-            </button>
-        </div>
+export function SubmenuNuevoInline({onSeleccionar, onCerrar, direccion = 'arriba', estiloPosicion}: SubmenuNuevoInlineProps): JSX.Element {
+    const anclaRef = useRef<HTMLSpanElement>(null);
+    const [posicion, setPosicion] = useState<{x: number; y: number} | null>(() => {
+        const left = estiloPosicion?.left;
+        const top = estiloPosicion?.top;
+        return typeof left === 'number' && typeof top === 'number' ? {x: left, y: top} : null;
+    });
+
+    /* Sin coordenadas explícitas: medir el ancla inline tras montar. */
+    useLayoutEffect(() => {
+        if (posicion || !anclaRef.current) return;
+        const rect = anclaRef.current.getBoundingClientRect();
+        setPosicion({
+            x: rect.left,
+            y: direccion === 'abajo' ? rect.bottom + 4 : rect.top - ALTO_ESTIMADO_MENU
+        });
+    }, [posicion, direccion]);
+
+    if (!posicion) {
+        /* Ancla invisible para medir: ocupa el sitio del submenu inline. */
+        return <span ref={anclaRef} className="submenuNuevoInline__ancla" />;
+    }
+
+    return (
+        <MenuContextual
+            opciones={OPCIONES_SUBMENU}
+            posicionX={posicion.x}
+            posicionY={posicion.y}
+            onSeleccionar={id => onSeleccionar(id as 'tarea' | 'habito')}
+            onCerrar={onCerrar}
+        />
     );
-
-    return usarPortal ? createPortal(submenu, obtenerRaizPortales()) : submenu;
 }

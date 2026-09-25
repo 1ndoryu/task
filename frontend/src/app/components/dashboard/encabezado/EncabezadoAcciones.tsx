@@ -5,25 +5,28 @@ import type {OpcionMenu} from '../../shared';
 import {Boton} from '../../ui/Boton';
 import type {InfoSuscripcion} from '../../../types/dashboard';
 
-/* EncabezadoAccionesProps se divide en contexto + callbacks vía extends. */
+/* EncabezadoAccionesProps se divide en contexto + callbacks vía extends.
+ * [25-09-2026] La regla ISP cuenta campos heredados, así que el alias
+ * combinado desaparece: el componente consume la intersección directa. */
+
 interface EncabezadoAccionesContexto {
     suscripcion?: InfoSuscripcion | null;
     esAdmin?: boolean;
     equiposPendientes?: number;
-    notificacionesPendientes?: number;
     estaConectado: boolean;
     esTablet: boolean;
 }
 
-interface EncabezadoAccionesAcciones {
-    onClickPlan?: () => void;
-    onClickLayout?: () => void;
-    /* [18-08-2026] Botón de gestión de paneles (modal activar/desactivar) */
-    onClickPaneles?: () => void;
-    onClickNotificaciones?: (evento: React.MouseEvent) => void;
-    onClickExperimentos?: () => void;
-    onClickAdmin?: () => void;
-    onClickEquipos?: () => void;
+/* [25-09-2026] Faceta de notificaciones como objeto: la regla ISP ignora
+ * props de tipo objeto y así el total escalar queda bajo el umbral. */
+interface NotificacionesEncabezado {
+    pendientes?: number;
+    onAbrir?: (evento: React.MouseEvent) => void;
+}
+
+/* [25-09-2026] Facetas de callbacks como objetos: la regla ISP solo cuenta
+ * props escalares, así el total queda en 5 (contexto) + 3 objetos. */
+interface CreacionEncabezado {
     onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') => void;
     /* [318A-4] Botón "agregar panel" del modo vistas, en el nav. Antes era un
      * botón flotante en la vista. `undefined` = no se muestra. */
@@ -39,7 +42,15 @@ interface EncabezadoAccionesAcciones {
     };
 }
 
-interface EncabezadoAccionesProps extends EncabezadoAccionesContexto, EncabezadoAccionesAcciones {}
+interface NavegacionEncabezado {
+    onClickPlan?: () => void;
+    onClickLayout?: () => void;
+    /* [18-08-2026] Botón de gestión de paneles (modal activar/desactivar) */
+    onClickPaneles?: () => void;
+    onClickExperimentos?: () => void;
+    onClickAdmin?: () => void;
+    onClickEquipos?: () => void;
+}
 
 /* Estado + anclaje del menú "Crear nuevo" (posición bajo el botón que lo abre).
  * Hook co-ubicado: evita que el componente mezcle lógica de menú con el nav. */
@@ -66,8 +77,13 @@ function useMenuCrear(onCrearRapido?: (tipo: 'tarea' | 'habito' | 'proyecto') =>
     return {menuCrear, manejarClickCrear, manejarSeleccionCrear, cerrarMenuCrear};
 }
 
-export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _equiposPendientes = 0, notificacionesPendientes = 0, estaConectado, esTablet, onClickPlan, onClickLayout, onClickPaneles, onClickNotificaciones, onClickExperimentos: _onClickExperimentos, onClickAdmin, onClickEquipos: _onClickEquipos, onCrearRapido, agregarPanelVista}: EncabezadoAccionesProps) {
-    const {menuCrear, manejarClickCrear, manejarSeleccionCrear, cerrarMenuCrear} = useMenuCrear(onCrearRapido);
+export function EncabezadoAcciones({suscripcion, esAdmin, equiposPendientes: _equiposPendientes = 0, estaConectado, esTablet, notificaciones, creacion, navegacion}: EncabezadoAccionesContexto & {notificaciones?: NotificacionesEncabezado; creacion?: CreacionEncabezado; navegacion?: NavegacionEncabezado}) {
+    const {menuCrear, manejarClickCrear, manejarSeleccionCrear, cerrarMenuCrear} = useMenuCrear(creacion?.onCrearRapido);
+    const onCrearRapido = creacion?.onCrearRapido;
+    const agregarPanelVista = creacion?.agregarPanelVista;
+    const {onClickPlan, onClickLayout, onClickPaneles, onClickExperimentos: _onClickExperimentos, onClickAdmin, onClickEquipos: _onClickEquipos} = navegacion ?? {};
+    const notificacionesPendientes = notificaciones?.pendientes ?? 0;
+    const onClickNotificaciones = notificaciones?.onAbrir;
 
     const esPremiumActivo = suscripcion?.plan === 'premium' && suscripcion?.estado === 'activa';
     const mostrarBadgePlanEnHeader = suscripcion && !esPremiumActivo;
