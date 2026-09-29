@@ -2,7 +2,7 @@
 // [por que] sqlx sin feature "macros" ni DB en compile-time: query! rompe el build.
 /* [03-09-2026] Adaptador de persistencia del agente (plan Glory Harness, Fase
  * 2): implementa el puerto `AgentPersistence` del núcleo con el SQL real de
- * task. El núcleo nunca persiste por su cuenta (R3 del plan); todo acceso a
+ * task. El núcleo nunca persiste por su cuenta (R3 del plan); cada acceso a
  * estado durable pasa por aquí. El SQL es el mismo que vivía en
  * `src/agent/runtime.rs` / `src/agent/scheduler.rs` (verbatim, con los nombres
  * reales de columnas de las migraciones `agente_*`). */

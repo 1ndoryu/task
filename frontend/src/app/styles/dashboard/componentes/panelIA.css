@@ -228,7 +228,7 @@
 /* [014A-1] min-width: 0 para que flex: 1 funcione correctamente y el textarea
  * ocupe el 100% del espacio disponible sin desbordarse */
 /* [318A-4] height: auto anula el height: 100% de .textareaContenedor base
- * (ui-formulario.css): con height 100% + flex: 1 la primera fila absorbe todo
+ * (ui-formulario.css): con height 100% + flex: 1 la primera fila absorbe
  * el alto de .panelIAInputCaja y la fila de controles (flex-basis: 100%)
  * queda fuera del borde. Con height auto la caja crece para incluir ambas
  * filas. */

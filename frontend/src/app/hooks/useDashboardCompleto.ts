@@ -117,7 +117,7 @@ export function useDashboardCompleto() {
 
     /* [247A-1] Wrapper de reordenarTareas que indica a useOrdenarTareas que
      * saltee el sort en el render inmediatamente posterior al drag.
-     * Sin esto, el compararPorPrioridad reordena todo en el siguiente render
+     * Sin esto, el compararPorPrioridad reordena en el siguiente render
      * y el orden manual del usuario se pierde. */
     const reordenarTareasConSkip = useCallback(
         (tareasReordenadas: Tarea[]) => {

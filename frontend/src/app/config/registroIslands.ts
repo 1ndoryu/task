@@ -6,7 +6,7 @@
  * Cada island se auto-registra al ser importada.
  *
  * COMPATIBILIDAD: Este sistema es ADITIVO. Los proyectos que usan
- * el método manual (appIslands.tsx con objeto exportado) siguen funcionando.
+ * el enfoque manual (appIslands.tsx con objeto exportado) siguen funcionando.
  */
 
 import type {ComponentType} from 'react';

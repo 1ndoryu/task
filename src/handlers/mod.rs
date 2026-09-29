@@ -497,7 +497,7 @@ fn api_routes(state: &AppState, agente_desactivado: bool) -> Router<AppState> {
         .merge(admin::routes(state))
 }
 
-// [14-09-2026] Kill-switch `AGENTE_DESACTIVADO`: cualquier método/ruta bajo
+// [14-09-2026] Kill-switch `AGENTE_DESACTIVADO`: cualquier endpoint bajo
 // `/api/agente/` + wildcard responde 503 con mensaje explícito (mejor que 404:
 // el front distingue "apagado temporal" de "ruta rota"). Reversible: basta
 // quitar la env y reiniciar.

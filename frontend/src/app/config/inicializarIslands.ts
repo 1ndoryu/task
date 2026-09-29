@@ -11,7 +11,7 @@
  * 3. Registrar ruta en App/Config/pages.php (sin modificar appIslands.tsx)
  *
  * COMPATIBILIDAD: Este sistema es OPCIONAL. Los proyectos que prefieren
- * el método manual (editar appIslands.tsx) pueden seguir usándolo.
+ * el enfoque manual (editar appIslands.tsx) pueden seguir usándolo.
  */
 
 import {registrarIsland, marcarIslandsInicializadas} from './registroIslands';

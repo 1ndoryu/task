@@ -38,7 +38,7 @@ export function esServidorVacio(serverData: DashboardData | null): boolean {
  * principales están vacíos y ya existía una sincronización previa (lastSync > 0).
  * Esto previene la catástrofe cuando Zustand aún no ha hidratado sus stores
  * (habitos = []) pero isDataReady ya es true, causando que el sync o el
- * auto-save envíen un estado vacío al servidor que soft-deletea todo.
+ * auto-save envíen un estado vacío al servidor que provoca soft-delete.
  * Excepción: lastSync === 0 = primera sincronización (usuario nuevo), permitido.
  */
 export function esProbableWipeout(

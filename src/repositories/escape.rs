@@ -1,7 +1,7 @@
 //! Escapado de wildcards para búsquedas `ILIKE`. [H-B03-06]
 //!
 //! Una búsqueda de usuario que contenga `%`, `_` o `\` no debe interpretarse como
-//! comodín del patrón `ILIKE` (si no, buscar `%` devuelve todo). La función escapa
+//! comodín del patrón `ILIKE` (si no, buscar `%` devuelve resultados). La función escapa
 //! esos tres caracteres para que se traten como texto literal. Postgres usa `\`
 //! como escape por defecto en `LIKE`/`ILIKE`, así que el resultado se usa tal cual
 //! con el patrón `'%' || $x || '%'` (o `%{}%` en SQL dinámico de whitelist).

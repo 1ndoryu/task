@@ -77,7 +77,7 @@ impl ActivityService {
         let recent_dates = ActivityRepository::recent_dates(pool, user_id, period.end).await?;
         /* [26-08-2026] Las estadísticas también deben reflejar el historial real
          * de cumplimiento (mismo merge que el heatmap): sin esto, un usuario
-         * con todo su historial en el payload vería 0 totales y racha 0. */
+         * con su historial completo en el payload vería 0 totales y racha 0. */
         let derived =
             ActivityRepository::derived_history_rows(pool, user_id, period.start, period.end)
                 .await?;

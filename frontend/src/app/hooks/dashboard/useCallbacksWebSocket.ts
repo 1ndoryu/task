@@ -49,7 +49,7 @@ export function useCallbacksWebSocket({refs, setTareas, setProyectos, setNotas}:
                 devLog('[SyncRT] Tarea remota recibida:', accion, datos);
                 const tareasActuales = refs.tareas.current;
                 /* [28-08-2026] Registrar el cambio como remoto SOLO cuando realmente
-                 * altera el estado. Antes se incrementaba el contador en TODO mensaje:
+                 * altera el estado. Antes se incrementaba el contador en cada mensaje:
                  * los que no cambian el hash (crear ya existente, editar idéntico,
                  * eliminar de una entidad ausente) dejaban el contador envenenado y
                  * la absorción HTTP del SyncManager se comía el PRÓXIMO cambio LOCAL

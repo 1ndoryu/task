@@ -25,7 +25,7 @@ export function tabDe(estado: EstadoAgente, id: string): TabAgente | undefined {
 
 /* [039A-2] Convierte un mensaje del historial del servidor a mensaje de tab,
  * conservando las tarjetas de tools y el contexto restaurados por el backend
- * (antes se mapeaban solo id/rol/contenido y todo se perdía al recargar).
+ * (antes se mapeaban solo id/rol/contenido y se perdía al recargar).
  * El `diff` nunca viajó persistido: las tarjetas restauradas muestran
  * resumen + argumentos (suficiente para ver el cambio específico). */
 export function aMensajeTab(h: MensajeConversacion): MensajeTabAgente {

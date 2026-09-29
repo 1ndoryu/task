@@ -39,6 +39,6 @@ export function parsearRespuestaLLM(contenido: string): RespuestaIA {
         } catch { /* JSON inválido dentro del bloque */ }
     }
 
-    /* Fallback: tratar todo como texto sin acciones */
+    /* Fallback: tratar como texto sin acciones */
     return {respuesta: limpio, acciones: []};
 }

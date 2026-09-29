@@ -19,7 +19,7 @@ export interface PosicionDefectoPanel {
     posicion: number;
 }
 
-/* Props base que todo panel debe aceptar */
+/* Props base que cada panel debe aceptar */
 export interface PanelBaseProps {
     renderHandleArrastre: (titulo?: string) => ReactNode;
     handleMinimizar: ReactNode;

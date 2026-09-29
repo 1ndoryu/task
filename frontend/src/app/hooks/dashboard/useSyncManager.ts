@@ -125,7 +125,7 @@ export function useSyncManager({currentData, onDataReceived, debounceMs = 2000, 
                     /* [275A-1] Safety guard: abortar si los datos están vacíos
                      * pero ya hubo una sync previa (race condition de hidratación).
                      * [18-08-2026] Se permite si hay tombstones pendientes (borrado
-                     * deliberado de TODO): el guardado con tombstones no es un wipe. */
+                     * deliberado de tareas): el guardado con tombstones no es un wipe. */
                     if (esProbableWipeout(currentData, lastSync, habitosInicializado) && !hayBorradosPendientes()) {
                         /* [18-08-2026] El guard anti-wipeout funciona por diseno: evita
                          * subir datos vacios (p. ej. race tras logout/limpieza de sesion).

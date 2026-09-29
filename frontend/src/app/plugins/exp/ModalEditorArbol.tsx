@@ -6,7 +6,7 @@
  * y lo especializa:
  * - 5 pestañas (0/25/50/75/100%): la imagen de cada estado se precarga desde
  *   ArbolVida (árbol por defecto o la versión editada persistida en el store).
- * - Todo es editable, incluido el tronco: el usuario puede borrarlo o
+ * - Es editable, incluido el tronco: el usuario puede borrarlo o
  *   redibujarlo; la imagen guardada reemplaza por completo a la por defecto.
  * - Pintar/borrar persiste la imagen COMPLETA del estado en `glory-exp`
  *   (copasArbol), de modo que el render del árbol (ArbolVida) la refleja.

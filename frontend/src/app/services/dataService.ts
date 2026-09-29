@@ -32,7 +32,7 @@ export interface DatosDashboardExportados {
 const VERSION_ACTUAL = '2.0.0';
 
 /* [H-F11-06] Limite de tamano para importaciones: evita que un archivo
- * gigante cargue todo en memoria con el FileReader (DoS del tab). */
+ * gigante cargue en memoria con el FileReader (DoS del tab). */
 const LIMITE_TAMANO_IMPORTACION = 10 * 1024 * 1024; // 10 MB
 
 /*

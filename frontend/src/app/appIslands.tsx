@@ -12,7 +12,7 @@
  * 3. Definir ruta en App/Config/pages.php
  *
  * COMPATIBILIDAD (proyectos legacy):
- * El objeto islandsManuales mantiene compatibilidad con el método anterior.
+ * El objeto islandsManuales mantiene compatibilidad con el enfoque anterior.
  * Las islands manuales tienen prioridad sobre las auto-registradas.
  */
 

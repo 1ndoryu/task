@@ -8,7 +8,7 @@
  * `habito.importancia.toUpperCase()` y tumbaba toda la isla con
  * "Cannot read properties of undefined (reading 'toUpperCase')".
  *
- * Invariante: tras pasar por normalizarHabitos, todo hábito tiene
+ * Invariante: tras pasar por normalizarHabitos, cada hábito tiene
  * nombre, importancia, frecuencia, tags, historialCompletados y
  * diasInactividad/racha numéricos. Los valores reales los repone el
  * servidor en el siguiente download; esto solo evita el crash y cura

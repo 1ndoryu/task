@@ -1,5 +1,5 @@
 /* [233A-40] Mapeo centralizado de prioridad, importancia y urgencia.
- * Todo componente que necesite renderizar iconos, colores o etiquetas de estos niveles
+ * Cada componente que necesite renderizar iconos, colores o etiquetas de estos niveles
  * debe importar desde aquí. Nunca duplicar estos mapeos en componentes individuales.
  *
  * Convenciones:

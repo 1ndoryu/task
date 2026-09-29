@@ -338,7 +338,7 @@ fn sanitizar_nombre_disposicion(nombre: &str) -> String {
         .collect()
 }
 
-/// Codifica RFC 5987 (filename*=UTF-8''...): percent-encode de todo byte fuera
+/// Codifica RFC 5987 (filename*=UTF-8''...): percent-encode de cada byte fuera
 /// de los unreserved de RFC 3986 (A-Z a-z 0-9 . _ ~ -).
 fn codificar_rfc5987(nombre: &str) -> String {
     let mut resultado = String::new();

@@ -4,7 +4,7 @@
  * [27-08-2026] Configuración detallada (plan IA): comportamiento del modelo
  * (temperatura, max tokens, idioma, estilo), contexto incluido (tareas
  * completadas, hábitos pausados, notas) y permisos de herramientas
- * (recordatorios, búsqueda web). Todo persistido en iaStore (no sensible).
+ * (recordatorios, búsqueda web). Se persiste en iaStore (no sensible).
  * [318A-3] Migrado al sistema centralizado: cada fila usa FormCampo (mismo
  * layout que el esqueleto itemOpcionConfig previo → visual-neutral). Este
  * panel combina cabeceras de sección (FormCampo sin control) + controles en

@@ -1,7 +1,7 @@
 /*
  * AccionesPanelResponsivas
  * [19-08-2026] Envuelve las acciones del encabezado de un panel (.seccionAcciones).
- * Si el contenido desborda el ancho disponible del panel, colapsa todo a un botón
+ * Si el contenido desborda el ancho disponible del panel, colapsa a un botón
  * de 3 puntos (MoreHorizontal) que abre un MenuContextual real con las mismas
  * acciones: cada botón de acción se convierte en una opción con su icono y una
  * etiqueta corta (sin tooltip nativo), y los selectores (grupo, filtro, orden)

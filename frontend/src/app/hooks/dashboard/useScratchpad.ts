@@ -1,7 +1,7 @@
 /* sentinel-disable-file html-sin-origen-declarado: los productores de este
  * fichero (formatearInlineMarkdown, resaltarMarkdownEnEditor,
  * renderizarMarkdownVistaPrevia) solo decoran texto ya escapado por
- * escaparHtml: todo input externo llega como entidades (&lt; &gt; &amp;),
+ * escaparHtml: el input externo llega como entidades (&lt; &gt; &amp;),
  * nunca se interpola HTML crudo. Auditado 2026-09-24. */
 
 /*
