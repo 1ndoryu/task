@@ -58,7 +58,7 @@
   },
   "tokenDetection": {
     "duplicate": {
-      "enabled": true,
+      "enabled": false,
       "severity": "warning"
     },
     "unused": {
