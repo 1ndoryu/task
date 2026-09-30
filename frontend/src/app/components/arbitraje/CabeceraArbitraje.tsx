@@ -14,6 +14,8 @@ export function CabeceraArbitraje({titulo, viabilidad}: CabeceraArbitrajeProps):
                 return <Check size={16} />;
             case 'riesgoso':
                 return <AlertTriangle size={16} />;
+            case 'noViable':
+                return <X size={16} />;
             default:
                 return <X size={16} />;
         }

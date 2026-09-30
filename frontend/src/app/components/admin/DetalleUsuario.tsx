@@ -76,11 +76,15 @@ export function DetalleUsuario({usuario, onCerrar, onActivarPremium, onCancelarP
                     <div className="detalleSuscripcion">
                         <div className="detalleItem">
                             <span className="detalleEtiqueta">Plan:</span>
-                            <span className={`detallePlan ${usuario.suscripcion.plan}`}>{usuario.suscripcion.plan.toUpperCase()}</span>
+                            {/* Ternario exhaustivo (PlanSuscripcion = 'free' | 'premium'):
+                              * literales completos para que el escaner vea premium/free en uso. */}
+                            <span className={usuario.suscripcion.plan === 'premium' ? 'detallePlan premium' : 'detallePlan free'}>{usuario.suscripcion.plan.toUpperCase()}</span>
                         </div>
                         <div className="detalleItem">
                             <span className="detalleEtiqueta">Estado:</span>
-                            <span className={`detalleEstado ${usuario.suscripcion.estado}`}>{usuario.suscripcion.estado}</span>
+                            {/* Ternario exhaustivo (EstadoSuscripcion = 'activa' | 'trial' | 'expirada'):
+                              * literales completos para que el escaner vea las variantes en uso. */}
+                            <span className={usuario.suscripcion.estado === 'activa' ? 'detalleEstado activa' : usuario.suscripcion.estado === 'trial' ? 'detalleEstado trial' : 'detalleEstado expirada'}>{usuario.suscripcion.estado}</span>
                         </div>
                         {usuario.suscripcion.diasRestantes !== null && (
                             <div className="detalleItem">
