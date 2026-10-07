@@ -169,6 +169,59 @@ pub struct ProductivityWriteResponse {
     pub updated_at: DateTime<Utc>,
 }
 
+/// [07AA-1] Un movimiento del bulk: reordena (`orden`) y opcionalmente cambia
+/// la tarea de columna (`proyectoId` = `legacy_id` del proyecto destino).
+/// Sin `proyectoId` solo reordena dentro de su columna actual.
+#[derive(Debug, Deserialize, Serialize, Validate, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ReordenarMovimiento {
+    pub legacy_id: i64,
+    pub orden: i32,
+    #[serde(default, rename = "proyectoId")]
+    pub proyecto_id: Option<i64>,
+}
+
+/// [07AA-1] Reordenado/movido atómico de tareas del kanban: todo el lote se
+/// aplica en una transacción o no se aplica nada (sin fallo parcial). Tope de
+/// 200 movimientos por lote: acota el trabajo transaccional (un solo golpe a
+/// la cuota de escritura) sin paginar el kanban.
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct BulkReorderRequest {
+    #[validate(length(
+        min = 1,
+        max = 200,
+        message = "movimientos debe traer entre 1 y 200 elementos"
+    ))]
+    pub movimientos: Vec<ReordenarMovimiento>,
+}
+
+impl BulkReorderRequest {
+    /// [07AA-1] Reglas por movimiento que el derive no recorre (validator no
+    /// valida elementos dentro del `Vec`): ids positivos.
+    #[must_use]
+    pub fn ids_validos(&self) -> bool {
+        self.movimientos
+            .iter()
+            .all(|m| m.legacy_id > 0 && m.proyecto_id.is_none_or(|destino| destino > 0))
+    }
+}
+
+/// [07AA-1] Tareas de una columna: items con el payload canónico (incluye
+/// `id`, `proyectoId` y `orden`), ordenados por `sort_order`.
+#[derive(Debug, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectTasksResponse {
+    pub tareas: Vec<ProductivityWriteResponse>,
+}
+
+/// [07AA-1] Resultado del bulk: las tareas tocadas con su payload canónico.
+#[derive(Debug, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct BulkReorderResponse {
+    pub actualizadas: Vec<ProductivityWriteResponse>,
+}
+
 fn default_project_status() -> String {
     "activo".to_owned()
 }
@@ -187,9 +240,60 @@ fn default_frequency() -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{UpsertProjectRequest, UpsertTaskRequest};
+    use super::{BulkReorderRequest, ReordenarMovimiento, UpsertProjectRequest, UpsertTaskRequest};
     use chrono::Utc;
     use serde_json::json;
+    use validator::Validate;
+
+    fn movimiento(legacy_id: i64, orden: i32, proyecto_id: Option<i64>) -> ReordenarMovimiento {
+        ReordenarMovimiento {
+            legacy_id,
+            orden,
+            proyecto_id,
+        }
+    }
+
+    /// [07AA-1] El bulk exige lote no vacío y acotado, sin ids inválidos
+    /// (los ids se revisan con `ids_validos`: el derive no recorre el `Vec`).
+    #[test]
+    fn bulk_reorder_validates_batch_bounds() {
+        let vacio = BulkReorderRequest {
+            movimientos: vec![],
+        };
+        assert!(vacio.validate().is_err());
+
+        let gigante = BulkReorderRequest {
+            movimientos: (1..=201).map(|id| movimiento(id, 0, None)).collect(),
+        };
+        assert!(gigante.validate().is_err());
+
+        let id_invalido = BulkReorderRequest {
+            movimientos: vec![movimiento(0, 0, None)],
+        };
+        assert!(!id_invalido.ids_validos());
+
+        let destino_invalido = BulkReorderRequest {
+            movimientos: vec![movimiento(3, 0, Some(0))],
+        };
+        assert!(!destino_invalido.ids_validos());
+
+        let valido = BulkReorderRequest {
+            movimientos: vec![movimiento(3, 0, Some(7)), movimiento(4, 1, None)],
+        };
+        assert!(valido.validate().is_ok());
+        assert!(valido.ids_validos());
+    }
+
+    /// [07AA-1] Contrato camelCase con el kanban (`legacyId`, `proyectoId`).
+    #[test]
+    fn bulk_reorder_deserializes_camel_case() {
+        let request: BulkReorderRequest = serde_json::from_value(json!({
+            "movimientos": [{ "legacyId": 3, "orden": 0, "proyectoId": 7 }]
+        }))
+        .expect("bulk válido");
+        assert!(request.validate().is_ok());
+        assert_eq!(request.movimientos[0].proyecto_id, Some(7));
+    }
 
     #[test]
     fn task_storage_payload_is_canonical_and_uses_legacy_id() {

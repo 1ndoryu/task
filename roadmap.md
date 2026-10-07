@@ -19,7 +19,15 @@ Segunda auditoría de principios SOLID iniciada el 2026-08-25: **855 archivos** 
 
 ## Bloque actual
 
-🔧 **En curso (07-09-2026): 079A-1 — página permanente local (autoinicio).** task corre
+- **07AA-1 — F1 kanban backend (pestaña `tareas` WM, plan `workspace-manager/Agente/planes/plan-tareas-tasks-2026-10-07.md`)** EN CURSO:
+  crear `GET /api/projects/:legacy_id/tasks` (tareas propias no borradas, orden
+  `sort_order`) + `POST /api/tasks/reordenar` (bulk transaccional ≤200 movs, cuota
+  escritura) + orden columnas vía `PUT /api/dashboard/settings` (`preferencias.kanban.v1`
+  con envelope `{valor,ts}`); seed 2 proyectos x3 tareas vía API; tests; verificar
+  en vivo contra BD rama. Excepción firmada a regla 18: la lógica de tareas vive
+  aquí (producto), no en `glory-rs` (framework); solo se extrae a núcleo agnóstico
+  lo reutilizable por terceros (tipos, cliente, validaciones, ops crear/mover/ordenar).
+- 🔧 **En curso (07-09-2026): 079A-1 — página permanente local (autoinicio).** task corre
 SIEMPRE en local en `http://127.0.0.1:4191`, sin interferir con otros agentes. Puertos
 definidos en `.env` (fuente única: `PORT=4190`, `VITE_PORT=4191`, `CORS_ORIGINS=:4191`);
 binario propio en `.runtime/target` (gitignored; FUERA de `C:\tmp`, que la tarea

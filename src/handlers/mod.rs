@@ -107,6 +107,8 @@ impl utoipa::Modify for SecurityAddon {
         habit_history::delete_day,
         productivity::upsert_project,
         productivity::upsert_task,
+        productivity::list_project_tasks,
+        productivity::bulk_reorder_tasks,
         shared::create,
         shared::received,
         shared::owned,
@@ -232,6 +234,10 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::productivity::ProductivityWriteResponse,
         crate::models::productivity::UpsertProjectRequest,
         crate::models::productivity::UpsertTaskRequest,
+        crate::models::productivity::ProjectTasksResponse,
+        crate::models::productivity::BulkReorderRequest,
+        crate::models::productivity::ReordenarMovimiento,
+        crate::models::productivity::BulkReorderResponse,
         crate::models::subscription::SubscriptionInfo,
         crate::models::subscription::TrialResponse,
         crate::models::subscription::CheckoutResponse,
@@ -482,6 +488,7 @@ fn api_routes(state: &AppState, agente_desactivado: bool) -> Router<AppState> {
         .merge(habit_history::routes())
         .merge(activity::routes())
         .merge(productivity::routes())
+        .merge(productivity::bulk_routes(state))
         .merge(collaboration::routes(state))
         .merge(shared::routes(state))
         .merge(notifications::routes())

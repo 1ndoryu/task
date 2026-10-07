@@ -309,4 +309,138 @@ impl ProductivityRepository {
         .fetch_optional(executor)
         .await
     }
+
+    /// [07AA-1] Tareas propias no borradas de una columna, ordenadas por
+    /// `sort_order` (criterio del kanban; desempate por `legacy_id` como en
+    /// la lectura del dashboard).
+    pub async fn list_tasks_by_project(
+        pool: &PgPool,
+        user_id: Uuid,
+        project_legacy_id: i64,
+    ) -> Result<Vec<ProductivityWriteRow>, sqlx::Error> {
+        sqlx::query_as(
+            "SELECT legacy_id, payload, updated_at
+             FROM dashboard_tasks
+             WHERE user_id = $1 AND project_legacy_id = $2 AND deleted_at IS NULL
+             ORDER BY sort_order ASC, legacy_id ASC",
+        )
+        .bind(user_id)
+        .bind(project_legacy_id)
+        .fetch_all(pool)
+        .await
+    }
+
+    /// [07AA-1] El proyecto existe, es propio y no está borrado (clave estable
+    /// de columna para el kanban).
+    pub async fn project_exists(
+        pool: &PgPool,
+        user_id: Uuid,
+        project_legacy_id: i64,
+    ) -> Result<bool, sqlx::Error> {
+        let found = sqlx::query_scalar::<_, i64>(
+            "SELECT legacy_id
+             FROM dashboard_projects
+             WHERE user_id = $1 AND legacy_id = $2 AND deleted_at IS NULL",
+        )
+        .bind(user_id)
+        .bind(project_legacy_id)
+        .fetch_optional(pool)
+        .await?;
+        Ok(found.is_some())
+    }
+}
+
+/// [07AA-1] Resultado del reordenado bulk sin acoplar al HTTP.
+#[derive(Debug)]
+pub enum BulkReorderOutcome {
+    Applied(Vec<ProductivityWriteRow>),
+    /// Alguna tarea no existe, es ajena o está borrada: nada se aplicó.
+    UnknownTask(i64),
+    /// Algún proyecto destino no existe, es ajeno o está borrado.
+    UnknownProject(i64),
+    /// El mismo `legacy_id` aparece dos veces en el lote.
+    DuplicateTask(i64),
+}
+
+impl ProductivityRepository {
+    /// [07AA-1] Reordenado/movido atómico: valida TODO el lote (existencia y
+    /// propiedad de tareas y proyectos destino, sin duplicados) y lo aplica en
+    /// una sola transacción; cualquier fallo revierte sin escribir nada.
+    /// El payload canónico se mantiene coherente (`orden` y `proyectoId`
+    /// viajan dentro del JSON que lee el dashboard).
+    pub async fn bulk_reorder(
+        pool: &PgPool,
+        user_id: Uuid,
+        movimientos: &[(i64, i32, Option<i64>)],
+    ) -> Result<BulkReorderOutcome, sqlx::Error> {
+        let mut vistos = std::collections::HashSet::with_capacity(movimientos.len());
+        for (legacy_id, _, _) in movimientos {
+            if !vistos.insert(*legacy_id) {
+                return Ok(BulkReorderOutcome::DuplicateTask(*legacy_id));
+            }
+        }
+        let mut transaction = pool.begin().await?;
+        let ids: Vec<i64> = movimientos.iter().map(|(id, _, _)| *id).collect();
+        let existentes = sqlx::query_scalar::<_, i64>(
+            "SELECT legacy_id
+             FROM dashboard_tasks
+             WHERE user_id = $1 AND legacy_id = ANY($2) AND deleted_at IS NULL
+             FOR UPDATE",
+        )
+        .bind(user_id)
+        .bind(&ids)
+        .fetch_all(&mut *transaction)
+        .await?;
+        let set: std::collections::HashSet<i64> = existentes.into_iter().collect();
+        for (legacy_id, _, _) in movimientos {
+            if !set.contains(legacy_id) {
+                transaction.rollback().await?;
+                return Ok(BulkReorderOutcome::UnknownTask(*legacy_id));
+            }
+        }
+        let mut destinos: Vec<i64> = movimientos
+            .iter()
+            .filter_map(|(_, _, proyecto_id)| *proyecto_id)
+            .collect();
+        destinos.sort_unstable();
+        destinos.dedup();
+        for destino in &destinos {
+            let existe = sqlx::query_scalar::<_, i64>(
+                "SELECT legacy_id
+                 FROM dashboard_projects
+                 WHERE user_id = $1 AND legacy_id = $2 AND deleted_at IS NULL",
+            )
+            .bind(user_id)
+            .bind(*destino)
+            .fetch_optional(&mut *transaction)
+            .await?;
+            if existe.is_none() {
+                transaction.rollback().await?;
+                return Ok(BulkReorderOutcome::UnknownProject(*destino));
+            }
+        }
+        let mut filas = Vec::with_capacity(movimientos.len());
+        for (legacy_id, orden, proyecto_id) in movimientos {
+            let fila = sqlx::query_as(
+                "UPDATE dashboard_tasks
+                 SET project_legacy_id = COALESCE($3, project_legacy_id),
+                     sort_order = $4,
+                     payload = COALESCE(payload, '{}'::jsonb)
+                         || jsonb_build_object('orden', $4)
+                         || jsonb_build_object('proyectoId', COALESCE($3, project_legacy_id)),
+                     updated_at = NOW()
+                 WHERE user_id = $1 AND legacy_id = $2 AND deleted_at IS NULL
+                 RETURNING legacy_id, payload, updated_at",
+            )
+            .bind(user_id)
+            .bind(*legacy_id)
+            .bind(*proyecto_id)
+            .bind(*orden)
+            .fetch_one(&mut *transaction)
+            .await?;
+            filas.push(fila);
+        }
+        transaction.commit().await?;
+        Ok(BulkReorderOutcome::Applied(filas))
+    }
 }

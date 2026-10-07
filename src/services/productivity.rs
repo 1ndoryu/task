@@ -3,9 +3,12 @@ use uuid::Uuid;
 
 use crate::errors::AppError;
 use crate::models::productivity::{
-    ProductivityWriteResponse, UpsertHabitRequest, UpsertProjectRequest, UpsertTaskRequest,
+    BulkReorderRequest, BulkReorderResponse, ProductivityWriteResponse, ProjectTasksResponse,
+    UpsertHabitRequest, UpsertProjectRequest, UpsertTaskRequest,
 };
-use crate::repositories::{ProductivityRepository, ProductivityWriteRow, TaskUpsertOutcome};
+use crate::repositories::{
+    BulkReorderOutcome, ProductivityRepository, ProductivityWriteRow, TaskUpsertOutcome,
+};
 
 pub struct ProductivityService;
 
@@ -78,6 +81,56 @@ impl ProductivityService {
     ) -> Result<(), AppError> {
         ProductivityRepository::delete_habit(pool, user_id, legacy_id).await?;
         Ok(())
+    }
+
+    /// [07AA-1] Columna del kanban: falla explícito si el proyecto no existe,
+    /// es ajeno o está borrado (la columna se define por `legacy_id`).
+    pub async fn list_project_tasks(
+        pool: &PgPool,
+        user_id: Uuid,
+        project_legacy_id: i64,
+    ) -> Result<ProjectTasksResponse, AppError> {
+        if !ProductivityRepository::project_exists(pool, user_id, project_legacy_id).await? {
+            return Err(AppError::NotFound("Proyecto no encontrado".into()));
+        }
+        let rows =
+            ProductivityRepository::list_tasks_by_project(pool, user_id, project_legacy_id).await?;
+        Ok(ProjectTasksResponse {
+            tareas: rows.into_iter().map(response).collect(),
+        })
+    }
+
+    /// [07AA-1] Bulk atómico: valida destinos positivos antes de tocar la BD;
+    /// el repositorio garantiza todo-o-nada y mapea cada fallo a su causa.
+    pub async fn bulk_reorder(
+        pool: &PgPool,
+        user_id: Uuid,
+        request: BulkReorderRequest,
+    ) -> Result<BulkReorderResponse, AppError> {
+        if !request.ids_validos() {
+            return Err(AppError::Validation(
+                "legacyId y proyectoId deben ser positivos".into(),
+            ));
+        }
+        let movimientos: Vec<(i64, i32, Option<i64>)> = request
+            .movimientos
+            .iter()
+            .map(|m| (m.legacy_id, m.orden, m.proyecto_id))
+            .collect();
+        match ProductivityRepository::bulk_reorder(pool, user_id, &movimientos).await? {
+            BulkReorderOutcome::Applied(rows) => Ok(BulkReorderResponse {
+                actualizadas: rows.into_iter().map(response).collect(),
+            }),
+            BulkReorderOutcome::UnknownTask(id) => {
+                Err(AppError::NotFound(format!("Tarea {id} no encontrada")))
+            }
+            BulkReorderOutcome::UnknownProject(id) => Err(AppError::NotFound(format!(
+                "Proyecto destino {id} no encontrado"
+            ))),
+            BulkReorderOutcome::DuplicateTask(id) => Err(AppError::Validation(format!(
+                "Tarea {id} duplicada en el lote"
+            ))),
+        }
     }
 }
 

@@ -5,7 +5,8 @@ use validator::Validate;
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::productivity::{
-    ProductivityWriteResponse, UpsertHabitRequest, UpsertProjectRequest, UpsertTaskRequest,
+    BulkReorderRequest, BulkReorderResponse, ProductivityWriteResponse, ProjectTasksResponse,
+    UpsertHabitRequest, UpsertProjectRequest, UpsertTaskRequest,
 };
 use crate::services::ProductivityService;
 use crate::AppState;
@@ -162,6 +163,72 @@ pub async fn delete_habit(
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/projects/:legacy_id", axum::routing::put(upsert_project).delete(delete_project))
+        .route("/projects/:legacy_id/tasks", axum::routing::get(list_project_tasks))
         .route("/tasks/:legacy_id", axum::routing::put(upsert_task).delete(delete_task))
         .route("/habits/:legacy_id", axum::routing::put(upsert_habit).delete(delete_habit))
+}
+
+/// [07AA-1] Columna del kanban: tareas propias no borradas de un proyecto,
+/// ordenadas por `sort_order`. Solo lectura (sin cuota de escritura).
+#[utoipa::path(
+    get,
+    tag = "tasks",
+    path = "/api/projects/{legacy_id}/tasks",
+    params(("legacy_id" = i64, Path, description = "ID legacy del proyecto (columna)")),
+    responses(
+        (status = 200, description = "Tareas de la columna", body = ProjectTasksResponse),
+        (status = 404, description = "Proyecto no encontrado", body = ErrorResponse)
+    ),
+    security(("session_cookie" = []))
+)]
+pub async fn list_project_tasks(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(legacy_id): Path<i64>,
+) -> Result<Json<ProjectTasksResponse>, AppError> {
+    validate_legacy_id(legacy_id)?;
+    Ok(Json(
+        ProductivityService::list_project_tasks(&state.pool, auth.user_id, legacy_id).await?,
+    ))
+}
+
+/// [07AA-1] Reordenado/movido atómico del kanban: todo el lote en una
+/// transacción o nada (un solo golpe a la cuota de escritura en vez de N PUTs).
+#[utoipa::path(
+    post,
+    tag = "tasks",
+    path = "/api/tasks/reordenar",
+    request_body = BulkReorderRequest,
+    responses(
+        (status = 200, description = "Lote aplicado", body = BulkReorderResponse),
+        (status = 404, description = "Tarea o proyecto destino no encontrado", body = ErrorResponse),
+        (status = 422, description = "Lote inválido o con duplicados", body = ErrorResponse)
+    ),
+    security(("session_cookie" = []))
+)]
+pub async fn bulk_reorder_tasks(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Json(request): Json<BulkReorderRequest>,
+) -> Result<Json<BulkReorderResponse>, AppError> {
+    request
+        .validate()
+        .map_err(|error| AppError::Validation(error.to_string()))?;
+    Ok(Json(
+        ProductivityService::bulk_reorder(&state.pool, auth.user_id, request).await?,
+    ))
+}
+
+/// [07AA-1] Solo el bulk lleva cuota de escritura (grupo `api_escritura`,
+/// 1 min/IP como `backups`); las lecturas y upserts conservan su régimen.
+pub fn bulk_routes(state: &AppState) -> Router<AppState> {
+    Router::new()
+        .route("/tasks/reordenar", axum::routing::post(bulk_reorder_tasks))
+        .route_layer(axum::middleware::from_fn_with_state(
+            (
+                state.api_escritura_limiter.clone(),
+                state.trust_proxy_headers,
+            ),
+            crate::middleware::rate_limit::limite_escritura_api,
+        ))
 }

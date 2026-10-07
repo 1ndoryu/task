@@ -31,7 +31,7 @@ pub use dashboard::DashboardRepository;
 pub use habit_history::HabitHistoryRepository;
 pub use note::NoteRepository;
 pub use notifications::{NotificationRepository, NotificationRow};
-pub use productivity::{ProductivityRepository, ProductivityWriteRow, TaskUpsertOutcome};
+pub use productivity::{BulkReorderOutcome, ProductivityRepository, ProductivityWriteRow, TaskUpsertOutcome};
 pub use reminder::{ReminderCreateOutcome, ReminderRepository};
 pub use shared::{SharedCreateOutcome, SharedItemRow, SharedParticipantRow, SharedRepository};
 pub use timeline::{TimelineRepository, TimelineRow, TimelineSystemInsert};
