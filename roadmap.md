@@ -19,7 +19,7 @@ Segunda auditoría de principios SOLID iniciada el 2026-08-25: **855 archivos** 
 
 ## Bloque actual
 
-- **07AA-1 — F1 kanban backend (pestaña `tareas` WM, plan `workspace-manager/Agente/planes/plan-tareas-tasks-2026-10-07.md`)** ✅ F1 CERRADA 2026-10-07 (commit `14bbe8a`, sin push):
+- **07AA-1 — F1 kanban backend (pestaña `tareas` WM, plan `workspace-manager/Agente/planes/plan-tareas-tasks-2026-10-07.md`)** ✅ F1 CERRADA 2026-10-07 (commit `14bbe8a`, pusheado):
   crear `GET /api/projects/:legacy_id/tasks` (tareas propias no borradas, orden
   `sort_order`) + `POST /api/tasks/reordenar` (bulk transaccional ≤200 movs, cuota
   escritura) + orden columnas vía `PUT /api/dashboard/settings` (`preferencias.kanban.v1`
@@ -27,6 +27,15 @@ Segunda auditoría de principios SOLID iniciada el 2026-08-25: **855 archivos** 
   en vivo contra BD rama. Excepción firmada a regla 18: la lógica de tareas vive
   aquí (producto), no en `glory-rs` (framework); solo se extrae a núcleo agnóstico
   lo reutilizable por terceros (tipos, cliente, validaciones, ops crear/mover/ordenar).
+- **07AA-1 — F1b núcleo kanban agnóstico (2026-10-07, EN CURSO).** Extraer a `tasks-core/`
+  (capa agnóstica en este repo, cero React/CSS): tipos mínimos, validaciones espejo del
+  backend, cliente fetch-inyectado (endpoints F1 + clave `kanban.v1`), ops puras (bulk,
+  fusión, merge de preferencias) y consultas de árbol genéricas (migran desde
+  `frontend/src/app/utils/jerarquiaTareas.ts`, que queda como re-export; `posicionamientoTareas.ts`
+  con reglas de producto como `esHabito` se queda en el editor). Excepción gobernanza
+  FIRMADA (opción 1, 2026-10-07): la capa vive aquí por ser lógica de producto-tareas, no
+  framework; `AGENTS.md:18` no aplica a este paquete. Consumo WM por pin de commit
+  (tags después); `CHANGELOG.md` + matriz de versiones en el paquete. Sin `file:` (EPERM OneDrive).
 - 🔧 **En curso (07-09-2026): 079A-1 — página permanente local (autoinicio).** task corre
 SIEMPRE en local en `http://127.0.0.1:4191`, sin interferir con otros agentes. Puertos
 definidos en `.env` (fuente única: `PORT=4190`, `VITE_PORT=4191`, `CORS_ORIGINS=:4191`);

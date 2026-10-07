@@ -1,0 +1,12 @@
+{
+  "name": "tasks-core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Núcleo kanban agnóstico (tipos, validaciones, cliente, ops, jerarquía): cero React/CSS/DOM. Excepción gobernanza firmada en roadmap 07AA-1 F1b.",
+  "scripts": {
+    "check": "node check-agnostico.mjs",
+    "test": "node --test src/",
+    "type-check": "node ../frontend/node_modules/typescript/bin/tsc -p tsconfig.json --noEmit"
+  }
+}
