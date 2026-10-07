@@ -19,7 +19,7 @@ Segunda auditoría de principios SOLID iniciada el 2026-08-25: **855 archivos** 
 
 ## Bloque actual
 
-- **07AA-1 — F1 kanban backend (pestaña `tareas` WM, plan `workspace-manager/Agente/planes/plan-tareas-tasks-2026-10-07.md`)** EN CURSO:
+- **07AA-1 — F1 kanban backend (pestaña `tareas` WM, plan `workspace-manager/Agente/planes/plan-tareas-tasks-2026-10-07.md`)** ✅ F1 CERRADA 2026-10-07 (commit `14bbe8a`, sin push):
   crear `GET /api/projects/:legacy_id/tasks` (tareas propias no borradas, orden
   `sort_order`) + `POST /api/tasks/reordenar` (bulk transaccional ≤200 movs, cuota
   escritura) + orden columnas vía `PUT /api/dashboard/settings` (`preferencias.kanban.v1`
