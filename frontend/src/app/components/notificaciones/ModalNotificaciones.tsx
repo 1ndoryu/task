@@ -7,6 +7,7 @@
  */
 
 import {Bell} from 'lucide-react';
+import type {CSSProperties} from 'react';
 import type {Notificacion} from '../../types/dashboard';
 import {ItemNotificacion} from './ItemNotificacion';
 import {useModalNotificaciones} from '../../hooks/dashboard/useModalNotificaciones';
@@ -32,10 +33,10 @@ interface MnnAcciones {
 interface ModalNotificacionesProps extends MnnEstado, MnnAcciones {}
 
 export function ModalNotificaciones({notificaciones, noLeidas, total: _total, cargando: _cargando, cargandoPrimeraVez, posicionX, posicionY, onMarcarLeida, onMarcarTodasLeidas, onEliminar, onClickNotificacion, onCerrar}: ModalNotificacionesProps): JSX.Element {
-    const {modalRef, calcularEstilo, manejarClickNotificacion, mostrarCargando} = useModalNotificaciones({noLeidas, posicionX, posicionY, notificaciones, cargandoPrimeraVez, onMarcarLeida, onMarcarTodasLeidas, onClickNotificacion, onCerrar});
+    const {modalRef, posicionAjustada, manejarClickNotificacion, mostrarCargando} = useModalNotificaciones({noLeidas, posicionX, posicionY, notificaciones, cargandoPrimeraVez, onMarcarLeida, onMarcarTodasLeidas, onClickNotificacion, onCerrar});
 
     return (
-        <div id="modal-notificaciones" className="modalNotificaciones" ref={modalRef} style={calcularEstilo()}>
+        <div id="modal-notificaciones" className="modalNotificaciones" ref={modalRef} style={{'--notif-x': `${posicionAjustada.x}px`, '--notif-y': `${posicionAjustada.y}px`} as CSSProperties}>
             {/* Lista de notificaciones */}
             <div className="modalNotificaciones__lista">
                 {mostrarCargando ? (

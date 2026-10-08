@@ -23,7 +23,8 @@ import {HistorialHabitoInline} from '../../shared/HistorialHabito';
 interface FilaHabitoDatos {
     habito: Habito;
     configuracion: ConfiguracionHabitos;
-    estiloGrid: React.CSSProperties;
+    /* Anchos de columna como texto: se publica como --tabla-columnas */
+    columnasTabla: string;
     tareas?: Tarea[];
     habitos?: Habito[];
 }
@@ -42,7 +43,7 @@ interface FilaHabitoAcciones {
 interface FilaHabitoProps extends FilaHabitoDatos, FilaHabitoAcciones {}
 
 /* [H-F13-07] Prop `indice` eliminada: no se usaba en FilaHabito. */
-export function FilaHabito({habito, onToggle, onEditar, onEliminar, onPosponer, onPausar, onMarcarDia, onDesmarcarDia, onActualizar, configuracion, estiloGrid, tareas = [], habitos = []}: FilaHabitoProps): JSX.Element {
+export function FilaHabito({habito, onToggle, onEditar, onEliminar, onPosponer, onPausar, onMarcarDia, onDesmarcarDia, onActualizar, configuracion, columnasTabla, tareas = [], habitos = []}: FilaHabitoProps): JSX.Element {
     const {
         mostrarAcciones, setMostrarAcciones,
         menuContextual,
@@ -96,7 +97,7 @@ export function FilaHabito({habito, onToggle, onEditar, onEliminar, onPosponer, 
 
     return (
         <>
-            <div className={`tablaFila tablaFilaEditable ${completadoHoy ? 'tablaFilaCompletada' : ''} ${configuracion.modoCompacto ? 'tablaFilaCompacta' : ''} ${habitoTocaHoy && !completadoHoy ? 'tablaFilaTocaHoy' : ''} ${estaPausado ? 'tablaFilaPausada' : ''} ${bloqueado ? 'dependenciaBloqueada' : ''} ${esDestello ? 'dependenciaDestello' : ''}`} onClick={manejarEditar} onContextMenu={manejarClickDerecho} onMouseEnter={() => setMostrarAcciones(true)} onMouseLeave={() => setMostrarAcciones(false)} style={estiloGrid}>
+            <div className={`tablaFila tablaFilaEditable ${completadoHoy ? 'tablaFilaCompletada' : ''} ${configuracion.modoCompacto ? 'tablaFilaCompacta' : ''} ${habitoTocaHoy && !completadoHoy ? 'tablaFilaTocaHoy' : ''} ${estaPausado ? 'tablaFilaPausada' : ''} ${bloqueado ? 'dependenciaBloqueada' : ''} ${esDestello ? 'dependenciaDestello' : ''}`} onClick={manejarEditar} onContextMenu={manejarClickDerecho} onMouseEnter={() => setMostrarAcciones(true)} onMouseLeave={() => setMostrarAcciones(false)} style={{'--tabla-columnas': columnasTabla} as React.CSSProperties}>
                 {/* Checkbox */}
                 {configuracion.columnasVisibles.indice && (
                     <div className="tablaColumnaCheckbox" onClick={manejarToggleConDependencias}>

@@ -55,8 +55,9 @@ export function useModalNotificaciones({noLeidas, posicionX, posicionY, notifica
         };
     }, [onCerrar]);
 
-    /* Ajustar posición para que no se salga de la pantalla */
-    const calcularEstilo = useCallback(() => {
+    /* Posición ajustada para que no se salga de la pantalla (números; el
+     * componente los publica como --notif-x/--notif-y, antes style left/top directo) */
+    const posicionAjustada = useMemo(() => {
         const anchoModal = 360;
         const altoMaximo = 480;
         const margen = 12;
@@ -76,8 +77,8 @@ export function useModalNotificaciones({noLeidas, posicionX, posicionY, notifica
         }
 
         return {
-            left: `${Math.max(margen, x)}px`,
-            top: `${y}px`
+            x: Math.max(margen, x),
+            y
         };
     }, [posicionX, posicionY]);
 
@@ -97,7 +98,7 @@ export function useModalNotificaciones({noLeidas, posicionX, posicionY, notifica
 
     return {
         modalRef,
-        calcularEstilo,
+        posicionAjustada,
         manejarClickNotificacion,
         mostrarCargando
     };

@@ -54,14 +54,14 @@ interface TablaHabitosDrag {
 interface TablaHabitosProps extends TablaHabitosDatos, TablaHabitosAccionesHabito, TablaHabitosAccionesSubHabito, TablaHabitosDrag {}
 
 export function TablaHabitos({habitos, tareas = [], onAñadirHabito, onToggleHabito, onEditarHabito, onEliminarHabito, onPosponerHabito, onPausarHabito, onMarcarDiaHabito, onDesmarcarDiaHabito, onActualizarHabito, onToggleSubHabito, onConfigurarSubHabito, onPosponerSubHabitoConTiempo, habilitarDrag = false, onReordenarHabitos, configuracion = CONFIG_HABITOS_POR_DEFECTO}: TablaHabitosProps): JSX.Element {
-    const {habitosVisibles, habitosPausados, estiloGrid} = useTablaHabitos(habitos, configuracion);
+    const {habitosVisibles, habitosPausados, columnasTabla} = useTablaHabitos(habitos, configuracion);
 
     /* [H-F13-06] Fila + subhábitos, compartida entre drag&drop y vista normal. */
     const renderFila = (habito: Habito): JSX.Element => (
         <React.Fragment key={habito.id}>
-            <FilaHabito habito={habito} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onPausar={onPausarHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} onActualizar={onActualizarHabito} configuracion={configuracion} estiloGrid={estiloGrid} tareas={tareas} habitos={habitos} />
+            <FilaHabito habito={habito} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onPausar={onPausarHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} onActualizar={onActualizarHabito} configuracion={configuracion} columnasTabla={columnasTabla} tareas={tareas} habitos={habitos} />
             {habito.subhabitos && habito.subhabitos.length > 0 && habito.subhabitos.map(sub => (
-                <FilaSubHabito key={`sub-${sub.id}`} subHabito={sub} habitoPadreId={habito.id} frecuenciaPadre={habito.frecuencia} onToggle={onToggleSubHabito} onConfigurar={onConfigurarSubHabito} onPosponerConTiempo={onPosponerSubHabitoConTiempo} configuracion={configuracion} estiloGrid={estiloGrid} tareas={tareas} habitos={habitos} />
+                <FilaSubHabito key={`sub-${sub.id}`} subHabito={sub} habitoPadreId={habito.id} frecuenciaPadre={habito.frecuencia} onToggle={onToggleSubHabito} onConfigurar={onConfigurarSubHabito} onPosponerConTiempo={onPosponerSubHabitoConTiempo} configuracion={configuracion} columnasTabla={columnasTabla} tareas={tareas} habitos={habitos} />
             ))}
         </React.Fragment>
     );
@@ -73,7 +73,7 @@ export function TablaHabitos({habitos, tareas = [], onAñadirHabito, onToggleHab
             ) : (
                 <>
                     {/* Encabezado de tabla */}
-                    <EncabezadoTabla configuracion={configuracion} estiloGrid={estiloGrid} />
+                    <EncabezadoTabla configuracion={configuracion} columnasTabla={columnasTabla} />
 
                     {/* [218A-1] Filas de hábitos activos — con o sin drag & drop */}
                     {habilitarDrag && onReordenarHabitos ? (
@@ -95,7 +95,7 @@ export function TablaHabitos({habitos, tareas = [], onAñadirHabito, onToggleHab
                                 <span className="tablaSeparadorPausados__texto">Pausados ({habitosPausados.length})</span>
                             </div>
                             {habitosPausados.map(habito => (
-                                <FilaHabito key={habito.id} habito={habito} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onPausar={onPausarHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} onActualizar={onActualizarHabito} configuracion={configuracion} estiloGrid={estiloGrid} tareas={tareas} habitos={habitos} />
+                                <FilaHabito key={habito.id} habito={habito} onToggle={onToggleHabito} onEditar={onEditarHabito} onEliminar={onEliminarHabito} onPosponer={onPosponerHabito} onPausar={onPausarHabito} onMarcarDia={onMarcarDiaHabito} onDesmarcarDia={onDesmarcarDiaHabito} onActualizar={onActualizarHabito} configuracion={configuracion} columnasTabla={columnasTabla} tareas={tareas} habitos={habitos} />
                             ))}
                         </>
                     )}

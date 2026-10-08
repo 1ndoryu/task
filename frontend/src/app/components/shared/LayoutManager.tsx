@@ -20,7 +20,7 @@ interface LayoutManagerProps {
 }
 
 export function LayoutManager({modoColumnas, anchos, onAjustarAnchos, columna1, columna2, columna3, habilitarResize = true}: LayoutManagerProps): JSX.Element {
-    const {contenedorRef, arrastrando, iniciarArrastre, estiloGrid} = useLayoutManager({
+    const {contenedorRef, arrastrando, iniciarArrastre, columnasDisposicion} = useLayoutManager({
         modoColumnas,
         anchos,
         onAjustarAnchos
@@ -40,7 +40,7 @@ export function LayoutManager({modoColumnas, anchos, onAjustarAnchos, columna1, 
     };
 
     return (
-        <div ref={contenedorRef} className={`layoutManager modo${modoColumnas}Columnas ${arrastrando ? 'arrastrando' : ''}`} style={estiloGrid}>
+        <div ref={contenedorRef} className={`layoutManager modo${modoColumnas}Columnas ${arrastrando ? 'arrastrando' : ''}`} style={{'--disposicion-columnas': columnasDisposicion} as React.CSSProperties}>
             {/* Columna 1 */}
             <div className="layoutColumna layoutColumna1">{columna1}</div>
 

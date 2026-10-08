@@ -15,10 +15,19 @@ interface UseMenuContextualParams {
     esSubmenu: boolean;
 }
 
+interface PosicionSubmenu {
+    /* Lado de apertura (flip si se sale por la derecha) y desplazamiento
+     * vertical/margen como texto: el componente los publica como
+     * --submenu-y/--submenu-margen (seam CSS, antes style left/right/top/marginLeft directo) */
+    ladoSubmenu: 'derecha' | 'izquierda';
+    desplazamientoSubmenuY: string;
+    margenSubmenu: string;
+}
+
 interface UseMenuContextualResult {
     menuRef: React.RefObject<HTMLDivElement | null>;
     opcionActivaId: string | null;
-    estiloSubmenu: React.CSSProperties;
+    posicionSubmenu: PosicionSubmenu;
     manejarClick: (opcion: OpcionMenu) => void;
     manejarMouseEnterOpcion: (opcionId: string) => void;
 }
@@ -26,10 +35,10 @@ interface UseMenuContextualResult {
 export function useMenuContextual({posicionX, posicionY, onSeleccionar, onCerrar, esSubmenu}: UseMenuContextualParams): UseMenuContextualResult {
     const menuRef = useRef<HTMLDivElement>(null);
     const [opcionActivaId, setOpcionActivaId] = useState<string | null>(null);
-    const [estiloSubmenu, setEstiloSubmenu] = useState<React.CSSProperties>({
-        left: '100%',
-        top: 0,
-        marginLeft: '4px'
+    const [posicionSubmenu, setPosicionSubmenu] = useState<PosicionSubmenu>({
+        ladoSubmenu: 'derecha',
+        desplazamientoSubmenuY: '0px',
+        margenSubmenu: '4px'
     });
 
     /* Ajustar posición si el menú se sale de la pantalla */
@@ -108,25 +117,22 @@ export function useMenuContextual({posicionX, posicionY, onSeleccionar, onCerrar
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
 
-        let left: string | number = '100%';
-        let right: string | number = 'auto';
-        let top: number = 0;
-        let marginLeft = '4px';
+        let ladoSubmenu: 'derecha' | 'izquierda' = 'derecha';
+        let desplazamientoY = 0;
+        let margenSubmenu = '4px';
 
         /* Ajustar si se sale por la derecha - mostrar a la izquierda */
         if (rect.right > viewportWidth - 10) {
-            left = 'auto';
-            right = '100%';
-            marginLeft = '-4px';
+            ladoSubmenu = 'izquierda';
+            margenSubmenu = '-4px';
         }
 
         /* Ajustar si se sale por abajo - mover hacia arriba */
         if (rect.bottom > viewportHeight - 10) {
-            const overflow = rect.bottom - (viewportHeight - 10);
-            top = -overflow;
+            desplazamientoY = -(rect.bottom - (viewportHeight - 10));
         }
 
-        setEstiloSubmenu({left, right, top, marginLeft});
+        setPosicionSubmenu({ladoSubmenu, desplazamientoSubmenuY: `${desplazamientoY}px`, margenSubmenu});
     }, [esSubmenu]);
 
     /* Agregar clase al body para ocultar tooltips */
@@ -152,5 +158,5 @@ export function useMenuContextual({posicionX, posicionY, onSeleccionar, onCerrar
         setOpcionActivaId(opcionId);
     }, []);
 
-    return {menuRef, opcionActivaId, estiloSubmenu, manejarClick, manejarMouseEnterOpcion};
+    return {menuRef, opcionActivaId, posicionSubmenu, manejarClick, manejarMouseEnterOpcion};
 }

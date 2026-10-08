@@ -228,85 +228,10 @@
     border-color: var(--dashboard-estadoExitoBorde);
 }
 
-/* [207A-4] Submenu de areaNuevoInline: elegir entre Tarea y Hábito */
-/* [20-08-2026] Compartido con el botón "+" del header del panel de ejecución:
- * la variante --abajo se abre hacia abajo (top: 100%) en vez de hacia arriba. */
-.submenuNuevoInline {
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    /* [25-08-2026] Font-family explícita: la variante portada a body (estado
-     * vacío) pierde la herencia de .dashboardContenedor y caía a Times New
-     * Roman (mismo caso documentado en modalSeleccionPropiedad/panelGruposFb). */
-    font-family: var(--dashboard-fuenteMonoespaciada);
-    background: var(--dashboard-fondoSecundario);
-    border: 1px solid var(--dashboard-bordePrincipal);
-    border-radius: var(--dashboard-radioMd);
-    box-shadow: var(--dashboard-sombraMedia);
-    z-index: 100;
-    min-width: 140px;
-    padding: var(--dashboard-espacioXxs) 0;
-    animation: aparecer var(--dashboard-transicionRapida) ease;
-    margin-bottom: var(--dashboard-espacioXxs);
-}
-
 /* Contenedor del botón "+" en el header del panel: referencia para el submenu */
 .seccionAccionesItem {
     position: relative;
     display: inline-flex;
-}
-
-.submenuNuevoInline--abajo {
-    bottom: auto;
-    top: 100%;
-    left: auto;
-    right: 0;
-    transform: none;
-    margin-bottom: 0;
-    margin-top: var(--dashboard-espacioXxs);
-}
-
-/* [25-08-2026] Variante fijada del estado vacío de tareas: se ancla a las
- * coordenadas del botón "+ Crear tarea" (left/top van inline desde el rect);
- * esta clase solo fija el modo de posicionamiento y neutraliza los valores
- * de la base/--abajo que no aplican en fixed. */
-.submenuNuevoInline--fijado {
-    position: fixed;
-    bottom: auto;
-    top: auto;
-    left: auto;
-    right: auto;
-    transform: none;
-    margin: 0;
-    z-index: 1000;
-}
-
-.submenuNuevoInline__opcion {
-    display: flex;
-    align-items: center;
-    gap: var(--dashboard-espacioSm);
-    padding: var(--dashboard-espacioSm) var(--dashboard-espacioMd);
-    background: none;
-    border: none;
-    color: var(--dashboard-textoNormal);
-    font-size: var(--dashboard-tamanoPequeno);
-    font-family: inherit;
-    cursor: pointer;
-    width: 100%;
-    text-align: left;
-    transition: background-color var(--dashboard-transicionRapida);
-}
-
-.submenuNuevoInline__opcion:hover {
-    background-color: var(--dashboard-fondoHover);
-}
-
-.submenuNuevoInline__opcion svg {
-    color: var(--dashboard-textoApagado);
-    flex-shrink: 0;
 }
 
 

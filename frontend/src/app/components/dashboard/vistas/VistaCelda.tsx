@@ -26,8 +26,9 @@ interface VistaCeldaIdentidad {
 }
 
 interface VistaCeldaArea {
-    /* Estilos del área en el grid (gridRow/gridColumn con spans) */
-    estiloArea: React.CSSProperties;
+    /* Área en el grid como texto (columna/fila con spans): se publica
+     * como --celda-columna/--celda-fila (seam CSS, antes style directo) */
+    areaGrid: {columna: string; fila: string};
     /* Si hay más de una celda → se muestran acciones de mover/quitar */
     total: number;
     indice: number;
@@ -55,7 +56,7 @@ export function VistaCelda({
     celdaId,
     panelId,
     ctx,
-    estiloArea,
+    areaGrid,
     total,
     indice,
     estaEligiendo = false,
@@ -98,7 +99,7 @@ export function VistaCelda({
     ].filter(Boolean).join(' ');
 
     return (
-        <div className={clases} style={estiloArea}>
+        <div className={clases} style={{'--celda-columna': areaGrid.columna, '--celda-fila': areaGrid.fila} as React.CSSProperties}>
             <DashboardPanelView panelId={panelId} ctx={ctx} accionesExtra={accionesExtra} onDividirPanel={onDividirPanel} />
             {/* Handles de resize en los bordes reales de este cuadro */}
             {handles}

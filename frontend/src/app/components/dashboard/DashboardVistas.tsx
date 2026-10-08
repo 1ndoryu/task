@@ -20,6 +20,7 @@
  */
 
 import {useCallback, useMemo, useState} from 'react';
+import type {CSSProperties} from 'react';
 import type {DashboardCompletoRetorno} from '../../hooks/useDashboardCompleto';
 import type {PanelId} from '../../hooks/useConfiguracionLayout';
 import type {CeldaVista, Vista} from '../../types/vistas';
@@ -66,12 +67,10 @@ export function DashboardVistas({
     const total = celdas.length;
     if (total === 0) return null;
 
-    /* Estilos del grid desde las proporciones (pesos → fr) */
-    const estiloGrid = useMemo(() => ({
-        /* sentinel-disable inline-style-prohibido */
-        gridTemplateColumns: vista.proporcionesColumnas.map(w => `${w}fr`).join(' '),
-        gridTemplateRows: vista.proporcionesFilas.map(w => `${w}fr`).join(' '),
-    }), [vista.proporcionesColumnas, vista.proporcionesFilas]);
+    /* Proporciones del grid como texto (pesos → fr): el contenedor las
+     * publica como --vistas-columnas/--vistas-filas (seam CSS, antes style directo) */
+    const columnasGrid = useMemo(() => vista.proporcionesColumnas.map(w => `${w}fr`).join(' '), [vista.proporcionesColumnas]);
+    const filasGrid = useMemo(() => vista.proporcionesFilas.map(w => `${w}fr`).join(' '), [vista.proporcionesFilas]);
 
     /* Handles de resize EN LOS BORDES REALES de cada celda.
      * Cada celda (cuadro) tiene:
@@ -112,11 +111,11 @@ export function DashboardVistas({
         return hs;
     }, [celdas, vista.totalColumnas, vista.totalFilas]);
 
-    /* Estilo del área de una celda (posición + span de fusión) */
-    const estiloArea = useCallback((celda: CeldaVista) => ({
-        /* sentinel-disable inline-style-prohibido */
-        gridColumn: `${celda.columna} / span ${celda.ancho}`,
-        gridRow: `${celda.fila} / span ${celda.alto}`,
+    /* Área de una celda como texto (posición + span de fusión): VistaCelda
+     * la publica como --celda-columna/--celda-fila (antes style directo) */
+    const areaCelda = useCallback((celda: CeldaVista) => ({
+        columna: `${celda.columna} / span ${celda.ancho}`,
+        fila: `${celda.fila} / span ${celda.alto}`,
     }), []);
 
     const handleElegir = useCallback((celdaId: string, x: number, y: number) => {
@@ -145,14 +144,14 @@ export function DashboardVistas({
      * DashboardVistas solo conserva `onAgregarPanel` para aplicar la selección. */
 
     return (
-        <div className="dashboardVistas" style={estiloGrid}>
+        <div className="dashboardVistas" style={{'--vistas-columnas': columnasGrid, '--vistas-filas': filasGrid} as CSSProperties}>
             {celdas.map((celda, indice) => (
                 <VistaCelda
                     key={celda.id}
                     celdaId={celda.id}
                     panelId={celda.panelId}
                     ctx={ctx}
-                    estiloArea={estiloArea(celda)}
+                    areaGrid={areaCelda(celda)}
                     total={total}
                     indice={indice}
                     estaEligiendo={selectorCelda?.celdaId === celda.id}

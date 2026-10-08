@@ -55,7 +55,9 @@ export function useTablaHabitos(habitos: Habito[], configuracion: ConfiguracionH
 
     const habitosPausados = useMemo(() => habitos.filter(habito => habito.pausado), [habitos]);
 
-    const estiloGrid = useMemo(() => {
+    /* Anchos de columna como texto: los componentes lo publican como
+     * --tabla-columnas (seam CSS, antes style gridTemplateColumns directo) */
+    const columnasTabla = useMemo(() => {
         const widths: string[] = [];
         if (configuracion.columnasVisibles.indice) widths.push('2rem');
         widths.push('3fr');
@@ -65,10 +67,10 @@ export function useTablaHabitos(habitos: Habito[], configuracion: ConfiguracionH
         if (configuracion.columnasVisibles.urgencia) widths.push('2fr');
         if (configuracion.columnasVisibles.racha) widths.push('1.5fr');
         if (configuracion.columnasVisibles.acciones) widths.push('auto');
-        return {gridTemplateColumns: widths.join(' ')};
+        return widths.join(' ');
     }, [configuracion.columnasVisibles]);
 
-    return {habitosVisibles, habitosPausados, estiloGrid};
+    return {habitosVisibles, habitosPausados, columnasTabla};
 }
 
 /*

@@ -7,6 +7,11 @@
  */
 .modalNotificaciones {
     position: fixed;
+    /* Posición publicada inline como --notif-x/--notif-y (antes style left/top directo) */
+    --notif-x: 0;
+    --notif-y: 0;
+    left: var(--notif-x);
+    top: var(--notif-y);
     z-index: 1000;
     width: 360px;
     max-height: 480px;

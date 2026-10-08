@@ -28,7 +28,8 @@ interface FilaSubHabitoProps {
     onConfigurar?: (habitoId: number, subHabitoId: number) => void;
     onPosponerConTiempo?: (habitoId: number, subHabitoId: number, hasta: string | null) => void;
     configuracion: ConfiguracionHabitos;
-    estiloGrid: React.CSSProperties;
+    /* Anchos de columna como texto: se publica como --tabla-columnas */
+    columnasTabla: string;
     tareas?: Tarea[];
     habitos?: Habito[];
 }
@@ -86,7 +87,7 @@ function useFilaSubHabito(subHabito: SubHabito, frecuenciaPadre: Habito['frecuen
     };
 }
 
-export function FilaSubHabito({subHabito, habitoPadreId, frecuenciaPadre, onToggle, onConfigurar, configuracion, estiloGrid, tareas = [], habitos = []}: FilaSubHabitoProps): JSX.Element {
+export function FilaSubHabito({subHabito, habitoPadreId, frecuenciaPadre, onToggle, onConfigurar, configuracion, columnasTabla, tareas = [], habitos = []}: FilaSubHabitoProps): JSX.Element {
     const {
         completadoHoy,
         pospuestoHasta,
@@ -125,7 +126,7 @@ export function FilaSubHabito({subHabito, habitoPadreId, frecuenciaPadre, onTogg
         <div
             className={`tablaFila tablaFilaEditable tablaFila--subhabito ${completadoHoy ? 'tablaFilaCompletada' : ''} ${configuracion.modoCompacto ? 'tablaFilaCompacta' : ''} ${estaPausado ? 'tablaFilaPausada' : ''} ${bloqueado ? 'dependenciaBloqueada' : ''} ${esDestello ? 'dependenciaDestello' : ''}`}
             onClick={manejarConfigurar}
-            style={estiloGrid}
+            style={{'--tabla-columnas': columnasTabla} as React.CSSProperties}
         >
             {/* Checkbox */}
             {configuracion.columnasVisibles.indice && (

@@ -31,12 +31,10 @@
 }
 
 /* [039A-1/FASE-FINAL] Seam posicionamiento: los hooks publican --menuX/--menuY
- * (antes style.left/top directos). Defaults en la propia regla: fuera de pantalla
- * hasta el efecto (evita flash) y definicion estatica para el scanner.
- * Submenus excluidos: usan estilo propio. */
+ * (antes style.left/top directos). Defaults centralizados en variables.css
+ * (regla 11, fuera de pantalla hasta el efecto, evita flash); esta regla solo
+ * consume las variables. Submenus excluidos: usan estilo propio. */
 .menuContextual:not(.menuContextualSubmenu) {
-    --menuX: -9999px;
-    --menuY: -9999px;
     left: var(--menuX);
     top: var(--menuY);
 }
@@ -146,6 +144,20 @@
     position: absolute !important;
     z-index: 10001;
     animation: menuContextualAparecer 0.1s ease-out;
+    /* Posición publicada inline como --submenu-y/--submenu-margen
+     * (antes style left/right/top/marginLeft directo) */
+    --submenu-y: 0px;
+    --submenu-margen: 4px;
+    left: 100%;
+    right: auto;
+    top: var(--submenu-y);
+    margin-left: var(--submenu-margen);
+}
+
+/* Flip a la izquierda cuando el submenu se sale por la derecha */
+.menuContextualSubmenu--izquierda {
+    left: auto;
+    right: 100%;
 }
 
 .menuContextualFlecha {

@@ -7,7 +7,7 @@
  * Los generadores de props se encuentran en generadoresPropsPanel.ts
  */
 
-import {useCallback, useMemo, useRef, type CSSProperties} from 'react';
+import {useCallback, useMemo, useRef} from 'react';
 import type {DashboardCompletoRetorno} from '../useDashboardCompleto';
 import type {PanelId} from '../useConfiguracionLayout';
 import type {Habito} from '../../types/dashboard';
@@ -88,17 +88,18 @@ export function useDashboardGrid(ctx: DashboardCompletoRetorno, esMovil: boolean
         [layout]
     );
 
-    /* Calcular estilos dinámicos con CSS variables para anchos de columna */
-    const estiloGrid = useMemo((): CSSProperties => {
+    /* Anchos de columna como texto (porcentajes y pesos fr): el contenedor los
+     * publica inline como --col*-ancho/--col*-fr (seam CSS, antes objeto style directo) */
+    const anchosColumna = useMemo(() => {
         const anchos = layout.anchos;
         return {
-            '--col1-ancho': `${anchos.columna1}%`,
-            '--col2-ancho': `${anchos.columna2}%`,
-            '--col3-ancho': `${anchos.columna3}%`,
-            '--col1-fr': `${anchos.columna1}fr`,
-            '--col2-fr': `${anchos.columna2}fr`,
-            '--col3-fr': `${anchos.columna3}fr`
-        } as CSSProperties;
+            col1Ancho: `${anchos.columna1}%`,
+            col2Ancho: `${anchos.columna2}%`,
+            col3Ancho: `${anchos.columna3}%`,
+            col1Fr: `${anchos.columna1}fr`,
+            col2Fr: `${anchos.columna2}fr`,
+            col3Fr: `${anchos.columna3}fr`
+        };
     }, [layout.anchos]);
 
     /*
@@ -114,7 +115,7 @@ export function useDashboardGrid(ctx: DashboardCompletoRetorno, esMovil: boolean
         manejarToggleTarea,
         manejarEditarHabitoPorId,
         manejarCambiarAlturaPanel,
-        estiloGrid,
+        anchosColumna,
         manejarRefreshMovil
     };
 }

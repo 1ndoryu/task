@@ -160,10 +160,12 @@ export function BottomSheet({estaAbierto, onCerrar, children, titulo: _titulo}: 
 
     if (!estaAbierto) return null;
 
-    const estiloPanel = {
-        transform: desplazamiento > 0 ? `translateY(${desplazamiento}px)` : undefined,
-        transition: arrastrando ? 'none' : undefined
-    };
+    /* Desplazamiento de arrastre como texto (px): el panel lo publica como
+     * --panel-desplazamiento-y/--panel-transicion (seam CSS, antes style directo).
+     * Se omite cuando no hay arrastre para que el CSS conserve sus reposos
+     * (oculto translateY(100%), visible translateY(0)). */
+    const desplazamientoY = desplazamiento > 0 ? `${desplazamiento}px` : undefined;
+    const transicionPanel = arrastrando ? 'none' : undefined;
 
     const contenido = (
         <>
@@ -172,7 +174,7 @@ export function BottomSheet({estaAbierto, onCerrar, children, titulo: _titulo}: 
             <div className={`bottomSheetOverlay ${estaAbierto ? 'bottomSheetOverlay--visible' : ''}`} onClick={manejarClickOverlay} aria-hidden="true" />
 
             {/* Panel inferior */}
-            <div ref={panelRef} className={`bottomSheetPanel ${estaAbierto ? 'bottomSheetPanel--visible' : ''}`} role="dialog" aria-modal="true" style={estiloPanel}>
+            <div ref={panelRef} className={`bottomSheetPanel ${estaAbierto ? 'bottomSheetPanel--visible' : ''}`} role="dialog" aria-modal="true" style={{'--panel-desplazamiento-y': desplazamientoY, '--panel-transicion': transicionPanel} as React.CSSProperties}>
                 {/* Indicador de arrastre - área táctil para drag-to-close */}
                 <div ref={indicadorRef} className="bottomSheetIndicador bottomSheetIndicadorArrastrable" onTouchStart={manejarTouchStart} onTouchMove={manejarTouchMove} onTouchEnd={manejarTouchEnd} onMouseDown={manejarMouseDown} />
 

@@ -9,6 +9,12 @@
 .layoutManager {
     position: relative;
     min-height: 200px;
+    display: grid;
+    /* Anchos de arrastre publicados inline como --disposicion-columnas
+     * (antes style gridTemplateColumns directo); gap estático */
+    --disposicion-columnas: 1fr;
+    grid-template-columns: var(--disposicion-columnas);
+    gap: var(--dashboard-espacioXl);
 }
 
 .layoutManager.arrastrando {

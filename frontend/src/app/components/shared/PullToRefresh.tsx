@@ -45,9 +45,10 @@ export function PullToRefresh({
         clasesIndicador,
         clasesIcono,
         clasesContenido,
-        estiloIndicador,
-        estiloIcono,
-        estiloContenido,
+        desplazamientoIndicador,
+        rotacionIcono,
+        escalaIcono,
+        desplazamientoContenido,
         manejarTouchStart,
         manejarTouchEnd
     } = usePullToRefresh({onRefresh, umbralRefresh, maxArrastre, deshabilitado});
@@ -60,13 +61,13 @@ export function PullToRefresh({
             onTouchEnd={manejarTouchEnd}>
             {/* Indicador de refresh */}
             {mostrarIndicador && (
-                <div className={clasesIndicador} style={estiloIndicador}>
-                    <RefreshCw size={20} className={clasesIcono} style={estiloIcono} />
+                <div className={clasesIndicador} style={{'--ptr-translateY': desplazamientoIndicador} as React.CSSProperties}>
+                    <RefreshCw size={20} className={clasesIcono} style={{'--ptr-rotacion': rotacionIcono, '--ptr-escala': escalaIcono} as React.CSSProperties} />
                 </div>
             )}
 
             {/* Contenido con desplazamiento */}
-            <div className={clasesContenido} style={estiloContenido}>
+            <div className={clasesContenido} style={{'--ptr-contenido-translateY': desplazamientoContenido} as React.CSSProperties}>
                 {children}
             </div>
         </div>

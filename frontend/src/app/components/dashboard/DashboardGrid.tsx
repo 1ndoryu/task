@@ -26,7 +26,7 @@ interface DashboardGridProps {
 
 export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecucion'}: DashboardGridProps): JSX.Element {
     const {layout, arrastre} = ctx;
-    const {refMovilNula, propsContexto, manejarToggleTarea, manejarEditarHabitoPorId, manejarCambiarAlturaPanel, estiloGrid, manejarRefreshMovil} = useDashboardGrid(ctx, esMovil);
+    const {refMovilNula, propsContexto, manejarToggleTarea, manejarEditarHabitoPorId, manejarCambiarAlturaPanel, anchosColumna, manejarRefreshMovil} = useDashboardGrid(ctx, esMovil);
 
     /*
      * Renderiza el contenido de un panel usando el registro
@@ -106,8 +106,9 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
         const alturaPanel = layout.obtenerAlturaPanel(panelId);
 
         /* Función de renderizado para ResizeHandlePanel */
+        /* Altura publicada como --altura-panel (seam CSS, antes style height directo) */
         const renderConContenedor = ({altura, contenedorRef, esAuto}: {altura: string; isResizing: boolean; contenedorRef: React.RefObject<HTMLDivElement | null>; esAuto: boolean}) => (
-            <div ref={contenedorRef as React.RefObject<HTMLDivElement>} className={`panelDashboard ${esMovil ? 'panelDashboard--movil' : ''}`} style={esAuto || esMovil ? undefined : {height: altura}}>
+            <div ref={contenedorRef as React.RefObject<HTMLDivElement>} className={`panelDashboard ${esMovil ? 'panelDashboard--movil' : ''}`} style={{'--altura-panel': esAuto || esMovil ? 'auto' : altura} as React.CSSProperties}>
                 <Componente {...props} />
             </div>
         );
@@ -193,8 +194,8 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
     /* MODO DESKTOP: Grid normal con columnas y handles */
     return (
         <div className="dashboardGridContenedor" style={{/* sentinel-disable inline-style-prohibido */ width: `${layout.anchoTotal}%`}}>
-            {/* sentinel-disable inline-style-prohibido */}
-            <div className={`dashboardGridColumnas dashboardGridColumnas--${layout.modoColumnas}col ${arrastre.panelArrastrando ? 'arrastrandoPanel' : ''}`} style={estiloGrid}>
+            {/* Anchos publicados como --col*-ancho/--col*-fr (seam CSS, antes objeto style) */}
+            <div className={`dashboardGridColumnas dashboardGridColumnas--${layout.modoColumnas}col ${arrastre.panelArrastrando ? 'arrastrandoPanel' : ''}`} style={{'--col1-ancho': anchosColumna.col1Ancho, '--col2-ancho': anchosColumna.col2Ancho, '--col3-ancho': anchosColumna.col3Ancho, '--col1-fr': anchosColumna.col1Fr, '--col2-fr': anchosColumna.col2Fr, '--col3-fr': anchosColumna.col3Fr} as React.CSSProperties}>
                 {/* Columna 1 con handle al final si hay más columnas */}
                 <div className="dashboardGridColumna dashboardGridColumna--conHandle">
                     {renderizarColumna(1)}

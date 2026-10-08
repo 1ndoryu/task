@@ -87,9 +87,11 @@
     cursor: crosshair;
 }
 
-/* Celda pintada (relleno sólido del color dado). */
+/* Celda pintada (relleno sólido del color dado). El mapeo del consumidor
+ * (--pixel-editor-relleno) gana cuando existe; --pixel-relleno (prop
+ * colorRelleno publicada inline) es el fallback agnóstico. */
 .editorPixelCelda--activa {
-    background: var(--pixel-editor-relleno) !important;
+    background: var(--pixel-editor-relleno, var(--pixel-relleno)) !important;
     box-shadow: none;
 }
 

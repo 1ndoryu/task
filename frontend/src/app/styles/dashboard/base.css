@@ -72,6 +72,9 @@ body {
     border: 1px solid var(--dashboard-bordePrincipal);
     border-radius: var(--dashboard-radioMd);
     overflow: hidden;
+    /* Altura publicada inline como --altura-panel (antes style height directo) */
+    --altura-panel: auto;
+    height: var(--altura-panel);
 }
 
 /* 

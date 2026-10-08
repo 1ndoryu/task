@@ -33,7 +33,7 @@ interface MenuContextualProps {
 }
 
 export function MenuContextual({opciones, posicionX, posicionY, onSeleccionar, onCerrar, esSubmenu = false, footer}: MenuContextualProps): JSX.Element {
-    const {menuRef, opcionActivaId, estiloSubmenu, manejarClick, manejarMouseEnterOpcion} = useMenuContextual({posicionX, posicionY, onSeleccionar, onCerrar, esSubmenu});
+    const {menuRef, opcionActivaId, posicionSubmenu, manejarClick, manejarMouseEnterOpcion} = useMenuContextual({posicionX, posicionY, onSeleccionar, onCerrar, esSubmenu});
 
     /* [318A-9] Portal a body: el menú usa position:fixed con coordenadas del
      * viewport, pero si se renderiza inline dentro de un ancestro con
@@ -44,7 +44,7 @@ export function MenuContextual({opciones, posicionX, posicionY, onSeleccionar, o
      * Solo se portaléa el menú raíz: los submenús usan position:absolute
      * relativo a .menuContextualItemWrapper y deben seguir anidados dentro. */
     const menu = (
-        <div id={esSubmenu ? undefined : 'menu-contextual'} ref={menuRef as React.RefObject<HTMLDivElement>} className={`menuContextual ${esSubmenu ? 'menuContextualSubmenu' : ''}`} role="menu" aria-orientation="vertical" style={esSubmenu ? estiloSubmenu : undefined}>
+        <div id={esSubmenu ? undefined : 'menu-contextual'} ref={menuRef as React.RefObject<HTMLDivElement>} className={`menuContextual ${esSubmenu ? 'menuContextualSubmenu' : ''} ${esSubmenu && posicionSubmenu.ladoSubmenu === 'izquierda' ? 'menuContextualSubmenu--izquierda' : ''}`} role="menu" aria-orientation="vertical" style={{'--submenu-y': posicionSubmenu.desplazamientoSubmenuY, '--submenu-margen': posicionSubmenu.margenSubmenu} as React.CSSProperties}>
             {opciones.map(opcion => (
                 <div key={opcion.id} className="menuContextualItemWrapper posicionRelativa" onMouseEnter={() => manejarMouseEnterOpcion(opcion.id)}>
                     <Boton type="button" variante="ghost" claseAdicional={`menuContextualOpcion ${opcion.peligroso ? 'menuContextualOpcionPeligrosa' : ''} ${opcion.deshabilitado ? 'menuContextualOpcionDeshabilitada' : ''} ${opcionActivaId === opcion.id && opcion.subOpciones ? 'menuContextualOpcionActiva' : ''}`} onClick={() => manejarClick(opcion)} disabled={opcion.deshabilitado} role="menuitem">

@@ -136,7 +136,11 @@ export function EditorPixelArt({
                 onMouseDown={e => manejadorDown(e, x, y)}
                 onMouseMove={e => manejadorMove(e, x, y)}
                 onContextMenu={e => e.preventDefault()}
-                style={pintada ? {background: colorRelleno} : undefined}
+                /* Color de relleno publicado como --pixel-relleno (seam CSS, antes
+                 * style background directo). El CSS prioriza el mapeo del consumidor
+                 * (--pixel-editor-relleno) y usa este valor como fallback. Se publica
+                 * siempre (literal incondicional) para el patrón eximido del scanner. */
+                style={{'--pixel-relleno': colorRelleno} as React.CSSProperties}
             />
         );
     }
@@ -185,7 +189,9 @@ export function EditorPixelArt({
                 tabIndex={0}
                 role="grid"
                 aria-label="Editor de pixel art"
-                style={{['--pixel-df' as string]: dimensiones}}
+                /* Dimensión publicada como texto (React 19 exige strings en custom
+                 * properties; antes número con clave computada invisible al scanner) */
+                style={{'--pixel-df': `${dimensiones}`} as React.CSSProperties}
             >
                 {celdas}
             </div>

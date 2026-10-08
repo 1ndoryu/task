@@ -5,7 +5,7 @@
  * de anchos con limites min/max, listeners de documento y estilo grid.
  */
 
-import {useState, useRef, useCallback, useEffect, type CSSProperties} from 'react';
+import {useState, useRef, useCallback, useEffect} from 'react';
 import type {ModoColumnas, AnchoColumnas} from '../useConfiguracionLayout';
 import {ANCHO_MINIMO_COLUMNA, ANCHO_MAXIMO_COLUMNA} from '../useConfiguracionLayout';
 
@@ -101,31 +101,19 @@ export function useLayoutManager({modoColumnas, anchos, onAjustarAnchos}: UseLay
         };
     }, [arrastrando, manejarMovimiento, finalizarArrastre]);
 
-    /* Calcular estilos dinámicos del grid */
-    const estiloGrid: CSSProperties = (() => {
-        if (modoColumnas === 1) {
-            return {
-                display: 'flex',
-                flexDirection: 'column' as const,
-                gap: 'var(--dashboard-espacioXl)'
-            };
-        }
-
-        const columnas = modoColumnas === 2
+    /* Columnas del grid como texto (porcentajes de arrastre): el contenedor
+     * las publica como --disposicion-columnas (seam CSS, antes style gridTemplateColumns
+     * directo). El gap es estático y vive en layoutManager.css. */
+    const columnasDisposicion = modoColumnas === 1
+        ? '1fr'
+        : modoColumnas === 2
             ? `${anchos.columna1}% ${anchos.columna2}%`
             : `${anchos.columna1}% ${anchos.columna2}% ${anchos.columna3}%`;
-
-        return {
-            display: 'grid',
-            gridTemplateColumns: columnas,
-            gap: 'var(--dashboard-espacioXl)'
-        };
-    })();
 
     return {
         contenedorRef,
         arrastrando,
         iniciarArrastre,
-        estiloGrid
+        columnasDisposicion
     };
 }

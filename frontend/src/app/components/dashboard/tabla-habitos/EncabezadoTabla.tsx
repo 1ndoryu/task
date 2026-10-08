@@ -9,12 +9,13 @@ import type {ConfiguracionHabitos} from '../../../hooks/useConfiguracionHabitos'
 
 interface EncabezadoTablaProps {
     configuracion: ConfiguracionHabitos;
-    estiloGrid: CSSProperties;
+    /* Anchos de columna como texto: se publica como --tabla-columnas */
+    columnasTabla: string;
 }
 
-export function EncabezadoTabla({configuracion, estiloGrid}: EncabezadoTablaProps): JSX.Element {
+export function EncabezadoTabla({configuracion, columnasTabla}: EncabezadoTablaProps): JSX.Element {
     return (
-        <div className="tablaEncabezado" style={estiloGrid}>
+        <div className="tablaEncabezado" style={{'--tabla-columnas': columnasTabla} as CSSProperties}>
             {configuracion.columnasVisibles.indice && <div className="tablaColumnaCheckbox"></div>}
             <div className="tablaColumnaNombre">HABITO</div>
             {configuracion.columnasVisibles.historial && <div className="tablaColumnaHistorial">ACTIVIDAD</div>}

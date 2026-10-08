@@ -112,9 +112,13 @@ export function usePullToRefresh({onRefresh, umbralRefresh = 80, maxArrastre = 1
     const clasesIcono = `pullToRefresh__icono ${iconoListo ? 'pullToRefresh__icono--listo' : ''} ${refrescando ? 'pullToRefresh__icono--girando' : ''}`.trim();
     const clasesContenido = `pullToRefresh__contenido ${!arrastrableRef.current ? 'pullToRefresh__contenido--animando' : ''}`.trim();
 
-    const estiloIndicador = {'--ptr-translateY': `${arrastre - 40}px`} as React.CSSProperties;
-    const estiloIcono = {'--ptr-rotacion': `${rotacion}deg`, '--ptr-escala': escala} as React.CSSProperties;
-    const estiloContenido = {'--ptr-contenido-translateY': `${arrastre}px`} as React.CSSProperties;
+    /* Valores dinámicos como texto para las custom properties --ptr-* del CSS
+     * (seam CSS: el componente los publica inline, antes objetos style directos).
+     * React 19 exige strings en custom properties: escala se stringifica. */
+    const desplazamientoIndicador = `${arrastre - 40}px`;
+    const rotacionIcono = `${rotacion}deg`;
+    const escalaIcono = `${escala}`;
+    const desplazamientoContenido = `${arrastre}px`;
 
     return {
         contenedorRef,
@@ -129,8 +133,9 @@ export function usePullToRefresh({onRefresh, umbralRefresh = 80, maxArrastre = 1
         clasesIndicador,
         clasesIcono,
         clasesContenido,
-        estiloIndicador,
-        estiloIcono,
-        estiloContenido
+        desplazamientoIndicador,
+        rotacionIcono,
+        escalaIcono,
+        desplazamientoContenido
     };
 }

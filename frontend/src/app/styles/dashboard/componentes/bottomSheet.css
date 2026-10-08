@@ -36,8 +36,12 @@
     z-index: 1501;
     display: flex;
     flex-direction: column;
-    transform: translateY(100%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Desplazamiento de arrastre publicado inline como --panel-desplazamiento-y
+     * y corte de transición como --panel-transicion (antes style transform/transition directo) */
+    --panel-desplazamiento-y: 100%;
+    --panel-transicion: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(var(--panel-desplazamiento-y));
+    transition: var(--panel-transicion);
     /* [233A-57] Portal renderiza en body, fuera de .dashboardContenedor — herencia perdida */
     font-family: var(--dashboard-fuenteMonoespaciada);
     font-size: var(--dashboard-tamanoBase);
@@ -47,7 +51,8 @@
 }
 
 .bottomSheetPanel--visible {
-    transform: translateY(0);
+    --panel-desplazamiento-y: 0;
+    transform: translateY(var(--panel-desplazamiento-y));
 }
 
 /* Indicador de arrastre (pill gris en la parte superior) */

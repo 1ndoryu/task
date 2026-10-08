@@ -126,7 +126,12 @@
     min-height: 0;
     gap: var(--dashboard-espacioMd);
     position: relative;
-    /* grid-template-columns/rows se inyectan inline desde el componente */
+    /* Proporciones publicadas inline como --vistas-columnas/--vistas-filas
+     * (antes grid-template-columns/rows directos) */
+    --vistas-columnas: 1fr;
+    --vistas-filas: 1fr;
+    grid-template-columns: var(--vistas-columnas);
+    grid-template-rows: var(--vistas-filas);
 }
 
 /* ── CELDA: CUADRO SEPARADO CON BORDE ── */
@@ -137,6 +142,11 @@
     position: relative;
     border: var(--dashboard-espacioHairline) solid var(--dashboard-bordePrincipal);
     background: var(--dashboard-fondoSecundario);
+    /* Área publicada inline como --celda-columna/--celda-fila (antes style directo) */
+    --celda-columna: auto;
+    --celda-fila: auto;
+    grid-column: var(--celda-columna);
+    grid-row: var(--celda-fila);
 }
 
 .dashboardVistasCelda .dashboardPanelView {
