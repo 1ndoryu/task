@@ -5,7 +5,7 @@
 #       -> watchdog-permanente.ps1: mantiene backend/Vite vivos, no duplica y
 #       repara solo los procesos/puertos propios; SIN abrir navegador en login.
 # El arranque NO interfiere con otros proyectos: puertos propios 4190/4191,
-# binario propio .runtime/target (fuera de C:\tmp que se limpia solo), BD
+# binario propio .runtime/bin/glory-backend.exe (copia; el target de compilación vive en C:\tmp), BD
 # glory_backend_local y cookies aisladas en 127.0.0.1.
 # Para desinstalar: usar el parámetro -Quitar (borra acceso directo y tarea).
 # Uso: pwsh -NoProfile -ExecutionPolicy Bypass -File instalar-permanente.ps1

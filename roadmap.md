@@ -39,7 +39,7 @@ Segunda auditoría de principios SOLID iniciada el 2026-08-25: **855 archivos** 
 - 🔧 **En curso (07-09-2026): 079A-1 — página permanente local (autoinicio).** task corre
 SIEMPRE en local en `http://127.0.0.1:4191`, sin interferir con otros agentes. Puertos
 definidos en `.env` (fuente única: `PORT=4190`, `VITE_PORT=4191`, `CORS_ORIGINS=:4191`);
-binario propio en `.runtime/target` (gitignored; FUERA de `C:\tmp`, que la tarea
+binario propio en `.runtime/bin/glory-backend.exe` (copia; gitignored; FUERA de `C:\tmp`, que la tarea
 `GloryCargoTargetCleanup` borra). Mecánica: `.freebuff/start-permanente.ps1` (idempotente,
 anti-duplicado, lee puertos del `.env`, requiere pwsh 7; flag `-AbrirNavegador`
 para abrir la URL en el navegador) + `stop-permanente.ps1` (ahora detiene watchdog

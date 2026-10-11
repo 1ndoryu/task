@@ -43,8 +43,8 @@ definidos en el `.env` del repo (fuente única), NO hardcodeados.
 - **Frontend (Vite):** `http://127.0.0.1:4191`, proxy `/api` → `:4190`
 - **Env (`.env`):** `HOST=127.0.0.1`, `PORT=4190`, `VITE_PORT=4191`,
   `CORS_ORIGINS=http://127.0.0.1:4191,http://localhost:4191`
-- **Binario backend:** `.runtime/target/debug/glory-backend.exe` (dentro del
-  repo, gitignored). Fuera de `C:\tmp` a propósito: la tarea programada
+- **Binario backend:** `.runtime/bin/glory-backend.exe` (copia de 35 MB dentro del
+  repo, gitignored; sin `target/` en el árbol). Fuera de `C:\tmp` a propósito: la tarea programada
   `GloryCargoTargetCleanup` borra `C:\tmp` y el binario "desaparecía".
 - **BD:** la misma `glory_backend_local` (PostgreSQL local 5432).
 - **Logs:** `.runtime/backend.{out,err}.log` y `.runtime/vite.{out,err}.log`
@@ -110,9 +110,10 @@ Abrir SIEMPRE `http://127.0.0.1:4191`.
 
 ```bash
 cd "PROYECTO TASKS"
-$env:CARGO_TARGET_DIR = "...PROYECTO TASKS\.runtime\target"
-cargo build --bin glory-backend
+CARGO_TARGET_DIR="C:/tmp/glory-target/glory_backend_permanente" cargo build --bin glory-backend
+cp "C:/tmp/glory-target/glory_backend_permanente/debug/glory-backend.exe" .runtime/bin/glory-backend.exe
 # luego reiniciar: .freebuff/stop-permanente.ps1 && .freebuff/start-permanente.ps1
+# (el target de compilación va en C:\tmp, nunca dentro del repo: AGENTS §0.2)
 ```
 
 ## Artefactos que necesita un checkout nuevo

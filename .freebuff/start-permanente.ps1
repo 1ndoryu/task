@@ -4,7 +4,7 @@
 # ya está en escucha por un proceso propio, no duplica; si no está, lo lanza.
 #
 # Stack permanente (ver .freebuff/run.md §"Página permanente local"):
-#   - Backend Rust : http://127.0.0.1:4190  (binario .runtime/target/debug/glory-backend.exe)
+#   - Backend Rust : http://127.0.0.1:4190  (binario .runtime/bin/glory-backend.exe, copia de target/debug)
 #   - Frontend Vite: http://127.0.0.1:4191  (proxy /api -> 4190)
 #   - BD local     : glory_backend_local (PostgreSQL 127.0.0.1:5432)
 #   - Logs         : .runtime/backend.{out,err}.log y .runtime/vite.{out,err}.log
@@ -37,7 +37,7 @@ if ($PSVersionTable.PSVersion.Major -lt 7) {
 $repo = Split-Path $PSScriptRoot -Parent          # ...\PROYECTO TASKS
 $envFile = Join-Path $repo '.env'
 $runtime = Join-Path $repo '.runtime'
-$bin = Join-Path $runtime 'target\debug\glory-backend.exe'
+$bin = Join-Path $runtime 'bin\glory-backend.exe'
 if (-not (Test-Path $runtime)) { New-Item -ItemType Directory -Path $runtime | Out-Null }
 
 # Los puertos del stack permanente se leen del .env (fuente única: "dónde
@@ -58,7 +58,7 @@ $puertoVite    = [int](Get-EnvVal 'VITE_PORT' '4191')
 $pidFileBackend = Join-Path $runtime 'backend.pid'
 $pidFileVite    = Join-Path $runtime 'vite.pid'
 
-if (-not (Test-Path $bin)) { throw "No existe el binario: $bin`nCompila primero: CARGO_TARGET_DIR=.runtime/target cargo build --bin glory-backend" }
+if (-not (Test-Path $bin)) { throw "No existe el binario: $bin`nCompila en C:\tmp y copia: CARGO_TARGET_DIR=C:/tmp/glory-target/glory_backend_permanente cargo build --bin glory-backend; luego copia target/debug/glory-backend.exe a .runtime/bin/" }
 if (-not (Test-Path $envFile)) { throw "No existe .env: $envFile" }
 
 # --- Helpers ---------------------------------------------------------------
