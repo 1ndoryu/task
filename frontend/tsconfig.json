@@ -17,12 +17,11 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     "types": ["vite/client", "node"],
     "paths": {
-      "@/*": ["src/glory-core/*"],
-      "@app/*": ["src/app/*"],
-      "@codetrix-studio/capacitor-google-auth": ["src/native-stubs/capacitor-google-auth.ts"]
+      "@/*": ["./src/glory-core/*"],
+      "@app/*": ["./src/app/*"],
+      "@codetrix-studio/capacitor-google-auth": ["./src/native-stubs/capacitor-google-auth.ts"]
     }
   },
   "include": ["src"],
