@@ -123,7 +123,7 @@ Quedan dos frentes, ninguno bloqueado por codigo:
 - **08AA-1 — Cierre resto 259A-2 (08-10-2026, HECHA):** `validator 0.18→0.20` (`validator_derive →0.20.1`, saca `idna 0.5.0`+`fnv` del lock); `cargo audit` 2→1 (queda `rsa 0.9.10` RUSTSEC-2023-0071 sin parche upstream + 5 warnings permitidos). Evidencia: `npm run check:back` exit 0, `tsc --noEmit` frontend exit 0. Commit incluye trabajo dashboard/pixelart ajeno coherente (33 ficheros + `AGENTS.md`) + `Cargo.toml/lock`.
 
 - **Rama `origin/legacy-php` (12-10-2026, decidido: no integrar aquí)**: sin ancestro común con `main` (874 commits; `main…legacy-php` = 1561 archivos, +61958/−94282). Integrarla exige `--allow-unrelated-histories` y resolver el árbol entero: decisión de la usuaria. Se conserva en remoto; bundle verificado en `C:/tmp/bundles/task-legacy-php.bundle` (copia de trabajo en C:\tmp, no respaldo definitivo). Desbloquea: decidir entre integrarla o archivarla en `rescate/legacy-php`.
-- **Release-evidence (12-10-2026, sin commit)**: `.sentinel/release-evidence/{sentinel,varsense}.json` en el árbol apuntan a sentinel `5c3267646dfaba1d318cd839e5337cd0a5c429d1` (no existe en el repo ni es el pin `ba6d9c7`). No se commitean; se regeneran sobre el pin y entonces se commitean.
+- **Release-evidence (12-10-2026, HECHA)**: `.sentinel/release-evidence/{sentinel,varsense}.json` regenerados con `quality:setup --refresh` sobre el pin de sentinel `ba6d9c7187477a5f2af83c705d61037235b1fb54` (origen `ejecutada`, compile y suite passed) y varsense `7c5cb7a6`; commiteados. El commit `5c3267646…` anterior no existía en el repo.
 
 ## Notas
 
