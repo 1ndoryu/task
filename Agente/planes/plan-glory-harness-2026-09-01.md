@@ -2,7 +2,7 @@
 
 - **Fecha:** 2026-09-01
 - **ID:** 318A-13
-- **Estado:** activo (diseño propuesto; requiere validación del usuario antes de ejecutar)
+- **Estado:** en curso. Fase 2 completada (roadmap.md:109-110, commits 5d89a49 y 5da99d0).
 - **Tipo:** refactor estructural / extracción de núcleo reutilizable
 - **Dependencias:** código actual del agente en `task/src/agent/` (runtime, tools, sandbox, contexto, scheduler), `task/src/services/ai.rs` (`LlmProviderService`), `task/src/handlers/agente.rs` (orquestación HTTP/SSE), frontend `task/frontend/src/app/plugins/agente/` (UI — **se queda en task**). Sin credenciales nuevas: se reutilizan las envs de proveedor ya existentes.
 - **Referencias:** plan previo `Agente/planes/plan-agente-ia-plugin-2026-08-27.md` (hecho H7 y decisión (8): *"NO extraer a glory-rs en Fase 0 (YAGNI, 2º consumidor especulativo) — extraer cuando haya consumidor real"*).
