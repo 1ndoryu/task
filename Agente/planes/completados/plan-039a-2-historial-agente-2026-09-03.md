@@ -1,5 +1,7 @@
 # 039A-2 — Historial del agente: tarjetas y contexto sobreviven a recargar + diff acotado
 
+> **Estado:** Completado 2026-09-03. Evidencia en `Agente/completados/tareas-2026-09-03.md:200`. Archivado 2026-10-13.
+
 Fecha: 2026-09-03. Origen: reporte del usuario (conversación del plugin pierde las
 tarjetas `file_search/file_read/file_patch` y la barra CONTX al recargar la pestaña;
 el diff del parche muestra el archivo completo).
@@ -23,7 +25,7 @@ el diff del parche muestra el archivo completo).
 
 ## Fases
 
-1. **Core (`glory-harness/core/src/diff.rs`)**: `diff_lineas` emite hunks con
+1. **Core (`glory-harness/core/src/contrato/diff.rs`)**: `diff_lineas` emite hunks con
    `CONTEXTO=3`, cabeceras `@@ -a,n +b,m @@` y placeholders de elisión.
    Tests: colapso real, ventana de contexto, conteo de elididas, idénticos → None.
 2. **Backend (task, sin migración)**: `AgenteRepository::listar_turnos_con_acciones`
