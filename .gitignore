@@ -38,6 +38,7 @@ desktop.ini
 
 /scripts/*
 !/scripts/branch-db.mjs
+!/scripts/preflight-exposure/
 !/scripts/run-with-db.mjs
 !/scripts/dev.mjs
 !/scripts/check-roadmap.mjs
