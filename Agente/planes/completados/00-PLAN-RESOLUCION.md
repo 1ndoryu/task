@@ -1,6 +1,6 @@
 # Plan de resolución de hallazgos de auditoría SOLID — task
 
-> **Estado:** ACTIVO — creado 2026-08-19 tras completar la auditoría (792/792 archivos, 69 hallazgos).
+> **Estado:** Completado — 2026-10-13. 69/69 hallazgos resueltos (evidencia en la sección Totales, `:206`). Creado 2026-08-19 tras completar la auditoría (792/792 archivos, 69 hallazgos).
 > **Fuentes:** `Agente/archivado/auditoria-2026-08-19/00-INDICE.md` y los MD por módulo (cada hallazgo vive allí con su detalle; este plan solo prioriza y agrupa). Auditoría archivada al cerrarse 69/69 el 19-08-2026.
 > **Regla:** un hallazgo se considera resuelto cuando su checkbox en el MD de auditoría pasa a `[x]` con fecha y evidencia (build/tests), y el índice se actualiza.
 

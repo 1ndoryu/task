@@ -212,7 +212,7 @@ Backend completo: **80/80 archivos revisados, 31 hallazgos** (0 BLOQUEANTE, 2 AL
 - H-B04-02 — `services/security.rs` Argon2 en runtime async sin `spawn_blocking`/semáforo (bloquea workers de tokio).
 - H-B01-01 (MEDIA) + H-B05-02 relacionados: 2-3 roundtrips por request autenticado.
 
-**Para continuar (sesión 18):** **0 abiertos — auditoría 100% cerrada (69/69).** Fuera de la auditoría quedó registrado el **cluster de sincronización** (T7) como refactor coordinado pendiente en `Agente/planes/00-PLAN-RESOLUCION.md` y `roadmap.md`.
+**Para continuar (sesión 18):** **0 abiertos — auditoría 100% cerrada (69/69).** Fuera de la auditoría quedó registrado el **cluster de sincronización** (T7) como refactor coordinado pendiente en `Agente/planes/completados/00-PLAN-RESOLUCION.md` y `roadmap.md`.
 
 **Cómo resolver:** al corregir un hallazgo, marcar `[x]` con fecha y commit; actualizar esta tabla. Los hallazgos `ALTA`/`MEDIA` de seguridad y rendimiento son candidatos a plan en `Agente/planes/`.
 

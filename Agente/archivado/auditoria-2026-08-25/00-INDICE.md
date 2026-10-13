@@ -77,7 +77,7 @@ Además del barrido archivo por archivo, se auditan **patrones transversales** q
 
 **COMPLETA — 855/855 archivos revisados, 7 hallazgos** (0 BLOQUEANTE, 0 ALTA, 2 MEDIA, 5 BAJA, 0 INFO). Auditoría de paz por patrones más archivo por archivo (modo contraste vs la pasada 2026-08-19).
 
-**Resolución 2026-08-25 — 7/7 resueltos ✅ — auditoría al 100%:** cerrados `H-F12-14`, `H-F13-08`, `H-B03-06`, `H-B03-07`, `H-F14-04`, `H-F13-09` y, al ejecutarse el refactor estructural T7, `H-F12-13` (cluster de sync). Ver plan `Agente/planes/00-PLAN-RESOLUCION-2026-08-25.md`; verificados con `tsc --noEmit` limpio y `cargo check`/`cargo test` 11/11 OK. Detalle de T7 en `12-hooks.md` (mappers a `utils/mappersContrato.ts`, `useOnlineStatus`/`obtenerNonce` a `hooks/useOnlineStatus.ts`, `generateBackup` tipado vía `DatosGuardado`, helpers de `useSyncManager` a `utils/syncAyudas.ts`, 4 `@ts-ignore` del cluster eliminados).
+**Resolución 2026-08-25 — 7/7 resueltos ✅ — auditoría al 100%:** cerrados `H-F12-14`, `H-F13-08`, `H-B03-06`, `H-B03-07`, `H-F14-04`, `H-F13-09` y, al ejecutarse el refactor estructural T7, `H-F12-13` (cluster de sync). Ver plan `Agente/planes/completados/00-PLAN-RESOLUCION-2026-08-25.md`; verificados con `tsc --noEmit` limpio y `cargo check`/`cargo test` 11/11 OK. Detalle de T7 en `12-hooks.md` (mappers a `utils/mappersContrato.ts`, `useOnlineStatus`/`obtenerNonce` a `hooks/useOnlineStatus.ts`, `generateBackup` tipado vía `DatosGuardado`, helpers de `useSyncManager` a `utils/syncAyudas.ts`, 4 `@ts-ignore` del cluster eliminados).
 
 **Avance por tanda:** T1 backend 84/84 (2 hallazgos B03) → T2 frontend F15/F11/F12 273/273 (2 hallazgos F12 transversales) → T3 frontend F13/F14/F10/F16/F17 498/498 (1 F13 + 1 F13 + 1 F14).
 
