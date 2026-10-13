@@ -1,4 +1,5 @@
 # Plan Sentinel + VarSense editor-agnostico - 2026-05-04
+> **Revisión 2026-10-13:** sigue abierto. Pendiente en línea 285: publicar/empaquetar y fixtures. La copia en WANDORIUS/Agente/planes/completados/ dice "completado"; no se toca desde aquí.
 
 ## Objetivo
 

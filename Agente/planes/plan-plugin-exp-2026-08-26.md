@@ -1,4 +1,5 @@
 # Plan: plugin EXP (gamificación — panel fijo superior, vida y dificultad automática)
+> **Revisión 2026-10-13:** el ítem de la línea 136 («Panel real registrado») figura como hecho, pero el DoD de la fase 1 (líneas 147–156) no tiene marcas. Pendiente de conciliar.
 
 - **Fecha:** 2026-08-26
 - **Estado:** activo (en curso)

@@ -1,4 +1,5 @@
 # Plan: IA esencial, persistente y segura
+> **Revisión 2026-10-13:** activo. Pendiente: verificar tsc, cargo test y suite de paridad (commits 2dad50f, 8698a60).
 
 **Fecha:** 2026-08-27  
 **Estado:** Activo — diseño y ejecución por fases  

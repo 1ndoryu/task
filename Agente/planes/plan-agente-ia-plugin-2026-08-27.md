@@ -1,4 +1,5 @@
 # Plan: Plugin de agente de IA — arquitectura completa (local + producción, sandbox)
+> **Revisión 2026-10-13:** activo. Fases 0–6 cerradas. Pendiente: tsvector, automejora y deploy Coolify (requiere autorización de la usuaria).
 
 - **Fecha:** 2026-08-27
 - **Estado:** activo (diseño aprobado para planificación; ejecución por fases)

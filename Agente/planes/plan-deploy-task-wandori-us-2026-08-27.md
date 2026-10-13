@@ -1,4 +1,5 @@
 # Plan: Despliegue de `task` en `task.wandori.us` (versión pre-Fase 0)
+> **Revisión 2026-10-13:** bloqueado por autorización de la usuaria para push y escrituras remotas. DoD sin marcar.
 
 > **Fecha:** 27-08-2026
 > **Estado:** PLANIFICADO — pendiente de autorización del usuario para push + escrituras remotas.

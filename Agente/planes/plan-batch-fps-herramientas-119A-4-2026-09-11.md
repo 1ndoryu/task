@@ -1,4 +1,5 @@
 # Plan batch FPs herramientas — single release (119A-4, 2026-09-11)
+> **Revisión 2026-10-13:** markers de glory-sentinel commiteados (2752448, 835d17f, 66a2113, 76de431); V1 en varsense da8f2dc. Pendiente: commit de la re-medición de 12 proyectos, verificación V2 y commit de la release 0.7.24.
 
 Origen: triaje 0.7.10/2.2.1 (039A-1 cerrado, 379 ítems, 0 errores).
 Objetivo: **un solo release** que corrija en la herramienta todos los FPs verificados,

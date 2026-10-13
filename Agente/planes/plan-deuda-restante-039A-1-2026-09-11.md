@@ -1,4 +1,5 @@
 # Plan deuda restante 039A-1 — ejecución (11-09)
+> **Revisión 2026-10-13:** F2–F4 hechas en RESTAURANTE (commit ef6b830; deploy_service/mod.rs:222–358). F1 sin verificar por función; weblink_catalog.rs no encontrado.
 
 Origen: triaje Sentinel `0.7.10` (`9f475d2`) + VarSense `2.2.1` (`21d8a70`).
 Evidencia: `C:\tmp\final-0710-*.json`, `C:\tmp\remedicion-0710-coolify.json`.
