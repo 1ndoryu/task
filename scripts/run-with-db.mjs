@@ -20,15 +20,13 @@ console.log('');
 const { dbUrl, cargoTargetDir } = getBranchDbContext();
 console.log('');
 
-/* [16AA-9 F3] El portátil ya no lleva toolchain de Rust (retirado el
- * 2026-10-16): este script no compila. Se sale en claro en vez de fallar con un
- * ENOENT de cargo. PROYECTO TASKS no tiene `scripts/run-cargo.mjs` ni está dado
- * de alta en el taller: hasta que se le dé de alta (AGENTS §2), su código Rust
- * solo se puede compilar en la 89 a mano. */
+/* [16AA-10] El portátil no lleva toolchain de Rust (retirada el 2026-10-16):
+ * este script no compila. Se sale en claro en vez de fallar con un ENOENT de
+ * cargo. Para compilar y probar: `node scripts/run-cargo.mjs <subcomando>`, que
+ * lo hace en la 89. */
 if (spawnSync(cargoCommand(), ['--version'], { encoding: 'utf8' }).status !== 0) {
   console.error('[db] No hay cargo en el portátil (toolchain retirado el 2026-10-16).');
-  console.error('[db] PROYECTO TASKS no tiene run-cargo.mjs ni alta en el taller:');
-  console.error('[db]   Arranque alta "PROYECTO TASKS"   (AGENTS §2) antes de compilarlo.');
+  console.error('[db] Compila y prueba en la 89: node scripts/run-cargo.mjs <subcomando> [...args]');
   process.exit(1);
 }
 

@@ -40,6 +40,7 @@ desktop.ini
 !/scripts/branch-db.mjs
 !/scripts/preflight-exposure/
 !/scripts/run-with-db.mjs
+!/scripts/run-cargo.mjs
 !/scripts/dev.mjs
 !/scripts/check-roadmap.mjs
 !/scripts/self-check.ps1
