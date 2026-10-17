@@ -49,7 +49,13 @@ const VITE_HOST = process.env.VITE_HOST || '127.0.0.1';
 
 export default defineConfig({
     plugins: [pluginModulosExternos(), react()],
-    base: './',
+    /* [16AA-18] `base: '/'`, NO `'./'`: con rutas relativas el `index.html` pide
+     * `./assets/...`, y en una ruta de cliente con barra final o de dos niveles
+     * (p. ej. `/cancion/mi-cancion/`) el navegador lo resuelve contra ese
+     * directorio, donde no hay assets: el SPA fallback devuelve el HTML con 200
+     * y el módulo no carga. La app siempre se sirve en la raíz del origen
+     * (aquí y en producción: el backend Axum sirve `frontend/dist`). */
+    base: '/',
     server: {
         host: VITE_HOST,
         port: Number(process.env.VITE_PORT) || 5173,
