@@ -10,11 +10,11 @@
  * Uso: node .freebuff/linea-base-agente.mjs   (backend en :3001 + BD local)
  * Salida: imprime el informe y lo guarda en `.freebuff/informe-linea-base-agente.md`.
  */
+import { fileURLToPath } from 'node:url';
+
 const BASE = process.env.PARITY_BASE_URL || 'http://127.0.0.1:3001/api';
 const LIMITE_CONVERSACIONES = Number(process.env.LIMITE_CONVERSACIONES || 20);
 const SALIDA = fileURLToPath(new URL('./informe-linea-base-agente.md', import.meta.url));
-
-import { fileURLToPath } from 'node:url';
 
 const cookies = {};
 function capturarCookies(res) {
