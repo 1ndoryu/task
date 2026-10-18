@@ -94,6 +94,9 @@
           "src/services"
         ],
         "portableBoundaries": {
+          "tooling": [
+            "/.freebuff/"
+          ],
           "dom": [
             "/frontend/src/utils/dom.ts",
             "/frontend/src/platform/",
