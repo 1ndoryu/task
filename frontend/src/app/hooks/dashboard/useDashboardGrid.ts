@@ -88,14 +88,11 @@ export function useDashboardGrid(ctx: DashboardCompletoRetorno, esMovil: boolean
         [layout]
     );
 
-    /* Anchos de columna como texto (porcentajes y pesos fr): el contenedor los
-     * publica inline como --col*-ancho/--col*-fr (seam CSS, antes objeto style directo) */
+    /* Pesos fr de columna como texto: el contenedor los publica inline como --col*-fr,
+     * que consume resizeHandleColumna.css (los --col*-ancho no tenían consumidor) */
     const anchosColumna = useMemo(() => {
         const anchos = layout.anchos;
         return {
-            col1Ancho: `${anchos.columna1}%`,
-            col2Ancho: `${anchos.columna2}%`,
-            col3Ancho: `${anchos.columna3}%`,
             col1Fr: `${anchos.columna1}fr`,
             col2Fr: `${anchos.columna2}fr`,
             col3Fr: `${anchos.columna3}fr`

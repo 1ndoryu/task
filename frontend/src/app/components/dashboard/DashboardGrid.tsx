@@ -194,8 +194,8 @@ export function DashboardGrid({ctx, esMovil = false, paginaMovilActiva = 'ejecuc
     /* MODO DESKTOP: Grid normal con columnas y handles */
     return (
         <div className="dashboardGridContenedor" style={{/* sentinel-disable inline-style-prohibido */ width: `${layout.anchoTotal}%`}}>
-            {/* Anchos publicados como --col*-ancho/--col*-fr (seam CSS, antes objeto style) */}
-            <div className={`dashboardGridColumnas dashboardGridColumnas--${layout.modoColumnas}col ${arrastre.panelArrastrando ? 'arrastrandoPanel' : ''}`} style={{'--col1-ancho': anchosColumna.col1Ancho, '--col2-ancho': anchosColumna.col2Ancho, '--col3-ancho': anchosColumna.col3Ancho, '--col1-fr': anchosColumna.col1Fr, '--col2-fr': anchosColumna.col2Fr, '--col3-fr': anchosColumna.col3Fr} as React.CSSProperties}>
+            {/* Pesos fr publicados como --col*-fr (seam CSS, consumido por resizeHandleColumna.css) */}
+            <div className={`dashboardGridColumnas dashboardGridColumnas--${layout.modoColumnas}col ${arrastre.panelArrastrando ? 'arrastrandoPanel' : ''}`} style={{'--col1-fr': anchosColumna.col1Fr, '--col2-fr': anchosColumna.col2Fr, '--col3-fr': anchosColumna.col3Fr} as React.CSSProperties}>
                 {/* Columna 1 con handle al final si hay más columnas */}
                 <div className="dashboardGridColumna dashboardGridColumna--conHandle">
                     {renderizarColumna(1)}
