@@ -81,7 +81,8 @@
           "glory-sentinel/**",
           "tools/**",
           "frontend/src/api/generated/**",
-          "glory-rs/**"
+          "glory-rs/**",
+          "vendor/**"
         ],
         "directoryExceptions": [
           "migrations",
