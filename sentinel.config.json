@@ -129,9 +129,6 @@
           ],
           "loggerModules": [
             "/frontend/src/app/utils/logger"
-          ],
-          "tooling": [
-            ".freebuff"
           ]
         },
         "rules": {
