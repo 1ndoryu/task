@@ -15,7 +15,8 @@ export async function checkHttpBasics() {
 
 export async function registerTemporaryUser(cookieJar = estado.cookies, label = 'primary', requestedEmail) {
   const email = requestedEmail || `preflight-${label}-${randomUUID()}@example.test`;
-  const password = 'PreflightPassword123!';
+  // Contraseña aleatoria por usuario de prueba: no hay secreto fijo en el repo
+  const password = `Pf-${randomUUID()}!A1`;
   const response = await request('/api/auth/register', {
     cookieJar,
     cookie: '',
