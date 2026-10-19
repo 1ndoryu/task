@@ -11,6 +11,7 @@ import appIslands, { AppProvider } from '@app/appIslands';
 import {logWarn} from './app/utils/logger';
 import {inicializarSuscripcionStore} from '@app/stores/suscripcionStore';
 import {limpiarTodosLosDatosUsuario} from '@app/utils/limpiezaSesion';
+import {autoLoginLocal} from '@app/config/autoLoginLocal';
 import type { GloryRoutesMap } from './glory-core/core/router/navigationStore';
 
 /* [29-08-2026] Aislamiento de datos por cuenta: la caché y la meta de sync del
@@ -104,6 +105,8 @@ async function cargarSesionRust(): Promise<void> {
 }
 
 async function iniciarApp(): Promise<void> {
+    /* [dev] En localhost, entra con la cuenta de prueba antes de leer la sesion. */
+    await autoLoginLocal();
     await cargarSesionRust();
     /* [H-F11-03] Hidratación de suscripción explícita (antes setTimeout en la
      * evaluación del store, fuera del ciclo de React). */
