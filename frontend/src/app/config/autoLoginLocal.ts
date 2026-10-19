@@ -17,7 +17,14 @@ export async function autoLoginLocal(): Promise<void> {
     try {
         // [por que] Si ya hay sesion valida no se vuelve a autenticar en cada recarga.
         const me = await fetch('/api/auth/me', { credentials: 'include' });
-        if (me.ok) return;
+        if (me.ok) {
+            // [por que] El perfil del webview (WebView2) sobrevive a las reinstalaciones, asi que
+            // una sesion vieja de OTRA cuenta pasa por valida y la app abria con ella en vez de
+            // con la local (2026-10-19: abrio como dev-admin@test.app). Solo vale la sesion de
+            // la cuenta local; de cualquier otra se reautentica y se pisa la cookie.
+            const usuario = (await me.json()) as { email?: string };
+            if (usuario.email === CUENTA_LOCAL.email) return;
+        }
         await fetch('/api/auth/login', {
             method: 'POST',
             credentials: 'include',
