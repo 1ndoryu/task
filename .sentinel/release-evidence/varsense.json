@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "tool": "varsense",
-  "commit": "3375e186bcee1086f66df6dd88a16c63a714851b",
+  "commit": "63f7f29988bec10047150c9f27f6deccdb02b153",
   "compile": "passed",
   "suite": "passed",
   "cleanStaging": true,
-  "origen": "ejecutada",
-  "at": "2026-10-18T12:33:12.370Z"
+  "origen": "reutilizada",
+  "at": "2026-10-18T23:18:33.650Z"
 }
