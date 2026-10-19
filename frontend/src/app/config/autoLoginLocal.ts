@@ -1,14 +1,19 @@
-/* Auto-login en local: con Vite en modo dev, o con el build de exe local
- * (VITE_AUTO_LOGIN_LOCAL=1, lo pone scripts/exe-local.mjs), y el navegador en
- * localhost o 127.0.0.1. La cuenta es de prueba (admin en la BD local de la 89).
- * Vite sustituye ambas condiciones en build, así que el build de produccion
- * elimina el bloque y sus credenciales no llegan al bundle. */
-const CUENTA_LOCAL = { email: 'dev-admin@test.app', password: 'Nakomi-Dev-7f3kQ9xW2pLm!' };
-const HOSTS_LOCALES = ['localhost', '127.0.0.1'];
+/* Auto-login en local: con Vite en modo dev, o con el build local
+ * (VITE_AUTO_LOGIN_LOCAL=1, lo ponen scripts/exe-local.mjs y el `build.construirFront`
+ * de la ficha del taller), y el navegador en un host local (`*.localhost`, `localhost`
+ * o `127.0.0.1`). La cuenta es la misma que la del puente de tareas de workspace-manager
+ * (`logs/.tareas-env`): una sola cuenta de administración local para todo el taller.
+ * Vite sustituye ambas condiciones al compilar, así que el build de producción (sin la
+ * bandera) elimina el bloque y sus credenciales no llegan a ese bundle. */
+const CUENTA_LOCAL = { email: 'admin@nakomi.studio', password: 'admin' };
+// [por que] `*.localhost` resuelve a loopback por convención del navegador: nunca es un
+// host público, así que la cuenta de administración local no puede salir por ahí.
+const esHostLocal = (host: string): boolean =>
+    host === 'localhost' || host === '127.0.0.1' || host.endsWith('.localhost');
 
 export async function autoLoginLocal(): Promise<void> {
     const activo = import.meta.env.DEV || import.meta.env.VITE_AUTO_LOGIN_LOCAL === '1';
-    if (!activo || !HOSTS_LOCALES.includes(location.hostname)) return;
+    if (!activo || !esHostLocal(location.hostname)) return;
     try {
         // [por que] Si ya hay sesion valida no se vuelve a autenticar en cada recarga.
         const me = await fetch('/api/auth/me', { credentials: 'include' });
