@@ -23,6 +23,9 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Pendientes
 
+- [ ] `19AA-9` — **El instalador de la app de escritorio compila el front con un `ssh + vite` propio.**
+  El paso 1 de `escritorio/scripts/instalar.mjs` hace `ssh dev89 'VITE_AUTO_LOGIN_LOCAL=1 node …/vite.js build --outDir …'` porque no hay wrapper para compilar un front en la 89 con entorno extra: PROYECTO TASKS no está en el taller con `host` ni con bloque `build`, así que `Arranque up` no lo cubre. Es la misma clase de vía paralela que `19AA-10` de workspace-manager —que ya añadió `--env`/`--prepath` a `rcargo`—, pero para vite. Criterio de hecho: el instalador no invoca `vite` ni `npm` por su cuenta, sino un wrapper del taller que compile el front en la 89.
+
 - [ ] `259A-1` — **Triaje warnings Sentinel 0.7.13 frontend+backend.**
   Re-medición con 0.7.13 daba 20 archivos/28w+5h (14 `inline-style-prohibido`, 5 `html-nativo`, 3 `css-adhoc-button-style`, 2 `componente-artesanal`, 5 `large-interface-isp` hints, 2 `sqlite-carga-N`, 1 `componente-sin-hook-glory`, 1 `menu-contextual-override`). Fixes reales: `agente.rs`→4 helpers turno/SSE, 11 toggles→`toggle(clave)`, `useMenuCrear`/`useModalCrearRecordatorio`/`useModalDependencias` extraídos, `Input` file + `Input` oculto perfil, 4 literales→tokens monocromo; resto FPs documentados (waivers `sentinel-disable-file`/`inline-style` con `[por que]`, TabsPanel islas span, mensajes render-diff, modal creación patrón bespoke, sqlite startup/framework). `tsc` exit 0, `run-with-db check` OK, clippy 121→120. `check:front` bloqueado por boundary pre-existente `main.tsx` (`gloryDashboard`/`localStorage`). Evidencia: `Agente/completados/tareas-2026-09-25.md`.
 
