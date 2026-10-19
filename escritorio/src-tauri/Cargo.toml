@@ -1,0 +1,25 @@
+[package]
+name = "proyecto-tasks"
+version = "0.1.0"
+edition = "2021"
+description = "PROYECTO TASKS de escritorio: lanza el túnel a la BD de la 89 y el backend local"
+
+# [por que] Crate propio: no forma parte del workspace de la raíz del proyecto.
+[workspace]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde_json = "1"
+# [por que] Sin zona horaria ni formato extra: solo la marca de fecha de los respaldos.
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+
+# [por que] Binario pequeño y poca RAM: sin símbolos, LTO y un solo hilo de codegen.
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
