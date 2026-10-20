@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "tool": "varsense",
-  "commit": "63f7f29988bec10047150c9f27f6deccdb02b153",
+  "commit": "101e986509941650a4dfc8f44ff52c9c06c2d92d",
   "compile": "passed",
   "suite": "passed",
   "cleanStaging": true,
-  "ejecutor": "vps89",
+  "ejecutor": "taller",
   "origen": "reutilizada",
-  "at": "2026-10-20T11:21:02.919Z"
+  "at": "2026-10-20T23:06:43.907Z"
 }
