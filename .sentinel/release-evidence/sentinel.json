@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
   "tool": "sentinel",
-  "commit": "b4d043b5c709f641bdcc1f38196984205b470be7",
+  "commit": "d547e0086d2ee1c079fafadff99ac3fe16cf3463",
   "compile": "passed",
   "suite": "passed",
   "cleanStaging": true,
+  "ejecutor": "vps89",
   "origen": "reutilizada",
-  "at": "2026-10-18T23:18:32.741Z"
+  "at": "2026-10-19T22:09:29.409Z"
 }
