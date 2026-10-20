@@ -64,7 +64,9 @@ export const OPCIONES_IMPORTANCIA: OpcionPropiedad[] = [
 
 /* Mapas para obtener texto legible desde ID */
 
+/* Cubre los 5 niveles de NivelPrioridad: si falta uno, quien lo use se queda sin texto */
 const MAPA_PRIORIDAD: Record<string, string> = {
+    muy_baja: 'Muy Baja',
     baja: 'Baja',
     media: 'Media',
     alta: 'Alta',
@@ -94,7 +96,7 @@ const MAPA_IMPORTANCIA: Record<string, string> = {
 
 /* Funciones de mapeo */
 
-export function obtenerTextoPrioridad(prioridad: string | undefined): string | null {
+export function obtenerTextoPrioridad(prioridad: string | null | undefined): string | null {
     if (!prioridad) return null;
     return MAPA_PRIORIDAD[prioridad] || null;
 }

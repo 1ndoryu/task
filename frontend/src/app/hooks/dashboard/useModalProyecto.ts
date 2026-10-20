@@ -39,6 +39,7 @@ export function useModalProyecto({
     const [descripcion, setDescripcion] = useState(proyecto?.descripcion || '');
     const [icono, setIcono] = useState(proyecto?.icono || 'folder');
     const [colorIcono, setColorIcono] = useState(proyecto?.colorIcono || '#888888');
+    /* El editor siempre muestra un nivel concreto; sin prioridad en el proyecto, parte de media */
     const [prioridad, setPrioridad] = useState<NivelPrioridad>(proyecto?.prioridad || 'media');
     const [urgencia, setUrgencia] = useState<NivelUrgencia | null>(proyecto?.urgencia || null);
     const [fechaLimite, setFechaLimite] = useState(proyecto?.fechaLimite || '');
@@ -77,7 +78,7 @@ export function useModalProyecto({
             setDescripcion(proyecto.descripcion || '');
             setIcono(proyecto.icono || 'folder');
             setColorIcono(proyecto.colorIcono || '#888888');
-            setPrioridad(proyecto.prioridad);
+            setPrioridad(proyecto.prioridad ?? 'media');
             setUrgencia(proyecto.urgencia || null);
             setFechaLimite(proyecto.fechaLimite || '');
             setAdjuntos(proyecto.adjuntos || []);
@@ -90,7 +91,7 @@ export function useModalProyecto({
                 descripcion: proyecto.descripcion || '',
                 icono: proyecto.icono || 'folder',
                 colorIcono: proyecto.colorIcono || '#888888',
-                prioridad: proyecto.prioridad,
+                prioridad: proyecto.prioridad ?? 'media',
                 urgencia: proyecto.urgencia || null,
                 fechaLimite: proyecto.fechaLimite || '',
                 adjuntos: proyecto.adjuntos || [],

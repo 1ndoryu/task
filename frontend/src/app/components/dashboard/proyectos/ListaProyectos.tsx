@@ -20,13 +20,14 @@ import {useListaProyectos} from '../../../hooks/dashboard/useListaProyectos';
 /* Mapa de prioridad a valor numérico para ordenamiento (menor = más prioritario) */
 const MAPA_VALOR_PRIORIDAD: Record<string, number> = {muy_alta: 0, alta: 1, media: 2, baja: 3};
 
-/* Obtener variante CSS para badge de prioridad de proyecto */
-function obtenerClasePrioridad(prioridad: string): string {
+/* Obtener variante CSS para badge de prioridad de proyecto (sin prioridad cae en la neutra) */
+function obtenerClasePrioridad(prioridad: string | null | undefined): string {
     switch (prioridad) {
         case 'muy_alta': return 'etiquetaMuyAlta';
         case 'alta': return 'etiquetaAlta';
         case 'media': return 'etiquetaMedia';
         case 'baja': return 'etiquetaBaja';
+        case 'muy_baja': return 'etiquetaBaja';
         default: return 'etiquetaMedia';
     }
 }
@@ -126,6 +127,9 @@ function ProyectoItem({proyecto, activo, tareasProyecto, estaCompartido = false,
     const textoFecha = obtenerTextoFechaLimite(proyecto.fechaLimite);
     const varianteFecha = obtenerVarianteFechaLimite(proyecto.fechaLimite);
 
+    /* Un proyecto sin prioridad no lleva badge; el separador solo aparece si algo se mostro antes */
+    const textoPrioridad = obtenerTextoPrioridad(proyecto.prioridad);
+
     /*
      * Wrapper para crear tareas heredando prioridad y urgencia del proyecto
      * Las tareas creadas dentro de un proyecto heredan sus propiedades
@@ -160,10 +164,10 @@ function ProyectoItem({proyecto, activo, tareasProyecto, estaCompartido = false,
                 <div className="proyectoItemContenido">
                     <span className={`proyectoNombre ${modoCompacto ? 'proyectoNombre--compacto' : ''}`}>{proyecto.nombre}</span>
                     <div className="proyectoMeta">
-                        <span className={`etiquetaPrioridad ${obtenerClasePrioridad(proyecto.prioridad)}`}>{obtenerTextoPrioridad(proyecto.prioridad)?.toUpperCase() || proyecto.prioridad.toUpperCase()}</span>
+                        {textoPrioridad && <span className={`etiquetaPrioridad ${obtenerClasePrioridad(proyecto.prioridad)}`}>{textoPrioridad.toUpperCase()}</span>}
                         {/* Badge de urgencia (si no es normal) */}
                         {proyecto.urgencia && proyecto.urgencia !== 'normal' && <BadgeInfo tipo="personalizado" icono={<Zap size={10} />} texto={proyecto.urgencia.toUpperCase()} variante={obtenerVarianteUrgencia(proyecto.urgencia)} titulo={`Urgencia: ${proyecto.urgencia}`} />}
-                        <span>•</span>
+                        {(textoPrioridad || (proyecto.urgencia && proyecto.urgencia !== 'normal')) && <span>•</span>}
                         <span>{totalTareas > 0 ? `${tareasCompletadas}/${totalTareas}` : 'Sin tareas'}</span>
 
                         {/* Badge de compartido o propietario */}
@@ -237,7 +241,7 @@ export function ListaProyectos({proyectos, tareas, onCrearProyecto, onSelecciona
                                 return new Date(a.fechaLimite).getTime() - new Date(b.fechaLimite).getTime();
                             }
                             if (ordenDefecto === 'prioridad') {
-                                return (MAPA_VALOR_PRIORIDAD[a.prioridad] ?? 99) - (MAPA_VALOR_PRIORIDAD[b.prioridad] ?? 99);
+                                return (MAPA_VALOR_PRIORIDAD[a.prioridad ?? ''] ?? 99) - (MAPA_VALOR_PRIORIDAD[b.prioridad ?? ''] ?? 99);
                             }
                             return 0;
                         })

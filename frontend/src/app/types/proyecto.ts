@@ -13,7 +13,8 @@ import type {Adjunto, NivelPrioridad, NivelUrgencia, RolCompartido} from './tare
 export interface ProyectoBasico {
     id: number;
     nombre: string;
-    prioridad: NivelPrioridad;
+    /* La columna priority admite NULL y el API lo devuelve tal cual: el front no puede mentir */
+    prioridad: NivelPrioridad | null;
     estado: 'activo' | 'completado' | 'pausado';
 }
 
