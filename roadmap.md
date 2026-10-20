@@ -9,9 +9,6 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 - [ ] `19AA-4` — **Dominios con credenciales externas.**
   No implementables sin cuentas/llaves de terceros; hoy se degradan con mensaje claro. El chat IA y la nutrición ya funcionan vía proxy `/api/ai/chat` + `/api/ai/nutricion` con las envs del proyecto anterior (`CEREBRAS_API_KEY`, `GROQ_API*`, `DEEPSEEK_API*`; ver `.env.example` y `run.md`). Quedan externos: agent actions (WhatsApp/research), Magnific, WhatsApp, Google OAuth, grupos Facebook, pagos Stripe reales (webhooks) y servidor MCP real (el token ya se genera; falta el servidor que lo consume). Requieren elegir proveedores y crear las cuentas antes de implementar.
 
-- [ ] `19AA-5` — **Puesta en producción.**
-  Definir destino (Coolify) y gate de exposición: memoria del proceso, `X-Forwarded-For`, cookies detrás del proxy, `docker build`/healthcheck en CI, ingress real; baseline p95 roja por memoria del host (12-08); rate limit single-replica. Mantener snapshot OpenAPI + cliente Orval sincronizado (`openapi:export` + `codegen` sin drift). Plan: `Agente/planes/plan-deploy-task-wandori-us-2026-08-27.md` (pendiente de autorización de push + escrituras remotas).
-
 ## Pendientes
 
 - [ ] `19AA-9` — **El instalador de la app de escritorio compila el front con un `ssh + vite` propio.**
@@ -35,7 +32,7 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 - `Agente/planes/plan-agente-ia-plugin-2026-08-27.md` — `19AA-7`.
 - `Agente/planes/plan-batch-fps-herramientas-119A-4-2026-09-11.md` — `119A-4`.
-- `Agente/planes/plan-deploy-task-wandori-us-2026-08-27.md` — `19AA-5`.
+- `Agente/planes/plan-deploy-task-wandori-us-2026-08-27.md` — deploy de `task.wandori.us`. Parked: su línea de tarea (`19AA-5`) se retiró el 2026-10-20; el plan sigue en disco y se reactiva con una línea nueva cuando haya autorización.
 - `Agente/planes/plan-deuda-restante-039A-1-2026-09-11.md` — `039A-1`.
 - `Agente/planes/plan-glory-harness-2026-09-01.md` — `318A-13`.
 - `Agente/planes/plan-ia-esencial-y-migracion-legacy-2026-08-27.md` — `19AA-8`.
