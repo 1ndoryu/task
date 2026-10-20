@@ -19,6 +19,20 @@ use crate::middleware::auth::{extract_cookie, CSRF_COOKIE, SESSION_COOKIE};
 use crate::services::session::SESSION_MAX_AGE_SEGUNDOS;
 use crate::AppState;
 
+/* [por que] Si el handler ya reemitió esa cookie, la del middleware llegaría después y
+ * el navegador se queda con la última: en un login seguiría valiendo la sesión vieja
+ * (entrar como otro usuario no cambiaba nada) y en un logout la cookie resucitaría.
+ * Solo se reemite lo que nadie haya tocado. */
+fn ya_emitida(respuesta: &Response, nombre: &str) -> bool {
+    let prefijo = format!("{nombre}=");
+    respuesta
+        .headers()
+        .get_all(SET_COOKIE)
+        .iter()
+        .filter_map(|v| v.to_str().ok())
+        .any(|v| v.starts_with(&prefijo))
+}
+
 pub async fn rodar_cookie(
     State(state): State<AppState>,
     peticion: Request,
@@ -37,15 +51,24 @@ pub async fn rodar_cookie(
     ) {
         return respuesta;
     }
-    for valor in [
-        cookie_header(SESSION_COOKIE, &sesion, &state, SESSION_MAX_AGE_SEGUNDOS),
-        cookie_header(
+    for (nombre, valor) in [
+        (
+            SESSION_COOKIE,
+            cookie_header(SESSION_COOKIE, &sesion, &state, SESSION_MAX_AGE_SEGUNDOS),
+        ),
+        (
             CSRF_COOKIE,
-            csrf.as_deref().unwrap_or(""),
-            &state,
-            SESSION_MAX_AGE_SEGUNDOS,
+            cookie_header(
+                CSRF_COOKIE,
+                csrf.as_deref().unwrap_or(""),
+                &state,
+                SESSION_MAX_AGE_SEGUNDOS,
+            ),
         ),
     ] {
+        if ya_emitida(&respuesta, nombre) {
+            continue;
+        }
         /* [por que] Igual que en los handlers de auth: un valor no convertible a
          * cabecera no puede tumbar la respuesta que ya estaba lista. */
         if let Ok(cabecera) = HeaderValue::from_str(&valor) {
@@ -53,4 +76,44 @@ pub async fn rodar_cookie(
         }
     }
     respuesta
+}
+
+#[cfg(test)]
+mod pruebas {
+    /* [20AA-1] Regresión: el middleware reemitía la cookie de la petición aunque el
+     * handler ya hubiera fijado la suya, y con dos `Set-Cookie` del mismo nombre gana
+     * la última. `cargo test` no necesita BD: se prueba la decisión, no el router. */
+    use super::ya_emitida;
+    use crate::middleware::auth::{CSRF_COOKIE, SESSION_COOKIE};
+    use axum::http::header::SET_COOKIE;
+    use axum::http::HeaderValue;
+    use axum::response::Response;
+
+    fn respuesta_con(valor: &str) -> Response {
+        let mut respuesta = Response::new(axum::body::Body::empty());
+        respuesta
+            .headers_mut()
+            .append(SET_COOKIE, HeaderValue::from_str(valor).unwrap());
+        respuesta
+    }
+
+    #[test]
+    fn la_cookie_que_ya_fijo_el_handler_no_se_reemite() {
+        let respuesta = respuesta_con("session_id=nueva; Path=/; HttpOnly");
+        assert!(ya_emitida(&respuesta, SESSION_COOKIE));
+        assert!(!ya_emitida(&respuesta, CSRF_COOKIE));
+    }
+
+    #[test]
+    fn una_cookie_de_otro_nombre_no_cuenta_como_emitida() {
+        let respuesta = respuesta_con("otra_cosa=1; Path=/");
+        assert!(!ya_emitida(&respuesta, SESSION_COOKIE));
+        assert!(!ya_emitida(&respuesta, CSRF_COOKIE));
+    }
+
+    #[test]
+    fn sin_set_cookie_no_hay_nada_emitido() {
+        let respuesta = Response::new(axum::body::Body::empty());
+        assert!(!ya_emitida(&respuesta, SESSION_COOKIE));
+    }
 }
