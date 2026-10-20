@@ -69,37 +69,56 @@ async function cargarSesionRust(): Promise<void> {
      * sesion Rust (isLoggedIn, currentUser con id UUID para compartidos/equipos).
      * apiUrl/apiBase quedan obsoletos y apuntan a /api por compatibilidad. */
     const base = { nonce: '', apiUrl: '/api', apiBase: '/api' };
-    try {
-        /* [fetch-sin-timeout] Timeout acotado para no bloquear el boot si
-         * /api/auth/me no responde (el fallo cae al catch y arranca no-auth). */
-        const control = new AbortController();
-        const temporizador = window.setTimeout(() => control.abort(), 8000);
-        let respuesta: Response;
+
+    /* [20AA-1] Solo 401/403 significan «sesión cerrada». Antes CUALQUIER
+     * respuesta no-ok dejaba isLoggedIn:false, así que un 500 (la BD sin
+     * responder: túnel SSH caído, pool agotado) deslogueaba la app con la sesión
+     * intacta en el servidor y la dejaba en la landing. Ahora los 5xx y los
+     * fallos de red se reintentan y, si no hay veredicto, se conserva la sesión
+     * que ya tuviera la ventana. */
+    for (let intento = 0; intento < 3; intento++) {
+        if (intento > 0) await new Promise((seguir) => window.setTimeout(seguir, 700 * intento));
         try {
-            respuesta = await fetch('/api/auth/me', { credentials: 'include', signal: control.signal });
-        } finally {
-            window.clearTimeout(temporizador);
+            /* [fetch-sin-timeout] Timeout acotado para no bloquear el boot si
+             * /api/auth/me no responde. */
+            const control = new AbortController();
+            const temporizador = window.setTimeout(() => control.abort(), 8000);
+            let respuesta: Response;
+            try {
+                respuesta = await fetch('/api/auth/me', { credentials: 'include', signal: control.signal });
+            } finally {
+                window.clearTimeout(temporizador);
+            }
+            if (respuesta.ok) {
+                const usuario = await respuesta.json();
+                /* [H-F15-03] /api/auth/me devuelve el UserResponse directamente (no
+                 * envuelto en {user}): es_admin real para el gate del panel admin. */
+                window.gloryDashboard = {
+                    ...base,
+                    currentUser: {
+                        id: usuario?.id,
+                        name: usuario?.display_name || usuario?.email || '',
+                        email: usuario?.email,
+                        avatarUrl: usuario?.avatar_url ?? undefined,
+                    },
+                    isLoggedIn: true,
+                    esAdmin: Boolean(usuario?.es_admin),
+                };
+                limpiarCacheSiCambioUsuario(usuario?.id);
+                return;
+            }
+            if (respuesta.status === 401 || respuesta.status === 403) {
+                window.gloryDashboard = { ...base, isLoggedIn: false, esAdmin: false };
+                return;
+            }
+            logWarn('main', `Sesion no comprobable (HTTP ${respuesta.status}); reintentando`);
+        } catch {
+            logWarn('main', 'Sesion no comprobable (red); reintentando');
         }
-        if (!respuesta.ok) {
-            window.gloryDashboard = { ...base, isLoggedIn: false, esAdmin: false };
-            return;
-        }
-        const usuario = await respuesta.json();
-        /* [H-F15-03] /api/auth/me devuelve el UserResponse directamente (no
-         * envuelto en {user}): es_admin real para el gate del panel admin. */
-        window.gloryDashboard = {
-            ...base,
-            currentUser: {
-                id: usuario?.id,
-                name: usuario?.display_name || usuario?.email || '',
-                email: usuario?.email,
-                avatarUrl: usuario?.avatar_url ?? undefined,
-            },
-            isLoggedIn: true,
-            esAdmin: Boolean(usuario?.es_admin),
-        };
-        limpiarCacheSiCambioUsuario(usuario?.id);
-    } catch {
+    }
+    /* Sin veredicto tras los reintentos: si la ventana ya tenía sesión se
+     * conserva (perderla aquí sería desloguear por un corte temporal). */
+    if (!window.gloryDashboard?.isLoggedIn) {
         window.gloryDashboard = { ...base, isLoggedIn: false, esAdmin: false };
     }
 }

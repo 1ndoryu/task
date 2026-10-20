@@ -1,3 +1,5 @@
+import { logWarn } from '@app/utils/logger';
+
 /* Auto-login en local: con Vite en modo dev, o con el build local
  * (VITE_AUTO_LOGIN_LOCAL=1, lo ponen scripts/exe-local.mjs y el `build.construirFront`
  * de la ficha del taller), y el navegador en un host local (`*.localhost`, `localhost`
@@ -25,12 +27,18 @@ export async function autoLoginLocal(): Promise<void> {
             const usuario = (await me.json()) as { email?: string };
             if (usuario.email === CUENTA_LOCAL.email) return;
         }
-        await fetch('/api/auth/login', {
+        const login = await fetch('/api/auth/login', {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(CUENTA_LOCAL),
         });
+        // [20AA-1] [por que] El resultado se mira y se registra: descartado, un 5xx
+        // (BD sin responder) pasaba por auto-login correcto y el diagnóstico se
+        // quedaba sin rastro. No se lanza: cargarSesionRust reintenta y decide.
+        if (!login.ok) {
+            logWarn('autoLoginLocal', `Auto-login local fallo (HTTP ${login.status})`);
+        }
     } catch {
         // [por que] Sin backend no se bloquea el arranque: cargarSesionRust cae a no-auth.
     }
