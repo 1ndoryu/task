@@ -5,6 +5,7 @@
 
 use std::ffi::OsStr;
 use std::fs::{self, File};
+use std::io::{Read, Write};
 use std::net::{SocketAddr, TcpStream};
 use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
@@ -23,10 +24,20 @@ const BD: &str = "glory_backend_local";
 const MAX_RESPALDOS: usize = 14;
 // [por que] Sin este flag Windows abre una consola por cada ssh y por el backend.
 const SIN_VENTANA: u32 = 0x0800_0000;
+// [por que] Cada cuánto se comprueba que la BD sigue alcanzable por el túnel.
+const INTERVALO_VIGILANCIA: Duration = Duration::from_secs(10);
+// [por que] Un fallo suelto de `/api/ready` puede ser un pico; reiniciar túnel y
+// backend por uno solo haría parpadear la app. Se exigen dos seguidos.
+const FALLOS_PARA_RECUPERAR: u32 = 2;
 
-// Procesos lanzados por esta app; se paran al salir.
+/// Procesos lanzados por esta app, en ranuras con nombre; se paran al salir.
+/// [por que] Con nombre y no en una lista porque el vigilante tiene que poder
+/// matar y relanzar *solo* el backend o *solo* el túnel al recuperarse.
 #[derive(Default)]
-struct Hijos(Mutex<Vec<Child>>);
+struct Hijos {
+    tunel: Mutex<Option<Child>>,
+    backend: Mutex<Option<Child>>,
+}
 
 fn main() {
     let construida = tauri::Builder::default()
@@ -54,9 +65,10 @@ fn main() {
     app.run(|app, evento| {
         if let RunEvent::Exit = evento {
             let hijos = app.state::<Hijos>();
-            for mut h in hijos.0.lock().unwrap_or_else(|e| e.into_inner()).drain(..) {
-                let _ = h.kill();
-            }
+            // [por que] Primero el backend: si se corta el túnel antes, el backend
+            // se queda esperando conexiones que ya no van a llegar.
+            matar(&hijos.backend);
+            matar(&hijos.tunel);
         }
     });
 }
@@ -88,7 +100,109 @@ fn arrancar(app: &tauri::AppHandle) -> Result<(), String> {
     app.get_webview_window("main")
         .ok_or("no existe la ventana principal")?
         .eval(&js)
-        .map_err(|e| e.to_string())
+        .map_err(|e| e.to_string())?;
+
+    /* [20AA-1] [por que] El túnel se abría una sola vez y nadie lo miraba después.
+     * Cuando moría, el pool de SQLx se quedaba trabado con conexiones fantasma
+     * (netstat: cero sockets a la BD) y TODA petición daba 500 hasta reiniciar el
+     * backend a mano; la app se quedaba muda y en la landing (2026-10-20). El
+     * vigilante detecta el corte y rehace el camino sin intervención. */
+    let vigilante = app.clone();
+    thread::spawn(move || vigilar(vigilante));
+    Ok(())
+}
+
+/// Vigila que el backend siga alcanzando la BD por el túnel; si no, recupera.
+/// [por que] El sondeo es `/api/ready`, que hace un `ping` real a PostgreSQL: es
+/// el único test que ve el caso difícil —el listener local sigue abierto pero el
+/// canal SSH está muerto—, que un simple «¿el puerto responde?» no distingue.
+fn vigilar(app: tauri::AppHandle) {
+    let mut fallos = 0u32;
+    loop {
+        thread::sleep(INTERVALO_VIGILANCIA);
+        // La ventana cerrada es la señal de salida; el proceso entero se va detrás.
+        if app.get_webview_window("main").is_none() {
+            return;
+        }
+        if readiness_ok() {
+            fallos = 0;
+            continue;
+        }
+        fallos += 1;
+        let dir = dir_app().unwrap_or_default();
+        registrar(&dir, &format!("la BD no responde por el túnel ({fallos}/{FALLOS_PARA_RECUPERAR})"));
+        if fallos < FALLOS_PARA_RECUPERAR {
+            continue;
+        }
+        fallos = 0;
+        mostrar_estado(&app, "Reconectando con la base de datos…");
+        match recuperar(&app) {
+            Ok(()) => {
+                registrar(&dir, "recuperado: túnel y backend reabiertos");
+                recargar(&app);
+            }
+            Err(e) => registrar(&dir, &format!("la recuperación falló: {e}")),
+        }
+    }
+}
+
+/// Rehace túnel y backend. [por que] El backend se reinicia siempre: su pool está
+/// trabado con conexiones muertas y ninguna se recupera sola; solo un proceso
+/// nuevo abre un pool sano. Las sesiones viven en la BD y las cookies en el
+/// webview, así que al recargar la usuaria sigue dentro.
+fn recuperar(app: &tauri::AppHandle) -> Result<(), String> {
+    let hijos = app.state::<Hijos>();
+    matar(&hijos.backend);
+    esperar_puerto_cerrado(PUERTO_BACKEND, 10);
+
+    // [por que] Solo se mata el ssh que abrimos nosotros: uno abierto a mano por
+    // la usuaria no es nuestro y se deja como estaba.
+    let propio = hijos.tunel.lock().unwrap_or_else(|e| e.into_inner()).is_some();
+    if propio {
+        matar(&hijos.tunel);
+        esperar_puerto_cerrado(PUERTO_TUNEL_BD, 10);
+    }
+    if !puerto_abierto(PUERTO_TUNEL_BD) {
+        lanzar_tunel(app)?;
+    }
+
+    let dir = dir_app()?;
+    lanzar_backend(app, &dir)?;
+    esperar_puerto(PUERTO_BACKEND, 30)
+}
+
+/// ¿El backend contesta `/api/ready` con 200? Petición HTTP a mano: el lanzador
+/// no lleva cliente HTTP y para una línea de estado no hace falta uno.
+fn readiness_ok() -> bool {
+    let Ok(mut flujo) = TcpStream::connect_timeout(
+        &SocketAddr::from(([127, 0, 0, 1], PUERTO_BACKEND)),
+        Duration::from_millis(500),
+    ) else {
+        return false;
+    };
+    // [por que] El pool agotado tarda `acquire_timeout` (5 s) en rendirse: sin
+    // margen, un corte se leería como «no respondió» y no como 503.
+    let _ = flujo.set_read_timeout(Some(Duration::from_secs(8)));
+    if flujo
+        .write_all(format!("GET /api/ready HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n").as_bytes())
+        .is_err()
+    {
+        return false;
+    }
+    let mut trozo = [0u8; 32];
+    match flujo.read(&mut trozo) {
+        Ok(n) => {
+            let inicio = String::from_utf8_lossy(&trozo[..n]);
+            inicio.starts_with("HTTP/1.1 200") || inicio.starts_with("HTTP/1.0 200")
+        }
+        Err(_) => false,
+    }
+}
+
+fn recargar(app: &tauri::AppHandle) {
+    if let Some(ventana) = app.get_webview_window("main") {
+        let _ = ventana.eval("location.reload()");
+    }
 }
 
 fn lanzar_tunel(app: &tauri::AppHandle) -> Result<(), String> {
@@ -102,7 +216,7 @@ fn lanzar_tunel(app: &tauri::AppHandle) -> Result<(), String> {
         .stderr(Stdio::null())
         .spawn()
         .map_err(|e| format!("no se pudo lanzar ssh: {e}"))?;
-    registrar_hijo(app, hijo);
+    registrar_hijo(&app.state::<Hijos>().tunel, hijo);
     esperar_puerto(PUERTO_TUNEL_BD, 15).map_err(|_| "el túnel a la 89 no respondió".to_string())
 }
 
@@ -123,7 +237,7 @@ fn lanzar_backend(app: &tauri::AppHandle, dir: &Path) -> Result<(), String> {
         .stderr(log)
         .spawn()
         .map_err(|e| format!("no se pudo lanzar el backend: {e}"))?;
-    registrar_hijo(app, hijo);
+    registrar_hijo(&app.state::<Hijos>().backend, hijo);
     Ok(())
 }
 
@@ -178,8 +292,22 @@ fn comando(programa: impl AsRef<OsStr>) -> Command {
     c
 }
 
-fn registrar_hijo(app: &tauri::AppHandle, hijo: Child) {
-    app.state::<Hijos>().0.lock().unwrap_or_else(|e| e.into_inner()).push(hijo);
+fn registrar_hijo(slot: &Mutex<Option<Child>>, hijo: Child) {
+    if let Some(mut previo) = slot.lock().unwrap_or_else(|e| e.into_inner()).replace(hijo) {
+        // [por que] Una ranura con un hijo vivo a quien se pisa quedaría huérfano.
+        let _ = previo.kill();
+        let _ = previo.wait();
+    }
+}
+
+/// Para el proceso de una ranura y cosecha su salida.
+/// [por que] Sin `wait` el hijo queda zombi y el puerto tarda en soltarse, así que
+/// el relanzamiento inmediato chocaría con el listener del muerto.
+fn matar(slot: &Mutex<Option<Child>>) {
+    if let Some(mut hijo) = slot.lock().unwrap_or_else(|e| e.into_inner()).take() {
+        let _ = hijo.kill();
+        let _ = hijo.wait();
+    }
 }
 
 fn dir_app() -> Result<PathBuf, String> {
@@ -189,7 +317,6 @@ fn dir_app() -> Result<PathBuf, String> {
 
 // Línea en app.log junto al exe; sin consola no hay otro sitio donde ver los fallos.
 fn registrar(dir: &Path, mensaje: &str) {
-    use std::io::Write;
     if let Ok(mut f) = fs::OpenOptions::new().create(true).append(true).open(dir.join("app.log")) {
         let _ = writeln!(f, "{} {mensaje}", chrono::Local::now().format("%Y-%m-%d %H:%M:%S"));
     }
@@ -198,6 +325,13 @@ fn registrar(dir: &Path, mensaje: &str) {
 fn puerto_abierto(puerto: u16) -> bool {
     let addr = SocketAddr::from(([127, 0, 0, 1], puerto));
     TcpStream::connect_timeout(&addr, Duration::from_millis(300)).is_ok()
+}
+
+fn esperar_puerto_cerrado(puerto: u16, segundos: u64) {
+    let limite = Instant::now() + Duration::from_secs(segundos);
+    while Instant::now() < limite && puerto_abierto(puerto) {
+        thread::sleep(Duration::from_millis(200));
+    }
 }
 
 fn esperar_puerto(puerto: u16, segundos: u64) -> Result<(), String> {
