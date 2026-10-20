@@ -138,10 +138,11 @@ impl IntoResponse for AppError {
                 /* [por que] Pool agotado, pool cerrado o conexión caída no son un
                  * fallo nuestro: es la BD sin responder. Se contestan 503 para que
                  * el cliente lo lea como temporal y reintente, en vez de 500 (que
-                 * es «algo se rompió»). Importa: la app de escritorio va contra la
-                 * BD de la 89 por túnel SSH, y al morir el túnel el pool se queda
-                 * trabado — con 500 el front no sabía distinguirlo de un fallo real
-                 * y se quedaba en la landing (2026-10-20). */
+                 * es «algo se rompió»). Importa: el pool de SQLx no se recupera solo
+                 * cuando la conexión se corta (con la app de escritorio le pasaba al
+                 * morir el túnel SSH a la 89, hoy retirado) — con 500 el front no
+                 * sabía distinguirlo de un fallo real y se quedaba en la landing
+                 * (2026-10-20). */
                 if bd_no_disponible(&err) {
                     (
                         StatusCode::SERVICE_UNAVAILABLE,
