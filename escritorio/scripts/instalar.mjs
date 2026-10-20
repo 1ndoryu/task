@@ -1,9 +1,11 @@
 // Compila PROYECTO TASKS de escritorio en la 89 y lo instala en el laptop.
-// [por que] El laptop no compila (AGENTS §1). El lanzador, el backend y el front van
-// juntos en una carpeta fija fuera de OneDrive y de C:\tmp; el front lleva el auto-login local.
+// [por que] El laptop no compila (AGENTS §1). La 89 solo compila: el dato vive en
+// el PostgreSQL del propio equipo y la app no depende de la red para abrir. El
+// lanzador, el backend y el front van juntos en una carpeta fija fuera de OneDrive
+// y de C:\tmp; el front lleva el auto-login local.
 // Uso: node escritorio/scripts/instalar.mjs
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { connect } from 'node:net';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -92,10 +94,40 @@ for (const args of copias) {
     if (spawnSync('scp', args, { stdio: 'inherit' }).status !== 0) throw new Error(`scp falló: ${args.at(-2)}`);
 }
 
-// 5. Acceso directo en el escritorio: un clic para abrir.
+/* 5. Config del equipo: `config.env` junto a los exe. El lanzador lee de aquí la
+ * conexión a la BD local y la ruta de pg_dump.
+ * [por que] Va en el destino y no en el repo porque lleva la contraseña de la BD:
+ * este script está versionado, el fichero generado no. Y no puede ir compilada en
+ * el .exe por lo mismo. La `DATABASE_URL` sale del `.env` del proyecto (ignorado
+ * por git) para no tener la conexión en dos sitios. */
+const env = readFileSync(join(RAIZ_LOCAL, '.env'), 'utf8');
+const databaseUrl = env.split(/\r?\n/).find((l) => l.startsWith('DATABASE_URL='))?.slice('DATABASE_URL='.length).trim();
+if (!databaseUrl) throw new Error('.env no trae DATABASE_URL');
+const pgDump = rutaPgDump();
+if (!pgDump) throw new Error('no se encontró pg_dump.exe; instala PostgreSQL o ajusta PG_DUMP en config.env');
+writeFileSync(join(DESTINO, 'config.env'), `DATABASE_URL=${databaseUrl}\nPG_DUMP=${pgDump}\n`, 'utf8');
+console.log(`BD local: ${databaseUrl.replace(/:\/\/[^:]*:[^@]*@/, '://***:***@')}`);
+
+// 6. Acceso directo en el escritorio: un clic para abrir.
 const ps = `$s=(New-Object -ComObject WScript.Shell).CreateShortcut([Environment]::GetFolderPath('Desktop')+'\\PROYECTO TASKS.lnk');` +
     `$s.TargetPath='${DESTINO.replaceAll('/', '\\')}\\proyecto-tasks.exe';$s.WorkingDirectory='${DESTINO.replaceAll('/', '\\')}';$s.Save()`;
 spawnSync('powershell', ['-NoProfile', '-Command', ps], { stdio: 'inherit' });
+
+// pg_dump del PostgreSQL instalado en el equipo; se elige la versión más alta.
+function rutaPgDump() {
+    const raiz = 'C:/Program Files/PostgreSQL';
+    let versiones = [];
+    try {
+        versiones = readdirSync(raiz).sort((a, b) => Number(b) - Number(a));
+    } catch {
+        return null;
+    }
+    for (const v of versiones) {
+        const exe = `${raiz}/${v}/bin/pg_dump.exe`;
+        if (existsSync(exe)) return exe;
+    }
+    return null;
+}
 
 console.log(`\nInstalado en ${DESTINO}. Ábrelo con el acceso directo «PROYECTO TASKS».`);
 

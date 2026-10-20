@@ -1,6 +1,6 @@
-// PROYECTO TASKS de escritorio: abre el túnel a la BD de la 89, arranca el backend
-// local (glory-backend.exe) y muestra la app contra él. Al cerrar la ventana
-// se paran los procesos que lanzó; un túnel ya abierto a mano se deja como estaba.
+// PROYECTO TASKS de escritorio: arranca el backend local (glory-backend.exe) contra
+// el PostgreSQL del propio equipo y muestra la app contra él. Todo el dato vive aquí:
+// la 89 solo compila los .exe. Al cerrar la ventana se para lo que lanzó.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::ffi::OsStr;
@@ -16,27 +16,54 @@ use std::time::{Duration, Instant};
 
 use tauri::{Manager, RunEvent};
 
-const HOST_REMOTO: &str = "dev89";
 const PUERTO_BACKEND: u16 = 4190;
-const PUERTO_TUNEL_BD: u16 = 15433;
-const SOCKET_PG: &str = "/var/run/postgresql/.s.PGSQL.5432";
-const BD: &str = "glory_backend_local";
 const MAX_RESPALDOS: usize = 14;
-// [por que] Sin este flag Windows abre una consola por cada ssh y por el backend.
+// [por que] Sin este flag Windows abre una consola por el backend.
 const SIN_VENTANA: u32 = 0x0800_0000;
-// [por que] Cada cuánto se comprueba que la BD sigue alcanzable por el túnel.
+// [por que] Cada cuánto se comprueba que la BD sigue respondiendo.
 const INTERVALO_VIGILANCIA: Duration = Duration::from_secs(10);
-// [por que] Un fallo suelto de `/api/ready` puede ser un pico; reiniciar túnel y
-// backend por uno solo haría parpadear la app. Se exigen dos seguidos.
+// [por que] Un fallo suelto de `/api/ready` puede ser un pico; reiniciar el backend
+// por uno solo haría parpadear la app. Se exigen dos seguidos.
 const FALLOS_PARA_RECUPERAR: u32 = 2;
+// [por que] Si el PostgreSQL local está caído, reiniciar el backend no arregla nada:
+// sin esta pausa el vigilante lo relanzaría cada 20 s indefinidamente.
+const ESPERA_TRAS_RECUPERACION: Duration = Duration::from_secs(60);
 
 /// Procesos lanzados por esta app, en ranuras con nombre; se paran al salir.
 /// [por que] Con nombre y no en una lista porque el vigilante tiene que poder
-/// matar y relanzar *solo* el backend o *solo* el túnel al recuperarse.
+/// matar y relanzar *solo* el backend al recuperarse.
 #[derive(Default)]
 struct Hijos {
-    tunel: Mutex<Option<Child>>,
     backend: Mutex<Option<Child>>,
+}
+
+/// Ajustes de la instalación (`config.env` junto al exe, fuera del repo: lleva la
+/// contraseña de la BD). [por que] El lanzador no puede traerla compilada —el repo
+/// es público para el gate— ni asumir una ruta de PostgreSQL que cambie de versión.
+struct Ajustes {
+    database_url: String,
+    pg_dump: Option<PathBuf>,
+}
+
+impl Ajustes {
+    fn leer(dir: &Path) -> Result<Self, String> {
+        let texto = fs::read_to_string(dir.join("config.env"))
+            .map_err(|e| format!("no se pudo leer config.env: {e}"))?;
+        let valor = |clave: &str| {
+            texto
+                .lines()
+                .filter(|l| !l.trim_start().starts_with('#'))
+                .filter_map(|l| l.split_once('='))
+                .find(|(k, _)| k.trim() == clave)
+                .map(|(_, v)| v.trim().to_string())
+        };
+        let database_url = valor("DATABASE_URL")
+            .ok_or("config.env no trae DATABASE_URL")?;
+        Ok(Self {
+            database_url,
+            pg_dump: valor("PG_DUMP").map(PathBuf::from),
+        })
+    }
 }
 
 fn main() {
@@ -64,33 +91,32 @@ fn main() {
     };
     app.run(|app, evento| {
         if let RunEvent::Exit = evento {
-            let hijos = app.state::<Hijos>();
-            // [por que] Primero el backend: si se corta el túnel antes, el backend
-            // se queda esperando conexiones que ya no van a llegar.
-            matar(&hijos.backend);
-            matar(&hijos.tunel);
+            // [por que] El backend no muere con la ventana por su cuenta: sin esto
+            // queda vivo ocupando el puerto y el siguiente arranque falla.
+            matar(&app.state::<Hijos>().backend);
         }
     });
 }
 
 fn arrancar(app: &tauri::AppHandle) -> Result<(), String> {
     let dir = dir_app()?;
+    let ajustes = Ajustes::leer(&dir)?;
     // [por que] Si el puerto ya responde es otro backend (p. ej. exe-local): no usarlo a ciegas.
     if puerto_abierto(PUERTO_BACKEND) {
         return Err(format!("el puerto {PUERTO_BACKEND} ya está en uso; cierra el otro backend"));
     }
-    if !puerto_abierto(PUERTO_TUNEL_BD) {
-        mostrar_estado(app, "Abriendo el túnel a la base de datos de la 89…");
-        lanzar_tunel(app)?;
-    }
     mostrar_estado(app, "Arrancando el backend…");
-    lanzar_backend(app, &dir)?;
+    lanzar_backend(app, &dir, &ajustes)?;
     esperar_puerto(PUERTO_BACKEND, 30)?;
 
     // [por que] El respaldo corre aparte: un fallo no debe impedir abrir la app.
     let dir_respaldo = dir.clone();
+    let ajustes_respaldo = Ajustes {
+        database_url: ajustes.database_url.clone(),
+        pg_dump: ajustes.pg_dump.clone(),
+    };
     thread::spawn(move || {
-        if let Err(e) = respaldar() {
+        if let Err(e) = respaldar(&ajustes_respaldo) {
             registrar(&dir_respaldo, &format!("respaldo: {e}"));
         }
     });
@@ -102,20 +128,20 @@ fn arrancar(app: &tauri::AppHandle) -> Result<(), String> {
         .eval(&js)
         .map_err(|e| e.to_string())?;
 
-    /* [20AA-1] [por que] El túnel se abría una sola vez y nadie lo miraba después.
-     * Cuando moría, el pool de SQLx se quedaba trabado con conexiones fantasma
-     * (netstat: cero sockets a la BD) y TODA petición daba 500 hasta reiniciar el
-     * backend a mano; la app se quedaba muda y en la landing (2026-10-20). El
-     * vigilante detecta el corte y rehace el camino sin intervención. */
+    /* [20AA-1] [por que] El backend abre su pool de SQLx una sola vez y no lo
+     * vigila nadie: si PostgreSQL se reinicia o se cae la conexión, el pool queda
+     * trabado con conexiones fantasma y TODA petición falla hasta reiniciar el
+     * proceso a mano; la app se quedaba muda y en la landing (2026-10-20). El
+     * vigilante detecta el corte y rehace el backend sin intervención. */
     let vigilante = app.clone();
     thread::spawn(move || vigilar(vigilante));
     Ok(())
 }
 
-/// Vigila que el backend siga alcanzando la BD por el túnel; si no, recupera.
+/// Vigila que el backend siga alcanzando la BD; si no, lo rehace.
 /// [por que] El sondeo es `/api/ready`, que hace un `ping` real a PostgreSQL: es
-/// el único test que ve el caso difícil —el listener local sigue abierto pero el
-/// canal SSH está muerto—, que un simple «¿el puerto responde?» no distingue.
+/// el único test que ve el caso difícil —el pool trabado—, que un simple «¿el
+/// puerto responde?» no distingue (el listener del backend sigue abierto).
 fn vigilar(app: tauri::AppHandle) {
     let mut fallos = 0u32;
     loop {
@@ -130,7 +156,7 @@ fn vigilar(app: tauri::AppHandle) {
         }
         fallos += 1;
         let dir = dir_app().unwrap_or_default();
-        registrar(&dir, &format!("la BD no responde por el túnel ({fallos}/{FALLOS_PARA_RECUPERAR})"));
+        registrar(&dir, &format!("la BD no responde ({fallos}/{FALLOS_PARA_RECUPERAR})"));
         if fallos < FALLOS_PARA_RECUPERAR {
             continue;
         }
@@ -138,36 +164,29 @@ fn vigilar(app: tauri::AppHandle) {
         mostrar_estado(&app, "Reconectando con la base de datos…");
         match recuperar(&app) {
             Ok(()) => {
-                registrar(&dir, "recuperado: túnel y backend reabiertos");
+                registrar(&dir, "recuperado: backend reiniciado");
                 recargar(&app);
             }
-            Err(e) => registrar(&dir, &format!("la recuperación falló: {e}")),
+            Err(e) => {
+                registrar(&dir, &format!("la recuperación falló: {e}"));
+                // [por que] Si la BD está caída de verdad, insistir cada 20 s no
+                // arregla nada y llena el log: se da un respiro y se reintenta.
+                thread::sleep(ESPERA_TRAS_RECUPERACION);
+            }
         }
     }
 }
 
-/// Rehace túnel y backend. [por que] El backend se reinicia siempre: su pool está
-/// trabado con conexiones muertas y ninguna se recupera sola; solo un proceso
-/// nuevo abre un pool sano. Las sesiones viven en la BD y las cookies en el
-/// webview, así que al recargar la usuaria sigue dentro.
+/// Rehace el backend. [por que] Su pool está trabado con conexiones muertas y
+/// ninguna se recupera sola; solo un proceso nuevo abre un pool sano. Las sesiones
+/// viven en la BD y las cookies en el webview, así que al recargar la usuaria
+/// sigue dentro.
 fn recuperar(app: &tauri::AppHandle) -> Result<(), String> {
-    let hijos = app.state::<Hijos>();
-    matar(&hijos.backend);
-    esperar_puerto_cerrado(PUERTO_BACKEND, 10);
-
-    // [por que] Solo se mata el ssh que abrimos nosotros: uno abierto a mano por
-    // la usuaria no es nuestro y se deja como estaba.
-    let propio = hijos.tunel.lock().unwrap_or_else(|e| e.into_inner()).is_some();
-    if propio {
-        matar(&hijos.tunel);
-        esperar_puerto_cerrado(PUERTO_TUNEL_BD, 10);
-    }
-    if !puerto_abierto(PUERTO_TUNEL_BD) {
-        lanzar_tunel(app)?;
-    }
-
     let dir = dir_app()?;
-    lanzar_backend(app, &dir)?;
+    let ajustes = Ajustes::leer(&dir)?;
+    matar(&app.state::<Hijos>().backend);
+    esperar_puerto_cerrado(PUERTO_BACKEND, 10);
+    lanzar_backend(app, &dir, &ajustes)?;
     esperar_puerto(PUERTO_BACKEND, 30)
 }
 
@@ -205,27 +224,12 @@ fn recargar(app: &tauri::AppHandle) {
     }
 }
 
-fn lanzar_tunel(app: &tauri::AppHandle) -> Result<(), String> {
-    // [por que] Peer auth: ssh entrega la conexión como `dev` en el socket; sin contraseñas.
-    let reenvio = format!("{PUERTO_TUNEL_BD}:{SOCKET_PG}");
-    let hijo = comando("ssh")
-        .args(["-N", "-o", "BatchMode=yes", "-o", "ExitOnForwardFailure=yes", "-o", "ServerAliveInterval=30"])
-        .args(["-L", reenvio.as_str(), HOST_REMOTO])
-        .stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .spawn()
-        .map_err(|e| format!("no se pudo lanzar ssh: {e}"))?;
-    registrar_hijo(&app.state::<Hijos>().tunel, hijo);
-    esperar_puerto(PUERTO_TUNEL_BD, 15).map_err(|_| "el túnel a la 89 no respondió".to_string())
-}
-
-fn lanzar_backend(app: &tauri::AppHandle, dir: &Path) -> Result<(), String> {
+fn lanzar_backend(app: &tauri::AppHandle, dir: &Path, ajustes: &Ajustes) -> Result<(), String> {
     // [por que] Variables explícitas: el .env no viaja al equipo. Solo loopback, sin nada público.
     let log = File::create(dir.join("backend.log")).map_err(|e| e.to_string())?;
     let hijo = comando(dir.join("glory-backend.exe"))
         .current_dir(dir)
-        .env("DATABASE_URL", format!("postgres://dev@127.0.0.1:{PUERTO_TUNEL_BD}/{BD}"))
+        .env("DATABASE_URL", &ajustes.database_url)
         .env("HOST", "127.0.0.1")
         .env("PORT", PUERTO_BACKEND.to_string())
         .env("CORS_ORIGINS", format!("http://127.0.0.1:{PUERTO_BACKEND},http://localhost:{PUERTO_BACKEND}"))
@@ -241,8 +245,12 @@ fn lanzar_backend(app: &tauri::AppHandle, dir: &Path) -> Result<(), String> {
     Ok(())
 }
 
-// Copia de la BD de la 89 a la carpeta de respaldos del laptop (fuera de OneDrive).
-fn respaldar() -> Result<(), String> {
+// Copia de la BD local a la carpeta de respaldos del laptop (fuera de OneDrive).
+// [por que] Con el dato en el propio equipo, este volcado es la ÚNICA copia que
+// no vive en el mismo disco que el original: por eso corre en cada arranque.
+fn respaldar(ajustes: &Ajustes) -> Result<(), String> {
+    let pg_dump = ajustes.pg_dump.as_deref()
+        .ok_or("config.env no trae PG_DUMP; sin ruta no hay respaldo")?;
     let carpeta = PathBuf::from(std::env::var("USERPROFILE").map_err(|e| e.to_string())?)
         .join("Respaldos")
         .join("PROYECTO-TASKS");
@@ -255,20 +263,26 @@ fn respaldar() -> Result<(), String> {
     if !destino.starts_with(&carpeta) {
         return Err("destino fuera de la carpeta de respaldos".into());
     }
-    let salida = File::create(&destino).map_err(|e| e.to_string())?;
-    let remoto = format!("pg_dump -Fc -h /var/run/postgresql -U dev {BD}");
-    let ok = comando("ssh")
-        .args(["-o", "BatchMode=yes", HOST_REMOTO, remoto.as_str()])
+    /* [por que] pg_dump escribe a un temporal y se renombra al final: en Windows
+     * un volcado binario por stdout redirecto puede salir con la traducción de
+     * saltos de línea, y además uno cortado no debe quedar con nombre válido. La
+     * conexión va como URI —la misma de `DATABASE_URL`— para no repetir usuario,
+     * contraseña ni nombre de base en dos sitios. */
+    let temporal = carpeta.join(format!(".{nombre}.tmp"));
+    let ok = comando(pg_dump)
+        .args(["-Fc", "-d", &ajustes.database_url, "-f"])
+        .arg(&temporal)
         .stdin(Stdio::null())
-        .stdout(salida)
+        .stdout(Stdio::null())
         .stderr(Stdio::null())
         .status()
         .map_err(|e| e.to_string())?
         .success();
     if !ok {
-        let _ = fs::remove_file(&destino);
-        return Err("pg_dump en la 89 falló".into());
+        let _ = fs::remove_file(&temporal);
+        return Err("pg_dump local falló".into());
     }
+    fs::rename(&temporal, &destino).map_err(|e| e.to_string())?;
     rotar(&carpeta, MAX_RESPALDOS).map_err(|e| e.to_string())
 }
 
