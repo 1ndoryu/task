@@ -11,8 +11,6 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Pendientes
 
-- [ ] `19AA-3` — **Plugin EXP / gamificación.**
-  Panel **real** con barra de vida + EXP/nivel, registrado como el resto de paneles (grid: columna 1 arriba; sidebar: entrada en SidebarMenu + render en `DashboardSidebarGrid`), activable/desactivable en configuraciones. ✅ **Panel real registrado (corrección 3, 27-08)**: reemplaza el montaje "fijo" directo en `DashboardIsland` por `registrarPanel` + `GENERADORES_PROPS` + `panelesIds: ['exp']` (ver `Agente/completados/tareas-2026-08-27.md`). Queda: dificultad automática por IA (solo con plugin activo) guardada en el payload; EXP = dificultad × importancia al completar; vida empieza en 100 y baja por incumplimientos de hábitos (derivado del historial real, hecho durable). Plan: `Agente/planes/plan-plugin-exp-2026-08-26.md`.
 
 ## Bloqueos
 
@@ -26,5 +24,4 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 - `Agente/planes/plan-deuda-restante-039A-1-2026-09-11.md` — `039A-1`.
 - `Agente/planes/plan-glory-harness-2026-09-01.md` — Glory Harness. Parked: su línea de tarea (`318A-13`) se retiró el 2026-10-20; Fases 0–4 hechas, el plan sigue en disco y se reactiva con una línea nueva si se retoma.
 - `Agente/planes/plan-ia-esencial-y-migracion-legacy-2026-08-27.md` — `19AA-8`.
-- `Agente/planes/plan-plugin-exp-2026-08-26.md` — `19AA-3`.
 - `Agente/planes/plan-sentinel-varsense-editor-agnostico-2026-05-04.md` — `105A-2`.
