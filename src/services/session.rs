@@ -11,6 +11,12 @@ use crate::models::User;
 
 const SESSION_DURATION_HOURS: i64 = 168;
 
+/// `Max-Age` de las cookies de sesión, en segundos.
+/// [por que] Una sola fuente para la fila y para la cookie: con dos literales
+/// (aquí 168 h y en `handlers/auth.rs` `60*60*24*7`) se desincronizan en cuanto
+/// alguien toque uno, y el navegador tira la cookie antes que la sesión.
+pub const SESSION_MAX_AGE_SEGUNDOS: u64 = SESSION_DURATION_HOURS as u64 * 60 * 60;
+
 #[derive(Debug, Clone, Serialize, sqlx::FromRow)]
 pub struct Session {
     pub id: Uuid,
@@ -28,6 +34,11 @@ pub struct SessionResult {
     pub session: Session,
 }
 
+/* [por que] Todos los fallos de sqlx de este módulo se envuelven como
+ * `AppError::Database` y no como `Internal`: es lo que permite distinguir «la BD
+ * no responde» (pool agotado → 503, reintentable) de un fallo real (500). Con
+ * `Internal` un túnel caído se veía como error interno y el front lo leía como
+ * sesión perdida (2026-10-20). */
 pub struct SessionService;
 
 impl SessionService {
@@ -55,7 +66,7 @@ impl SessionService {
         .bind(user_agent)
         .fetch_one(pool)
         .await
-        .map_err(|error| AppError::Internal(format!("Error creando sesión: {error}")))?;
+        .map_err(AppError::Database)?;
 
         Ok(SessionResult {
             raw_token,
@@ -73,7 +84,7 @@ impl SessionService {
         .bind(token_hash)
         .fetch_optional(pool)
         .await
-        .map_err(|error| AppError::Internal(format!("Error validando sesión: {error}")))?;
+        .map_err(AppError::Database)?;
 
         let Some(session) = session else {
             return Ok(None);
@@ -126,7 +137,7 @@ impl SessionService {
         .bind(token_hash)
         .fetch_optional(pool)
         .await
-        .map_err(|error| AppError::Internal(format!("Error validando sesión: {error}")))?;
+        .map_err(AppError::Database)?;
 
         let Some(row) = row else {
             return Ok(None);
@@ -171,7 +182,7 @@ impl SessionService {
             .bind(session.id)
             .execute(pool)
             .await
-            .map_err(|error| AppError::Internal(format!("Error actualizando sesión: {error}")))?;
+            .map_err(AppError::Database)?;
         }
         Ok(())
     }
@@ -188,7 +199,7 @@ impl SessionService {
         .bind(hash_token(raw_token))
         .fetch_optional(pool)
         .await
-        .map_err(|error| AppError::Internal(format!("Error validando CSRF: {error}")))?;
+        .map_err(AppError::Database)?;
         Ok(stored.is_some_and(|(hash,)| hash == hash_token(csrf_token)))
     }
 
@@ -197,7 +208,7 @@ impl SessionService {
             .bind(session_id)
             .execute(pool)
             .await
-            .map_err(|error| AppError::Internal(format!("Error revocando sesión: {error}")))?;
+            .map_err(AppError::Database)?;
         Ok(())
     }
 
@@ -206,7 +217,7 @@ impl SessionService {
             .bind(hash_token(raw_token))
             .execute(pool)
             .await
-            .map_err(|error| AppError::Internal(format!("Error revocando sesión: {error}")))?;
+            .map_err(AppError::Database)?;
         Ok(())
     }
 

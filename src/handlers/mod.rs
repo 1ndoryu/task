@@ -502,6 +502,12 @@ fn api_routes(state: &AppState, agente_desactivado: bool) -> Router<AppState> {
         .merge(security::routes())
         .merge(realtime::routes())
         .merge(admin::routes(state))
+        /* [por que] Va sobre todo `/api`, no por ruta: cualquier respuesta
+         * autenticada renueva la cookie de sesión (ver middleware/sesion.rs). */
+        .layer(from_fn_with_state(
+            state.clone(),
+            crate::middleware::sesion::rodar_cookie,
+        ))
 }
 
 // [14-09-2026] Kill-switch `AGENTE_DESACTIVADO`: cualquier endpoint bajo

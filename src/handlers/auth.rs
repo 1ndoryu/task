@@ -8,10 +8,11 @@ use axum::{Json, Router};
 use validator::Validate;
 
 use crate::errors::AppError;
-use crate::middleware::auth::{AuthUser, SESSION_COOKIE};
+use crate::middleware::auth::{AuthUser, CSRF_COOKIE, SESSION_COOKIE};
 use crate::models::{
     AuthResponse, LoginRequest, RegisterRequest, UpdateProfileRequest, UserResponse,
 };
+use crate::services::session::SESSION_MAX_AGE_SEGUNDOS;
 use crate::services::AuthService;
 use crate::AppState;
 
@@ -176,7 +177,7 @@ pub async fn logout(
     );
     response.headers_mut().append(
         SET_COOKIE,
-        cookie_header("csrf_token", "", &state, 0)
+        cookie_header(CSRF_COOKIE, "", &state, 0)
             .parse()
             .map_err(|_| AppError::Internal("Cookie CSRF inválida".into()))?,
     );
@@ -218,8 +219,8 @@ fn with_session_cookies(
      * en lugar de paniquear dentro del handler de auth, igual que en
      * `handlers/storage.rs`. */
     for valor in [
-        cookie_header(SESSION_COOKIE, session, state, 60 * 60 * 24 * 7),
-        cookie_header("csrf_token", csrf, state, 60 * 60 * 24 * 7),
+        cookie_header(SESSION_COOKIE, session, state, SESSION_MAX_AGE_SEGUNDOS),
+        cookie_header(CSRF_COOKIE, csrf, state, SESSION_MAX_AGE_SEGUNDOS),
     ] {
         let cabecera: HeaderValue = valor
             .parse()
@@ -229,7 +230,10 @@ fn with_session_cookies(
     Ok(response)
 }
 
-fn cookie_header(name: &str, value: &str, state: &AppState, max_age: u64) -> String {
+/// Cabecera `Set-Cookie` de una cookie de sesión. `pub(crate)` porque el
+/// middleware de sesión rodante re-emite las mismas: una sola definición de los
+/// atributos (Path, SameSite, HttpOnly, Secure, Domain) para las dos.
+pub(crate) fn cookie_header(name: &str, value: &str, state: &AppState, max_age: u64) -> String {
     let mut cookie = format!("{name}={value}; Path=/; Max-Age={max_age}; SameSite=Lax");
     if name == SESSION_COOKIE {
         cookie.push_str("; HttpOnly");

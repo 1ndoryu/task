@@ -13,7 +13,7 @@ mod rate_limit;
 mod realtime;
 mod reminder;
 mod security;
-mod session;
+pub mod session;
 mod shared;
 mod storage;
 mod subscription;

@@ -87,6 +87,17 @@ pub struct ErrorResponse {
     pub message: String,
 }
 
+/// ¿El fallo es «la BD no responde» (temporal) y no un error de la consulta?
+/// [por que] `PoolTimedOut` es la firma del pool agotado —todos los turnos
+/// ocupados por conexiones muertas—, que es justo el caso que el cliente debe
+/// poder reintentar; `PoolClosed` y `Io` son la conexión ida.
+fn bd_no_disponible(err: &sqlx::Error) -> bool {
+    matches!(
+        err,
+        sqlx::Error::PoolTimedOut | sqlx::Error::PoolClosed | sqlx::Error::Io(_)
+    )
+}
+
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, error_type, message) = match &self {
@@ -124,11 +135,26 @@ impl IntoResponse for AppError {
             }
             Self::Database(err) => {
                 tracing::error!("Error de base de datos: {err}");
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "database_error",
-                    "Ocurrió un error de base de datos".to_string(),
-                )
+                /* [por que] Pool agotado, pool cerrado o conexión caída no son un
+                 * fallo nuestro: es la BD sin responder. Se contestan 503 para que
+                 * el cliente lo lea como temporal y reintente, en vez de 500 (que
+                 * es «algo se rompió»). Importa: la app de escritorio va contra la
+                 * BD de la 89 por túnel SSH, y al morir el túnel el pool se queda
+                 * trabado — con 500 el front no sabía distinguirlo de un fallo real
+                 * y se quedaba en la landing (2026-10-20). */
+                if bd_no_disponible(&err) {
+                    (
+                        StatusCode::SERVICE_UNAVAILABLE,
+                        "database_unavailable",
+                        "La base de datos no responde; inténtalo de nuevo".to_string(),
+                    )
+                } else {
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "database_error",
+                        "Ocurrió un error de base de datos".to_string(),
+                    )
+                }
             }
             Self::Validation(msg) => (
                 StatusCode::UNPROCESSABLE_ENTITY,
