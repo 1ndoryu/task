@@ -3,7 +3,14 @@
  * tocarlo y el modal se va con Escape o con un clic fuera. El modal y el
  * formulario son recetas compartidas (`estilos/modal.css`). */
 import { useEffect, useId, useRef, type ReactNode } from 'react';
-import type { Altura, AlcancePrivacidad, Fuente, Preferencias } from '../logica/preferencias';
+import {
+  COLORES_NIVEL,
+  type Altura,
+  type AlcancePrivacidad,
+  type Fuente,
+  type Preferencias,
+} from '../logica/preferencias';
+import { ColoresNivel } from './ColoresNivel';
 
 /** Un ajuste: título, valores en fila y una nota opcional que explica el efecto. */
 function Campo<T extends string>({
@@ -147,6 +154,14 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
                 ? undefined
                 : 'Solo se aplica con la privacidad activa.'
             }
+          />
+          <ColoresNivel
+            colores={preferencias.colores}
+            // Se guarda la paleta entera: un cambio toca un nivel y conserva el resto.
+            onCambiar={(nivel, color) =>
+              onCambiar({ colores: { ...preferencias.colores, [nivel]: color.toLowerCase() } })
+            }
+            onRestablecer={() => onCambiar({ colores: { ...COLORES_NIVEL } })}
           />
         </div>
       </div>

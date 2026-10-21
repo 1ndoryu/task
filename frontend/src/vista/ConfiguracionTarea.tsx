@@ -6,6 +6,7 @@
  * del formulario (`estilos/modal.css`). */
 import { useEffect, useId, useRef, useState } from 'react';
 import { frecuenciaDe } from '../logica/frecuencia';
+import type { ColoresNivel } from '../logica/preferencias';
 import type { Proyecto } from '../logica/tipos';
 import { grupoDe, prioridadDe } from './accionesFila';
 import { FrecuenciaCampos } from './FrecuenciaCampos';
@@ -45,11 +46,13 @@ interface Props {
   proyectos: Proyecto[];
   /** Grupos ya usados, para ofrecerlos como atajo al escribir uno nuevo. */
   grupos: string[];
+  /** Paleta de importancia: cada opción lleva su punto de color. */
+  colores: ColoresNivel;
   onGuardar: (fila: NonNullable<Editando>, cambios: CambiosFilaForm) => void;
   onCerrar: () => void;
 }
 
-export function ConfiguracionTarea({ fila, proyectos, grupos, onGuardar, onCerrar }: Props) {
+export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar, onCerrar }: Props) {
   const dialogo = useRef<HTMLDialogElement>(null);
   const [borrador, setBorrador] = useState<CambiosFilaForm | null>(fila ? borradorDe(fila) : null);
   // El nombre se edita en un `input` controlado: sin él, el cursor salta al
@@ -202,6 +205,7 @@ export function ConfiguracionTarea({ fila, proyectos, grupos, onGuardar, onCerra
                 titulo={esHabito ? 'Importancia' : 'Prioridad'}
                 valor={borrador.prioridad}
                 opciones={PRIORIDADES}
+                colores={colores}
                 onElegir={(id) => aplicar({ prioridad: id })}
               />
             </div>

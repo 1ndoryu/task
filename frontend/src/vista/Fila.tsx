@@ -25,11 +25,10 @@ export function Fila({ fila, saliendo, acciones, grupos, completados, hoy, menuA
   const esTarea = fila.tipo === 'tarea';
   const tarea = esTarea ? fila.tarea : null;
   const habito = esTarea ? null : fila.habito;
-  // El acento visual sale de la urgencia en la tarea y del nivel en el hábito
-  // (que no tiene urgencia propia); el texto nunca lo repite.
-  const acento = tarea
-    ? tarea.urgencia === 'bloqueante' || tarea.urgencia === 'urgente'
-    : prioridadDe(fila) === 'muy_alta';
+  // El punto de la fila lleva el color de su nivel: el mismo para tareas y
+  // hábitos. La urgencia no se pinta aquí porque el color es uno solo y el
+  // nivel es lo que se elige en la configuración.
+  const nivel = prioridadDe(fila);
   const hecho = tarea ? tarea.completado : habito !== null && hechoHoy(habito, hoy);
   const texto = tarea ? tarea.texto : (habito?.nombre ?? '');
   const racha = habito?.racha ?? 0;
@@ -39,7 +38,7 @@ export function Fila({ fila, saliendo, acciones, grupos, completados, hoy, menuA
       className={[
         'fila',
         esTarea ? 'fila--tarea' : 'fila--habito',
-        acento && 'fila--urgente',
+        `fila--nivel-${nivel}`,
         hecho && 'fila--hecho',
         saliendo && 'fila--saliendo',
       ]

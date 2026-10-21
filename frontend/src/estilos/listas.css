@@ -201,9 +201,47 @@ button.fila__marca:hover {
   background: var(--tinta);
 }
 
-.fila--urgente .fila__marca {
-  border-color: var(--sangre);
-  background: var(--sangre);
+/* El color del nivel no debe comerse el retorno del ratón: se repite con más
+ * especificidad para que el punto se encienda al pasar por encima. */
+.fila button.fila__marca:hover {
+  border-color: var(--tinta);
+  background: var(--tinta);
+}
+
+/* El punto lleva el color de su nivel. Los cinco niveles tienen su variable
+ * (la paleta la pone la vista desde las preferencias) y una por defecto por si
+ * la lista se pinta fuera de la caja: escala pastel que acaba en rojo. */
+:root {
+  --nivel-muy_baja: #dbe6f0;
+  --nivel-baja: #dcebdc;
+  --nivel-media: #f6eecb;
+  --nivel-alta: #f6d9bd;
+  --nivel-muy_alta: #e8a09b;
+}
+
+.fila--nivel-muy_baja .fila__marca {
+  border-color: var(--nivel-muy_baja);
+  background: var(--nivel-muy_baja);
+}
+
+.fila--nivel-baja .fila__marca {
+  border-color: var(--nivel-baja);
+  background: var(--nivel-baja);
+}
+
+.fila--nivel-media .fila__marca {
+  border-color: var(--nivel-media);
+  background: var(--nivel-media);
+}
+
+.fila--nivel-alta .fila__marca {
+  border-color: var(--nivel-alta);
+  background: var(--nivel-alta);
+}
+
+.fila--nivel-muy_alta .fila__marca {
+  border-color: var(--nivel-muy_alta);
+  background: var(--nivel-muy_alta);
 }
 
 /* El texto es el disparador de la configuración: se ve como texto, no como botón. */

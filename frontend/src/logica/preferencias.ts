@@ -2,6 +2,7 @@
  * `localStorage`. Se guardan aparte de los datos: aquí no hay contratos del
  * backend, solo cómo mira la usuaria su lista. */
 
+import type { NivelPrioridad } from './importancia';
 import { MODOS_ORDEN } from './orden';
 
 const CLAVE = 'tareas-nuevo:v1:vista';
@@ -30,6 +31,35 @@ export interface Preferencias {
   altura: Altura;
   /** Filete entre filas. */
   separador: boolean;
+  /** Un color por nivel de importancia, del más frío al rojo. */
+  colores: ColoresNivel;
+}
+
+export type ColoresNivel = Record<NivelPrioridad, string>;
+
+/* Escala pastel armónica: cinco tonos del mismo aire, del más apagado (muy
+ * baja) al rojo (muy alta). Se eligieron con el mismo croma y saturación para
+ * que ninguno grite más que el rojo. */
+export const COLORES_NIVEL: ColoresNivel = {
+  muy_baja: '#dbe6f0',
+  baja: '#dcebdc',
+  media: '#f6eecb',
+  alta: '#f6d9bd',
+  muy_alta: '#e8a09b',
+};
+
+/** Un `#rgb`/`#rrggbb` válido; cualquier otra cosa cae al color por defecto. */
+const COLOR = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+
+/** Colores guardados, nivel a nivel: uno roto no arrastra a los demás. */
+function leerColores(valor: unknown): ColoresNivel {
+  const guardado = (typeof valor === 'object' && valor !== null ? valor : {}) as Record<string, unknown>;
+  const colores = { ...COLORES_NIVEL };
+  for (const nivel of Object.keys(COLORES_NIVEL) as NivelPrioridad[]) {
+    const color = guardado[nivel];
+    if (typeof color === 'string' && COLOR.test(color)) colores[nivel] = color.toLowerCase();
+  }
+  return colores;
 }
 
 const POR_DEFECTO: Preferencias = {
@@ -41,6 +71,7 @@ const POR_DEFECTO: Preferencias = {
   fuente: 'normal',
   altura: 'normal',
   separador: true,
+  colores: { ...COLORES_NIVEL },
 };
 
 export function leerPreferencias(): Preferencias {
@@ -79,6 +110,7 @@ export function leerPreferencias(): Preferencias {
       fuente: (fuente as Fuente) ?? POR_DEFECTO.fuente,
       altura: (altura as Altura) ?? POR_DEFECTO.altura,
       separador: typeof guardado.separador === 'boolean' ? guardado.separador : POR_DEFECTO.separador,
+      colores: leerColores(guardado.colores),
     };
   } catch {
     return { ...POR_DEFECTO };

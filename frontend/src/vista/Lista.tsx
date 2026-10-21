@@ -2,8 +2,8 @@
  * con scroll propio. La cabecera lleva las pestañas y el orden; las pestañas
  * parten la lista por grupo de ejecución, y ambos tipos de fila tienen su
  * marca de completar, su menú y su configuración. */
-import { useState } from 'react';
-import { importanciaDeHabito } from '../logica/importancia';
+import { useState, type CSSProperties } from 'react';
+import { importanciaDeHabito, type NivelPrioridad } from '../logica/importancia';
 import { MODOS_ORDEN, PESTANA_COMPLETADOS, type ModoOrden } from '../logica/orden';
 import { Ajustes } from './Ajustes';
 import { ConfiguracionTarea } from './ConfiguracionTarea';
@@ -57,6 +57,14 @@ export function Lista() {
   const grupos = lista.pestanas.map((p) => p.id).filter((id) => id && id !== PESTANA_COMPLETADOS);
   // Los ajustes entran como modificadores de la caja: el CSS decide, la vista solo
   // declara qué está activo.
+  // La paleta es un dato de la usuaria, no diseño: entra como variables CSS
+  // (las únicas que admite un objeto de estilo) y la hoja decide dónde se usan.
+  const paleta = Object.fromEntries(
+    (Object.entries(preferencias.colores) as [NivelPrioridad, string][]).map(([nivel, color]) => [
+      `--nivel-${nivel}`,
+      color,
+    ]),
+  ) as CSSProperties;
   const clases = [
     'caja',
     preferencias.privacidad && 'caja--privacidad',
@@ -112,7 +120,7 @@ export function Lista() {
 
   return (
     <main className="marco">
-      <section className={clases} aria-label="Tareas y hábitos">
+      <section className={clases} style={paleta} aria-label="Tareas y hábitos">
         <header className="barra">
           <Pestanas
             titulo="Pestaña de la lista"
@@ -197,6 +205,7 @@ export function Lista() {
         fila={lista.editando}
         proyectos={proyectos}
         grupos={grupos}
+        colores={preferencias.colores}
         onGuardar={guardarCambios}
         onCerrar={() => lista.abrirEdicion(null)}
       />

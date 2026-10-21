@@ -128,3 +128,73 @@
   content: '·';
   margin-right: 0.3rem;
 }
+
+/* Paleta de importancia: una fila por nivel, con su muestra nativa al lado.
+ * El select nativo ya trae teclado y lector de pantalla, así que aquí solo se
+ * le da el tamaño y se quita el borde que trae por defecto. */
+.paleta {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.paleta__fila {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.paleta__nombre {
+  color: var(--tinta-tenue);
+  font-size: var(--texto-menu);
+}
+
+.paleta__color {
+  width: 2.2rem;
+  height: 1.1rem;
+  padding: 0;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoChico);
+  background: none;
+  cursor: pointer;
+}
+
+.paleta__color:focus-visible {
+  border-color: var(--tinta-tenue);
+  outline: none;
+}
+
+/* Vuelta a la escala original: un enlace, no un botón del sistema. */
+.paleta__volver {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tinta-tenue);
+  font: inherit;
+  font-size: var(--texto-nota);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.paleta__volver:hover {
+  color: var(--tinta);
+}
+
+/* Muestra de un nivel: el punto, más grande que el de la lista, para que el
+ * color se distinga al elegirlo. Solo pinta un dato de la usuaria. */
+.muestra {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-right: 0.35rem;
+}
+
+.muestra__punto {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--redondoPunto);
+}
