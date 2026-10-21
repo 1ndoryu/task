@@ -54,9 +54,13 @@ export function seleccionar(
   const saliendo = (id: number) => opciones.saliendo?.has(`tarea${id}`) ?? false;
 
   // La pestaña de completados es de sistema: recoge lo hecho de todos los
-  // grupos y no se parte por pestaña.
+  // grupos y no se parte por pestaña. «Tareas» es la lista de lo suelto: una
+  // tarea con proyecto pertenece al proyecto y no se repite aquí.
   const tareas = datos.tareas.filter(
-    (t) => t.parentId == null && (completados ? t.completado : !t.completado || saliendo(t.id)) && (completados || enGrupo(t.grupoEjecucion, grupo)),
+    (t) =>
+      t.parentId == null &&
+      (completados ? t.completado : !t.completado || saliendo(t.id)) &&
+      (completados || (enGrupo(t.grupoEjecucion, grupo) && (grupo !== null || t.proyectoId == null))),
   );
   const habitos = (completados ? datos.habitos.filter((h) => hechoHoy(h, hoy)) : datos.habitos.filter((h) => enGrupo(h.grupoEjecucion, grupo))).filter(
     (h) => completados || !ocultarCompletado(h, hoy, opciones.ocultarHabitos ?? false),

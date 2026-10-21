@@ -11,6 +11,10 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Pendientes
 
+- [ ] `21AC-1` — **Dónde se ven las tareas de un proyecto.**
+  (Tras sacarlas de «Tareas».) Hoy 228 pendientes con proyecto no aparecen en
+  ninguna pestaña. Decidir el destino: una pestaña por proyecto, un panel
+  aparte, o agruparlas en las pestañas de grupo.
 - [ ] `21AB-2` — **El color de una tarea debe seguir a su urgencia.**
   (Tras `21AB-1`.)
   Hoy el punto de la tarea muestra su prioridad, mientras el orden de la lista
