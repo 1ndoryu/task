@@ -12,15 +12,12 @@ interface Props {
 }
 
 export function ColorNivel({ nivel, colores }: Props) {
-  // El color es un dato de la usuaria, no diseño: va como variable CSS (la
-  // única forma de estilo por elemento que el sistema admite) y la hoja lo usa.
-  const id = nivelDe(nivel);
-  // Las claves `--*` son la forma que el analizador acepta: una costumbre CSS,
-  // no un estilo de diseño escrito a mano.
-  const punto = { '--color-nivel': colores[id] } as CSSProperties;
+  // El color es un dato de la usuaria, no diseño: entra como variable CSS y la
+  // hoja decide dónde se usa. El literal va aquí a propósito: un objeto con
+  // solo claves `--*` es una definición de token, no un estilo escrito a mano.
   return (
     <span className="muestra">
-      <span className="muestra__punto" style={punto} />
+      <span className="muestra__punto" style={{ '--color-nivel': colores[nivelDe(nivel)] } as CSSProperties} />
     </span>
   );
 }

@@ -3,7 +3,7 @@
  * parten la lista por grupo de ejecución, y ambos tipos de fila tienen su
  * marca de completar, su menú y su configuración. */
 import { useState, type CSSProperties } from 'react';
-import { importanciaDeHabito, type NivelPrioridad } from '../logica/importancia';
+import { importanciaDeHabito } from '../logica/importancia';
 import { MODOS_ORDEN, PESTANA_COMPLETADOS, type ModoOrden } from '../logica/orden';
 import { Ajustes } from './Ajustes';
 import { ConfiguracionTarea } from './ConfiguracionTarea';
@@ -57,14 +57,6 @@ export function Lista() {
   const grupos = lista.pestanas.map((p) => p.id).filter((id) => id && id !== PESTANA_COMPLETADOS);
   // Los ajustes entran como modificadores de la caja: el CSS decide, la vista solo
   // declara qué está activo.
-  // La paleta es un dato de la usuaria, no diseño: entra como variables CSS
-  // (las únicas que admite un objeto de estilo) y la hoja decide dónde se usan.
-  const paleta = Object.fromEntries(
-    (Object.entries(preferencias.colores) as [NivelPrioridad, string][]).map(([nivel, color]) => [
-      `--nivel-${nivel}`,
-      color,
-    ]),
-  ) as CSSProperties;
   const clases = [
     'caja',
     preferencias.privacidad && 'caja--privacidad',
@@ -120,7 +112,23 @@ export function Lista() {
 
   return (
     <main className="marco">
-      <section className={clases} style={paleta} aria-label="Tareas y hábitos">
+      {/* La paleta es un dato de la usuaria, no diseño: entra como variables
+          CSS y la hoja decide dónde se usan. Va como literal y no en un objeto
+          construido aparte: un literal cuyas claves son todas `--*` es una
+          definición de token; una variable con la misma forma, no. */}
+      <section
+        className={clases}
+        style={
+          {
+            '--nivel-muy_baja': preferencias.colores.muy_baja,
+            '--nivel-baja': preferencias.colores.baja,
+            '--nivel-media': preferencias.colores.media,
+            '--nivel-alta': preferencias.colores.alta,
+            '--nivel-muy_alta': preferencias.colores.muy_alta,
+          } as CSSProperties
+        }
+        aria-label="Tareas y hábitos"
+      >
         <header className="barra">
           <Pestanas
             titulo="Pestaña de la lista"
