@@ -24,7 +24,9 @@
   background: var(--superposicion);
 }
 
-/* Columna: cabecera fija y cuerpo con su propio scroll. */
+/* Columna: el cuerpo tiene su propio scroll. Los modales ya no llevan cabecera
+ * ni botones: se cierran con Escape o con un clic fuera, y cada control se
+ * guarda al tocarlo. */
 .modal__caja {
   display: flex;
   flex-direction: column;
@@ -32,44 +34,21 @@
   margin: 0;
 }
 
-.modal__cabecera {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.75rem 0.75rem 0.5rem 1.1rem;
-  border-bottom: 1px solid var(--linea);
-}
-
-.modal__titulo {
-  margin: 0;
-  color: var(--tinta-tenue);
-  font-size: var(--texto-etiqueta);
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.modal__cerrar {
-  display: inline-flex;
-  padding: 0.25rem;
-  border: 0;
-  border-radius: var(--redondoChico);
-  background: none;
-  color: var(--tinta-tenue);
-  line-height: 0;
-  cursor: pointer;
-}
-
-.modal__cerrar:hover {
-  color: var(--tinta);
-}
-
 .modal__cuerpo {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 0.85rem 1.1rem 1.1rem;
+  padding: 0.5rem 1.1rem 1rem;
+}
+
+/* Etiqueta que solo lee el lector de pantalla: el campo se explica solo. */
+.sr-solo {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* Cada ajuste: título tenue arriba y sus valores debajo, en línea. */
@@ -118,15 +97,6 @@
 .entrada:focus-visible {
   border-color: var(--tinta-tenue);
   outline: none;
-}
-
-/* Acciones al pie: a la derecha y separadas del cuerpo por su filete. */
-.modal__acciones {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding: 0.6rem 1.1rem 0.75rem;
-  border-top: 1px solid var(--linea);
 }
 
 /* Valores en fila: el activo lleva el punto delante, sin desplazar el texto. */

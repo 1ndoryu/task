@@ -1,11 +1,10 @@
-/* Estado de la lista: carga, orden, filtro, pestaña de grupo y las mutaciones.
+/* Estado de la lista: carga, orden, pestaña y las mutaciones.
  * Tareas y hábitos se tratan igual: ambos tienen grupo, menú y configuración.
  * La lógica de datos vive en `logica/`; aquí solo se guarda y se encadena. */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { leerDashboard } from '../logica/dashboard';
 import { fechaLocal } from '../logica/fechas';
-import { codificarFiltro, decodificarFiltro, type Filtro } from '../logica/filtros';
-import { anotarGrupos, leerGruposConocidos } from '../logica/grupos';
+import { anotarGrupos, guardarOrdenPestanas, leerGruposConocidos, leerOrdenPestanas } from '../logica/grupos';
 import {
   borrarHabito,
   desmarcarHabito,
@@ -13,13 +12,13 @@ import {
   guardarHabito,
   marcarHabito,
 } from '../logica/habitos';
-import { pestanasDeGrupos, type ModoOrden } from '../logica/orden';
+import { PESTANA_COMPLETADOS, pestanasDeGrupos, type ModoOrden } from '../logica/orden';
 import { guardarPreferencias, leerPreferencias, type Preferencias } from '../logica/preferencias';
 import { hechoHoy, seleccionar, type Vista } from '../logica/seleccion';
 import { asegurarSesionLocal } from '../logica/sesion';
 import { fusionarPendientes, guardarPendientes, leerPendientes, type Pendientes } from '../logica/store';
 import { alternarCompletado, borrarTarea, editarTarea, guardarTarea } from '../logica/tareas';
-import type { Dashboard, Habito, Tarea } from '../logica/tipos';
+import type { Dashboard, FrecuenciaDetalle, Habito, Tarea } from '../logica/tipos';
 
 type Estado =
   | { fase: 'cargando' }
@@ -37,11 +36,12 @@ export interface CambiosFila {
   proyectoId?: number | null;
   fechaMaxima?: string;
   grupoEjecucion?: string | null;
+  /** Solo hábitos: frecuencia completa; el `tipo` va a la columna del backend. */
+  frecuencia?: FrecuenciaDetalle;
 }
 
 export interface Lista {
   estado: Estado;
-  filtro: Filtro;
   orden: ModoOrden;
   /** Pestaña de grupo activa; `''` es «Tareas» (lo que no tiene grupo). */
   grupo: string;
@@ -54,9 +54,10 @@ export interface Lista {
   ajustesAbiertos: boolean;
   vista: Vista | null;
   hoy: string;
-  cambiarFiltro: (filtro: Filtro) => void;
   cambiarOrden: (modo: ModoOrden) => void;
   cambiarGrupo: (grupo: string) => void;
+  /** Mueve un grupo a otra posición de la fila de pestañas (arrastre). */
+  moverPestana: (grupo: string, hasta: string) => void;
   cambiarPreferencias: (cambios: Partial<Preferencias>) => void;
   abrirAjustes: (abiertos: boolean) => void;
   /** Fila abierta en el modal de configuración; `null` si está cerrado. */
@@ -79,7 +80,6 @@ export const claveFila = (fila: NonNullable<Editando>) =>
 export function usarLista(): Lista {
   const preferencias = useMemo(leerPreferencias, []);
   const [estado, setEstado] = useState<Estado>({ fase: 'cargando' });
-  const [filtro, setFiltro] = useState<Filtro>(() => decodificarFiltro(preferencias.filtro));
   const [orden, setOrden] = useState(preferencias.orden as ModoOrden);
   const [grupo, setGrupo] = useState(preferencias.grupo);
   const [ajustes, setAjustes] = useState<Preferencias>(preferencias);
@@ -87,6 +87,8 @@ export function usarLista(): Lista {
   const [editando, setEditando] = useState<Editando>(null);
   const [hoy] = useState(() => fechaLocal());
   const [gruposConocidos, setGruposConocidos] = useState<string[]>(leerGruposConocidos);
+  // Orden manual de las pestañas de grupo; vacío = alfabético.
+  const [ordenPestanas, setOrdenPestanas] = useState<string[]>(leerOrdenPestanas);
   // Filas completadas que siguen en la lista mientras termina su animación.
   const [saliendo, setSaliendo] = useState<ReadonlySet<string>>(() => new Set());
   // El correo separa los cambios de cada cuenta; llega con la carga.
@@ -245,8 +247,8 @@ export function usarLista(): Lista {
     const presentes = estado.fase === 'listo'
       ? [...estado.datos.tareas, ...estado.datos.habitos].map((f) => f.grupoEjecucion ?? null)
       : [];
-    return pestanasDeGrupos(presentes, gruposConocidos);
-  }, [estado, gruposConocidos]);
+    return pestanasDeGrupos(presentes, gruposConocidos, ordenPestanas);
+  }, [estado, gruposConocidos, ordenPestanas]);
 
   // Una pestaña recordada que ya no existe (grupo renombrado o vaciado sin
   // rastro) dejaría la lista en blanco: se cae a «Tareas».
@@ -255,14 +257,19 @@ export function usarLista(): Lista {
   const vista = useMemo(
     () =>
       estado.fase === 'listo'
-        ? seleccionar(estado.datos, { filtro, orden, grupo: grupoActivo || null, hoy, saliendo })
+        ? seleccionar(estado.datos, {
+            orden,
+            grupo: grupoActivo || null,
+            ocultarHabitos: ajustes.ocultarHabitos,
+            hoy,
+            saliendo,
+          })
         : null,
-    [estado, filtro, orden, grupoActivo, hoy, saliendo],
+    [estado, orden, grupoActivo, ajustes.ocultarHabitos, hoy, saliendo],
   );
 
   return {
     estado,
-    filtro,
     orden,
     grupo: grupoActivo,
     pestanas,
@@ -271,10 +278,6 @@ export function usarLista(): Lista {
     ajustesAbiertos,
     vista,
     hoy,
-    cambiarFiltro: (nuevo) => {
-      setFiltro(nuevo);
-      guardarPreferencias({ filtro: codificarFiltro(nuevo) });
-    },
     cambiarOrden: (modo) => {
       setOrden(modo);
       guardarPreferencias({ orden: modo });
@@ -282,6 +285,18 @@ export function usarLista(): Lista {
     cambiarGrupo: (nuevo: string) => {
       setGrupo(nuevo);
       guardarPreferencias({ grupo: nuevo });
+    },
+    moverPestana: (movido: string, hasta: string) => {
+      // Solo se reordenan grupos: «Tareas» y «Completados» tienen su sitio.
+      const grupos = pestanas.map((p) => p.id).filter((id) => id && id !== PESTANA_COMPLETADOS);
+      const desde = grupos.indexOf(movido);
+      const destino = grupos.indexOf(hasta);
+      if (desde < 0 || destino < 0 || desde === destino) return;
+      const nuevo = [...grupos];
+      nuevo.splice(desde, 1);
+      nuevo.splice(destino, 0, movido);
+      setOrdenPestanas(nuevo);
+      guardarOrdenPestanas(nuevo);
     },
     // Un solo punto de escritura: el estado local y el `localStorage` no se separan.
     cambiarPreferencias: (cambios) => {
@@ -300,7 +315,12 @@ export function usarLista(): Lista {
     editarHabito: (id, cambios) => {
       anotarGrupo(cambios.grupoEjecucion ?? null);
       void escribirHabito(id, (h) =>
-        editarHabito(h, { nombre: cambios.texto, importancia: cambios.prioridad ?? undefined, grupoEjecucion: cambios.grupoEjecucion }),
+        editarHabito(h, {
+          nombre: cambios.texto,
+          importancia: cambios.prioridad ?? undefined,
+          grupoEjecucion: cambios.grupoEjecucion,
+          frecuencia: cambios.frecuencia,
+        }),
       );
     },
     borrarTarea: (id) => {

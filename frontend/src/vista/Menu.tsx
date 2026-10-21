@@ -22,6 +22,7 @@ export interface OpcionMenu {
 }
 
 interface Props {
+  /** Contenido del botón; `null` deja el menú sin disparador (solo clic derecho). */
   etiqueta: ReactNode;
   items: OpcionMenu[];
   onElegir: (id: string) => void;
@@ -146,18 +147,20 @@ export function Menu({ etiqueta, items, onElegir, titulo, claseBoton, abierto, o
 
   return (
     <div className="menu" ref={contenedor}>
-      <button
-        type="button"
-        className={claseBoton ?? 'menu__boton'}
-        aria-haspopup="menu"
-        aria-expanded={abiertoAhora}
-        aria-controls={abiertoAhora ? idPanel : undefined}
-        aria-label={titulo}
-        title={titulo}
-        onClick={() => poner(!abiertoAhora)}
-      >
-        {etiqueta}
-      </button>
+      {etiqueta !== null && (
+        <button
+          type="button"
+          className={claseBoton ?? 'menu__boton'}
+          aria-haspopup="menu"
+          aria-expanded={abiertoAhora}
+          aria-controls={abiertoAhora ? idPanel : undefined}
+          aria-label={titulo}
+          title={titulo}
+          onClick={() => poner(!abiertoAhora)}
+        >
+          {etiqueta}
+        </button>
+      )}
       {abiertoAhora && (
         <div
           className={`menu__panel${enPunto ? ' menu__panel--punto' : ''}`}

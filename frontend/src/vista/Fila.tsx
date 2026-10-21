@@ -1,8 +1,8 @@
 /* Una fila de la lista, sea tarea o hábito: marca de completar, texto que abre
- * la configuración, racha y menú de acciones. Vive aparte de `Lista` para que
- * cada archivo tenga una sola responsabilidad. */
+ * la configuración y racha. El menú de acciones se abre con el clic derecho en
+ * la fila; no hay botón visible. Vive aparte de `Lista` para que cada archivo
+ * tenga una sola responsabilidad. */
 import { hechoHoy } from '../logica/seleccion';
-import { IconoMenu } from './Iconos';
 import { Menu } from './Menu';
 import { opcionesFila, type AccionesFila } from './accionesFila';
 import type { Editando } from './usarLista';
@@ -12,6 +12,8 @@ interface Props {
   saliendo: boolean;
   acciones: AccionesFila;
   grupos: string[];
+  /** La pestaña de completados: el menú no se abre, ahí no hay nada que hacer. */
+  completados: boolean;
   /** Día de hoy: decide si un hábito está hecho. */
   hoy: string;
   /** El menú abierto desde el clic derecho de esta fila, y dónde. */
@@ -19,7 +21,7 @@ interface Props {
   onMenuAbierto: (punto: { x: number; y: number } | null) => void;
 }
 
-export function Fila({ fila, saliendo, acciones, grupos, hoy, menuAbierto, onMenuAbierto }: Props) {
+export function Fila({ fila, saliendo, acciones, grupos, completados, hoy, menuAbierto, onMenuAbierto }: Props) {
   const esTarea = fila.tipo === 'tarea';
   const tarea = esTarea ? fila.tarea : null;
   const habito = esTarea ? null : fila.habito;
@@ -42,10 +44,10 @@ export function Fila({ fila, saliendo, acciones, grupos, hoy, menuAbierto, onMen
       ]
         .filter(Boolean)
         .join(' ')}
-      // Clic derecho: el mismo menú del botón, en el punto pulsado.
+      // Clic derecho: el menú de acciones, en el punto pulsado.
       onContextMenu={(evento) => {
         evento.preventDefault();
-        onMenuAbierto({ x: evento.clientX, y: evento.clientY });
+        if (!completados) onMenuAbierto({ x: evento.clientX, y: evento.clientY });
       }}
     >
       <button
@@ -65,10 +67,10 @@ export function Fila({ fila, saliendo, acciones, grupos, hoy, menuAbierto, onMen
         {texto}
       </button>
       {racha > 1 && <span className="fila__nota">{racha} días</span>}
+      {/* Sin disparador: el ancla es el punto del clic derecho. */}
       <Menu
-        etiqueta={<IconoMenu />}
+        etiqueta={null}
         titulo={`Acciones de ${texto}`}
-        claseBoton="fila__opciones barra__icono"
         items={opcionesFila(fila, grupos)}
         abierto={menuAbierto !== null}
         onAbierto={(abierto) => {

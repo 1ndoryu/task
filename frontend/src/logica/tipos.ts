@@ -31,14 +31,27 @@ export interface Proyecto {
   orden?: number;
 }
 
+/** Los cinco tipos del legacy (`TipoFrecuencia`). */
+export type Frecuencia = 'diario' | 'cadaXDias' | 'semanal' | 'diasEspecificos' | 'mensual';
+
+/** El backend guarda el tipo en su columna y el objeto entero en el `payload`;
+ * al leer llega una u otra forma, así que se aceptan las dos. */
+export interface FrecuenciaDetalle {
+  tipo?: Frecuencia;
+  /** `cadaXDias`: días entre repeticiones (2–30). */
+  cadaDias?: number;
+  /** `diasEspecificos`: días de la semana en minúsculas y sin tilde. */
+  diasSemana?: string[];
+  /** `mensual`: veces al mes (1–30). */
+  vecesAlMes?: number;
+}
+
 export interface Habito {
   id: number;
   nombre: string;
   importancia?: string;
   orden?: number;
-  /* En el payload histórico llega como string o como `{tipo, cadaDias?, …}`;
-   * aquí solo se usa `cadaDias` para repartir la inactividad. */
-  frecuencia?: string | { tipo?: string; cadaDias?: number };
+  frecuencia?: Frecuencia | string | FrecuenciaDetalle;
   historialCompletados?: string[];
   historialPospuestos?: string[];
   racha?: number;

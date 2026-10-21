@@ -15,6 +15,10 @@ export const MODOS_ORDEN: { id: ModoOrden; etiqueta: string }[] = [
   { id: 'prioridad', etiqueta: 'Prioridad' },
 ];
 
+/** Pestaña de sistema con lo completado: siempre la última y no se mueve ni
+ * se renombra. Los grupos nunca pueden llamarse así: `limpiarGrupo` lo impide. */
+export const PESTANA_COMPLETADOS = 'completados';
+
 /** Grupo de ejecución: el nombre que la tarea o el hábito lleva en
  * `grupoEjecucion` (`null` = sin grupo, la pestaña «Tareas»). */
 export type Grupo = string | null;
@@ -28,21 +32,29 @@ export const CLAVE_GRUPOS = 'tareas-nuevo:v1:grupos';
 export function limpiarGrupo(crudo: unknown): Grupo {
   if (typeof crudo !== 'string') return null;
   const nombre = crudo.trim();
-  return nombre ? nombre : null;
+  // «Completados» es de sistema: un grupo con ese nombre no tendría pestaña.
+  return nombre && nombre.toLowerCase() !== PESTANA_COMPLETADOS ? nombre : null;
 }
 
-/** Pestañas de la lista: «Tareas» (sin grupo) y un grupo por nombre, en orden
- * alfabético como el panel de ejecución del front original, incluidos los
- * grupos vacíos que se recuerdan guardados. */
+/** Pestañas de la lista: «Tareas» (sin grupo), los grupos y, al final, la de
+ * completados. Los grupos conservan el orden en que se movieron a mano; los
+ * que no están en `ordenGuardado` entran al final, en alfabético. */
 export function pestanasDeGrupos(
   gruposDeFilas: Iterable<Grupo>,
   conocidos: Iterable<string>,
+  ordenGuardado: Iterable<string> = [],
 ): { id: string; etiqueta: string }[] {
   const nombres = new Set<string>(conocidos);
   for (const grupo of gruposDeFilas) if (grupo) nombres.add(grupo);
+  const fijos = new Set<string>();
+  for (const nombre of ordenGuardado) if (nombres.has(nombre)) fijos.add(nombre);
+  const nuevos = [...nombres]
+    .filter((nombre) => !fijos.has(nombre))
+    .sort((a, b) => a.localeCompare(b, 'es'));
   return [
     { id: '', etiqueta: 'Tareas' },
-    ...[...nombres].sort((a, b) => a.localeCompare(b, 'es')).map((nombre) => ({ id: nombre, etiqueta: nombre })),
+    ...[...fijos, ...nuevos].map((nombre) => ({ id: nombre, etiqueta: nombre })),
+    { id: PESTANA_COMPLETADOS, etiqueta: 'Completados' },
   ];
 }
 

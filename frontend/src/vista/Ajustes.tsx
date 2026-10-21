@@ -1,9 +1,9 @@
-/* Panel de ajustes de lectura: un modal con todos los controles de cómo se ve la
- * lista. El modal y el formulario son recetas compartidas (`estilos/modal.css`);
- * aquí solo se declaran los campos y se avisa del cambio. */
+/* Panel de ajustes: un modal con todos los controles de cómo se ve la lista y
+ * qué se esconde. Sin cabecera ni botón de cerrar: cada control se guarda al
+ * tocarlo y el modal se va con Escape o con un clic fuera. El modal y el
+ * formulario son recetas compartidas (`estilos/modal.css`). */
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import type { Altura, AlcancePrivacidad, Fuente, Preferencias } from '../logica/preferencias';
-import { IconoCerrar } from './Iconos';
 
 /** Un ajuste: título, valores en fila y una nota opcional que explica el efecto. */
 function Campo<T extends string>({
@@ -84,7 +84,7 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
     if (!abierto && nodo.open) nodo.close();
   }, [abierto]);
 
-  // Escape y el botón de cerrar llegan aquí; el estado vive en `usarLista`.
+  // Escape llega aquí; el estado vive en `usarLista`.
   useEffect(() => {
     const nodo = dialogo.current;
     if (!nodo) return;
@@ -104,19 +104,6 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
       }}
     >
       <div className="modal__caja">
-        <header className="modal__cabecera">
-          <h2 className="modal__titulo">Ajustes</h2>
-          <button
-            type="button"
-            className="modal__cerrar"
-            aria-label="Cerrar los ajustes"
-            title="Cerrar"
-            onClick={onCerrar}
-          >
-            <IconoCerrar />
-          </button>
-        </header>
-
         <div className="modal__cuerpo">
           <Campo
             titulo="Tamaño de la fuente"
@@ -135,6 +122,13 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
             valor={preferencias.separador ? 'si' : 'no'}
             opciones={SI_NO}
             onElegir={(valor) => onCambiar({ separador: valor === 'si' })}
+          />
+          <Campo
+            titulo="Ocultar hábitos cumplidos"
+            valor={preferencias.ocultarHabitos ? 'si' : 'no'}
+            opciones={SI_NO}
+            onElegir={(valor) => onCambiar({ ocultarHabitos: valor === 'si' })}
+            nota="Un hábito que tocaba hoy y ya está hecho sale de la lista; la pestaña Completados los guarda."
           />
           <Campo
             titulo="Privacidad"

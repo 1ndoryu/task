@@ -1,60 +1,42 @@
 /* Configuración de una fila: tareas y hábitos comparten el mismo formulario.
  * Cambian solo los campos que cada uno tiene: la tarea añade proyecto, fecha
- * límite y urgencia; el hábito mantiene su importancia. Usa la receta del modal
- * y del formulario (`estilos/modal.css`); la fila se edita en una copia y solo
- * se guarda al aceptar. */
+ * límite y urgencia; el hábito su frecuencia. Se guarda sola: cada control
+ * escribe su cambio al momento, sin botones ni cabecera que cierren, porque
+ * el modal desaparece al pulsar fuera o con Escape. Usa la receta del modal y
+ * del formulario (`estilos/modal.css`). */
 import { useEffect, useId, useRef, useState } from 'react';
-import type { Editando } from './usarLista';
+import { frecuenciaDe } from '../logica/frecuencia';
 import type { Proyecto } from '../logica/tipos';
-import { IconoCerrar } from './Iconos';
+import { grupoDe, prioridadDe } from './accionesFila';
+import { FrecuenciaCampos } from './FrecuenciaCampos';
+import { Opciones } from './Opciones';
+import { PRIORIDADES, URGENCIAS, type CambiosFilaForm } from './opcionesFila';
+import type { Editando } from './usarLista';
 
-/** Borrador común: `texto` es el nombre del hábito o el texto de la tarea. */
-export interface CambiosFilaForm {
-  texto: string;
-  prioridad: string;
-  urgencia: string;
-  proyectoId: number | null;
-  fechaMaxima: string;
-  /** `''` es «Tareas»; el nombre libre es el grupo. */
-  grupoEjecucion: string;
-}
-
-const PRIORIDADES = [
-  { id: 'muy_alta', etiqueta: 'Muy alta' },
-  { id: 'alta', etiqueta: 'Alta' },
-  { id: 'media', etiqueta: 'Media' },
-  { id: 'baja', etiqueta: 'Baja' },
-  { id: 'muy_baja', etiqueta: 'Muy baja' },
-];
-
-const URGENCIAS = [
-  { id: 'bloqueante', etiqueta: 'Bloqueante' },
-  { id: 'urgente', etiqueta: 'Urgente' },
-  { id: 'normal', etiqueta: 'Normal' },
-  { id: 'chill', etiqueta: 'Chill' },
-];
-
-/* La importancia del hábito viaja en el mismo campo de prioridad: son la
- * misma escala, y así el formulario no necesita dos juegos de opciones. */
+/** Borrador inicial de la fila abierta, en los campos que entiende el modal. */
 function borradorDe(fila: NonNullable<Editando>): CambiosFilaForm {
-  const grupo = fila.tipo === 'tarea' ? fila.tarea.grupoEjecucion : fila.habito.grupoEjecucion;
-  return fila.tipo === 'tarea'
-    ? {
-        texto: fila.tarea.texto,
-        prioridad: fila.tarea.prioridad ?? 'media',
-        urgencia: fila.tarea.urgencia ?? 'normal',
-        proyectoId: fila.tarea.proyectoId ?? null,
-        fechaMaxima: fila.tarea.configuracion?.fechaMaxima ?? '',
-        grupoEjecucion: grupo ?? '',
-      }
-    : {
-        texto: fila.habito.nombre,
-        prioridad: fila.habito.importancia ?? 'media',
-        urgencia: 'normal',
-        proyectoId: null,
-        fechaMaxima: '',
-        grupoEjecucion: grupo ?? '',
-      };
+  const base = {
+    prioridad: prioridadDe(fila),
+    grupoEjecucion: grupoDe(fila) ?? '',
+  };
+  if (fila.tipo === 'habito') {
+    const { tipo, cadaDias, diasSemana, vecesAlMes } = frecuenciaDe(fila.habito);
+    return {
+      ...base,
+      texto: fila.habito.nombre,
+      urgencia: 'normal',
+      proyectoId: null,
+      fechaMaxima: '',
+      frecuencia: { tipo, cadaDias, diasSemana, vecesAlMes },
+    };
+  }
+  return {
+    ...base,
+    texto: fila.tarea.texto,
+    urgencia: fila.tarea.urgencia ?? 'normal',
+    proyectoId: fila.tarea.proyectoId ?? null,
+    fechaMaxima: fila.tarea.configuracion?.fechaMaxima ?? '',
+  };
 }
 
 interface Props {
@@ -70,15 +52,20 @@ interface Props {
 export function ConfiguracionTarea({ fila, proyectos, grupos, onGuardar, onCerrar }: Props) {
   const dialogo = useRef<HTMLDialogElement>(null);
   const [borrador, setBorrador] = useState<CambiosFilaForm | null>(fila ? borradorDe(fila) : null);
-  const idTexto = useId();
+  // El nombre se edita en un `input` controlado: sin él, el cursor salta al
+  // repintarse la lista con cada cambio guardado.
+  const [nombre, setNombre] = useState(fila ? borradorDe(fila).texto : '');
+  const idNombre = useId();
+  const idGrupo = useId();
   const idProyecto = useId();
   const idFecha = useId();
-  const idGrupo = useId();
-  const esTarea = fila?.tipo === 'tarea';
+  const esHabito = fila?.tipo === 'habito';
 
-  // Cada fila abre con su propio borrador; cerrar lo descarta.
   useEffect(() => {
-    setBorrador(fila ? borradorDe(fila) : null);
+    if (!fila) return;
+    const inicial = borradorDe(fila);
+    setBorrador(inicial);
+    setNombre(inicial.texto);
   }, [fila]);
 
   useEffect(() => {
@@ -96,59 +83,45 @@ export function ConfiguracionTarea({ fila, proyectos, grupos, onGuardar, onCerra
     return () => nodo.removeEventListener('close', alCerrar);
   }, [onCerrar]);
 
-  const cambiar = (cambios: Partial<CambiosFilaForm>) =>
-    setBorrador((previo) => (previo ? { ...previo, ...cambios } : previo));
-
-  const guardar = () => {
-    if (!fila || !borrador) return;
+  /** Aplica un cambio ya mismo: el modal no tiene botón de guardar. */
+  const aplicar = (cambios: Partial<CambiosFilaForm>) => {
+    if (!fila) return;
+    const siguiente = { ...borradorDe(fila), ...borrador, ...cambios } as CambiosFilaForm;
+    setBorrador(siguiente);
     // El texto vacío dejaría una fila sin nombre: se conserva el anterior.
-    const texto = borrador.texto.trim() || borradorDe(fila).texto;
-    onGuardar(fila, { ...borrador, texto });
-    onCerrar();
+    onGuardar(fila, { ...siguiente, texto: siguiente.texto.trim() || borradorDe(fila).texto });
   };
 
   return (
     <dialog
       className="modal"
       ref={dialogo}
-      aria-label={esTarea ? 'Configuración de la tarea' : 'Configuración del hábito'}
+      aria-label={esHabito ? 'Configuración del hábito' : 'Configuración de la tarea'}
       onClick={(evento) => {
+        // El clic fuera del contenido solo alcanza al propio `<dialog>`.
         if (evento.target === dialogo.current) onCerrar();
       }}
     >
-      {borrador && (
-        <form
-          className="modal__caja"
-          onSubmit={(evento) => {
-            evento.preventDefault();
-            guardar();
-          }}
-        >
-          <header className="modal__cabecera">
-            <h2 className="modal__titulo">{esTarea ? 'Tarea' : 'Hábito'}</h2>
-            <button
-              type="button"
-              className="modal__cerrar"
-              aria-label="Cerrar la configuración"
-              title="Cerrar"
-              onClick={onCerrar}
-            >
-              <IconoCerrar />
-            </button>
-          </header>
-
+      {borrador && fila && (
+        <div className="modal__caja">
           <div className="modal__cuerpo">
             <div className="campo">
-              <label className="campo__titulo" htmlFor={idTexto}>
-                {esTarea ? 'Texto' : 'Nombre'}
+              <label className="sr-solo" htmlFor={idNombre}>
+                {esHabito ? 'Nombre' : 'Texto'}
               </label>
-              <textarea
-                id={idTexto}
+              <input
+                id={idNombre}
                 className="entrada"
-                rows={2}
-                maxLength={esTarea ? 1000 : 120}
-                value={borrador.texto}
-                onChange={(evento) => cambiar({ texto: evento.target.value })}
+                autoFocus
+                maxLength={esHabito ? 120 : 1000}
+                value={nombre}
+                onChange={(evento) => setNombre(evento.target.value)}
+                // Al salir del campo es cuando se manda, y el valor se lee del
+                // propio campo: el estado del último pintado puede ir por detrás.
+                onBlur={(evento) => aplicar({ texto: evento.currentTarget.value })}
+                onKeyDown={(evento) => {
+                  if (evento.key === 'Enter') evento.currentTarget.blur();
+                }}
               />
             </div>
 
@@ -163,17 +136,22 @@ export function ConfiguracionTarea({ fila, proyectos, grupos, onGuardar, onCerra
                 className="entrada"
                 list={`${idGrupo}-sugerencias`}
                 placeholder="Sin grupo"
-                value={borrador.grupoEjecucion}
-                onChange={(evento) => cambiar({ grupoEjecucion: evento.target.value })}
+                defaultValue={borrador.grupoEjecucion}
+                onBlur={(evento) => {
+                  if (evento.target.value !== borrador.grupoEjecucion) aplicar({ grupoEjecucion: evento.target.value });
+                }}
+                onKeyDown={(evento) => {
+                  if (evento.key === 'Enter') evento.currentTarget.blur();
+                }}
               />
               <datalist id={`${idGrupo}-sugerencias`}>
-                {grupos.map((nombre) => (
-                  <option key={nombre} value={nombre} />
+                {grupos.map((nombreGrupo) => (
+                  <option key={nombreGrupo} value={nombreGrupo} />
                 ))}
               </datalist>
             </div>
 
-            {esTarea && (
+            {fila.tipo === 'tarea' ? (
               <>
                 <div className="campo">
                   <label className="campo__titulo" htmlFor={idProyecto}>
@@ -184,7 +162,7 @@ export function ConfiguracionTarea({ fila, proyectos, grupos, onGuardar, onCerra
                     className="entrada"
                     value={borrador.proyectoId ?? ''}
                     onChange={(evento) =>
-                      cambiar({ proyectoId: evento.target.value === '' ? null : Number(evento.target.value) })
+                      aplicar({ proyectoId: evento.target.value === '' ? null : Number(evento.target.value) })
                     }
                   >
                     <option value="">Sueltas</option>
@@ -205,60 +183,42 @@ export function ConfiguracionTarea({ fila, proyectos, grupos, onGuardar, onCerra
                     className="entrada"
                     type="date"
                     value={borrador.fechaMaxima}
-                    onChange={(evento) => cambiar({ fechaMaxima: evento.target.value })}
+                    onChange={(evento) => aplicar({ fechaMaxima: evento.target.value })}
                   />
                 </div>
               </>
+            ) : (
+              borrador.frecuencia && (
+                <FrecuenciaCampos
+                  frecuencia={borrador.frecuencia}
+                  onCambiar={(cambios) => aplicar({ frecuencia: { ...borrador.frecuencia, ...cambios } })}
+                />
+              )
             )}
 
             <div className="campo">
-              <p className="campo__titulo">{esTarea ? 'Prioridad' : 'Importancia'}</p>
-              <div className="opciones" role="radiogroup" aria-label={esTarea ? 'Prioridad' : 'Importancia'}>
-                {PRIORIDADES.map((opcion) => (
-                  <button
-                    key={opcion.id}
-                    type="button"
-                    role="radio"
-                    aria-checked={borrador.prioridad === opcion.id}
-                    className={`segmento${borrador.prioridad === opcion.id ? ' segmento--activo' : ''}`}
-                    onClick={() => cambiar({ prioridad: opcion.id })}
-                  >
-                    {opcion.etiqueta}
-                  </button>
-                ))}
-              </div>
+              <p className="campo__titulo">{esHabito ? 'Importancia' : 'Prioridad'}</p>
+              <Opciones
+                titulo={esHabito ? 'Importancia' : 'Prioridad'}
+                valor={borrador.prioridad}
+                opciones={PRIORIDADES}
+                onElegir={(id) => aplicar({ prioridad: id })}
+              />
             </div>
 
-            {esTarea && (
+            {!esHabito && (
               <div className="campo">
                 <p className="campo__titulo">Urgencia</p>
-                <div className="opciones" role="radiogroup" aria-label="Urgencia">
-                  {URGENCIAS.map((opcion) => (
-                    <button
-                      key={opcion.id}
-                      type="button"
-                      role="radio"
-                      aria-checked={borrador.urgencia === opcion.id}
-                      className={`segmento${borrador.urgencia === opcion.id ? ' segmento--activo' : ''}`}
-                      onClick={() => cambiar({ urgencia: opcion.id })}
-                    >
-                      {opcion.etiqueta}
-                    </button>
-                  ))}
-                </div>
+                <Opciones
+                  titulo="Urgencia"
+                  valor={borrador.urgencia}
+                  opciones={URGENCIAS}
+                  onElegir={(id) => aplicar({ urgencia: id })}
+                />
               </div>
             )}
           </div>
-
-          <footer className="modal__acciones">
-            <button type="button" className="segmento" onClick={onCerrar}>
-              Cancelar
-            </button>
-            <button type="submit" className="segmento segmento--activo">
-              Guardar
-            </button>
-          </footer>
-        </form>
+        </div>
       )}
     </dialog>
   );

@@ -3,16 +3,18 @@
  * (`PUT /api/habits/:id`). Marcar un día es su propia ruta:
  * `PUT /api/habits/:id/history` con `{date, status}`. */
 import { pedir } from './cliente';
-import type { Habito } from './tipos';
+import { frecuenciaDe } from './frecuencia';
+import type { FrecuenciaDetalle, Habito } from './tipos';
 
 /** Cuerpo que espera `UpsertHabitRequest` en Rust (camelCase). */
 function habitoARequest(habito: Habito): Record<string, unknown> {
   return {
     nombre: habito.nombre,
-    // `importancia` e `frecuencia` son textos del contrato; si no hay, el
-    // backend aplica sus valores por defecto.
+    // `importancia` y `frecuencia` son textos del contrato; si no hay, aplica
+    // sus valores por defecto. `frecuencia` es una frase quedada del legacy:
+    // el backend quiere el tipo, no el objeto (el objeto va en el payload).
     importancia: habito.importancia ?? 'media',
-    frecuencia: typeof habito.frecuencia === 'string' ? habito.frecuencia : (habito.frecuencia?.tipo ?? 'diario'),
+    frecuencia: frecuenciaDe(habito).tipo,
     orden: habito.orden ?? 0,
     payload: habito,
     expectedUpdatedAt: null,
@@ -42,7 +44,13 @@ export async function desmarcarHabito(id: number, fecha: string): Promise<void> 
 /** Cambios del modal de configuración aplicados a la copia del hábito. */
 export function editarHabito(
   habito: Habito,
-  cambios: { nombre: string; importancia?: string; grupoEjecucion?: string | null },
+  cambios: {
+    nombre: string;
+    importancia?: string;
+    grupoEjecucion?: string | null;
+    /** Si falta, la frecuencia se queda como estaba. */
+    frecuencia?: FrecuenciaDetalle;
+  },
 ): Habito {
   return {
     ...habito,
@@ -50,5 +58,10 @@ export function editarHabito(
     importancia: cambios.importancia ?? habito.importancia,
     grupoEjecucion:
       cambios.grupoEjecucion === undefined ? (habito.grupoEjecucion ?? null) : cambios.grupoEjecucion,
+    // La frecuencia viaja entera dentro del payload, conservando sus extras.
+    frecuencia:
+      cambios.frecuencia === undefined
+        ? habito.frecuencia
+        : { ...(typeof habito.frecuencia === 'object' && habito.frecuencia !== null ? habito.frecuencia : {}), ...cambios.frecuencia },
   };
 }

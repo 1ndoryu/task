@@ -114,6 +114,13 @@ body {
   padding: 0 0.5rem 0.5rem 0;
 }
 
+/* Las pestañas ocupan la cabecera; el orden y los iconos no se encogen. */
+.barra__pestanas {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+}
+
 /* Los dos iconos de la derecha, pegados entre sí. */
 .barra__acciones {
   display: flex;
@@ -215,37 +222,6 @@ button.fila__marca:hover {
 
 .fila__texto:hover {
   color: var(--tinta);
-}
-
-/* El botón de acciones solo aparece cuando se mira la fila: sin ruido. */
-.fila__opciones {
-  flex: none;
-  padding: 0.15rem;
-  border: 0;
-  border-radius: var(--redondoChico);
-  background: none;
-  color: var(--tinta-tenue);
-  line-height: 0;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 90ms ease-out;
-}
-
-.fila:hover .fila__opciones,
-.fila:focus-within .fila__opciones,
-.fila__opciones[aria-expanded='true'] {
-  opacity: 1;
-}
-
-.fila__opciones:hover {
-  color: var(--tinta);
-}
-
-/* Con el menú de la fila abierto, el panel no debe heredar el difuminado:
- * se lee siempre, como el texto bajo el ratón. */
-.caja--privacidad .fila__opciones {
-  filter: none;
-  opacity: 1;
 }
 
 .fila__nota {

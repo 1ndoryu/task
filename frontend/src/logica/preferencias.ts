@@ -1,4 +1,4 @@
-/* Preferencias de la vista (orden, filtro y ajustes de lectura), recordadas en
+/* Preferencias de la vista (orden, pestaña y ajustes de lectura), recordadas en
  * `localStorage`. Se guardan aparte de los datos: aquí no hay contratos del
  * backend, solo cómo mira la usuaria su lista. */
 
@@ -21,7 +21,8 @@ export interface Preferencias {
   orden: string;
   /** Pestaña de grupo activa: `''` es «Tareas» (sin grupo). */
   grupo: string;
-  filtro: string;
+  /** Esconder de la lista los hábitos ya cumplidos que tocaban hoy. */
+  ocultarHabitos: boolean;
   /** Modo privacidad: el texto de la lista va difuminado hasta pasar el ratón. */
   privacidad: boolean;
   privacidadAlcance: AlcancePrivacidad;
@@ -34,7 +35,7 @@ export interface Preferencias {
 const POR_DEFECTO: Preferencias = {
   orden: 'inteligente',
   grupo: '',
-  filtro: 'sueltas',
+  ocultarHabitos: true,
   privacidad: false,
   privacidadAlcance: 'una',
   fuente: 'normal',
@@ -69,7 +70,10 @@ export function leerPreferencias(): Preferencias {
         typeof guardado.grupo === 'string' && !MODOS_GRUPO_VIEJOS.includes(guardado.grupo)
           ? guardado.grupo.trim()
           : POR_DEFECTO.grupo,
-      filtro: typeof guardado.filtro === 'string' ? guardado.filtro : POR_DEFECTO.filtro,
+      // El filtro por proyecto de la barra desapareció: sus valores guardados
+      // se quedan sin leer y la lista enseña todo.
+      ocultarHabitos:
+        typeof guardado.ocultarHabitos === 'boolean' ? guardado.ocultarHabitos : POR_DEFECTO.ocultarHabitos,
       privacidad: typeof guardado.privacidad === 'boolean' ? guardado.privacidad : POR_DEFECTO.privacidad,
       privacidadAlcance: texto('privacidadAlcance', ['una', 'todas']) as AlcancePrivacidad ?? POR_DEFECTO.privacidadAlcance,
       fuente: (fuente as Fuente) ?? POR_DEFECTO.fuente,
