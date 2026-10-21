@@ -3,6 +3,7 @@
  * parten la lista por grupo de ejecución, y ambos tipos de fila tienen su
  * marca de completar, su menú y su configuración. */
 import { useState } from 'react';
+import { importanciaDeHabito } from '../logica/importancia';
 import { MODOS_ORDEN, PESTANA_COMPLETADOS, type ModoOrden } from '../logica/orden';
 import { Ajustes } from './Ajustes';
 import { ConfiguracionTarea } from './ConfiguracionTarea';
@@ -72,9 +73,11 @@ export function Lista() {
     editar: lista.abrirEdicion,
     borrar: (fila) => (fila.tipo === 'tarea' ? lista.borrarTarea(fila.tarea.id) : lista.borrarHabito(fila.habito.id)),
     prioridad: (fila, prioridad) => {
+      // El menú elige en ids; el hábito los guarda como texto (`Muy Alta`).
+      const nivel = prioridad ?? 'media';
       const cambios: CambiosFilaForm = {
         texto: fila.tipo === 'tarea' ? fila.tarea.texto : fila.habito.nombre,
-        prioridad: prioridad ?? 'media',
+        prioridad: fila.tipo === 'tarea' ? nivel : importanciaDeHabito(nivel),
         urgencia: fila.tipo === 'tarea' ? (fila.tarea.urgencia ?? 'normal') : 'normal',
         proyectoId: fila.tipo === 'tarea' ? (fila.tarea.proyectoId ?? null) : null,
         fechaMaxima: fila.tipo === 'tarea' ? (fila.tarea.configuracion?.fechaMaxima ?? '') : '',

@@ -4,6 +4,7 @@
  * (`frontend-legacy/src/app/hooks/useOrdenarTareas.ts` +
  * `useHabitosComoTareas.ts`). Aquí se conservan los mismos pesos y umbrales. */
 import { diferenciaDias, fechaLocal } from './fechas';
+import { nivelDe } from './importancia';
 import type { Habito, Tarea } from './tipos';
 
 export type ModoOrden = 'inteligente' | 'manual' | 'fecha' | 'prioridad';
@@ -76,15 +77,6 @@ const PESO_PRIORIDAD: Record<string, number> = {
 /* Cada día de retraso suma 50: lo olvidado sube poco a poco. */
 const PESO_POR_DIA_RETRASO = 50;
 
-/** Importancia del hábito traducida a la prioridad que usa el comparador. */
-const IMPORTANCIA_A_PRIORIDAD: Record<string, string> = {
-  'Muy Alta': 'muy_alta',
-  Alta: 'alta',
-  Media: 'media',
-  Baja: 'baja',
-  'Muy Baja': 'muy_baja',
-};
-
 /* Umbrales de inactividad del legacy: días sin hacerlo y sube de urgencia. */
 const UMBRAL = { normal: 1, urgente: 3, bloqueante: 5 };
 
@@ -108,7 +100,7 @@ export interface EntradaOrdenable {
 export function entradaDeTarea(tarea: Tarea): EntradaOrdenable {
   return {
     orden: tarea.orden ?? 0,
-    prioridad: tarea.prioridad ?? 'media',
+    prioridad: nivelDe(tarea.prioridad),
     urgencia: tarea.urgencia ?? 'normal',
     fechaMaxima: tarea.configuracion?.fechaMaxima,
   };
@@ -117,7 +109,7 @@ export function entradaDeTarea(tarea: Tarea): EntradaOrdenable {
 export function entradaDeHabito(habito: Habito): EntradaOrdenable {
   return {
     orden: habito.orden ?? 0,
-    prioridad: IMPORTANCIA_A_PRIORIDAD[habito.importancia ?? 'Media'] ?? 'media',
+    prioridad: nivelDe(habito.importancia),
     urgencia: urgenciaDeHabito(habito),
   };
 }

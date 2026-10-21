@@ -4,7 +4,7 @@
  * tenga una sola responsabilidad. */
 import { hechoHoy } from '../logica/seleccion';
 import { Menu } from './Menu';
-import { opcionesFila, type AccionesFila } from './accionesFila';
+import { opcionesFila, prioridadDe, type AccionesFila } from './accionesFila';
 import type { Editando } from './usarLista';
 
 interface Props {
@@ -25,10 +25,11 @@ export function Fila({ fila, saliendo, acciones, grupos, completados, hoy, menuA
   const esTarea = fila.tipo === 'tarea';
   const tarea = esTarea ? fila.tarea : null;
   const habito = esTarea ? null : fila.habito;
-  // La urgencia se lee solo para el acento visual; el texto no la repite.
+  // El acento visual sale de la urgencia en la tarea y del nivel en el hábito
+  // (que no tiene urgencia propia); el texto nunca lo repite.
   const acento = tarea
     ? tarea.urgencia === 'bloqueante' || tarea.urgencia === 'urgente'
-    : (habito?.importancia ?? '').toLowerCase() === 'bloqueante';
+    : prioridadDe(fila) === 'muy_alta';
   const hecho = tarea ? tarea.completado : habito !== null && hechoHoy(habito, hoy);
   const texto = tarea ? tarea.texto : (habito?.nombre ?? '');
   const racha = habito?.racha ?? 0;

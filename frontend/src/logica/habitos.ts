@@ -4,6 +4,7 @@
  * `PUT /api/habits/:id/history` con `{date, status}`. */
 import { pedir } from './cliente';
 import { frecuenciaDe } from './frecuencia';
+import { importanciaDeHabito } from './importancia';
 import type { FrecuenciaDetalle, Habito } from './tipos';
 
 /** Cuerpo que espera `UpsertHabitRequest` en Rust (camelCase). */
@@ -13,7 +14,7 @@ function habitoARequest(habito: Habito): Record<string, unknown> {
     // `importancia` y `frecuencia` son textos del contrato; si no hay, aplica
     // sus valores por defecto. `frecuencia` es una frase quedada del legacy:
     // el backend quiere el tipo, no el objeto (el objeto va en el payload).
-    importancia: habito.importancia ?? 'media',
+    importancia: importanciaDeHabito(habito.importancia),
     frecuencia: frecuenciaDe(habito).tipo,
     orden: habito.orden ?? 0,
     payload: habito,

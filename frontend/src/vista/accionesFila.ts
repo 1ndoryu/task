@@ -1,5 +1,7 @@
 /* Lo que una fila ofrece en su menú contextual y las acciones que la vista le
  * pasa. Separa el «qué se puede hacer» del componente que lo pinta. */
+import { nivelDe } from '../logica/importancia';
+import { PRIORIDADES } from './opcionesFila';
 import type { OpcionMenu } from './Menu';
 import type { Editando } from './usarLista';
 
@@ -11,19 +13,10 @@ export interface AccionesFila {
   mover: (fila: NonNullable<Editando>, grupo: string | null) => void;
 }
 
-/* Las cinco prioridades del `payload` (la importancia del hábito usa la misma
- * escala); el menú de la fila las ofrece como elección rápida. */
-const PRIORIDADES = [
-  { id: 'muy_alta', etiqueta: 'Muy alta' },
-  { id: 'alta', etiqueta: 'Alta' },
-  { id: 'media', etiqueta: 'Media' },
-  { id: 'baja', etiqueta: 'Baja' },
-  { id: 'muy_baja', etiqueta: 'Muy baja' },
-];
-
-/** Prioridad o importancia según el tipo de fila. */
+/** Nivel de la fila en el id común: la tarea ya lo trae y la importancia del
+ * hábito llega como texto (`Muy Alta`), así que se traduce aquí. */
 export function prioridadDe(fila: NonNullable<Editando>): string {
-  return (fila.tipo === 'tarea' ? fila.tarea.prioridad : fila.habito.importancia) ?? 'media';
+  return nivelDe(fila.tipo === 'tarea' ? fila.tarea.prioridad : fila.habito.importancia);
 }
 
 export function grupoDe(fila: NonNullable<Editando>): string | null {

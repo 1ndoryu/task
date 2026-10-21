@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { leerDashboard } from '../logica/dashboard';
 import { fechaLocal } from '../logica/fechas';
 import { anotarGrupos, guardarOrdenPestanas, leerGruposConocidos, leerOrdenPestanas } from '../logica/grupos';
+import { importanciaDeHabito } from '../logica/importancia';
 import {
   borrarHabito,
   desmarcarHabito,
@@ -317,7 +318,8 @@ export function usarLista(): Lista {
       void escribirHabito(id, (h) =>
         editarHabito(h, {
           nombre: cambios.texto,
-          importancia: cambios.prioridad ?? undefined,
+          // El hábito guarda su escala como texto (`Muy Alta`), no como id.
+          importancia: cambios.prioridad ? importanciaDeHabito(cambios.prioridad) : undefined,
           grupoEjecucion: cambios.grupoEjecucion,
           frecuencia: cambios.frecuencia,
         }),
