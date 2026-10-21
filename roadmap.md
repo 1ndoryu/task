@@ -11,12 +11,8 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Pendientes
 
-- [ ] `21AB-1` — **Colores de importancia en la lista.**
-  Paleta pastel por nivel (muy baja azulada → muy alta roja), editable en
-  Ajustes con el selector nativo y guardada en `localStorage`; el punto de
-  cada fila y la opción del modal llevan su color. Base de `21AB-2`.
-
 - [ ] `21AB-2` — **El color de una tarea debe seguir a su urgencia.**
+  (Tras `21AB-1`.)
   Hoy el punto de la tarea muestra su prioridad, mientras el orden de la lista
   pesa más la urgencia: una tarea urgente puede salir arriba con punto frío.
   Decidir la regla (urgencia, o prioridad con la urgencia como desempate) y
