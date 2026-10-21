@@ -65,16 +65,16 @@
 .pestanas--lateral {
   flex-direction: column;
   align-items: stretch;
-  gap: 0.15rem;
+  gap: 0.05rem;
   padding: 0;
   overflow: visible;
 }
 
-/* Sin caja: en una columna el filete sobra y tres marcos seguidos pesan más
- * que la lista a la que acompañan. La activa sigue invirtiéndose, que es lo
- * que distingue el bloque abierto. */
+/* Sin caja ni relleno: en la columna las pestañas son una lista de enlaces y
+ * lo único que marca el bloque abierto es la tinta, con el mismo punto que
+ * llevan los valores activos del formulario. */
 .pestana--bloque {
-  padding: 0.3rem 0.5rem;
+  padding: 0.1rem 0.2rem;
   border: 0;
   background: none;
   text-align: left;
@@ -85,6 +85,11 @@
 }
 
 .pestana--bloque.pestana--activa {
-  background: var(--tinta);
-  color: var(--panel);
+  background: none;
+  color: var(--tinta);
+}
+
+.pestana--bloque.pestana--activa::before {
+  content: '·';
+  margin-right: 0.3rem;
 }
