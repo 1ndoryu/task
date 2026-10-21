@@ -231,7 +231,10 @@ export function usarLista(): Lista {
         const historial = new Set(h.historialCompletados ?? []);
         if (quedaHecha) historial.add(hoy);
         else historial.delete(hoy);
-        return { ...h, historialCompletados: [...historial].sort() };
+        const fechas = [...historial].sort();
+        // `ultimoCompletado` se mantiene junto al historial: lo lee el respaldo
+        // de `ultimoHecho` y el panel de Actividad del resto de la app.
+        return { ...h, historialCompletados: fechas, ultimoCompletado: fechas.at(-1) ?? null };
       });
       // El historial es su propia ruta; el cambio del payload no lo escribe.
       const peticion = quedaHecha ? marcarHabito(id, hoy, 'completado') : desmarcarHabito(id, hoy);

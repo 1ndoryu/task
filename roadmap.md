@@ -26,8 +26,8 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
   `npx tsc` está bloqueado por el guard del proyecto y `scripts/quality/stages.json`
   solo declara la etapa de Sentinel: el front se compila en la 89 pero nadie
   valida sus tipos. Añadir a la etapa del front `tsc --noEmit` + `vite build` en la
-  réplica de la 89 (la ruta `~/taller/PROYECTO TASKS/frontend` no existe; hay que
-  resolver dónde vive el árbol sincronizado).
+  réplica de la 89 (la ruta sí existe: `~/taller/PROYECTO TASKS/frontend`, con
+  `~/.local/share/fnm/node-versions/v24.21.0/installation/bin` en el PATH).
 
 
 ## Bloqueos

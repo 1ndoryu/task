@@ -4,6 +4,7 @@
  * (`frontend-legacy/src/app/hooks/useOrdenarTareas.ts` +
  * `useHabitosComoTareas.ts`). Aquí se conservan los mismos pesos y umbrales. */
 import { diferenciaDias, fechaLocal } from './fechas';
+import { rachaDe, ultimoHecho } from './frecuencia';
 import { nivelDe } from './importancia';
 import type { Habito, Tarea } from './tipos';
 
@@ -80,9 +81,16 @@ const PESO_POR_DIA_RETRASO = 50;
 /* Umbrales de inactividad del legacy: días sin hacerlo y sube de urgencia. */
 const UMBRAL = { normal: 1, urgente: 3, bloqueante: 5 };
 
-function urgenciaDeHabito(habito: Habito): string {
-  const dias = habito.diasInactividad ?? 0;
-  if ((habito.racha ?? 0) > 0 && dias < UMBRAL.normal) return 'chill';
+/* La inactividad se cuenta del historial: `diasInactividad` y `racha` vinieron
+ * congelados del front legacy y aquí nadie los recalcula. */
+function inactividadDeHabito(habito: Habito, hoy: string): number {
+  const ultimo = ultimoHecho(habito);
+  return ultimo === null ? 0 : Math.max(0, diferenciaDias(ultimo, hoy));
+}
+
+function urgenciaDeHabito(habito: Habito, hoy: string): string {
+  const dias = inactividadDeHabito(habito, hoy);
+  if (rachaDe(habito, hoy) > 0 && dias < UMBRAL.normal) return 'chill';
   if (dias >= UMBRAL.bloqueante) return 'bloqueante';
   if (dias >= UMBRAL.urgente) return 'urgente';
   if (dias >= UMBRAL.normal) return 'normal';
@@ -106,11 +114,11 @@ export function entradaDeTarea(tarea: Tarea): EntradaOrdenable {
   };
 }
 
-export function entradaDeHabito(habito: Habito): EntradaOrdenable {
+export function entradaDeHabito(habito: Habito, hoy: string): EntradaOrdenable {
   return {
     orden: habito.orden ?? 0,
     prioridad: nivelDe(habito.importancia),
-    urgencia: urgenciaDeHabito(habito),
+    urgencia: urgenciaDeHabito(habito, hoy),
   };
 }
 

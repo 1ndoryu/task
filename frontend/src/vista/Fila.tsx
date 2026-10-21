@@ -2,6 +2,7 @@
  * la configuración y racha. El menú de acciones se abre con el clic derecho en
  * la fila; no hay botón visible. Vive aparte de `Lista` para que cada archivo
  * tenga una sola responsabilidad. */
+import { diaCorto, proximaRepeticion, rachaDe } from '../logica/frecuencia';
 import { hechoHoy } from '../logica/seleccion';
 import { Menu } from './Menu';
 import { opcionesFila, prioridadDe, type AccionesFila } from './accionesFila';
@@ -31,7 +32,11 @@ export function Fila({ fila, saliendo, acciones, grupos, completados, hoy, menuA
   const nivel = prioridadDe(fila);
   const hecho = tarea ? tarea.completado : habito !== null && hechoHoy(habito, hoy);
   const texto = tarea ? tarea.texto : (habito?.nombre ?? '');
-  const racha = habito?.racha ?? 0;
+  // La racha se cuenta del historial: el `racha` del payload es del front viejo.
+  const racha = habito !== null ? rachaDe(habito, hoy) : 0;
+  // Lo ya hecho de un hábito no sale de la lista (solo se tacha), así que se
+  // dice cuándo vuelve: sin eso, marcarlo parece no hacer nada.
+  const vuelve = habito !== null && hecho ? proximaRepeticion(habito, hoy) : null;
 
   return (
     <li
@@ -66,6 +71,7 @@ export function Fila({ fila, saliendo, acciones, grupos, completados, hoy, menuA
       >
         {texto}
       </button>
+      {vuelve !== null && vuelve !== hoy && <span className="fila__nota">vuelve el {diaCorto(vuelve)}</span>}
       {racha > 1 && <span className="fila__nota">{racha} días</span>}
       {/* Sin disparador: el ancla es el punto del clic derecho. */}
       <Menu

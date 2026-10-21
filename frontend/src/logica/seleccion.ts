@@ -68,7 +68,7 @@ export function seleccionar(
 
   const pares = [
     ...tareas.map((tarea) => ({ fila: { tipo: 'tarea', tarea } as Fila, entrada: entradaDeTarea(tarea) })),
-    ...habitos.map((habito) => ({ fila: { tipo: 'habito', habito } as Fila, entrada: entradaDeHabito(habito) })),
+    ...habitos.map((habito) => ({ fila: { tipo: 'habito', habito } as Fila, entrada: entradaDeHabito(habito, hoy) })),
   ];
 
   // El comparador guarda los pesos calculados: se crea una sola vez.
