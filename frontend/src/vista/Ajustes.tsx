@@ -178,7 +178,7 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
                   valor={preferencias.ocultarHabitos ? 'si' : 'no'}
                   opciones={SI_NO}
                   onElegir={(valor) => onCambiar({ ocultarHabitos: valor === 'si' })}
-                  nota="Un hábito que tocaba hoy y ya está hecho sale de la lista; la pestaña Completados los guarda."
+                  nota="Solo se ven los que tocan hoy y no están hechos; el resto vuelve cuando su frecuencia lo trae. La pestaña Completados los guarda."
                 />
                 <Campo
                   titulo="Privacidad"

@@ -27,11 +27,12 @@ export function enGrupo(grupoDeFila: Grupo | undefined, activo: Grupo): boolean 
   return (grupoDeFila ?? null) === activo;
 }
 
-/** Si un hábito ya hecho hoy debe esconderse. La frecuencia decide cuándo
- * vuelve a tocar: lo que tocaba hoy y ya está hecho no se repite; lo que no
- * tocaba (semanal, días fijos…) se queda en la lista como pendiente. */
+/** Si un hábito debe esconderse de la lista. Es la regla del panel de
+ * ejecución del legacy: se muestra si toca hoy **y** no está hecho; lo hecho
+ * se esconde, y lo que no toca (cada X días, semanal, mensual, días fijos)
+ * también, hasta que la frecuencia lo traiga de vuelta. */
 export function ocultarCompletado(habito: Habito, hoy: string, ocultar: boolean): boolean {
-  return ocultar && hechoHoy(habito, hoy) && tocaHoy(habito, hoy);
+  return ocultar && (hechoHoy(habito, hoy) || !tocaHoy(habito, hoy));
 }
 
 export function seleccionar(
