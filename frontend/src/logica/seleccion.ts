@@ -1,52 +1,41 @@
-/* Qué parte del dashboard se pinta. Lógica pura sobre los datos ya leídos:
- * tareas abiertas (sin las subtareas, que pertenecen a su padre) y hábitos por
- * orden, con la fecha de hoy ya resuelta para marcar lo hecho. */
+/* Qué se pinta: tareas y hábitos en una sola lista, ordenados por el mismo
+ * criterio (como el panel de ejecución del front original). Lógica pura. */
+import { fechaLocal } from './fechas';
+import { aplicarFiltro, type Filtro } from './filtros';
+import { comparador, entradaDeHabito, entradaDeTarea, type ModoOrden } from './orden';
 import type { Dashboard, Habito, Tarea } from './tipos';
 
-const PESO_URGENCIA: Record<string, number> = {
-  bloqueante: 0,
-  urgente: 1,
-  normal: 2,
-  chill: 3,
-};
+export { fechaLocal };
 
-function pesoUrgencia(tarea: Tarea): number {
-  return PESO_URGENCIA[tarea.urgencia ?? 'normal'] ?? 2;
-}
+/** Una fila de la lista: o una tarea real o un hábito. */
+export type Fila = { tipo: 'tarea'; tarea: Tarea } | { tipo: 'habito'; habito: Habito };
 
-/** Tareas pendientes de primer nivel, las más urgentes primero.
- * [por que] Las que tienen proyecto no son trabajo suelto del día: viven en su
- * proyecto y aquí solo estorbarían. */
-export function tareasAbiertas(tareas: Tarea[]): Tarea[] {
-  return tareas
-    .filter((tarea) => !tarea.completado && tarea.parentId == null && tarea.proyectoId == null)
-    .sort((a, b) => pesoUrgencia(a) - pesoUrgencia(b) || (a.orden ?? 0) - (b.orden ?? 0));
-}
-
-export function habitosOrdenados(habitos: Habito[]): Habito[] {
-  return [...habitos].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
-}
-
-/** Fecha local en `YYYY-MM-DD`, el formato en que el backend guarda el historial. */
-export function fechaLocal(ahora: Date = new Date()): string {
-  const mes = String(ahora.getMonth() + 1).padStart(2, '0');
-  const dia = String(ahora.getDate()).padStart(2, '0');
-  return `${ahora.getFullYear()}-${mes}-${dia}`;
+export interface Vista {
+  filas: Fila[];
 }
 
 export function hechoHoy(habito: Habito, hoy: string): boolean {
   return habito.historialCompletados?.includes(hoy) ?? false;
 }
 
-export function resumen(datos: Dashboard, hoy: string): {
-  tareas: Tarea[];
-  habitos: Habito[];
-  hechos: number;
-} {
-  const habitos = habitosOrdenados(datos.habitos);
-  return {
-    tareas: tareasAbiertas(datos.tareas),
-    habitos,
-    hechos: habitos.filter((habito) => hechoHoy(habito, hoy)).length,
-  };
+export function seleccionar(
+  datos: Dashboard,
+  opciones: { filtro: Filtro; orden: ModoOrden; hoy?: string },
+): Vista {
+  const hoy = opciones.hoy ?? fechaLocal();
+  const tareas = aplicarFiltro(datos.tareas, opciones.filtro).filter((t) => !t.completado);
+
+  const pares = [
+    ...tareas.map((tarea) => ({ fila: { tipo: 'tarea', tarea } as Fila, entrada: entradaDeTarea(tarea) })),
+    ...datos.habitos.map((habito) => ({
+      fila: { tipo: 'habito', habito } as Fila,
+      entrada: entradaDeHabito(habito),
+    })),
+  ];
+
+  // El comparador guarda los pesos calculados: se crea una sola vez.
+  const comparar = comparador(opciones.orden, hoy);
+  pares.sort((a, b) => comparar(a.entrada, b.entrada));
+
+  return { filas: pares.map((par) => par.fila) };
 }

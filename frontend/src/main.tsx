@@ -3,6 +3,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Lista } from './vista/Lista';
+import './estilos/button.css';
+import './estilos/dropdownPanel.css';
 import './estilos/listas.css';
 
 const raiz = document.getElementById('raiz');

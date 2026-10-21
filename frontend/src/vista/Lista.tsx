@@ -1,25 +1,24 @@
-/* Vista de listas: tareas pendientes y hábitos, en una sola columna centrada. */
-import { useState } from 'react';
-import { fechaLocal, hechoHoy, resumen } from '../logica/seleccion';
-import type { Habito, Tarea } from '../logica/tipos';
-import { usarDashboard } from './usarDashboard';
+/* Vista de la lista: tareas y hábitos en un solo flujo, dentro de una caja
+ * con scroll propio. La cabecera lleva el filtro y el orden. */
+import { decodificarFiltro, etiquetaFiltro, type Filtro } from '../logica/filtros';
+import { MODOS_ORDEN, type ModoOrden } from '../logica/orden';
+import { hechoHoy } from '../logica/seleccion';
+import type { Habito, Proyecto, Tarea } from '../logica/tipos';
+import { Menu, type OpcionMenu } from './Menu';
+import { usarLista } from './usarLista';
 
-const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-const MESES = [
-  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
-  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
-];
-
-function etiquetaFecha(ahora: Date): string {
-  return `${DIAS[ahora.getDay()]} ${ahora.getDate()} de ${MESES[ahora.getMonth()]}`;
-}
-
-function FilaTarea({ tarea }: { tarea: Tarea }) {
+function FilaTarea({ tarea, onCompletar }: { tarea: Tarea; onCompletar: (tarea: Tarea) => void }) {
   // La urgencia se lee solo para el acento visual; el texto no la repite.
   const acento = tarea.urgencia === 'bloqueante' || tarea.urgencia === 'urgente';
   return (
     <li className={`fila${acento ? ' fila--urgente' : ''}`}>
-      <span className="fila__marca" aria-hidden="true" />
+      <button
+        type="button"
+        className="fila__marca"
+        aria-label={`Completar ${tarea.texto}`}
+        title="Completar"
+        onClick={() => onCompletar(tarea)}
+      />
       <span className="fila__texto">{tarea.texto}</span>
     </li>
   );
@@ -29,7 +28,7 @@ function FilaHabito({ habito, hoy }: { habito: Habito; hoy: string }) {
   const hecho = hechoHoy(habito, hoy);
   const racha = habito.racha ?? 0;
   return (
-    <li className={`fila${hecho ? ' fila--hecho' : ''}`}>
+    <li className={`fila fila--habito${hecho ? ' fila--hecho' : ''}`}>
       <span className="fila__marca" aria-hidden="true" />
       <span className="fila__texto">{habito.nombre}</span>
       {racha > 1 && <span className="fila__nota">{racha} días</span>}
@@ -37,71 +36,89 @@ function FilaHabito({ habito, hoy }: { habito: Habito; hoy: string }) {
   );
 }
 
+/** Opciones del filtro: las categorías del legacy más un apartado por proyecto. */
+function itemsFiltro(filtro: Filtro, proyectos: Proyecto[]): OpcionMenu[] {
+  return [
+    { id: 'sueltas', etiqueta: 'Sueltas', activo: filtro.tipo === 'sueltas', grupo: 'Vista' },
+    { id: 'todas', etiqueta: 'Todas', activo: filtro.tipo === 'todas' },
+    ...proyectos.map((proyecto) => ({
+      id: `proyecto-${proyecto.id}`,
+      etiqueta: proyecto.nombre,
+      activo: filtro.tipo === 'proyecto' && filtro.proyectoId === proyecto.id,
+      grupo: 'Proyectos',
+    })),
+  ];
+}
+
 export function Lista() {
-  const estado = usarDashboard();
-  // La fecha se congela al montar: la vista no se repinta sola a medianoche.
-  const [ahora] = useState(() => new Date());
-  const hoy = fechaLocal(ahora);
+  const lista = usarLista();
+
+  if (lista.estado.fase === 'cargando') {
+    return (
+      <main className="marco">
+        <div className="caja">
+          <p className="aviso">Cargando…</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (lista.estado.fase === 'error') {
+    return (
+      <main className="marco">
+        <div className="caja">
+          <p className="aviso aviso--error" role="alert">
+            {lista.estado.mensaje}
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  const { filas } = lista.vista ?? { filas: [] };
+  const proyectos = lista.estado.datos.proyectos;
+  const { filtro } = lista;
 
   return (
     <main className="marco">
-      <div className="columna">
-        <header className="cabecera">
-          <h1 className="cabecera__titulo">Hoy</h1>
-          <span className="cabecera__fecha">{etiquetaFecha(ahora)}</span>
+      <section className="caja" aria-label="Tareas y hábitos">
+        <header className="barra">
+          <Menu
+            etiqueta={etiquetaFiltro(filtro, proyectos)}
+            titulo="Filtrar tareas"
+            items={itemsFiltro(filtro, proyectos)}
+            onElegir={(id) => lista.cambiarFiltro(decodificarFiltro(id))}
+            claseBoton="barra__boton"
+          />
+          <Menu
+            etiqueta="Orden"
+            titulo="Ordenar la lista"
+            items={MODOS_ORDEN.map((modo) => ({
+              id: modo.id,
+              etiqueta: modo.etiqueta,
+              activo: lista.orden === modo.id,
+            }))}
+            onElegir={(id) => lista.cambiarOrden(id as ModoOrden)}
+            claseBoton="barra__boton"
+          />
         </header>
 
-        {estado.fase === 'cargando' && <p className="aviso">Cargando…</p>}
-        {estado.fase === 'error' && (
-          <p className="aviso aviso--error" role="alert">
-            {estado.mensaje}
-          </p>
-        )}
-
-        {estado.fase === 'listo' && <Contenido datos={estado.datos} hoy={hoy} />}
-      </div>
+        <div className="scroll">
+          {filas.length === 0 ? (
+            <p className="aviso">Nada pendiente.</p>
+          ) : (
+            <ul className="lista">
+              {filas.map((fila) =>
+                fila.tipo === 'tarea' ? (
+                  <FilaTarea key={`t${fila.tarea.id}`} tarea={fila.tarea} onCompletar={lista.completar} />
+                ) : (
+                  <FilaHabito key={`h${fila.habito.id}`} habito={fila.habito} hoy={lista.hoy} />
+                ),
+              )}
+            </ul>
+          )}
+        </div>
+      </section>
     </main>
-  );
-}
-
-function Contenido({ datos, hoy }: { datos: Parameters<typeof resumen>[0]; hoy: string }) {
-  const { tareas, habitos, hechos } = resumen(datos, hoy);
-
-  return (
-    <>
-      <section className="seccion" aria-labelledby="titulo-tareas">
-        <h2 className="seccion__titulo" id="titulo-tareas">
-          <span>Tareas</span>
-          <span>{tareas.length}</span>
-        </h2>
-        {tareas.length === 0 ? (
-          <p className="aviso">Nada pendiente.</p>
-        ) : (
-          <ul className="lista">
-            {tareas.map((tarea) => (
-              <FilaTarea key={tarea.id} tarea={tarea} />
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section className="seccion" aria-labelledby="titulo-habitos">
-        <h2 className="seccion__titulo" id="titulo-habitos">
-          <span>Hábitos</span>
-          <span>
-            {hechos}/{habitos.length}
-          </span>
-        </h2>
-        {habitos.length === 0 ? (
-          <p className="aviso">Sin hábitos.</p>
-        ) : (
-          <ul className="lista">
-            {habitos.map((habito) => (
-              <FilaHabito key={habito.id} habito={habito} hoy={hoy} />
-            ))}
-          </ul>
-        )}
-      </section>
-    </>
   );
 }

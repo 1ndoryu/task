@@ -1,0 +1,20 @@
+/* Receta del botón de la cabecera: solo texto, sin caja, que se apaga hasta que
+ * se mira o se abre. Hoja propia (como button.css en el front original) porque
+ * es receta compartida, no layout de la lista. */
+.barra__boton {
+  padding: 0.15rem 0.4rem;
+  border: 0;
+  border-radius: var(--redondoChico);
+  background: none;
+  color: var(--tinta-tenue);
+  font: inherit;
+  font-size: var(--texto-etiqueta);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.barra__boton:hover,
+.barra__boton[aria-expanded='true'] {
+  color: var(--tinta);
+}

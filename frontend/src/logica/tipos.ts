@@ -3,6 +3,13 @@
  * intacto dentro de cada entidad y se ignora. Origen: los tipos del front
  * original (`frontend-legacy/src/app/types/`). */
 
+export interface ConfiguracionTarea {
+  fechaMaxima?: string;
+  fechaCompletado?: string;
+  descripcion?: string;
+  [clave: string]: unknown;
+}
+
 export interface Tarea {
   id: number;
   texto: string;
@@ -12,6 +19,14 @@ export interface Tarea {
   urgencia?: string | null;
   parentId?: number | null;
   proyectoId?: number | null;
+  fechaCreacion?: string;
+  configuracion?: ConfiguracionTarea;
+}
+
+export interface Proyecto {
+  id: number;
+  nombre: string;
+  orden?: number;
 }
 
 export interface Habito {
@@ -19,16 +34,18 @@ export interface Habito {
   nombre: string;
   importancia?: string;
   orden?: number;
-  /* En el payload histórico llega como string o como `{tipo}`; aquí solo se
-   * muestra, no se evalúa. */
-  frecuencia?: string | { tipo?: string };
+  /* En el payload histórico llega como string o como `{tipo, cadaDias?, …}`;
+   * aquí solo se usa `cadaDias` para repartir la inactividad. */
+  frecuencia?: string | { tipo?: string; cadaDias?: number };
   historialCompletados?: string[];
   historialPospuestos?: string[];
   racha?: number;
+  diasInactividad?: number;
   ultimoCompletado?: string | null;
 }
 
 export interface Dashboard {
   tareas: Tarea[];
   habitos: Habito[];
+  proyectos: Proyecto[];
 }

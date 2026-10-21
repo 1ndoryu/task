@@ -1,0 +1,55 @@
+/* Receta del desplegable: panel pegado al disparador y sus opciones. Hoja
+ * compartida, como el dropdown canónico del front original: cualquier menú de la
+ * app debe salir de aquí y no reinventar fondo, borde ni tipografía. */
+.menu__panel {
+  position: absolute;
+  top: calc(100% + 0.3rem);
+  right: 0;
+  z-index: 10;
+  min-width: 11rem;
+  max-height: 60dvh;
+  overflow-y: auto;
+  padding: 0.3rem;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoMenu);
+  background: var(--panel);
+}
+
+.menu__grupo {
+  margin: 0.4rem 0.5rem 0.15rem;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.menu__item {
+  display: block;
+  width: 100%;
+  padding: 0.3rem 1.4rem 0.3rem 0.5rem;
+  border: 0;
+  border-radius: var(--redondoChico);
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--texto-menu);
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+}
+
+.menu__item:hover {
+  background: var(--fondo);
+}
+
+/* El punto marca la opción vigente sin mover el texto. */
+.menu__item--activo::after {
+  content: '·';
+  position: absolute;
+  right: 0.5rem;
+  color: var(--tinta);
+}
+
+.menu__item--peligro {
+  color: var(--sangre);
+}
