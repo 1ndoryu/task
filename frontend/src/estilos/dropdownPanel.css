@@ -1,6 +1,13 @@
 /* Receta del desplegable: panel pegado al disparador y sus opciones. Hoja
  * compartida, como el dropdown canónico del front original: cualquier menú de la
  * app debe salir de aquí y no reinventar fondo, borde ni tipografía. */
+/* El contenedor da el punto de anclaje: sin `position` el panel absoluto se
+ * coloca contra la caja entera y aparece lejos del botón. */
+.menu {
+  position: relative;
+  display: inline-flex;
+}
+
 .menu__panel {
   position: absolute;
   top: calc(100% + 0.3rem);

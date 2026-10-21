@@ -18,3 +18,11 @@
 .barra__boton[aria-expanded='true'] {
   color: var(--tinta);
 }
+
+/* Solo icono: la caja se ajusta al trazo y no al texto. */
+.barra__boton--icono {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem;
+  line-height: 0;
+}

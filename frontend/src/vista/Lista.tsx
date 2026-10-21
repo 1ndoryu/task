@@ -4,6 +4,7 @@ import { decodificarFiltro, etiquetaFiltro, type Filtro } from '../logica/filtro
 import { MODOS_ORDEN, type ModoOrden } from '../logica/orden';
 import { hechoHoy } from '../logica/seleccion';
 import type { Habito, Proyecto, Tarea } from '../logica/tipos';
+import { IconoOrden } from './Iconos';
 import { Menu, type OpcionMenu } from './Menu';
 import { usarLista } from './usarLista';
 
@@ -91,15 +92,15 @@ export function Lista() {
             claseBoton="barra__boton"
           />
           <Menu
-            etiqueta="Orden"
-            titulo="Ordenar la lista"
+            etiqueta={<IconoOrden />}
+            titulo={`Ordenar la lista: ${MODOS_ORDEN.find((m) => m.id === lista.orden)?.etiqueta ?? ''}`}
             items={MODOS_ORDEN.map((modo) => ({
               id: modo.id,
               etiqueta: modo.etiqueta,
               activo: lista.orden === modo.id,
             }))}
             onElegir={(id) => lista.cambiarOrden(id as ModoOrden)}
-            claseBoton="barra__boton"
+            claseBoton="barra__boton barra__boton--icono"
           />
         </header>
 
