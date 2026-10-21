@@ -193,8 +193,15 @@
   margin-right: 0.35rem;
 }
 
+/* El punto recibe su color del nivel; sin paleta puesta por la vista, cae a la
+ * línea del diseño para no pintarse de negro. */
+:root {
+  --color-nivel: var(--linea);
+}
+
 .muestra__punto {
   width: 0.5rem;
   height: 0.5rem;
   border-radius: var(--redondoPunto);
+  background: var(--color-nivel);
 }

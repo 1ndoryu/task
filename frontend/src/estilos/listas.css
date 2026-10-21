@@ -366,7 +366,7 @@ button.fila__marca:hover {
 .cargando__punto {
   width: 0.4rem;
   height: 0.4rem;
-  border-radius: 50%;
+  border-radius: var(--redondoPunto);
   background: currentColor;
   animation: latirCargando 1.1s ease-in-out infinite;
 }
