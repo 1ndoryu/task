@@ -13,7 +13,7 @@
   top: calc(100% + 0.3rem);
   right: 0;
   z-index: 10;
-  min-width: 11rem;
+  min-width: 12rem;
   max-height: 60dvh;
   overflow-y: auto;
   padding: 0.3rem;
@@ -30,10 +30,22 @@
   text-transform: uppercase;
 }
 
+/* Abierto con clic derecho: cuelga del punto pulsado, no del botón. */
+.menu__panel--punto {
+  position: fixed;
+  right: auto;
+  z-index: 15;
+}
+
+/* Compacto: un dedo menos de aire arriba y abajo, y una talla por debajo, para
+ * que veinte opciones no se coman la pantalla. */
 .menu__item {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   width: 100%;
-  padding: 0.3rem 1.4rem 0.3rem 0.5rem;
+  padding: 0.2rem 1.4rem 0.2rem 0.5rem;
   border: 0;
   border-radius: var(--redondoChico);
   background: none;
@@ -43,6 +55,37 @@
   text-align: left;
   cursor: pointer;
   position: relative;
+}
+
+/* Flecha de «hay más al lado»: un trazo, no un icono entero. */
+.menu__flecha {
+  width: 0.35rem;
+  height: 0.35rem;
+  margin-right: 0.1rem;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  transform: rotate(45deg);
+  opacity: 0.5;
+}
+
+.menu__item[aria-expanded='true'] .menu__flecha {
+  opacity: 1;
+}
+
+/* El submenú. `fixed` y no absoluto: el panel de arriba lleva `overflow-y` y
+ * recortaría al hijo, que además heredaría su scroll. La posición la pone el
+ * componente midiendo el ítem (`Menu.tsx`). */
+.menu__fila {
+  position: relative;
+}
+
+.menu__subpanel {
+  position: fixed;
+  right: auto;
+  top: 0;
+  left: 0;
+  z-index: 20;
+  max-height: 70dvh;
 }
 
 .menu__item:hover {

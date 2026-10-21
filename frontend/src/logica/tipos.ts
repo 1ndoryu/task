@@ -21,6 +21,8 @@ export interface Tarea {
   proyectoId?: number | null;
   fechaCreacion?: string;
   configuracion?: ConfiguracionTarea;
+  /** Grupo de ejecución: la pestaña en la que aparece (null = «Tareas»). */
+  grupoEjecucion?: string | null;
 }
 
 export interface Proyecto {
@@ -42,6 +44,8 @@ export interface Habito {
   racha?: number;
   diasInactividad?: number;
   ultimoCompletado?: string | null;
+  /** Grupo de ejecución, el mismo campo que en las tareas. */
+  grupoEjecucion?: string | null;
 }
 
 export interface Dashboard {

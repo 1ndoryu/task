@@ -15,6 +15,37 @@ export const MODOS_ORDEN: { id: ModoOrden; etiqueta: string }[] = [
   { id: 'prioridad', etiqueta: 'Prioridad' },
 ];
 
+/** Grupo de ejecución: el nombre que la tarea o el hábito lleva en
+ * `grupoEjecucion` (`null` = sin grupo, la pestaña «Tareas»). */
+export type Grupo = string | null;
+
+/** Nombre con el que se guardan los grupos conocidos aunque hoy estén vacíos
+ * (paridad con `gruposConocidos` del front original). */
+export const CLAVE_GRUPOS = 'tareas-nuevo:v1:grupos';
+
+/* Los nombres de grupo son texto libre del usuario: se recortan y se ignoran
+ * los vacíos para que no aparezcan pestañas fantasma. */
+export function limpiarGrupo(crudo: unknown): Grupo {
+  if (typeof crudo !== 'string') return null;
+  const nombre = crudo.trim();
+  return nombre ? nombre : null;
+}
+
+/** Pestañas de la lista: «Tareas» (sin grupo) y un grupo por nombre, en orden
+ * alfabético como el panel de ejecución del front original, incluidos los
+ * grupos vacíos que se recuerdan guardados. */
+export function pestanasDeGrupos(
+  gruposDeFilas: Iterable<Grupo>,
+  conocidos: Iterable<string>,
+): { id: string; etiqueta: string }[] {
+  const nombres = new Set<string>(conocidos);
+  for (const grupo of gruposDeFilas) if (grupo) nombres.add(grupo);
+  return [
+    { id: '', etiqueta: 'Tareas' },
+    ...[...nombres].sort((a, b) => a.localeCompare(b, 'es')).map((nombre) => ({ id: nombre, etiqueta: nombre })),
+  ];
+}
+
 const PESO_URGENCIA: Record<string, number> = {
   bloqueante: 1000,
   urgente: 500,

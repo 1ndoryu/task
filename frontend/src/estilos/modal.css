@@ -1,0 +1,160 @@
+/* Receta del modal y del formulario que vive dentro: una sola hoja para que
+ * cualquier panel de ajustes salga de aquí y no reinviente fondo, borde,
+ * tipografía ni ritmo vertical. Hoja compartida (como modal.css del front
+ * original), así que los componentes no definen diseño local por su cuenta. */
+
+/* El <dialog> nativo ya centra y bloquea el resto; aquí solo se viste. */
+.modal {
+  width: 100%;
+  max-width: 22rem;
+  max-height: min(80dvh, 34rem);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondo);
+  background: var(--panel);
+  color: var(--tinta);
+  font-family: var(--fuente);
+  font-size: var(--texto-base);
+  line-height: var(--ritmo);
+  overflow: hidden;
+}
+
+.modal::backdrop {
+  background: var(--superposicion);
+}
+
+/* Columna: cabecera fija y cuerpo con su propio scroll. */
+.modal__caja {
+  display: flex;
+  flex-direction: column;
+  max-height: inherit;
+  margin: 0;
+}
+
+.modal__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 0.75rem 0.5rem 1.1rem;
+  border-bottom: 1px solid var(--linea);
+}
+
+.modal__titulo {
+  margin: 0;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.modal__cerrar {
+  display: inline-flex;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: var(--redondoChico);
+  background: none;
+  color: var(--tinta-tenue);
+  line-height: 0;
+  cursor: pointer;
+}
+
+.modal__cerrar:hover {
+  color: var(--tinta);
+}
+
+.modal__cuerpo {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.85rem 1.1rem 1.1rem;
+}
+
+/* Cada ajuste: título tenue arriba y sus valores debajo, en línea. */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.campo:last-child {
+  border-bottom: 0;
+}
+
+.campo__titulo {
+  margin: 0;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Nota al pie de un campo: un punto más pequeña que la etiqueta para que no
+ * compita con ella ni alargue el modal. */
+.campo__nota {
+  margin: 0.1rem 0 0;
+  color: var(--tinta-tenue);
+  font-size: calc(var(--texto-etiqueta) - 0.0625rem);
+  line-height: 1.45;
+}
+
+/* Campo de entrada del formulario: caja tenue sobre el panel, sin sombra. */
+.entrada {
+  width: 100%;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoChico);
+  background: var(--panel);
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--texto-menu);
+  resize: vertical;
+}
+
+.entrada:focus-visible {
+  border-color: var(--tinta-tenue);
+  outline: none;
+}
+
+/* Acciones al pie: a la derecha y separadas del cuerpo por su filete. */
+.modal__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 0.6rem 1.1rem 0.75rem;
+  border-top: 1px solid var(--linea);
+}
+
+/* Valores en fila: el activo lleva el punto delante, sin desplazar el texto. */
+.opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.9rem;
+}
+
+.segmento {
+  padding: 0.15rem 0;
+  border: 0;
+  background: none;
+  color: var(--tinta-tenue);
+  font: inherit;
+  font-size: var(--texto-menu);
+  cursor: pointer;
+}
+
+.segmento:hover {
+  color: var(--tinta);
+}
+
+.segmento--activo {
+  color: var(--tinta);
+}
+
+.segmento--activo::before {
+  content: '·';
+  margin-right: 0.3rem;
+}

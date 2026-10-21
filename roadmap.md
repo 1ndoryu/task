@@ -6,13 +6,6 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Siguiente bloque
 
-- [ ] `21AA-2` — **Marcar hechos los hábitos desde el front nuevo.**
-  Las tareas ya se completan (`21AA-4`, sección A, `logica/tareas.ts`). Falta el
-  historial diario del hábito: `PUT /api/habits/:id` con `historialCompletados`,
-  `racha` y `ultimoCompletado` (lógica que en el legacy hace
-  `habitosService.marcarDia`/`desmarcarDia`), más el desmarcado. La fila del
-  hábito deja de ser un punto inerte y pasa a ser botón, igual que la tarea.
-
 - [ ] `19AA-4` — **Dominios con credenciales externas.**
   No implementables sin cuentas/llaves de terceros; hoy se degradan con mensaje claro. El chat IA y la nutrición ya funcionan vía proxy `/api/ai/chat` + `/api/ai/nutricion` con las envs del proyecto anterior (`CEREBRAS_API_KEY`, `GROQ_API*`, `DEEPSEEK_API*`; ver `.env.example` y `run.md`). Quedan externos: agent actions (WhatsApp/research), Magnific, WhatsApp, Google OAuth, grupos Facebook, pagos Stripe reales (webhooks) y servidor MCP real (el token ya se genera; falta el servidor que lo consume). Requieren elegir proveedores y crear las cuentas antes de implementar.
 

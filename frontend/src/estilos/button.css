@@ -20,7 +20,7 @@
 }
 
 /* Solo icono: la caja se ajusta al trazo y no al texto. */
-.barra__boton--icono {
+.barra__icono {
   display: inline-flex;
   align-items: center;
   padding: 0.25rem;
