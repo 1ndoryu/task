@@ -58,3 +58,33 @@
   border-style: dashed;
   color: var(--tinta);
 }
+
+/* --- Variante lateral: pestañas en columna, para agrupar un formulario largo.
+ * Mismo filete y misma marca de activa, girados: la columna no se desliza, así
+ * que se quita el scroll de la fila. --- */
+.pestanas--lateral {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.15rem;
+  padding: 0;
+  overflow: visible;
+}
+
+/* Sin caja: en una columna el filete sobra y tres marcos seguidos pesan más
+ * que la lista a la que acompañan. La activa sigue invirtiéndose, que es lo
+ * que distingue el bloque abierto. */
+.pestana--bloque {
+  padding: 0.3rem 0.5rem;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+
+.pestana--bloque:hover {
+  border: 0;
+}
+
+.pestana--bloque.pestana--activa {
+  background: var(--tinta);
+  color: var(--panel);
+}

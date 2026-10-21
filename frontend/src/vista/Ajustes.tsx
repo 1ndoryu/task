@@ -2,7 +2,7 @@
  * qué se esconde. Sin cabecera ni botón de cerrar: cada control se guarda al
  * tocarlo y el modal se va con Escape o con un clic fuera. El modal y el
  * formulario son recetas compartidas (`estilos/modal.css`). */
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import {
   COLORES_NIVEL,
   type Altura,
@@ -11,6 +11,7 @@ import {
   type Preferencias,
 } from '../logica/preferencias';
 import { ColoresNivel } from './ColoresNivel';
+import { PestanasLaterales } from './PestanasLaterales';
 
 /** Un ajuste: título, valores en fila y una nota opcional que explica el efecto. */
 function Campo<T extends string>({
@@ -68,6 +69,17 @@ const ALCANCES: { id: AlcancePrivacidad; etiqueta: string }[] = [
   { id: 'todas', etiqueta: 'Todas' },
 ];
 
+/** Los tres bloques del panel: cómo se ve la lista, qué se esconde y los
+ * colores. Cada uno cabe en una pantalla, así que no hay que recorrer una
+ * tira larga para llegar al último ajuste. */
+type Pestana = 'vista' | 'privacidad' | 'colores';
+
+const TABS: { id: Pestana; etiqueta: string }[] = [
+  { id: 'vista', etiqueta: 'Vista' },
+  { id: 'privacidad', etiqueta: 'Privacidad' },
+  { id: 'colores', etiqueta: 'Colores' },
+];
+
 const SI_NO = [
   { id: 'si' as const, etiqueta: 'Sí' },
   { id: 'no' as const, etiqueta: 'No' },
@@ -83,6 +95,14 @@ interface Props {
 /** `<dialog>` nativo: el foco, el fondo inerte y Escape los pone el navegador. */
 export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
   const dialogo = useRef<HTMLDialogElement>(null);
+  // La pestaña es del panel, no de la sesión: al abrirlo se entra por «Vista».
+  const [pestana, setPestana] = useState<Pestana>('vista');
+  const idPanel = useId();
+  const indicePestana = TABS.findIndex((tab) => tab.id === pestana);
+
+  useEffect(() => {
+    if (abierto) setPestana('vista');
+  }, [abierto]);
 
   useEffect(() => {
     const nodo = dialogo.current;
@@ -111,58 +131,83 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
       }}
     >
       <div className="modal__caja">
-        <div className="modal__cuerpo">
-          <Campo
-            titulo="Tamaño de la fuente"
-            valor={preferencias.fuente}
-            opciones={FUENTES}
-            onElegir={(fuente) => onCambiar({ fuente })}
+        <div className="modal__pestanas">
+          <PestanasLaterales
+            titulo="Bloques de los ajustes"
+            valor={pestana}
+            opciones={TABS}
+            onElegir={setPestana}
+            idBase={idPanel}
           />
-          <Campo
-            titulo="Altura de las filas"
-            valor={preferencias.altura}
-            opciones={ALTURAS}
-            onElegir={(altura) => onCambiar({ altura })}
-          />
-          <Campo
-            titulo="Separador entre filas"
-            valor={preferencias.separador ? 'si' : 'no'}
-            opciones={SI_NO}
-            onElegir={(valor) => onCambiar({ separador: valor === 'si' })}
-          />
-          <Campo
-            titulo="Ocultar hábitos cumplidos"
-            valor={preferencias.ocultarHabitos ? 'si' : 'no'}
-            opciones={SI_NO}
-            onElegir={(valor) => onCambiar({ ocultarHabitos: valor === 'si' })}
-            nota="Un hábito que tocaba hoy y ya está hecho sale de la lista; la pestaña Completados los guarda."
-          />
-          <Campo
-            titulo="Privacidad"
-            valor={preferencias.privacidad ? 'si' : 'no'}
-            opciones={SI_NO}
-            onElegir={(valor) => onCambiar({ privacidad: valor === 'si' })}
-            nota="Con la privacidad activa el texto va borroso hasta que lo miras."
-          />
-          <Campo
-            titulo="Al pasar el ratón"
-            valor={preferencias.privacidadAlcance}
-            opciones={ALCANCES}
-            onElegir={(privacidadAlcance) => onCambiar({ privacidadAlcance })}
-            nota={
-              preferencias.privacidad
-                ? undefined
-                : 'Solo se aplica con la privacidad activa.'
-            }
-          />
-          <ColoresNivel
-            colores={preferencias.colores}
-            // Se guarda la paleta entera: un cambio toca un nivel y conserva el resto.
-            onCambiar={(nivel, color) =>
-              onCambiar({ colores: { ...preferencias.colores, [nivel]: color.toLowerCase() } })
-            }
-            onRestablecer={() => onCambiar({ colores: { ...COLORES_NIVEL } })}
-          />
+          {/* Un solo cuerpo: se repinta con el bloque elegido, así los campos
+              que no se ven no roban el foco ni el tabulador. */}
+          <div
+            className="modal__cuerpo"
+            id={`${idPanel}-panel`}
+            role="tabpanel"
+            aria-labelledby={`${idPanel}-${indicePestana}`}
+            tabIndex={-1}
+          >
+            {pestana === 'vista' && (
+              <>
+                <Campo
+                  titulo="Tamaño de la fuente"
+                  valor={preferencias.fuente}
+                  opciones={FUENTES}
+                  onElegir={(fuente) => onCambiar({ fuente })}
+                />
+                <Campo
+                  titulo="Altura de las filas"
+                  valor={preferencias.altura}
+                  opciones={ALTURAS}
+                  onElegir={(altura) => onCambiar({ altura })}
+                />
+                <Campo
+                  titulo="Separador entre filas"
+                  valor={preferencias.separador ? 'si' : 'no'}
+                  opciones={SI_NO}
+                  onElegir={(valor) => onCambiar({ separador: valor === 'si' })}
+                />
+              </>
+            )}
+
+            {pestana === 'privacidad' && (
+              <>
+                <Campo
+                  titulo="Ocultar hábitos cumplidos"
+                  valor={preferencias.ocultarHabitos ? 'si' : 'no'}
+                  opciones={SI_NO}
+                  onElegir={(valor) => onCambiar({ ocultarHabitos: valor === 'si' })}
+                  nota="Un hábito que tocaba hoy y ya está hecho sale de la lista; la pestaña Completados los guarda."
+                />
+                <Campo
+                  titulo="Privacidad"
+                  valor={preferencias.privacidad ? 'si' : 'no'}
+                  opciones={SI_NO}
+                  onElegir={(valor) => onCambiar({ privacidad: valor === 'si' })}
+                  nota="Con la privacidad activa el texto va borroso hasta que lo miras."
+                />
+                <Campo
+                  titulo="Al pasar el ratón"
+                  valor={preferencias.privacidadAlcance}
+                  opciones={ALCANCES}
+                  onElegir={(privacidadAlcance) => onCambiar({ privacidadAlcance })}
+                  nota={preferencias.privacidad ? undefined : 'Solo se aplica con la privacidad activa.'}
+                />
+              </>
+            )}
+
+            {pestana === 'colores' && (
+              <ColoresNivel
+                colores={preferencias.colores}
+                // Se guarda la paleta entera: un cambio toca un nivel y conserva el resto.
+                onCambiar={(nivel, color) =>
+                  onCambiar({ colores: { ...preferencias.colores, [nivel]: color.toLowerCase() } })
+                }
+                onRestablecer={() => onCambiar({ colores: { ...COLORES_NIVEL } })}
+              />
+            )}
+          </div>
         </div>
       </div>
     </dialog>
