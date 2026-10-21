@@ -6,6 +6,12 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Siguiente bloque
 
+- [ ] `21AA-2` — **Marcar hechas desde el front nuevo.**
+  La vista nueva es de solo lectura. Copiar de `frontend-legacy/` la lógica de
+  mutación mínima: `mappersContrato` (`PUT /api/tasks/:id`, `PUT /api/projects/:id`,
+  `PUT /api/habits/:id`) y `habitosService.marcarDia`/`desmarcarDia` para el
+  historial diario, con `X-CSRF-Token` (ya en `logica/cliente.ts`).
+
 - [ ] `19AA-4` — **Dominios con credenciales externas.**
   No implementables sin cuentas/llaves de terceros; hoy se degradan con mensaje claro. El chat IA y la nutrición ya funcionan vía proxy `/api/ai/chat` + `/api/ai/nutricion` con las envs del proyecto anterior (`CEREBRAS_API_KEY`, `GROQ_API*`, `DEEPSEEK_API*`; ver `.env.example` y `run.md`). Quedan externos: agent actions (WhatsApp/research), Magnific, WhatsApp, Google OAuth, grupos Facebook, pagos Stripe reales (webhooks) y servidor MCP real (el token ya se genera; falta el servidor que lo consume). Requieren elegir proveedores y crear las cuentas antes de implementar.
 

@@ -80,9 +80,9 @@
           "**/.sentinel/**",
           "glory-sentinel/**",
           "tools/**",
-          "frontend/src/api/generated/**",
           "glory-rs/**",
-          "vendor/**"
+          "vendor/**",
+          "frontend-legacy/**"
         ],
         "directoryExceptions": [
           "migrations",
@@ -99,37 +99,20 @@
             "/.freebuff/"
           ],
           "dom": [
-            "/frontend/src/utils/dom.ts",
-            "/frontend/src/platform/",
-            "/frontend/src/adapters/",
-            "/frontend/src/app/hooks/",
-            "/frontend/src/app/stores/",
-            "/frontend/src/app/components/",
-            "/frontend/src/glory-core/",
-            "/frontend/src/app/islands/",
-            "/frontend/src/app/utils/",
-            "/frontend/src/app/services/",
-            "frontend/src/main.tsx",
-            "frontend/src/app/main.tsx"
+            "/frontend/src/logica/",
+            "/frontend/src/sesion/",
+            "/frontend/src/vista/",
+            "frontend/src/main.tsx"
           ],
           "window": [
-            "/frontend/src/platform/",
-            "/frontend/src/adapters/",
-            "/frontend/src/navigation/",
-            "/frontend/src/app/hooks/",
-            "/frontend/src/app/stores/",
-            "/frontend/src/app/components/",
-            "/frontend/src/glory-core/",
-            "/frontend/src/app/islands/",
-            "/frontend/src/app/utils/",
-            "/frontend/src/app/services/",
-            "frontend/src/main.tsx",
-            "frontend/src/app/main.tsx"
+            "/frontend/src/logica/",
+            "/frontend/src/vista/",
+            "frontend/src/main.tsx"
           ],
           "services": [
-            "/frontend/src/services/",
+            "/frontend/src/adapters/",
             "/frontend/src/api/",
-            "/frontend/src/adapters/"
+            "/frontend/src/services/"
           ],
           "loggerModules": [
             "/frontend/src/app/utils/logger"

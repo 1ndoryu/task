@@ -10,6 +10,10 @@
 /frontend/node_modules/
 /frontend/dist/
 
+# [21AA-1] Front original conservado en disco pero fuera de git: se rehace el
+# front desde cero y la lógica se va copiando de aquí a `frontend/` a demanda.
+/frontend-legacy/
+
 # IDE
 .idea/
 .vscode/

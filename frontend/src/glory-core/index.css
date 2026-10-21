@@ -1,9 +1,0 @@
-/* [por que] Capa de estilos propia del proyecto (design system local).
- * Los estilos de prosa (.prose/.prose-sm) se eliminaron en 318A-7VAR-3:
- * 0 usos en codigo (ts/tsx/js/jsx/html/php/rs; scratchpad usa clases
- * scratchpadVistaPrevia*, no .prose). El disable-file era para esas reglas.
- */
-
-/* Sistema de diseno del proyecto (CSS Variables + componentes) */
-@import '../assets/css/init.css';
-

@@ -1,0 +1,157 @@
+/* Vista de listas: una columna centrada, sin adornos.
+ * Todo el color es tinta; el único acento marca lo que ya está hecho. */
+
+:root {
+  color-scheme: light;
+  --fondo: #faf9f7;
+  --tinta: #1b1b19;
+  --tinta-tenue: #8a8781;
+  --linea: #e6e3dd;
+  --hecho: #a8a49c;
+  --sangre: #9c3d2e;
+  --fuente: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ancho: 34rem;
+  --ritmo: 1.5rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--fondo);
+  color: var(--tinta);
+  font-family: var(--fuente);
+  font-size: 1rem;
+  line-height: var(--ritmo);
+  -webkit-font-smoothing: antialiased;
+}
+
+.marco {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 3rem 1.25rem;
+}
+
+.columna {
+  width: 100%;
+  max-width: var(--ancho);
+}
+
+.cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 2.5rem;
+}
+
+.cabecera h1 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.cabecera__fecha,
+.cabecera__cuenta {
+  color: var(--tinta-tenue);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.seccion + .seccion {
+  margin-top: 3rem;
+}
+
+.seccion__titulo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 0 0 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tinta-tenue);
+}
+
+.lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--linea);
+}
+
+.fila {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.fila__marca {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 1px solid var(--tinta-tenue);
+  border-radius: 50%;
+  transform: translateY(-0.1em);
+}
+
+.fila--urgente .fila__marca {
+  border-color: var(--sangre);
+  background: var(--sangre);
+}
+
+.fila__texto {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.fila__nota {
+  flex: none;
+  color: var(--tinta-tenue);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.fila--hecho .fila__texto {
+  color: var(--hecho);
+  text-decoration: line-through;
+  text-decoration-color: var(--hecho);
+}
+
+.fila--hecho .fila__marca {
+  border-color: var(--hecho);
+  background: var(--hecho);
+}
+
+.aviso {
+  margin: 0;
+  color: var(--tinta-tenue);
+}
+
+.aviso--error {
+  color: var(--sangre);
+}
+
+@media (max-width: 30rem) {
+  .marco {
+    padding: 2rem 1rem;
+    place-items: start center;
+  }
+
+  .cabecera {
+    margin-bottom: 2rem;
+  }
+}

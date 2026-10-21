@@ -1,14 +1,6 @@
 {
   "variableFiles": [
-    "frontend/src/app/styles/dashboard/variables.css",
-    "frontend/src/glory-core/index.css",
-    "frontend/src/App.css",
-    "frontend/src/app/plugins/exp/PanelExp.css",
-    "frontend/src/app/styles/dashboard/shared/badgeInfo.css",
-    "frontend/src/app/styles/dashboard/shared/resizeHandleColumna.css",
-    "frontend/src/app/styles/dashboard/componentes/pullToRefresh.css",
-    "frontend/src/app/plugins/exp/modalEditorArbol.css",
-    "frontend/src/glory-core/components/pixelart/editorPixelArt.css"
+    "frontend/src/estilos/listas.css"
   ],
   "includePatterns": [
     "frontend/src/**/*.css",
@@ -21,8 +13,7 @@
     "**/build/**",
     "**/.quality-tools/**",
     "**/.quality-reports/**",
-    "**/.sentinel/**",
-    "frontend/src/api/generated/**"
+    "**/.sentinel/**"
   ],
   "scanAllFiles": false,
   "hardcodedDetection": {
