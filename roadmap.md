@@ -6,16 +6,24 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Siguiente bloque
 
-- [ ] `21AA-2` — **Marcar hechas desde el front nuevo.**
-  La vista nueva es de solo lectura. Copiar de `frontend-legacy/` la lógica de
-  mutación mínima: `mappersContrato` (`PUT /api/tasks/:id`, `PUT /api/projects/:id`,
-  `PUT /api/habits/:id`) y `habitosService.marcarDia`/`desmarcarDia` para el
-  historial diario, con `X-CSRF-Token` (ya en `logica/cliente.ts`).
+- [ ] `21AA-2` — **Marcar hechos los hábitos desde el front nuevo.**
+  Las tareas ya se completan (`21AA-4`, sección A, `logica/tareas.ts`). Falta el
+  historial diario del hábito: `PUT /api/habits/:id` con `historialCompletados`,
+  `racha` y `ultimoCompletado` (lógica que en el legacy hace
+  `habitosService.marcarDia`/`desmarcarDia`), más el desmarcado. La fila del
+  hábito deja de ser un punto inerte y pasa a ser botón, igual que la tarea.
 
 - [ ] `19AA-4` — **Dominios con credenciales externas.**
   No implementables sin cuentas/llaves de terceros; hoy se degradan con mensaje claro. El chat IA y la nutrición ya funcionan vía proxy `/api/ai/chat` + `/api/ai/nutricion` con las envs del proyecto anterior (`CEREBRAS_API_KEY`, `GROQ_API*`, `DEEPSEEK_API*`; ver `.env.example` y `run.md`). Quedan externos: agent actions (WhatsApp/research), Magnific, WhatsApp, Google OAuth, grupos Facebook, pagos Stripe reales (webhooks) y servidor MCP real (el token ya se genera; falta el servidor que lo consume). Requieren elegir proveedores y crear las cuentas antes de implementar.
 
 ## Pendientes
+
+- [ ] `21AA-5` — **`frontend/src` nuevo sin type-check en el gate.**
+  `npx tsc` está bloqueado por el guard del proyecto y `scripts/quality/stages.json`
+  solo declara la etapa de Sentinel: el front se compila en la 89 pero nadie
+  valida sus tipos. Añadir a la etapa del front `tsc --noEmit` + `vite build` en la
+  réplica de la 89 (la ruta `~/taller/PROYECTO TASKS/frontend` no existe; hay que
+  resolver dónde vive el árbol sincronizado).
 
 
 ## Bloqueos
