@@ -1,17 +1,26 @@
-/* Vista de listas: una columna centrada, sin adornos.
+/* Vista de listas: una caja centrada, sin adornos.
  * Todo el color es tinta; el único acento marca lo que ya está hecho. */
 
 :root {
   color-scheme: light;
   --fondo: #faf9f7;
+  --panel: #fff;
   --tinta: #1b1b19;
   --tinta-tenue: #8a8781;
   --linea: #e6e3dd;
   --hecho: #a8a49c;
   --sangre: #9c3d2e;
   --fuente: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --ancho: 34rem;
-  --ritmo: 1.5rem;
+  --texto-base: 0.875rem;
+  --texto-titulo: 0.9375rem;
+  --texto-fecha: 0.8125rem;
+  --texto-fila: 0.8125rem;
+  --texto-etiqueta: 0.625rem;
+  --texto-nota: 0.6875rem;
+  --redondo: 50%;
+  --ancho: 32rem;
+  --ritmo: 1.35rem;
+  --radio: 1.1rem;
 }
 
 * {
@@ -28,7 +37,7 @@ body {
   background: var(--fondo);
   color: var(--tinta);
   font-family: var(--fuente);
-  font-size: 1rem;
+  font-size: var(--texto-base);
   line-height: var(--ritmo);
   -webkit-font-smoothing: antialiased;
 }
@@ -43,6 +52,11 @@ body {
 .columna {
   width: 100%;
   max-width: var(--ancho);
+  /* La caja: todo lo que se lee vive dentro de un marco redondeado. */
+  padding: 1.75rem 1.5rem 2rem;
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  background: var(--panel);
 }
 
 .cabecera {
@@ -50,25 +64,24 @@ body {
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  margin: 0 0 2.5rem;
+  margin: 0 0 1.75rem;
 }
 
-.cabecera h1 {
+.cabecera__titulo {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--texto-titulo);
   font-weight: 600;
   letter-spacing: 0.02em;
 }
 
-.cabecera__fecha,
-.cabecera__cuenta {
+.cabecera__fecha {
   color: var(--tinta-tenue);
-  font-size: 0.8125rem;
+  font-size: var(--texto-fecha);
   font-variant-numeric: tabular-nums;
 }
 
 .seccion + .seccion {
-  margin-top: 3rem;
+  margin-top: 2rem;
 }
 
 .seccion__titulo {
@@ -76,7 +89,7 @@ body {
   align-items: baseline;
   justify-content: space-between;
   margin: 0 0 0.75rem;
-  font-size: 0.6875rem;
+  font-size: var(--texto-etiqueta);
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -94,8 +107,9 @@ body {
   display: flex;
   align-items: baseline;
   gap: 0.75rem;
-  padding: 0.625rem 0;
+  padding: 0.5rem 0;
   border-bottom: 1px solid var(--linea);
+  font-size: var(--texto-fila);
 }
 
 .fila__marca {
@@ -103,7 +117,7 @@ body {
   width: 0.5rem;
   height: 0.5rem;
   border: 1px solid var(--tinta-tenue);
-  border-radius: 50%;
+  border-radius: var(--redondo);
   transform: translateY(-0.1em);
 }
 
@@ -121,7 +135,7 @@ body {
 .fila__nota {
   flex: none;
   color: var(--tinta-tenue);
-  font-size: 0.75rem;
+  font-size: var(--texto-nota);
   font-variant-numeric: tabular-nums;
 }
 
@@ -147,11 +161,15 @@ body {
 
 @media (max-width: 30rem) {
   .marco {
-    padding: 2rem 1rem;
+    padding: 1.25rem 0.75rem;
     place-items: start center;
   }
 
+  .columna {
+    padding: 1.25rem 1rem 1.5rem;
+  }
+
   .cabecera {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
 }

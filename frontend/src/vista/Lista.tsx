@@ -47,7 +47,7 @@ export function Lista() {
     <main className="marco">
       <div className="columna">
         <header className="cabecera">
-          <h1>Hoy</h1>
+          <h1 className="cabecera__titulo">Hoy</h1>
           <span className="cabecera__fecha">{etiquetaFecha(ahora)}</span>
         </header>
 

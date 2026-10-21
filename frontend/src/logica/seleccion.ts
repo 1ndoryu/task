@@ -14,10 +14,12 @@ function pesoUrgencia(tarea: Tarea): number {
   return PESO_URGENCIA[tarea.urgencia ?? 'normal'] ?? 2;
 }
 
-/** Tareas pendientes de primer nivel, las más urgentes primero. */
+/** Tareas pendientes de primer nivel, las más urgentes primero.
+ * [por que] Las que tienen proyecto no son trabajo suelto del día: viven en su
+ * proyecto y aquí solo estorbarían. */
 export function tareasAbiertas(tareas: Tarea[]): Tarea[] {
   return tareas
-    .filter((tarea) => !tarea.completado && tarea.parentId == null)
+    .filter((tarea) => !tarea.completado && tarea.parentId == null && tarea.proyectoId == null)
     .sort((a, b) => pesoUrgencia(a) - pesoUrgencia(b) || (a.orden ?? 0) - (b.orden ?? 0));
 }
 
