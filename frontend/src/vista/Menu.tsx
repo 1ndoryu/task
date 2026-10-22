@@ -5,15 +5,20 @@
  * menú del front original, para que las categorías no alarguen la lista.
  * La posición se escribe en el nodo (no con `style={{}}`) porque depende de
  * medidas en vivo: dónde acaba el panel y cuánto mide la ventana. */
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 
 export interface OpcionMenu {
   id: string;
   etiqueta: string;
-  /* Marca la opción vigente: se pinta con un punto y `aria-checked`. */
+  /* Marca la opción vigente: fondo, marca a la derecha y `aria-checked`. */
   activo?: boolean;
+  /* Muestra de color delante del texto: el nivel de importancia, que se
+   * reconoce mejor por su círculo que por su nombre. */
+  color?: string;
+  /* Trazo opcional delante del texto (iconos del alta rápida). */
+  icono?: ReactNode;
   peligro?: boolean;
-  /* Título de grupo: separa las opciones por bloques sin anidar menús. */
+  /* Título de grupo: separa las opciones por bloques. */
   grupo?: string;
   /* Una opción que solo actúa (borrar, editar) no es una elección marcada. */
   accion?: boolean;
@@ -38,6 +43,25 @@ interface Props {
 
 /** Margen mínimo con el borde de la ventana. */
 const MARGEN = 8;
+
+/** El adorno de una opción, lo mismo en el panel que en el disparador del
+ * submenú: círculo de nivel, icono y texto que ocupa el hueco. */
+function Adorno({ item }: { item: OpcionMenu }) {
+  return (
+    <>
+      {/* Columna de ancho fijo: aunque la opción no lleve nada, el texto cae
+          en la misma vertical que sus vecinas. */}
+      <span className="menu__adorno">
+        {item.color ? (
+          <span className="menu__muestra" style={{ '--color-nivel': item.color } as CSSProperties} />
+        ) : (
+          item.icono
+        )}
+      </span>
+      <span className="menu__texto">{item.etiqueta}</span>
+    </>
+  );
+}
 
 /** Los ítems de un submenú, ya desplegados. */
 function Items({
@@ -65,7 +89,7 @@ function Items({
             cerrar();
           }}
         >
-          {item.etiqueta}
+          <Adorno item={item} />
         </button>
       ))}
     </>
@@ -195,7 +219,7 @@ export function Menu({ etiqueta, items, onElegir, titulo, claseBoton, abierto, o
                   role="menuitem"
                   aria-haspopup="menu"
                   aria-expanded={desplegado}
-                  className={`menu__item${item.activo ? ' menu__item--activo' : ''}`}
+                  className={`menu__item${desplegado ? ' menu__item--abierto' : ''}`}
                   ref={(nodo) => {
                     if (nodo) itemRefs.current.set(item.id, nodo);
                     else itemRefs.current.delete(item.id);
@@ -204,7 +228,7 @@ export function Menu({ etiqueta, items, onElegir, titulo, claseBoton, abierto, o
                   // Abrir al pasar el ratón es lo que hace fluido el recorrido.
                   onPointerEnter={() => setSub(item.id)}
                 >
-                  {item.etiqueta}
+                  <Adorno item={item} />
                   <span className="menu__flecha" aria-hidden="true" />
                 </button>
                 {desplegado && (

@@ -37,28 +37,89 @@
   z-index: 15;
 }
 
-/* Compacto: un dedo menos de aire arriba y abajo, y una talla por debajo, para
- * que veinte opciones no se coman la pantalla. */
+/* Compacto: una talla por debajo y un dedo de aire arriba y abajo, lo justo
+ * para que las opciones no se lean como un bloque. El hueco del adorno es de
+ * un tercio de dedo: separa el icono del texto sin dejar de parecer unido. */
 .menu__item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.35rem;
   width: 100%;
-  padding: 0.2rem 1.4rem 0.2rem 0.5rem;
+  padding: 0.45rem 1.4rem 0.45rem 0.5rem;
   border: 0;
   border-radius: var(--redondoChico);
   background: none;
   color: var(--tinta);
   font: inherit;
   font-size: var(--texto-menu);
+  line-height: 1.2;
   text-align: left;
   cursor: pointer;
   position: relative;
 }
 
+.menu__item:hover {
+  background: var(--fondo);
+}
+
+/* La opción vigente se ve de un golpe: fondo marcado, texto a tinta y una
+ * marca a la derecha. Antes era un punto diminuto y no se distinguía. */
+.menu__item--activo {
+  background: var(--fondo);
+  color: var(--tinta);
+  font-weight: 700;
+}
+
+.menu__item--activo::after {
+  content: '·';
+  position: absolute;
+  right: 0.5rem;
+  color: var(--tinta);
+}
+
+/* La muestra de un nivel dentro del menú (importancia): el círculo de color
+ * va delante del texto y la opción vigente lleva además un aro. */
+.menu__muestra {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: var(--redondoPunto);
+  background: var(--color-nivel, var(--linea));
+}
+
+.menu__item--activo .menu__muestra {
+  box-shadow: 0 0 0 1.5px var(--panel), 0 0 0 2.5px var(--tinta);
+}
+
+.menu__item--peligro {
+  color: var(--sangre);
+}
+
+/* Columna del adorno: el mismo ancho para iconos y círculos, y también para
+ * las opciones que no llevan nada. Así el texto de todas cae en la misma
+ * vertical y no hay que separar el icono del texto con más aire. */
+.menu__adorno {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.menu__adorno > svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* El texto ocupa el hueco que deja la marca de activo a la derecha. */
+.menu__texto {
+  flex: 1;
+  min-width: 0;
+}
+
 /* Flecha de «hay más al lado»: un trazo, no un icono entero. */
 .menu__flecha {
+  flex: none;
   width: 0.35rem;
   height: 0.35rem;
   margin-right: 0.1rem;
@@ -66,6 +127,13 @@
   border-right: 1px solid currentColor;
   transform: rotate(45deg);
   opacity: 0.5;
+}
+
+/* El disparador del submenú abierto se marca igual que la opción vigente:
+ * así se ve de dónde sale el panel de al lado. */
+.menu__item[aria-expanded='true'],
+.menu__item--abierto {
+  background: var(--fondo);
 }
 
 .menu__item[aria-expanded='true'] .menu__flecha {
@@ -86,20 +154,4 @@
   left: 0;
   z-index: 20;
   max-height: 70dvh;
-}
-
-.menu__item:hover {
-  background: var(--fondo);
-}
-
-/* El punto marca la opción vigente sin mover el texto. */
-.menu__item--activo::after {
-  content: '·';
-  position: absolute;
-  right: 0.5rem;
-  color: var(--tinta);
-}
-
-.menu__item--peligro {
-  color: var(--sangre);
 }

@@ -107,3 +107,87 @@ export function IconoPrivacidad({ tam = 12, oculto }: PropsIcono & { oculto: boo
     </svg>
   );
 }
+
+/** Carpeta: el grupo al que va lo que se está dando de alta. */
+export function IconoCarpeta({ tam = 12 }: PropsIcono) {
+  return (
+    <svg
+      width={tam}
+      height={tam}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4l2 2.5h7A1.5 1.5 0 0 1 19 10v7.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 3 17.5z" />
+    </svg>
+  );
+}
+
+/** Tarea: una casilla marcada. Dice qué se está dando de alta, junto al
+ * campo que lo escribe. */
+export function IconoTarea({ tam = 12 }: PropsIcono) {
+  return (
+    <svg
+      width={tam}
+      height={tam}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M4 12.5l4.5 4.5L20 5.5" />
+    </svg>
+  );
+}
+
+/** Hábito: flecha circular, la misma que la frecuencia. Es lo que lo
+ * distingue de una tarea: vuelve. */
+export function IconoHabito({ tam = 12 }: PropsIcono) {
+  return (
+    <svg
+      width={tam}
+      height={tam}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M20 12a8 8 0 1 1-2.3-5.6" />
+      <path d="M21 3v5h-5" />
+    </svg>
+  );
+}
+
+/** Flecha circular: la frecuencia con la que vuelve un hábito. */
+export function IconoFrecuencia({ tam = 12 }: PropsIcono) {
+  return (
+    <svg
+      width={tam}
+      height={tam}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M20 12a8 8 0 1 1-2.3-5.6" />
+      <path d="M21 3v5h-5" />
+    </svg>
+  );
+}

@@ -4,7 +4,7 @@
  * escribe su cambio al momento, sin botones ni cabecera que cierren, porque
  * el modal desaparece al pulsar fuera o con Escape. Usa la receta del modal y
  * del formulario (`estilos/modal.css`). */
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { frecuenciaDe } from '../logica/frecuencia';
 import type { ColoresNivel } from '../logica/preferencias';
 import type { Proyecto } from '../logica/tipos';
@@ -12,6 +12,7 @@ import { grupoDe, prioridadDe } from './accionesFila';
 import { FrecuenciaCampos } from './FrecuenciaCampos';
 import { Opciones } from './Opciones';
 import { PRIORIDADES, URGENCIAS, type CambiosFilaForm } from './opcionesFila';
+import { opcionesFecha, Selector } from './Selector';
 import type { Editando } from './usarLista';
 
 /** Borrador inicial de la fila abierta, en los campos que entiende el modal. */
@@ -59,9 +60,6 @@ export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar
   // repintarse la lista con cada cambio guardado.
   const [nombre, setNombre] = useState(fila ? borradorDe(fila).texto : '');
   const idNombre = useId();
-  const idGrupo = useId();
-  const idProyecto = useId();
-  const idFecha = useId();
   const esHabito = fila?.tipo === 'habito';
 
   useEffect(() => {
@@ -94,6 +92,26 @@ export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar
     // El texto vacío dejaría una fila sin nombre: se conserva el anterior.
     onGuardar(fila, { ...siguiente, texto: siguiente.texto.trim() || borradorDe(fila).texto });
   };
+
+  // Los grupos que ya existen, con «Sin grupo» delante: mover es elegir, y el
+  // nombre libre nuevo se ofrece al escribir lo que no está en la lista.
+  const opcionesGrupo = useMemo(
+    () => [
+      { id: '', etiqueta: 'Sin grupo' },
+      ...grupos.map((nombre) => ({ id: nombre, etiqueta: nombre })),
+    ],
+    [grupos],
+  );
+  const opcionesProyecto = useMemo(
+    () => [
+      { id: '', etiqueta: 'Sueltas' },
+      ...proyectos.map((proyecto) => ({
+        id: String(proyecto.id),
+        etiqueta: proyecto.nombre,
+      })),
+    ],
+    [proyectos],
+  );
 
   return (
     <dialog
@@ -129,64 +147,43 @@ export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar
             </div>
 
             <div className="campo">
-              <label className="campo__titulo" htmlFor={idGrupo}>
-                Grupo
-              </label>
-              {/* Texto libre con los grupos ya usados como sugerencias: el
-                  nombre es la pestaña, así que no puede salir de una lista fija. */}
-              <input
-                id={idGrupo}
-                className="entrada"
-                list={`${idGrupo}-sugerencias`}
-                placeholder="Sin grupo"
-                defaultValue={borrador.grupoEjecucion}
-                onBlur={(evento) => {
-                  if (evento.target.value !== borrador.grupoEjecucion) aplicar({ grupoEjecucion: evento.target.value });
-                }}
-                onKeyDown={(evento) => {
-                  if (evento.key === 'Enter') evento.currentTarget.blur();
-                }}
+              <p className="campo__titulo">Grupo</p>
+              {/* El nombre libre no se pierde: al escribir uno nuevo, la lista
+                  ofrece crearlo, porque el grupo es la pestaña y no una entidad
+                  fija del backend. */}
+              <Selector
+                etiqueta="Grupo de la fila"
+                valor={borrador.grupoEjecucion}
+                opciones={opcionesGrupo}
+                vacio="Sin grupo"
+                onElegir={(id) => aplicar({ grupoEjecucion: id })}
+                onCrear={(nombre) => aplicar({ grupoEjecucion: nombre })}
               />
-              <datalist id={`${idGrupo}-sugerencias`}>
-                {grupos.map((nombreGrupo) => (
-                  <option key={nombreGrupo} value={nombreGrupo} />
-                ))}
-              </datalist>
             </div>
 
             {fila.tipo === 'tarea' ? (
               <>
                 <div className="campo">
-                  <label className="campo__titulo" htmlFor={idProyecto}>
-                    Proyecto
-                  </label>
-                  <select
-                    id={idProyecto}
-                    className="entrada"
-                    value={borrador.proyectoId ?? ''}
-                    onChange={(evento) =>
-                      aplicar({ proyectoId: evento.target.value === '' ? null : Number(evento.target.value) })
-                    }
-                  >
-                    <option value="">Sueltas</option>
-                    {proyectos.map((proyecto) => (
-                      <option key={proyecto.id} value={proyecto.id}>
-                        {proyecto.nombre}
-                      </option>
-                    ))}
-                  </select>
+                  <p className="campo__titulo">Proyecto</p>
+                  <Selector
+                    etiqueta="Proyecto de la tarea"
+                    valor={borrador.proyectoId === null ? '' : String(borrador.proyectoId)}
+                    opciones={opcionesProyecto}
+                    vacio="Sueltas"
+                    onElegir={(id) => aplicar({ proyectoId: id === '' ? null : Number(id) })}
+                  />
                 </div>
 
                 <div className="campo">
-                  <label className="campo__titulo" htmlFor={idFecha}>
-                    Fecha límite
-                  </label>
-                  <input
-                    id={idFecha}
-                    className="entrada"
-                    type="date"
-                    value={borrador.fechaMaxima}
-                    onChange={(evento) => aplicar({ fechaMaxima: evento.target.value })}
+                  <p className="campo__titulo">Fecha límite</p>
+                  {/* Días hacia delante agrupados por mes; la fecha guardada,
+                      aunque esté fuera del tramo, sigue en la lista. */}
+                  <Selector
+                    etiqueta="Fecha límite de la tarea"
+                    valor={borrador.fechaMaxima}
+                    opciones={opcionesFecha(borrador.fechaMaxima)}
+                    vacio="Sin fecha"
+                    onElegir={(id) => aplicar({ fechaMaxima: id })}
                   />
                 </div>
               </>

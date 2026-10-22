@@ -1,8 +1,10 @@
 /* Lo que una fila ofrece en su menú contextual y las acciones que la vista le
  * pasa. Separa el «qué se puede hacer» del componente que lo pinta. */
-import { nivelDe } from '../logica/importancia';
-import { PRIORIDADES } from './opcionesFila';
+import { nivelDe, type NivelPrioridad } from '../logica/importancia';
+import type { ColoresNivel } from '../logica/preferencias';
+import { IconoCarpeta } from './Iconos';
 import type { OpcionMenu } from './Menu';
+import { gruposMenu, IconoBorrar, IconoEditar, prioridadesMenu } from './MenuOpciones';
 import type { Editando } from './usarLista';
 
 export interface AccionesFila {
@@ -25,35 +27,25 @@ export function grupoDe(fila: NonNullable<Editando>): string | null {
 
 /** Menú de una fila: lo justo para no salir de la lista. Vale para tarea y hábito.
  * Las categorías abren su propio panel al lado, como el menú del front original:
- * así la primera lista se queda en cinco entradas pase lo que pase. */
-export function opcionesFila(fila: NonNullable<Editando>, grupos: string[]): OpcionMenu[] {
-  const actual = prioridadDe(fila);
-  const grupoActual = grupoDe(fila);
+ * así la primera lista se queda en cinco entradas pase lo que pase.
+ * Cada entrada lleva su icono; el disparador de importancia, además, el color
+ * del nivel vigente, para no tener que abrirlo para saberlo. */
+export function opcionesFila(
+  fila: NonNullable<Editando>,
+  grupos: string[],
+  colores: ColoresNivel,
+): OpcionMenu[] {
   const nombre = fila.tipo === 'tarea' ? 'la tarea' : 'el hábito';
+  const actual = prioridadDe(fila);
   return [
-    { id: 'editar', etiqueta: `Configurar ${nombre}`, accion: true },
-    {
-      id: 'grupo',
-      etiqueta: 'Grupo',
-      hijos: [
-        { id: 'grupo-', etiqueta: 'Sin grupo', activo: grupoActual === null },
-        // Solo los grupos que ya existen: mover es elegir, no inventar.
-        ...grupos.map((grupo) => ({
-          id: `grupo-${grupo}`,
-          etiqueta: grupo,
-          activo: grupoActual === grupo,
-        })),
-      ],
-    },
+    { id: 'editar', etiqueta: `Configurar ${nombre}`, accion: true, icono: <IconoEditar /> },
+    { id: 'grupo', etiqueta: 'Grupo', icono: <IconoCarpeta />, hijos: gruposMenu(grupos, grupoDe(fila)) },
     {
       id: 'prioridad',
-      etiqueta: 'Prioridad',
-      hijos: PRIORIDADES.map((p) => ({
-        id: `prioridad-${p.id}`,
-        etiqueta: p.etiqueta,
-        activo: actual === p.id,
-      })),
+      etiqueta: 'Importancia',
+      color: colores[actual as NivelPrioridad],
+      hijos: prioridadesMenu(colores, actual),
     },
-    { id: 'borrar', etiqueta: `Eliminar ${nombre}`, accion: true, peligro: true },
+    { id: 'borrar', etiqueta: `Eliminar ${nombre}`, accion: true, peligro: true, icono: <IconoBorrar /> },
   ];
 }

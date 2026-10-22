@@ -41,6 +41,11 @@
   overflow-y: auto;
   padding: 0.5rem 1.1rem 1rem;
 }
+/* Sin título, el primer control queda pegado al borde: recupera el aire de
+ * arriba que daba el rótulo. */
+.modal__cuerpo--sin-titulo {
+  padding-top: 0.9rem;
+}
 
 /* Dos columnas: las pestañas se quedan quietas a la izquierda y solo el panel
  * de la derecha se desplaza, así el grupo elegido siempre está a la vista.
@@ -77,6 +82,270 @@
     padding-left: 0;
     padding-right: 0;
   }
+}
+
+/* --- Modal con acciones: el que pide decidir antes de aplicar. Lleva título y
+ * un pie de botones; el resto de los modales se guardan solos y no lo usan. --- */
+.modal--acciones {
+  max-width: 24rem;
+}
+
+.modal__titulo {
+  margin: 0 0 0.4rem;
+  color: var(--tinta);
+  font-size: var(--texto-menu);
+  font-weight: 700;
+}
+
+/* Los botones van a la derecha y en el orden en que se leen: la acción que se
+ * espera, al final y con la tinta llena. */
+.modal__pie {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.3rem;
+  padding: 0.6rem 1.1rem;
+  border-top: 1px solid var(--linea);
+}
+
+.boton {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoChico);
+  background: var(--panel);
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--texto-menu);
+  cursor: pointer;
+}
+
+.boton:hover {
+  border-color: var(--tinta-tenue);
+}
+
+.boton--peligro {
+  border-color: var(--sangre);
+  color: var(--sangre);
+}
+
+.boton--peligro:hover {
+  background: var(--sangre);
+  color: var(--panel);
+}
+
+.boton--principal {
+  border-color: var(--tinta);
+  background: var(--tinta);
+  color: var(--panel);
+}
+
+.boton--principal:hover {
+  border-color: var(--tinta);
+  background: var(--tinta);
+  color: var(--panel);
+}
+
+/* --- Panel de grupos: alta arriba y una fila por grupo con su cuenta y sus
+ * dos acciones. La fila es la unidad de lectura, así que el nombre cede ancho
+ * antes que los botones. --- */
+.grupos__alta {
+  display: flex;
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.grupos__alta .entrada {
+  flex: 1;
+  min-width: 0;
+}
+
+.grupos {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grupos__fila {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.grupos__fila:last-child {
+  border-bottom: 0;
+}
+
+.grupos__nombre {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0.1rem 0.2rem;
+  margin-left: -0.2rem;
+  border: 0;
+  border-radius: var(--redondoChico);
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--texto-menu);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: text;
+}
+
+.grupos__nombre:hover {
+  background: var(--fondo);
+}
+
+/* El número, tenue y con cifras fijas para que la columna no baile. */
+.grupos__cuenta {
+  min-width: 1.5rem;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.grupos__accion {
+  display: inline-flex;
+  padding: 0.15rem;
+  border: 0;
+  border-radius: var(--redondoChico);
+  background: none;
+  color: var(--tinta-tenue);
+  cursor: pointer;
+}
+
+.grupos__accion:hover {
+  background: var(--fondo);
+  color: var(--tinta);
+}
+
+.grupos__accion--peligro:hover {
+  color: var(--sangre);
+}
+
+/* --- Selector con búsqueda: un botón que muestra el valor vigente y, al
+ * abrirlo, una caja flotante con filtro y lista. Sustituye al `<select>` y al
+ * `<datalist>` nativos, que no se pueden filtrar ni vestir a gusto. --- */
+.selector {
+  position: relative;
+}
+
+/* El mismo cuerpo que `.entrada`, para que los campos del modal se lean igual. */
+.selector__disparador {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoChico);
+  background: var(--panel);
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--texto-menu);
+  text-align: left;
+  cursor: pointer;
+}
+
+.selector__disparador:focus-visible {
+  outline: none;
+}
+
+.selector__valor {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selector__valor--vacio {
+  color: var(--tinta-tenue);
+}
+
+.selector__flecha {
+  flex: none;
+  color: var(--tinta-tenue);
+}
+
+/* `fixed`: el cuerpo del modal recorta lo que sale de su scroll, y la lista no
+ * cabe dentro. El ancho y la posición los pone el componente al abrir. */
+.selector__panel {
+  position: fixed;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  padding: 0.3rem;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoChico);
+  background: var(--panel);
+  box-shadow: 0 0.4rem 1rem var(--superposicion);
+}
+
+.selector__filtro {
+  flex: none;
+  margin-bottom: 0.25rem;
+}
+
+.selector__lista {
+  flex: 1;
+  min-height: 0;
+  max-height: 13rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+/* Título de bloque (el mes, en las fechas): se queda pegado arriba mientras
+ * se recorre su tramo, así siempre se sabe de qué mes es la fila. */
+.selector__bloque {
+  position: sticky;
+  top: 0;
+  margin: 0;
+  padding: 0.2rem 0.2rem 0.15rem;
+  background: var(--panel);
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.selector__opcion {
+  display: flex;
+  align-items: baseline;
+  width: 100%;
+  padding: 0.15rem 0.2rem;
+  border: 0;
+  border-radius: var(--redondoChico);
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--texto-menu);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* El cursor del teclado y el del ratón pintan lo mismo: una sola idea de
+ * «dónde estoy». */
+.selector__opcion--activo {
+  background: var(--fondo);
+}
+
+.selector__marca {
+  flex: none;
+  width: 0.7rem;
+  color: var(--tinta);
+}
+
+.selector__nada {
+  padding: 0.3rem 0.2rem;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-menu);
 }
 
 /* Etiqueta que solo lee el lector de pantalla: el campo se explica solo. */
@@ -132,8 +401,9 @@
   resize: vertical;
 }
 
+/* Al enfocar no cambia nada: el borde se queda igual y el cursor ya dice
+ * dónde se escribe. */
 .entrada:focus-visible {
-  border-color: var(--tinta-tenue);
   outline: none;
 }
 

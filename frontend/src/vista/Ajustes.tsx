@@ -168,6 +168,13 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
                   opciones={SI_NO}
                   onElegir={(valor) => onCambiar({ separador: valor === 'si' })}
                 />
+                <Campo
+                  titulo="Separar grupos en cajas"
+                  valor={preferencias.separarGrupos ? 'si' : 'no'}
+                  opciones={SI_NO}
+                  onElegir={(valor) => onCambiar({ separarGrupos: valor === 'si' })}
+                  nota="Cada grupo pasa a su propia caja, en fila, con movimiento lateral. El grupo sigue siendo el mismo: cambia dónde se pinta."
+                />
               </>
             )}
 

@@ -1,45 +1,28 @@
 /* Estado de la lista: carga, orden, pestaña y las mutaciones.
  * Tareas y hábitos se tratan igual: ambos tienen grupo, menú y configuración.
- * La lógica de datos vive en `logica/`; aquí solo se guarda y se encadena. */
+ * La lógica de datos vive en `logica/`; aquí solo se guarda y se encadena.
+ * La escritura y las acciones de grupo viven en `usarEscritura` y `usarGrupos`:
+ * esta función orquesta, no reescribe filas. */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { leerDashboard } from '../logica/dashboard';
 import { fechaLocal } from '../logica/fechas';
 import { anotarGrupos, guardarOrdenPestanas, leerGruposConocidos, leerOrdenPestanas } from '../logica/grupos';
+import { desmarcarHabito, editarHabito, guardarHabito, marcarHabito } from '../logica/habitos';
 import { importanciaDeHabito } from '../logica/importancia';
-import {
-  borrarHabito,
-  desmarcarHabito,
-  editarHabito,
-  guardarHabito,
-  marcarHabito,
-} from '../logica/habitos';
 import { PESTANA_COMPLETADOS, pestanasDeGrupos, type ModoOrden } from '../logica/orden';
 import { guardarPreferencias, leerPreferencias, type Preferencias } from '../logica/preferencias';
 import { hechoHoy, seleccionar, type Vista } from '../logica/seleccion';
 import { asegurarSesionLocal } from '../logica/sesion';
-import { fusionarPendientes, guardarPendientes, leerPendientes, type Pendientes } from '../logica/store';
-import { alternarCompletado, borrarTarea, editarTarea, guardarTarea } from '../logica/tareas';
-import type { Dashboard, FrecuenciaDetalle, Habito, Tarea } from '../logica/tipos';
+import { fusionarPendientes, type Pendientes } from '../logica/store';
+import { alternarCompletado, editarTarea, guardarTarea } from '../logica/tareas';
+import type { Dashboard, Habito, Tarea } from '../logica/tipos';
+import type { NuevaFila } from './NuevaFila';
+import { claveFila, idNuevo, type CambiosFila, type Editando, type Estado } from './tiposLista';
+import { usarEscritura } from './usarEscritura';
+import { usarGrupos } from './usarGrupos';
 
-type Estado =
-  | { fase: 'cargando' }
-  | { fase: 'listo'; datos: Dashboard }
-  | { fase: 'error'; mensaje: string };
-
-/** Lo que el modal de configuración puede abrir: una tarea o un hábito. */
-export type Editando = { tipo: 'tarea'; tarea: Tarea } | { tipo: 'habito'; habito: Habito } | null;
-
-/** Cambios comunes de una fila. `grupoEjecucion` llega desde el modal. */
-export interface CambiosFila {
-  texto: string;
-  prioridad?: string | null;
-  urgencia?: string | null;
-  proyectoId?: number | null;
-  fechaMaxima?: string;
-  grupoEjecucion?: string | null;
-  /** Solo hábitos: frecuencia completa; el `tipo` va a la columna del backend. */
-  frecuencia?: FrecuenciaDetalle;
-}
+export type { CambiosFila, Editando } from './tiposLista';
+export { claveFila } from './tiposLista';
 
 export interface Lista {
   estado: Estado;
@@ -72,11 +55,12 @@ export interface Lista {
   borrarHabito: (id: number) => void;
   /** Mueve una fila de grupo desde el menú de la fila. */
   moverGrupo: (fila: NonNullable<Editando>, grupo: string | null) => void;
+  /** Da de alta una tarea o un hábito desde el campo de la lista. */
+  crear: (fila: NuevaFila) => void;
+  crearGrupo: (nombre: string) => void;
+  renombrarGrupo: (viejo: string, nuevo: string) => void;
+  borrarGrupo: (nombre: string, conFilas: boolean) => void;
 }
-
-/** Clave de una fila en el conjunto de salidas: tareas y hábitos comparten id. */
-export const claveFila = (fila: NonNullable<Editando>) =>
-  `${fila.tipo}${fila.tipo === 'tarea' ? fila.tarea.id : fila.habito.id}`;
 
 export function usarLista(): Lista {
   const preferencias = useMemo(leerPreferencias, []);
@@ -92,20 +76,27 @@ export function usarLista(): Lista {
   const [ordenPestanas, setOrdenPestanas] = useState<string[]>(leerOrdenPestanas);
   // Filas completadas que siguen en la lista mientras termina su animación.
   const [saliendo, setSaliendo] = useState<ReadonlySet<string>>(() => new Set());
-  // El correo separa los cambios de cada cuenta; llega con la carga.
-  const correoRef = useRef('');
-  // Cambios sin confirmar: solo se mutan en el manejador, nunca se leen del estado.
+  // Cambios sin confirmar: la escritura y las altas anotan en el mismo sitio.
   const pendientesRef = useRef<Pendientes>({ tareas: {}, habitos: {} });
+
+  // Última foto de los datos, para que una acción tarde no trabaje sobre una
+  // copia vieja: el estado de React no se lee dentro de los manejadores.
+  const datosRef = useRef<Dashboard>({ tareas: [], habitos: [], proyectos: [] });
+  const { anotar, abrirCuenta, escribirTarea, escribirHabito, quitarTarea, quitarHabito } = usarEscritura(
+    estado,
+    setEstado,
+    datosRef,
+    pendientesRef,
+  );
 
   useEffect(() => {
     let vigente = true;
     async function cargar() {
       try {
-        correoRef.current = (await asegurarSesionLocal()) ?? '';
+        const correo = (await asegurarSesionLocal()) ?? '';
         const datos = await leerDashboard();
         if (!vigente) return;
-        const guardados = leerPendientes(correoRef.current);
-        pendientesRef.current = guardados;
+        const guardados = abrirCuenta(correo);
         const fusionado = fusionarPendientes(datos.tareas, datos.habitos, guardados);
         setEstado({ fase: 'listo', datos: { ...datos, ...fusionado } });
       } catch (error) {
@@ -117,75 +108,12 @@ export function usarLista(): Lista {
     return () => {
       vigente = false;
     };
+    // La carga es única: depende de la sesión que se asegura dentro.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Última foto de los datos, para que una acción tarde no trabaje sobre una
-  // copia vieja: el estado de React no se lee dentro de los manejadores.
-  const datosRef = useRef<Dashboard>({ tareas: [], habitos: [], proyectos: [] });
-  if (estado.fase === 'listo') datosRef.current = estado.datos;
-
-  const anotar = useCallback((cambios: Partial<Pendientes>) => {
-    pendientesRef.current = { ...pendientesRef.current, ...cambios };
-    guardarPendientes(correoRef.current, pendientesRef.current);
-  }, []);
-
-  /** Única vía de escritura de una tarea: aplica el cambio en memoria, lo anota
-   * como pendiente y lo manda. Cada llamada lleva su transformación, así que dos
-   * acciones seguidas no se pisan. */
-  const escribirTarea = useCallback(
-    async (id: number, cambiar: (tarea: Tarea) => Tarea) => {
-      const actual = datosRef.current.tareas.find((t) => t.id === id);
-      if (!actual) return;
-      const actualizada = cambiar(actual);
-      setEstado((previo) =>
-        previo.fase === 'listo'
-          ? {
-              fase: 'listo',
-              datos: { ...previo.datos, tareas: previo.datos.tareas.map((t) => (t.id === id ? actualizada : t)) },
-            }
-          : previo,
-      );
-      anotar({ tareas: { ...pendientesRef.current.tareas, [id]: actualizada } });
-      try {
-        await guardarTarea(actualizada);
-        const resto = { ...pendientesRef.current.tareas };
-        delete resto[id];
-        anotar({ tareas: resto });
-      } catch {
-        // Queda pendiente en el navegador y se reenvía al recargar la lista.
-      }
-    },
-    [anotar],
-  );
-
-  const escribirHabito = useCallback(
-    async (id: number, cambiar: (habito: Habito) => Habito) => {
-      const actual = datosRef.current.habitos.find((h) => h.id === id);
-      if (!actual) return;
-      const actualizado = cambiar(actual);
-      setEstado((previo) =>
-        previo.fase === 'listo'
-          ? {
-              fase: 'listo',
-              datos: { ...previo.datos, habitos: previo.datos.habitos.map((h) => (h.id === id ? actualizado : h)) },
-            }
-          : previo,
-      );
-      anotar({ habitos: { ...pendientesRef.current.habitos, [id]: actualizado } });
-      try {
-        await guardarHabito(actualizado);
-        const resto = { ...pendientesRef.current.habitos };
-        delete resto[id];
-        anotar({ habitos: resto });
-      } catch {
-        // Queda pendiente en el navegador y se reenvía al recargar la lista.
-      }
-    },
-    [anotar],
-  );
-
-  /** Saca una fila de la vista tras la animación, y recuerda su grupo para que
-   * la pestaña no desaparezca al mover la última fila. */
+  /** Recuerda el grupo de una fila, para que la pestaña no desaparezca al mover
+   * la última fila. */
   const anotarGrupo = useCallback((nombre: string | null) => {
     if (!nombre) return;
     setGruposConocidos((previos) => {
@@ -202,6 +130,62 @@ export function usarLista(): Lista {
       anotarGrupo(destino);
     },
     [escribirTarea, escribirHabito, anotarGrupo],
+  );
+
+  /** Alta: la fila aparece ya en la lista y se manda con el mismo PUT que un
+   * cambio, porque el backend no tiene POST de creación (una fila con id
+   * nuevo es un upsert). Si el envío falla, queda como pendiente. */
+  const crear = useCallback(
+    (nueva: NuevaFila) => {
+      const id = idNuevo();
+      const grupoNuevo = nueva.grupo;
+      anotarGrupo(grupoNuevo);
+      const previas = datosRef.current;
+      // Va al final del grupo: el orden manual no se reescribe al dar de alta.
+      const orden = Math.max(-1, ...previas.tareas.map((t) => t.orden ?? 0), ...previas.habitos.map((h) => h.orden ?? 0)) + 1;
+      const fecha = fechaLocal();
+      if (nueva.tipo === 'tarea') {
+        const tarea: Tarea = {
+          id,
+          texto: nueva.texto,
+          completado: false,
+          prioridad: nueva.prioridad,
+          urgencia: 'normal',
+          orden,
+          grupoEjecucion: grupoNuevo,
+          fechaCreacion: fecha,
+          configuracion: {},
+        };
+        setEstado((previo) =>
+          previo.fase === 'listo' ? { fase: 'listo', datos: { ...previo.datos, tareas: [...previo.datos.tareas, tarea] } } : previo,
+        );
+        datosRef.current = { ...previas, tareas: [...previas.tareas, tarea] };
+        anotar({ tareas: { ...pendientesRef.current.tareas, [id]: tarea } });
+        void guardarTarea(tarea).catch(() => {
+          /* Queda pendiente en el navegador y se reenvía al recargar. */
+        });
+        return;
+      }
+      const habito: Habito = {
+        id,
+        nombre: nueva.texto,
+        // El hábito guarda su escala como texto (`Muy Alta`), no como id.
+        importancia: importanciaDeHabito(nueva.prioridad),
+        orden,
+        grupoEjecucion: grupoNuevo,
+        frecuencia: { ...nueva.frecuencia },
+        historialCompletados: [],
+      };
+      setEstado((previo) =>
+        previo.fase === 'listo' ? { fase: 'listo', datos: { ...previo.datos, habitos: [...previo.datos.habitos, habito] } } : previo,
+      );
+      datosRef.current = { ...previas, habitos: [...previas.habitos, habito] };
+      anotar({ habitos: { ...pendientesRef.current.habitos, [id]: habito } });
+      void guardarHabito(habito).catch(() => {
+        /* Queda pendiente en el navegador y se reenvía al recargar. */
+      });
+    },
+    [anotar, anotarGrupo],
   );
 
   const completar = useCallback(
@@ -272,6 +256,18 @@ export function usarLista(): Lista {
     [estado, orden, grupoActivo, ajustes.ocultarHabitos, hoy, saliendo],
   );
 
+  const { crearGrupo, renombrarGrupo, borrarGrupo } = usarGrupos({
+    datosRef,
+    setGruposConocidos,
+    setOrdenPestanas,
+    setGrupo,
+    escribirTarea,
+    escribirHabito,
+    quitarTarea,
+    quitarHabito,
+    grupoActivo,
+  });
+
   return {
     estado,
     orden,
@@ -328,34 +324,12 @@ export function usarLista(): Lista {
         }),
       );
     },
-    borrarTarea: (id) => {
-      // Optimista: la fila desaparece y, si el servidor falla, vuelve al recargar.
-      setEstado((previo) =>
-        previo.fase === 'listo'
-          ? { fase: 'listo', datos: { ...previo.datos, tareas: previo.datos.tareas.filter((t) => t.id !== id) } }
-          : previo,
-      );
-      // La copia de pendientes no debe resucitarla al recargar.
-      const resto = { ...pendientesRef.current.tareas };
-      delete resto[id];
-      anotar({ tareas: resto });
-      void borrarTarea(id).catch(() => {
-        /* Queda en el servidor: la próxima carga la trae otra vez. */
-      });
-    },
-    borrarHabito: (id) => {
-      setEstado((previo) =>
-        previo.fase === 'listo'
-          ? { fase: 'listo', datos: { ...previo.datos, habitos: previo.datos.habitos.filter((h) => h.id !== id) } }
-          : previo,
-      );
-      const resto = { ...pendientesRef.current.habitos };
-      delete resto[id];
-      anotar({ habitos: resto });
-      void borrarHabito(id).catch(() => {
-        /* Queda en el servidor: la próxima carga lo trae otra vez. */
-      });
-    },
+    borrarTarea: quitarTarea,
+    borrarHabito: quitarHabito,
     moverGrupo,
+    crear,
+    crearGrupo,
+    renombrarGrupo,
+    borrarGrupo,
   };
 }

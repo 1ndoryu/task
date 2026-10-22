@@ -31,6 +31,8 @@ export interface Preferencias {
   altura: Altura;
   /** Filete entre filas. */
   separador: boolean;
+  /** Cada grupo en su propia caja, en fila y con movimiento lateral. */
+  separarGrupos: boolean;
   /** Un color por nivel de importancia, del más frío al rojo. */
   colores: ColoresNivel;
 }
@@ -71,6 +73,7 @@ const POR_DEFECTO: Preferencias = {
   fuente: 'normal',
   altura: 'normal',
   separador: true,
+  separarGrupos: false,
   colores: { ...COLORES_NIVEL },
 };
 
@@ -110,6 +113,8 @@ export function leerPreferencias(): Preferencias {
       fuente: (fuente as Fuente) ?? POR_DEFECTO.fuente,
       altura: (altura as Altura) ?? POR_DEFECTO.altura,
       separador: typeof guardado.separador === 'boolean' ? guardado.separador : POR_DEFECTO.separador,
+      separarGrupos:
+        typeof guardado.separarGrupos === 'boolean' ? guardado.separarGrupos : POR_DEFECTO.separarGrupos,
       colores: leerColores(guardado.colores),
     };
   } catch {

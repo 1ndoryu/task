@@ -3,6 +3,7 @@
  * la fila; no hay botón visible. Vive aparte de `Lista` para que cada archivo
  * tenga una sola responsabilidad. */
 import { diaCorto, proximaRepeticion, rachaDe } from '../logica/frecuencia';
+import type { ColoresNivel } from '../logica/preferencias';
 import { hechoHoy } from '../logica/seleccion';
 import { Menu } from './Menu';
 import { opcionesFila, prioridadDe, type AccionesFila } from './accionesFila';
@@ -17,12 +18,14 @@ interface Props {
   completados: boolean;
   /** Día de hoy: decide si un hábito está hecho. */
   hoy: string;
+  /** Paleta de la usuaria: el menú pinta el círculo de cada nivel. */
+  colores: ColoresNivel;
   /** El menú abierto desde el clic derecho de esta fila, y dónde. */
   menuAbierto: { x: number; y: number } | null;
   onMenuAbierto: (punto: { x: number; y: number } | null) => void;
 }
 
-export function Fila({ fila, saliendo, acciones, grupos, completados, hoy, menuAbierto, onMenuAbierto }: Props) {
+export function Fila({ fila, saliendo, acciones, grupos, colores, completados, hoy, menuAbierto, onMenuAbierto }: Props) {
   const esTarea = fila.tipo === 'tarea';
   const tarea = esTarea ? fila.tarea : null;
   const habito = esTarea ? null : fila.habito;
@@ -77,7 +80,7 @@ export function Fila({ fila, saliendo, acciones, grupos, completados, hoy, menuA
       <Menu
         etiqueta={null}
         titulo={`Acciones de ${texto}`}
-        items={opcionesFila(fila, grupos)}
+        items={opcionesFila(fila, grupos, colores)}
         abierto={menuAbierto !== null}
         onAbierto={(abierto) => {
           if (!abierto) onMenuAbierto(null);
