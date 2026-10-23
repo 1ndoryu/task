@@ -3,7 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tareas</title>
+    <title>PROYECTO TASKS</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <script>
+      /* [por que] El tema lo aplica React, que llega después del primer pintado:
+       * sin esto, quien usa el modo oscuro ve un destello blanco en cada carga.
+       * Se lee la misma clave de `localStorage` que `logica/preferencias.ts`
+       * (la versión forma parte de ella), y cualquier fallo deja el claro. */
+      try {
+        var guardado = JSON.parse(localStorage.getItem('tareas-nuevo:v1:vista') || '{}');
+        if (guardado.tema === 'oscuro') document.documentElement.dataset.tema = 'oscuro';
+      } catch {}
+    </script>
   </head>
   <body>
     <div id="raiz"></div>

@@ -26,6 +26,27 @@ export function IconoOrden({ tam = 12 }: PropsIcono) {
   );
 }
 
+/** Hoja con un trazo dentro: una caja de nota, no de tareas. */
+export function IconoNota({ tam = 12 }: PropsIcono) {
+  return (
+    <svg
+      width={tam}
+      height={tam}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" />
+      <path d="M8 9h8M8 13h8M8 17h4" />
+    </svg>
+  );
+}
+
 /** Tres puntos verticales: abre el menú contextual de la fila. */
 export function IconoMenu({ tam = 12 }: PropsIcono) {
   return (
@@ -104,6 +125,33 @@ export function IconoPrivacidad({ tam = 12, oculto }: PropsIcono & { oculto: boo
       <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z" />
       <circle cx="12" cy="12" r="3" />
       {oculto && <path d="M3 3l18 18" />}
+    </svg>
+  );
+}
+
+/** Luna si la vista está clara (pulsarla la apaga), sol si ya está oscura. */
+export function IconoTema({ tam = 12, oscuro }: PropsIcono & { oscuro: boolean }) {
+  return (
+    <svg
+      width={tam}
+      height={tam}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {oscuro ? (
+        <>
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4" />
+        </>
+      ) : (
+        <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z" />
+      )}
     </svg>
   );
 }
@@ -188,6 +236,37 @@ export function IconoFrecuencia({ tam = 12 }: PropsIcono) {
     >
       <path d="M20 12a8 8 0 1 1-2.3-5.6" />
       <path d="M21 3v5h-5" />
+    </svg>
+  );
+}
+
+/* --- Controles de la ventana de escritorio (ver `BarraVentana`). Trazo de 1px
+ * como los de Windows: a 10px, el de 2 de los demás iconos los engorda. --- */
+
+/** Guion de minimizar. */
+export function IconoMinimizar({ tam = 10 }: PropsIcono) {
+  return (
+    <svg width={tam} height={tam} viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true" focusable="false">
+      <path d="M1.5 5.5h7" />
+    </svg>
+  );
+}
+
+/** Cuadrado de maximizar, con su hueco al pie derecho. */
+export function IconoMaximizar({ tam = 10 }: PropsIcono) {
+  return (
+    <svg width={tam} height={tam} viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true" focusable="false">
+      <rect x="1.5" y="1.5" width="7" height="7" />
+    </svg>
+  );
+}
+
+/** Dos cuadrados superpuestos: la ventana vuelve a su tamaño. */
+export function IconoRestaurar({ tam = 10 }: PropsIcono) {
+  return (
+    <svg width={tam} height={tam} viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true" focusable="false">
+      <rect x="1.5" y="3" width="5.5" height="5.5" />
+      <path d="M3.5 1.5h5v5" />
     </svg>
   );
 }

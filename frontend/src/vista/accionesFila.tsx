@@ -1,10 +1,11 @@
 /* Lo que una fila ofrece en su menú contextual y las acciones que la vista le
  * pasa. Separa el «qué se puede hacer» del componente que lo pinta. */
+import { APLAZOS } from '../logica/aplazos';
 import { nivelDe, type NivelPrioridad } from '../logica/importancia';
 import type { ColoresNivel } from '../logica/preferencias';
 import { IconoCarpeta } from './Iconos';
 import type { OpcionMenu } from './Menu';
-import { gruposMenu, IconoBorrar, IconoEditar, prioridadesMenu } from './MenuOpciones';
+import { aplazosMenu, gruposMenu, IconoAplazar, IconoBorrar, IconoEditar, prioridadesMenu } from './MenuOpciones';
 import type { Editando } from './usarLista';
 
 export interface AccionesFila {
@@ -13,6 +14,8 @@ export interface AccionesFila {
   borrar: (fila: NonNullable<Editando>) => void;
   prioridad: (fila: NonNullable<Editando>, prioridad: string | null) => void;
   mover: (fila: NonNullable<Editando>, grupo: string | null) => void;
+  /** Aplaza un hábito: `hasta` es la fecha de vuelta, `null` para quitarlo. */
+  aplazar: (fila: NonNullable<Editando>, hasta: string | null) => void;
 }
 
 /** Nivel de la fila en el id común: la tarea ya lo trae y la importancia del
@@ -34,11 +37,25 @@ export function opcionesFila(
   fila: NonNullable<Editando>,
   grupos: string[],
   colores: ColoresNivel,
+  /** Hay un aplazo vigente: el submenú ofrece quitarlo. */
+  aplazado = false,
 ): OpcionMenu[] {
-  const nombre = fila.tipo === 'tarea' ? 'la tarea' : 'el hábito';
+  const esTarea = fila.tipo === 'tarea';
+  const nombre = esTarea ? 'la tarea' : 'el hábito';
   const actual = prioridadDe(fila);
   return [
     { id: 'editar', etiqueta: `Configurar ${nombre}`, accion: true, icono: <IconoEditar /> },
+    // Solo el hábito se aplaza: una tarea se completa o se deja.
+    ...(esTarea
+      ? []
+      : [
+          {
+            id: 'aplazar',
+            etiqueta: 'Aplazar',
+            icono: <IconoAplazar />,
+            hijos: aplazosMenu(APLAZOS, aplazado),
+          },
+        ]),
     { id: 'grupo', etiqueta: 'Grupo', icono: <IconoCarpeta />, hijos: gruposMenu(grupos, grupoDe(fila)) },
     {
       id: 'prioridad',

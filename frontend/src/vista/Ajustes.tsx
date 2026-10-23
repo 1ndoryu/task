@@ -9,6 +9,7 @@ import {
   type AlcancePrivacidad,
   type Fuente,
   type Preferencias,
+  type Tema,
 } from '../logica/preferencias';
 import { ColoresNivel } from './ColoresNivel';
 import { PestanasLaterales } from './PestanasLaterales';
@@ -67,6 +68,11 @@ const ALTURAS: { id: Altura; etiqueta: string }[] = [
 const ALCANCES: { id: AlcancePrivacidad; etiqueta: string }[] = [
   { id: 'una', etiqueta: 'Solo la del ratón' },
   { id: 'todas', etiqueta: 'Todas' },
+];
+
+const TEMAS: { id: Tema; etiqueta: string }[] = [
+  { id: 'claro', etiqueta: 'Claro' },
+  { id: 'oscuro', etiqueta: 'Oscuro' },
 ];
 
 /** Los tres bloques del panel: cómo se ve la lista, qué se esconde y los
@@ -157,6 +163,13 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
                   onElegir={(fuente) => onCambiar({ fuente })}
                 />
                 <Campo
+                  titulo="Tamaño del texto de las notas"
+                  valor={preferencias.fuenteNota}
+                  opciones={FUENTES}
+                  onElegir={(fuenteNota) => onCambiar({ fuenteNota })}
+                  nota="Solo el texto de las notas: se lee de corrido y no tiene por qué seguir la talla de las filas."
+                />
+                <Campo
                   titulo="Altura de las filas"
                   valor={preferencias.altura}
                   opciones={ALTURAS}
@@ -169,11 +182,25 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
                   onElegir={(valor) => onCambiar({ separador: valor === 'si' })}
                 />
                 <Campo
+                  titulo="Separar tareas y hábitos"
+                  valor={preferencias.separarHabitos ? 'si' : 'no'}
+                  opciones={SI_NO}
+                  onElegir={(valor) => onCambiar({ separarHabitos: valor === 'si' })}
+                  nota="La caja «Tareas» se parte en dos: las tareas sueltas por un lado y los hábitos sin grupo por otro. En las pestañas, «Hábitos» estrena su propia pestaña."
+                />
+                <Campo
                   titulo="Separar grupos en cajas"
                   valor={preferencias.separarGrupos ? 'si' : 'no'}
                   opciones={SI_NO}
                   onElegir={(valor) => onCambiar({ separarGrupos: valor === 'si' })}
                   nota="Cada grupo pasa a su propia caja, en fila, con movimiento lateral. El grupo sigue siendo el mismo: cambia dónde se pinta."
+                />
+                <Campo
+                  titulo="Tema"
+                  valor={preferencias.tema}
+                  opciones={TEMAS}
+                  onElegir={(tema) => onCambiar({ tema })}
+                  nota="Lo mismo de noche: el oscuro es el claro con otra luz, no su negativo."
                 />
               </>
             )}

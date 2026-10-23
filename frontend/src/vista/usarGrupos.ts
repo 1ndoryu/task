@@ -4,7 +4,14 @@
  * Vive aparte de `usarLista` porque es la única parte que reescribe filas en
  * bloque; la lista solo la llama. */
 import { useCallback, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
-import { anotarGrupos, guardarOrdenPestanas, leerOrdenPestanas, olvidarGrupo, renombrarGrupoGuardado } from '../logica/grupos';
+import {
+  anotarGrupos,
+  archivarGrupoGuardado,
+  guardarOrdenPaneles,
+  leerOrdenPestanas,
+  olvidarGrupo,
+  renombrarGrupoGuardado,
+} from '../logica/grupos';
 import { editarHabito } from '../logica/habitos';
 import { limpiarGrupo } from '../logica/orden';
 import { guardarPreferencias } from '../logica/preferencias';
@@ -33,6 +40,8 @@ export interface AccionesGrupo {
   /** Borra un grupo. Con `conFilas`, también sus tareas y hábitos; sin él, las
    * filas se quedan y pasan a «Tareas» (sin grupo). */
   borrarGrupo: (nombre: string, conFilas: boolean) => void;
+  /** Lo aparta sin tocar sus filas: deja de ser panel y puede volver. */
+  archivarGrupo: (nombre: string) => void;
 }
 
 export function usarGrupos({
@@ -55,7 +64,7 @@ export function usarGrupos({
       setGruposConocidos((previos) => (previos.includes(limpio) ? previos : [...previos, limpio]));
       setOrdenPestanas((previo) => (previo.includes(limpio) ? previo : [...previo, limpio]));
       anotarGrupos([limpio]);
-      guardarOrdenPestanas([...leerOrdenPestanas(), limpio]);
+      guardarOrdenPaneles([...leerOrdenPestanas(), limpio]);
     },
     [setGruposConocidos, setOrdenPestanas],
   );
@@ -126,5 +135,22 @@ export function usarGrupos({
     ],
   );
 
-  return { crearGrupo, renombrarGrupo, borrarGrupo };
+  /** Archivar no toca las filas: el grupo sigue en `grupoEjecucion` de cada
+   *  una y solo deja de tener panel. Desarchivar lo devuelve tal cual. */
+  const archivarGrupo = useCallback(
+    (nombre: string) => {
+      const archivado = limpiarGrupo(nombre);
+      if (!archivado) return;
+      archivarGrupoGuardado(archivado, true);
+      setOrdenPestanas((previos) => previos.filter((g) => g !== archivado));
+      // La pestaña archivada no puede seguir abierta: se vuelve a «Tareas».
+      if (grupoActivo === archivado) {
+        setGrupo('');
+        guardarPreferencias({ grupo: '' });
+      }
+    },
+    [grupoActivo, setGrupo, setOrdenPestanas],
+  );
+
+  return { crearGrupo, renombrarGrupo, borrarGrupo, archivarGrupo };
 }

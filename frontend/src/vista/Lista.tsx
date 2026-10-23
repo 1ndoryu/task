@@ -1,46 +1,57 @@
 /* Vista de la lista: tareas y hábitos en un solo flujo, dentro de una caja
  * con scroll propio. La cabecera lleva las pestañas y el orden; las pestañas
- * parten la lista por grupo de ejecución, y ambos tipos de fila tienen su
- * marca de completar, su menú y su configuración.
- * Con «separar grupos en cajas» cada pestaña pasa a ser una caja del carril: el
- * mismo grupo, pintado al lado en vez de por turnos. */
-import { useState, type ReactNode } from 'react';
-import { importanciaDeHabito } from '../logica/importancia';
-import { MODOS_ORDEN, PESTANA_COMPLETADOS, type ModoOrden } from '../logica/orden';
-import { seleccionar } from '../logica/seleccion';
-import { Ajustes } from './Ajustes';
-import { Caja } from './Caja';
+ * parten la lista por panel, y ambos tipos de fila tienen su marca de
+ * completar, su menú y su configuración.
+ * Con «separar grupos en cajas» cada panel pasa a ser una caja del carril: el
+ * mismo contenido, pintado al lado en vez de por turnos.
+ *
+ * La vista no pregunta por grupos ni por notas: recorre `lista.paneles` y elige
+ * qué pinta según `panel.tipo`. Un tipo nuevo es una rama más aquí y nada más.
+ * Lo que no es reparto de paneles vive fuera: las ventanas abiertas en
+ * `usarVista`, y la barra, los modales y el menú de caja en sus componentes. */
+import { Fragment, useEffect } from 'react';
+import type { Panel } from '../logica/paneles';
+import { accionesDeLista } from './accionesDeLista';
+import { AccionesBarra } from './AccionesBarra';
+import { BarraVentana } from './BarraVentana';
 import { Carril } from './Carril';
-import { ConfiguracionTarea } from './ConfiguracionTarea';
-import type { CambiosFilaForm } from './opcionesFila';
-import { grupoDe, type AccionesFila } from './accionesFila';
-import { IconoAjustes, IconoCarpeta, IconoOrden, IconoPrivacidad } from './Iconos';
-import { Menu } from './Menu';
-import { PanelGrupos } from './PanelGrupos';
-import { IconoFecha, IconoOrdenInteligente, IconoOrdenManual, IconoPrioridad } from './MenuOpciones';
-import { NuevaFila } from './NuevaFila';
+import { ContenidoPanel } from './ContenidoPanel';
+import { MenuCaja } from './MenuCaja';
+import { Modales } from './Modales';
+import { iconoDePanel } from './Paneles';
 import { Pestanas } from './Pestanas';
-import { usarLista, type Editando } from './usarLista';
-
-/** Un icono por modo de orden: a qué criterio obedece la lista. */
-const ICONO_ORDEN: Record<ModoOrden, ReactNode> = {
-  inteligente: <IconoOrdenInteligente />,
-  manual: <IconoOrdenManual />,
-  fecha: <IconoFecha />,
-  prioridad: <IconoPrioridad />,
-};
+import { usarLista } from './usarLista';
+import { usarVista } from './usarVista';
 
 export function Lista() {
   const lista = usarLista();
-  // Menú abierto con clic derecho, con la clave de la fila y el punto pulsado.
-  // Se guarda aquí porque el clic derecho nace fuera del propio menú.
-  const [menuAbierto, setMenuAbierto] = useState<{ clave: string; x: number; y: number } | null>(null);
-  // Panel de grupos: alta, renombrado y borrado de los nombres de grupo.
-  const [gruposAbiertos, setGruposAbiertos] = useState(false);
+  // Lo que no es dato de la lista: qué menú, modal o renombrado está abierto.
+  const vista = usarVista({
+    renombrarPanel: lista.renombrarPanel,
+    cambiarGrupo: lista.cambiarGrupo,
+    archivarNota: lista.archivarNota,
+    archivarGrupo: lista.archivarGrupo,
+  });
+
+  // El tema se escribe en `<html>` y no en un contenedor: así lo heredan el
+  // `body`, el `<dialog>` —que se pinta en la capa superior, fuera del árbol—
+  // y las barras de scroll. `color-scheme` va con él, en la hoja.
+  const tema = lista.preferencias.tema;
+  useEffect(() => {
+    document.documentElement.dataset.tema = tema;
+  }, [tema]);
+
+  /* [por que] En la app de escritorio la ventana no lleva decoración de
+   * Windows: el fondo del marco arrastra la ventana y los botones de minimizar,
+   * maximizar y cerrar los pinta la página. Tauri inyecta su API global en el
+   * documento que carga desde el backend del equipo; en el navegador no existe
+   * y aquí no cambia nada. */
+  const escritorio = Boolean((globalThis as { __TAURI__?: { window?: unknown } }).__TAURI__?.window);
 
   if (lista.estado.fase === 'cargando') {
     return (
-      <main className="marco">
+      <main className={`marco${escritorio ? ' marco--escritorio' : ''}`} data-tauri-drag-region>
+        <BarraVentana />
         <div className="caja">
           {/* Centrado en la caja entera y con su pulso: es la única cosa viva
               mientras llega la lista. */}
@@ -55,7 +66,8 @@ export function Lista() {
 
   if (lista.estado.fase === 'error') {
     return (
-      <main className="marco">
+      <main className={`marco${escritorio ? ' marco--escritorio' : ''}`} data-tauri-drag-region>
+        <BarraVentana />
         <div className="caja">
           <p className="aviso aviso--error" role="alert">
             {lista.estado.mensaje}
@@ -68,9 +80,9 @@ export function Lista() {
   const datos = lista.estado.datos;
   const proyectos = datos.proyectos;
   const { preferencias } = lista;
-  // Grupos de verdad para el menú de la fila: sin «Tareas» ni «Completados»,
-  // que no son grupos que una fila pueda llevar.
-  const grupos = lista.pestanas.map((p) => p.id).filter((id) => id && id !== PESTANA_COMPLETADOS);
+  // Grupos de verdad para el menú de la fila y el alta: sin «Tareas», sin
+  // «Completados» y sin notas, que no son grupos que una fila pueda llevar.
+  const grupos = lista.grupos;
   // Cuántas filas lleva cada grupo, para decirlo antes de borrarlo.
   const cuenta: Record<string, number> = {};
   for (const nombre of [...datos.tareas.map((t) => t.grupoEjecucion), ...datos.habitos.map((h) => h.grupoEjecucion)]) {
@@ -78,225 +90,170 @@ export function Lista() {
   }
   // Dos formas de la misma lista: por turnos (una caja) o todas al lado.
   const enCajas = preferencias.separarGrupos;
+  const { acciones, guardarCambios } = accionesDeLista(lista);
 
-  const acciones: AccionesFila = {
-    completar: lista.completar,
-    editar: lista.abrirEdicion,
-    borrar: (fila) => (fila.tipo === 'tarea' ? lista.borrarTarea(fila.tarea.id) : lista.borrarHabito(fila.habito.id)),
-    prioridad: (fila, prioridad) => {
-      // El menú elige en ids; el hábito los guarda como texto (`Muy Alta`).
-      const nivel = prioridad ?? 'media';
-      const cambios: CambiosFilaForm = {
-        texto: fila.tipo === 'tarea' ? fila.tarea.texto : fila.habito.nombre,
-        prioridad: fila.tipo === 'tarea' ? nivel : importanciaDeHabito(nivel),
-        urgencia: fila.tipo === 'tarea' ? (fila.tarea.urgencia ?? 'normal') : 'normal',
-        proyectoId: fila.tipo === 'tarea' ? (fila.tarea.proyectoId ?? null) : null,
-        fechaMaxima: fila.tipo === 'tarea' ? (fila.tarea.configuracion?.fechaMaxima ?? '') : '',
-        grupoEjecucion: grupoDe(fila) ?? '',
-      };
-      guardarCambios(fila, cambios);
-    },
-    mover: lista.moverGrupo,
+  /** Crear una nota: en cajas, el carril la centra; en pestañas, se abre. Es
+   *  lo mismo desde el botón de la barra en las dos formas de la vista. */
+  const agregarNota = async () => {
+    const id = await lista.crearNota();
+    if (!id) return;
+    vista.setNotaNueva(id);
+    if (!enCajas) lista.cambiarGrupo(id);
   };
 
-  /** Guarda el modal en el tipo que corresponda. */
-  function guardarCambios(fila: NonNullable<Editando>, cambios: CambiosFilaForm): void {
-    const grupo = cambios.grupoEjecucion.trim() || null;
-    if (fila.tipo === 'tarea') {
-      lista.editarTarea(fila.tarea.id, {
-        texto: cambios.texto,
-        prioridad: cambios.prioridad,
-        urgencia: cambios.urgencia,
-        proyectoId: cambios.proyectoId,
-        fechaMaxima: cambios.fechaMaxima,
-        grupoEjecucion: grupo,
-      });
-    } else {
-      lista.editarHabito(fila.habito.id, {
-        texto: cambios.texto,
-        prioridad: cambios.prioridad,
-        grupoEjecucion: grupo,
-        frecuencia: cambios.frecuencia,
-      });
-    }
-  }
-
-  /** Las acciones de la cabecera: orden, privacidad y ajustes. Las pintan la
-   * cabecera de la caja única y, en modo cajas, la barra del carril. */
   const accionesBarra = (
-    <div className="barra__acciones">
-      <Menu
-        etiqueta={<IconoOrden />}
-        titulo={`Ordenar la lista: ${MODOS_ORDEN.find((m) => m.id === lista.orden)?.etiqueta ?? ''}`}
-        items={MODOS_ORDEN.map((modo) => ({
-          id: modo.id,
-          etiqueta: modo.etiqueta,
-          activo: lista.orden === modo.id,
-          icono: ICONO_ORDEN[modo.id],
-        }))}
-        onElegir={(id) => lista.cambiarOrden(id as ModoOrden)}
-        claseBoton="barra__boton barra__icono"
-      />
-      <button
-        type="button"
-        className="barra__boton barra__icono"
-        aria-haspopup="dialog"
-        aria-expanded={gruposAbiertos}
-        aria-label="Gestionar los grupos"
-        title="Grupos"
-        onClick={() => setGruposAbiertos(true)}
-      >
-        <IconoCarpeta />
-      </button>
-      <button
-        type="button"
-        className="barra__boton barra__icono"
-        aria-pressed={preferencias.privacidad}
-        aria-label={preferencias.privacidad ? 'Quitar el modo privacidad' : 'Activar el modo privacidad'}
-        title={preferencias.privacidad ? 'Privacidad: activa' : 'Modo privacidad'}
-        onClick={() => lista.cambiarPreferencias({ privacidad: !preferencias.privacidad })}
-      >
-        <IconoPrivacidad oculto={preferencias.privacidad} />
-      </button>
-      <button
-        type="button"
-        className="barra__boton barra__icono"
-        aria-haspopup="dialog"
-        aria-expanded={lista.ajustesAbiertos}
-        aria-label="Abrir los ajustes"
-        title="Ajustes"
-        onClick={() => lista.abrirAjustes(true)}
-      >
-        <IconoAjustes />
-      </button>
-    </div>
+    <AccionesBarra
+      enCajas={enCajas}
+      orden={lista.orden}
+      onOrden={lista.cambiarOrden}
+      onNota={() => void agregarNota()}
+      gruposAbiertos={vista.gruposAbiertos}
+      onAbrirGrupos={() => vista.setGruposAbiertos(true)}
+      preferencias={preferencias}
+      onCambiar={lista.cambiarPreferencias}
+      ajustesAbiertos={lista.ajustesAbiertos}
+      onAbrirAjustes={lista.abrirAjustes}
+    />
   );
 
   const modales = (
-    <>
-      <Ajustes
-        abierto={lista.ajustesAbiertos}
-        preferencias={preferencias}
-        onCambiar={lista.cambiarPreferencias}
-        onCerrar={() => lista.abrirAjustes(false)}
-      />
-
-      <PanelGrupos
-        abierto={gruposAbiertos}
-        grupos={grupos}
-        cuenta={cuenta}
-        onCrear={lista.crearGrupo}
-        onRenombrar={lista.renombrarGrupo}
-        onBorrar={lista.borrarGrupo}
-        onCerrar={() => setGruposAbiertos(false)}
-      />
-
-      <ConfiguracionTarea
-        fila={lista.editando}
-        proyectos={proyectos}
-        grupos={grupos}
-        colores={preferencias.colores}
-        onGuardar={guardarCambios}
-        onCerrar={() => lista.abrirEdicion(null)}
-      />
-    </>
+    <Modales
+      ajustesAbiertos={lista.ajustesAbiertos}
+      preferencias={preferencias}
+      onCambiar={lista.cambiarPreferencias}
+      onAbrirAjustes={lista.abrirAjustes}
+      gruposAbiertos={vista.gruposAbiertos}
+      grupos={grupos}
+      cuenta={cuenta}
+      onCrearGrupo={lista.crearGrupo}
+      onRenombrarGrupo={lista.renombrarGrupo}
+      onBorrarGrupo={lista.borrarGrupo}
+      onCerrarGrupos={() => vista.setGruposAbiertos(false)}
+      editando={lista.editando}
+      proyectos={proyectos}
+      colores={preferencias.colores}
+      onGuardar={guardarCambios}
+      onCerrarEdicion={() => lista.abrirEdicion(null)}
+      borrando={vista.borrando}
+      onBorrarNota={() => vista.borrando && lista.borrarNota(vista.borrando.panel.id)}
+      onBorrarPanelGrupo={(conFilas) => vista.borrando && lista.borrarGrupo(vista.borrando.panel.id, conFilas)}
+      onCerrarBorrado={() => vista.setBorrando(null)}
+    />
   );
 
-  // Modo cajas: una por pestaña, en fila. Cada una se pinta con su propio
-  // grupo, así que la que se esté mirando no depende de la pestaña activa.
+  /** Lo que va dentro de una caja, según su tipo. Cada panel lo pinta
+   *  `ContenidoPanel`; aquí solo se le pasan los datos y los ayudantes. */
+  const contenido = (panel: Panel) => (
+    <ContenidoPanel
+      panel={panel}
+      datos={datos}
+      preferencias={preferencias}
+      grupos={grupos}
+      acciones={acciones}
+      ordenDe={lista.ordenDe}
+      cambiarOrdenCaja={lista.cambiarOrdenCaja}
+      crear={lista.crear}
+      hoy={lista.hoy}
+      saliendo={lista.saliendo}
+      nota={lista.nota}
+      titulo={vista.titulo}
+      contextoDe={vista.contextoDe}
+      menuAbierto={vista.menuAbierto}
+      onMenuAbierto={vista.setMenuAbierto}
+    />
+  );
+
+  // Modo cajas: una por panel, en fila. Cada una se pinta con su propio grupo o
+  // su propio texto, así que la que se esté mirando no depende de la activa.
   if (enCajas) {
+    const indiceNueva = vista.notaNueva ? lista.paneles.findIndex((p) => p.id === vista.notaNueva) : -1;
     return (
-      <main className="marco marco--cajas">
+      <main className={`marco marco--cajas${escritorio ? ' marco--escritorio' : ''}`} data-tauri-drag-region>
+        <BarraVentana />
         <div className="barra barra--carril">{accionesBarra}</div>
-        <Carril total={lista.pestanas.length}>
-          {lista.pestanas.map((pestana) => {
-            const completados = pestana.id === PESTANA_COMPLETADOS;
-            const vista = seleccionar(datos, {
-              orden: lista.orden,
-              grupo: pestana.id === '' ? null : pestana.id,
-              ocultarHabitos: preferencias.ocultarHabitos,
-              hoy: lista.hoy,
-              saliendo: lista.saliendo,
-            });
-            return (
-              <Caja
-                key={pestana.id}
-                etiqueta={pestana.etiqueta}
-                preferencias={preferencias}
-                cabecera={
-                  <header className="barra">
-                    <p className="barra__titulo">{pestana.etiqueta}</p>
-                  </header>
-                }
-                alta={
-                  <NuevaFila
-                    grupo={completados ? null : pestana.id || null}
-                    grupos={grupos}
-                    colores={preferencias.colores}
-                    onCrear={lista.crear}
-                    oculto={completados}
-                  />
-                }
-                filas={vista.filas}
-                saliendo={lista.saliendo}
-                completados={vista.completados}
-                acciones={acciones}
-                grupos={grupos}
-                colores={preferencias.colores}
-                hoy={lista.hoy}
-                menuAbierto={menuAbierto}
-                onMenuAbierto={setMenuAbierto}
-              />
-            );
-          })}
+        <Carril
+          etiqueta="Paneles en cajas"
+          // La nota nueva se centra sola; después manda el gesto de quien mira.
+          indiceActivo={indiceNueva >= 0 ? indiceNueva : undefined}
+          onMover={(movida, destino) =>
+            lista.moverPanel(
+              movida,
+              lista.paneles.findIndex((p) => p.id === destino),
+            )
+          }
+          onSoltar={() => {
+            lista.guardarOrdenPaneles();
+            // La nota ya está en su sitio: no vuelve a centrarse al soltar.
+            vista.setNotaNueva(null);
+          }}
+          fija={(pieza) => Boolean(lista.paneles.find((p) => p.id === (pieza.dataset.panel ?? null))?.fija)}
+        >
+          {/* Cada panel pinta su propia `section.caja`: es la pieza que el
+              carril mide y arrastra, sin capas de por medio. */}
+          {lista.paneles.map((panel) => (
+            <Fragment key={panel.id}>{contenido(panel)}</Fragment>
+          ))}
         </Carril>
+        {/* El menú de la caja se pinta aquí, fuera de su `section`: es la
+            pieza que el carril arrastra y nada más. */}
+        <MenuCaja
+          menuPanel={vista.menuPanel}
+          onCerrar={() => vista.setMenuPanel(null)}
+          onAccion={(panel, accion) => vista.accionPanel(panel, accion, cuenta)}
+        />
         {modales}
       </main>
     );
   }
 
-  const filas = lista.vista?.filas ?? [];
-  const completados = lista.vista?.completados ?? false;
+  const activo = lista.paneles.find((p) => p.id === lista.grupo) ?? lista.paneles[0];
 
   return (
-    <main className="marco">
-      <Caja
-        etiqueta="Tareas y hábitos"
-        preferencias={preferencias}
-        cabecera={
-          <header className="barra">
-            <Pestanas
-              titulo="Pestaña de la lista"
-              valor={lista.grupo}
-              opciones={lista.pestanas}
-              onElegir={lista.cambiarGrupo}
-              onMover={lista.moverPestana}
-              esFija={(id) => id === '' || id === PESTANA_COMPLETADOS}
-              clase="barra__pestanas"
-            />
-            {accionesBarra}
-          </header>
-        }
-        // Alta rápida: desaparece en «Completados», que es solo lectura.
-        alta={
-          <NuevaFila
-            grupo={lista.grupo || null}
-            grupos={grupos}
-            colores={preferencias.colores}
-            onCrear={lista.crear}
-            oculto={completados}
+    <main className={`marco${escritorio ? ' marco--escritorio' : ''}`} data-tauri-drag-region>
+      <BarraVentana />
+      <section className="marco__unica" aria-label="Tareas y hábitos">
+        {/* Las acciones vuelven donde estaban: sobre la esquina derecha de la
+            caja, sin ocupar altura. Los paneles cuelgan aparte, a la izquierda. */}
+        <div className="barra barra--superior barra--acciones-suelta">{accionesBarra}</div>
+        {/* Los paneles, al costado de la caja: una columna a la izquierda con
+            su nombre recortado, y la caja centrada con ellos. */}
+        <header className="barra barra--costado barra--paneles">
+          <Pestanas
+            titulo="Panel de la lista"
+            valor={lista.grupo}
+            orientacion="costado"
+            opciones={lista.paneles.map((panel) => ({
+              id: panel.id,
+              etiqueta: (
+                <span className={`pestana__cuerpo pestana__cuerpo--${panel.tipo}`}>
+                  {iconoDePanel(panel)}
+                  {vista.titulo(panel, 'pestana__titulo', 'doble')}
+                </span>
+              ),
+            }))}
+            onElegir={lista.cambiarGrupo}
+            onMover={lista.moverPestana}
+            esFija={(id) => Boolean(lista.paneles.find((p) => p.id === id)?.fija)}
+            panelDe={(id) => lista.paneles.find((p) => p.id === id)}
+            onAccion={(id, accion) => {
+              const panel = lista.paneles.find((p) => p.id === id);
+              if (panel) vista.accionPanel(panel, accion, cuenta);
+            }}
+            claseDe={(id) => {
+              const tipo = lista.paneles.find((p) => p.id === id)?.tipo;
+              return tipo ? `pestana--${tipo}` : undefined;
+            }}
           />
-        }
-        filas={filas}
-        saliendo={lista.saliendo}
-        completados={completados}
-        acciones={acciones}
-        grupos={grupos}
-        colores={preferencias.colores}
-        hoy={lista.hoy}
-        menuAbierto={menuAbierto}
-        onMenuAbierto={setMenuAbierto}
-      />
+        </header>
+        {contenido(activo)}
+        {/* El menú de la caja única: en las pestañas va dentro de su lista; en
+            la caja, aquí, porque su `section` no es envoltorio del menú. */}
+        <MenuCaja
+          menuPanel={vista.menuPanel}
+          onCerrar={() => vista.setMenuPanel(null)}
+          onAccion={(panel, accion) => vista.accionPanel(panel, accion, cuenta)}
+        />
+      </section>
       {modales}
     </main>
   );

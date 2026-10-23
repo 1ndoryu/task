@@ -1,0 +1,70 @@
+/* Ventana de escritorio sin decoración: los botones y la franja que arrastra
+ * los pone la página. Hoja propia porque es receta del marco de la ventana, no
+ * del contenido de la lista.
+ *
+ * sentinel-disable-file css-adhoc-button-style — esta hoja es el cromo de la
+ * ventana (marco sin decoración de Tauri): sus botones son cuadrados pegados al
+ * borde, como los de Windows, y no pueden ser el botón de texto de la lista.
+ *
+ * [por que] Todo lo de aquí solo existe dentro de la app (Tauri): en el
+ * navegador no hay ni franja ni botones y nada de esta hoja se pinta. Por eso
+ * los controles cuelgan de `.marco--escritorio`, que `Lista` pone cuando
+ * encuentra el API de Tauri. */
+
+/* La franja superior: 1.75rem de aire por encima de todo, del color del fondo.
+ * Es la zona de arrastre y también el hueco de los botones, para que no pisen
+ * la cabecera de la caja. El arrastre lo da `data-tauri-drag-region` en el
+ * propio marco: solo arrastra el clic directo en ese nodo, así que el relleno
+ * del marco sí y la caja no. En modo cajas el carril ocupa la pantalla entera
+ * y el aire se suma a su alto. */
+.marco--escritorio {
+  padding-top: 1.75rem;
+  /* [por que] El lanzador recorta la ventana en redondo: fuera de la esquina se
+   * ve el escritorio, así que el fondo del marco tiene que ser el de la app y
+   * no el de la página, o la esquina saldría con el color del sistema. */
+  background: var(--fondo);
+}
+
+/* Los botones de minimizar, maximizar y cerrar: arriba a la derecha, pegados al
+ * borde como los de Windows. */
+.ventana {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  height: 1.75rem;
+}
+
+/* Controles de la ventana: 2,75rem de ancho, sin caja, rojo al cerrar. */
+.ventana__boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--tinta-tenue);
+  cursor: pointer;
+}
+
+.ventana__boton:hover {
+  background: var(--superposicion);
+  color: var(--tinta);
+}
+
+/* Cerrar se pinta en rojo como en Windows: es la única salida que para la app
+ * entera y no debe confundirse con las otras dos. Es el último botón de la
+ * franja, así que se nombra por su sitio y no con una clase aparte. */
+.ventana__boton:last-child:hover {
+  background: var(--sangre);
+  color: var(--fondo);
+}
+
+/* Foco visible solo con teclado: el botón no lleva caja propia. */
+.ventana__boton:focus-visible {
+  outline: 1px solid var(--tinta);
+  outline-offset: -3px;
+}

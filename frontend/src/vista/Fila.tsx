@@ -2,6 +2,7 @@
  * la configuración y racha. El menú de acciones se abre con el clic derecho en
  * la fila; no hay botón visible. Vive aparte de `Lista` para que cada archivo
  * tenga una sola responsabilidad. */
+import { aplazadoHasta, fechaAplazo } from '../logica/aplazos';
 import { diaCorto, proximaRepeticion, rachaDe } from '../logica/frecuencia';
 import type { ColoresNivel } from '../logica/preferencias';
 import { hechoHoy } from '../logica/seleccion';
@@ -16,7 +17,7 @@ interface Props {
   grupos: string[];
   /** La pestaña de completados: el menú no se abre, ahí no hay nada que hacer. */
   completados: boolean;
-  /** Día de hoy: decide si un hábito está hecho. */
+  /** Día de hoy: decide si un hábito está hecho y si sigue aplazado. */
   hoy: string;
   /** Paleta de la usuaria: el menú pinta el círculo de cada nivel. */
   colores: ColoresNivel;
@@ -40,6 +41,8 @@ export function Fila({ fila, saliendo, acciones, grupos, colores, completados, h
   // Lo ya hecho de un hábito no sale de la lista (solo se tacha), así que se
   // dice cuándo vuelve: sin eso, marcarlo parece no hacer nada.
   const vuelve = habito !== null && hecho ? proximaRepeticion(habito, hoy) : null;
+  // Aplazado: lo que la fila dice en vez de «vuelve el …», que es lo mismo.
+  const aplazado = habito !== null ? aplazadoHasta(habito, hoy) : null;
 
   return (
     <li
@@ -74,13 +77,17 @@ export function Fila({ fila, saliendo, acciones, grupos, colores, completados, h
       >
         {texto}
       </button>
-      {vuelve !== null && vuelve !== hoy && <span className="fila__nota">vuelve el {diaCorto(vuelve)}</span>}
+      {aplazado !== null ? (
+        <span className="fila__nota">vuelve el {diaCorto(aplazado)}</span>
+      ) : (
+        vuelve !== null && vuelve !== hoy && <span className="fila__nota">vuelve el {diaCorto(vuelve)}</span>
+      )}
       {racha > 1 && <span className="fila__nota">{racha} días</span>}
       {/* Sin disparador: el ancla es el punto del clic derecho. */}
       <Menu
         etiqueta={null}
         titulo={`Acciones de ${texto}`}
-        items={opcionesFila(fila, grupos, colores)}
+        items={opcionesFila(fila, grupos, colores, aplazado !== null)}
         abierto={menuAbierto !== null}
         onAbierto={(abierto) => {
           if (!abierto) onMenuAbierto(null);
@@ -89,6 +96,8 @@ export function Fila({ fila, saliendo, acciones, grupos, colores, completados, h
         onElegir={(id) => {
           if (id === 'editar') acciones.editar(fila);
           else if (id === 'borrar') acciones.borrar(fila);
+          else if (id === 'aplazar-quitar') acciones.aplazar(fila, null);
+          else if (id.startsWith('aplazar-')) acciones.aplazar(fila, fechaAplazo(hoy, id.slice('aplazar-'.length)));
           else if (id === 'grupo-') acciones.mover(fila, null);
           else if (id.startsWith('grupo-')) acciones.mover(fila, id.slice('grupo-'.length));
           else acciones.prioridad(fila, id.replace('prioridad-', ''));

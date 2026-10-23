@@ -125,3 +125,49 @@ export function prioridadesMenu(colores: ColoresNivel, actual?: string): OpcionM
     activo: actual === nivel.id,
   }));
 }
+
+/** Lápiz con la línea de escritura: renombrar un panel. */
+export function IconoRenombrar() {
+  return (
+    <Trazo>
+      <path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17z" />
+      <path d="M14.5 6.5l3 3" />
+    </Trazo>
+  );
+}
+
+/** Caja con tapa y flecha hacia dentro: archivar sin perder nada. */
+export function IconoArchivar() {
+  return (
+    <Trazo>
+      <path d="M3.5 7.5h17v3.5h-17z" />
+      <path d="M5 11v8a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19v-8" />
+      <path d="M12 14.5v-1M9.5 15.5L12 18l2.5-2.5" />
+    </Trazo>
+  );
+}
+
+/** Reloj con la aguja hacia atrás: el hábito se aplaza y vuelve luego. */
+export function IconoAplazar() {
+  return (
+    <Trazo>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l-2.5 2.5" />
+    </Trazo>
+  );
+}
+
+/** Los aplazos del menú: uno por duración, y la vuelta si ya está aplazado.
+ *  `hasta` llega de `logica/aplazos` para no repetir aquí la aritmética. */
+export function aplazosMenu(opciones: { id: string; etiqueta: string }[], aplazado: boolean): OpcionMenu[] {
+  const lista: OpcionMenu[] = opciones.map((opcion) => ({
+    id: `aplazar-${opcion.id}`,
+    etiqueta: opcion.etiqueta,
+    icono: <IconoAplazar />,
+  }));
+  if (aplazado) {
+    lista.push({ id: 'aplazar-quitar', etiqueta: 'Quitar el aplazo', accion: true, icono: <IconoAplazar /> });
+  }
+  return lista;
+}
+

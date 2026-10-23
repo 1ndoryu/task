@@ -25,6 +25,9 @@
   --texto-menu: 0.6875rem;
   --texto-etiqueta: 0.625rem;
   --texto-nota: 0.6875rem;
+  /* Texto de una nota: su propia talla, porque se lee de corrido y no tiene
+   * por qué seguir la de las filas de una lista. */
+  --texto-campo-nota: 0.875rem;
   --redondo: 1.1rem;
   --redondoChico: 0.35rem;
   --redondoMenu: 0.6rem;
@@ -41,6 +44,27 @@
   --desenfoque: 0.28rem;
   --velo: 0.55;
   --superposicion: rgb(27 27 25 / 0.18);
+}
+
+/* Modo oscuro: los mismos nombres, otra luz. No es el claro invertido —el
+ * negro puro hace vibrar el texto en pantalla— sino un negro cálido con la
+ * tinta apenas por debajo del papel, para que el contraste sea el mismo que de
+ * día. Lo enciende `Lista` poniendo `data-tema="oscuro"` en `<html>`; los
+ * colores de nivel siguen siendo los de cada nivel, que es donde se eligen.
+ * `color-scheme` avisa al navegador: así los `<input>`, el `<dialog>` y las
+ * barras de scroll nativas nacen oscuros en vez de blancos. */
+:root[data-tema='oscuro'] {
+  color-scheme: dark;
+  --fondo: #171614;
+  --panel: #201f1c;
+  --tinta: #f0ede7;
+  --tinta-tenue: #918d85;
+  --linea: #33312d;
+  --hecho: #6d6a64;
+  --sangre: #d98976;
+  --barra-thumb: #46433e;
+  --barra-thumbHover: #b3afa7;
+  --superposicion: rgb(0 0 0 / 0.55);
 }
 
 * {
@@ -95,6 +119,16 @@ body {
   padding: 2rem 1.25rem;
 }
 
+/* Vista por pestañas: la caja sigue centrada en la pantalla y los paneles
+ * cuelgan a su izquierda, fuera de su sitio. Así el ancho de la columna —y lo
+ * que mida cada nombre— no mueve ni un píxel la caja; el texto de la columna
+ * se alinea a la derecha, hacia el contenido al que nombra. */
+.marco__unica {
+  position: relative;
+  width: 100%;
+  max-width: var(--ancho);
+}
+
 /* La caja: alto fijo en pantalla, todo el contenido con su propio scroll. */
 .caja {
   display: flex;
@@ -116,6 +150,35 @@ body {
   /* Mismo aire derecho que el scroll de la lista: así los iconos de la cabecera
    * caen en la misma vertical que los del alta y los de la fila. */
   padding: 0 0.75rem 0.5rem 0;
+}
+
+/* La cabecera al costado: los paneles arriba y los iconos abajo, pegados a la
+ * derecha. Ocupa la altura de la caja para que los iconos caigan al pie. */
+.barra--costado {
+  /* Colgada del borde izquierdo de la caja, no dentro de ella: la caja ya es
+   * el ancho de `--ancho` y la columna no puede robárselo. */
+  position: absolute;
+  right: calc(100% + 1rem);
+  top: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 0;
+}
+
+/* La barra de acciones sigue donde estaba: encima de la esquina derecha de la
+ * caja, alineada con su borde y sin ocupar altura (no empuja la caja). */
+.barra--superior {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.4rem);
+  justify-content: flex-end;
+  padding: 0;
+}
+
+/* Los nombres de los paneles y los iconos se reparten la fila cuando la
+ * columna se tumba; esta clase solo lleva al carril lo que necesita. */
+.barra--paneles {
+  flex-direction: row;
 }
 
 /* Las pestañas ocupan la cabecera; el orden y los iconos no se encogen. */
@@ -273,6 +336,7 @@ button.fila__marca:hover {
   font-variant-numeric: tabular-nums;
 }
 
+/* sentinel-disable-next-line claseHuerfana — falso positivo del scanner: la clase se compone en un array condicional de `Fila.tsx`; el scanner solo ve literales className completos. */
 .fila--hecho .fila__texto {
   color: var(--hecho);
   text-decoration: line-through;
@@ -292,6 +356,16 @@ button.fila__marca:hover {
 
 .caja--fuente-grande {
   --texto-fila: 0.9375rem;
+}
+
+/* La talla de las notas va por su cuenta: cambia `--texto-campo-nota`, no la
+ * de las filas, y así una nota deja de arrastrar el ajuste de la lista. */
+.caja--nota-fuente-pequena {
+  --texto-campo-nota: 0.75rem;
+}
+
+.caja--nota-fuente-grande {
+  --texto-campo-nota: 1rem;
 }
 
 .caja--altura-compacta .fila {
@@ -359,17 +433,22 @@ button.fila__marca:hover {
 
 /* La barra del carril no es la de una caja: va sobre el conjunto, alineada con
  * la caja centrada, y solo lleva los iconos de la derecha. Flota sobre el aire
- * que deja el carril al pegarse abajo, así no empuja la altura de las cajas. */
+ * que deja el carril al pegarse abajo, así no empuja la altura de las cajas.
+ * Su sitio no se calcula con el alto de la caja —una caja puede enfermar o
+ * llevar su propio alto—, sino que el carril mide dónde empieza la pieza
+ * centrada y escribe `--alto-barra-carril`; si no llega, cae a 1.9rem. */
 .barra--carril {
   position: absolute;
-  /* El alto del carril es la pantalla y las cajas van centradas: su borde
-   * superior queda a un `(pantalla - caja) / 2`, y la barra se sienta justo
-   * encima. */
-  top: calc((100% - var(--alto-cajas)) / 2 - 1.9rem);
+  /* Apoyada sobre el borde superior de la pieza, sin saber cuánto mide ella:
+   * se ancla por abajo y sube entera. Así un cambio de alto o de fuente no la
+   * descoloca, y el aire de su relleno queda entre los iconos y la caja. */
+  top: calc(
+    (var(--alto-carril, 100%) - var(--alto-pieza-carril, var(--alto-cajas))) / 2
+  );
   left: 50%;
   z-index: 5;
   width: min(var(--ancho), calc(100% - 2.5rem));
-  transform: translateX(-50%);
+  transform: translate(-50%, -100%);
   justify-content: flex-end;
   /* La barra del carril comparte el borde exterior de la caja, pero no su
    * relleno: borde (1px) más relleno de la caja (8px) más el aire del scroll
@@ -378,6 +457,7 @@ button.fila__marca:hover {
 }
 
 /* Nombre del grupo, con la talla y el aire de una pestaña. */
+/* sentinel-disable-next-line claseHuerfana — falso positivo del scanner: la clase se pasa por parámetro desde `Lista.tsx` (`titulo(panel, 'barra__titulo')`); nunca aparece en un literal className. */
 .barra__titulo {
   flex: 1;
   min-width: 0;
@@ -386,9 +466,66 @@ button.fila__marca:hover {
   color: var(--tinta);
   font-size: var(--texto-etiqueta);
   letter-spacing: 0.08em;
-  text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+/* --- Título editable. El texto se ve como el título y se comporta como un
+ * disparador; el campo que lo sustituye hereda talla, color y aire, así que
+ * renombrar no cambia el alto de la cabecera ni mueve los iconos de al lado. --- */
+.titulo {
+  /* Aquí no se toca ni la talla ni el espaciado de letra: los pone la regla del
+   * sitio donde vive el título, porque estas clases también son el título de una
+   * pestaña. Declararlos en `inherit` pisaría justo eso (la cascada no distingue
+   * `inherit` de un valor explícito) y el título cambiaría al editarse. */
+  color: inherit;
+  /* El mismo interlineado en las tres formas: un `<p>`, un botón y un campo
+   * miden alto distinto si cada uno usa el suyo, y las pestañas fijas salían
+   * más altas que las demás. */
+  line-height: 1.3;
+  /* Los títulos que no se renombran son un `<p>`: sin este margen, una pestaña
+   * fija mide lo que un párrafo y las demás no. */
+  margin: 0;
+  text-align: left;
+}
+
+/* El título editable no parece un campo hasta que se pulsa: ni borde, ni
+ * fondo, ni filete al pasar el ratón. Es texto, como el título de siempre. */
+.titulo--editable {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  /* Un botón no hereda la familia: el navegador le pone la suya. El resto de la
+   * letra sí tiene que venir del título que sustituye. */
+  font-family: inherit;
+  cursor: text;
+  text-overflow: ellipsis;
+}
+
+.titulo--editable:focus-visible {
+  outline: 1px solid var(--tinta);
+  outline-offset: 2px;
+}
+
+/* El campo del título: la misma letra y la misma talla que el texto que
+ * sustituye, sin caja propia; solo cambia el color, a tinta plena, para verse
+ * como algo que de verdad se puede escribir. */
+.titulo--campo {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  /* `appearance: none` además de quitar fondo y borde: sin él, el campo del
+   * navegador se pinta con su propio marco y su propio fondo en modo oscuro. */
+  appearance: none;
+  background: transparent;
+  color: var(--tinta);
+  /* Como el botón: el campo trae su propia familia del navegador y la talla, el
+   * espaciado y las mayúsculas ya vienen de la regla del sitio. */
+  font-family: inherit;
+  text-overflow: ellipsis;
+  outline: none;
 }
 
 .carril {
@@ -413,6 +550,12 @@ button.fila__marca:hover {
   max-width: none;
 }
 
+/* La nota no es más estrecha que una lista: el carril es una fila de cajas
+ * iguales, y una de texto que se arrastra se lee peor si cambia de talla. */
+.carril > .caja--nota {
+  width: min(var(--ancho), calc(100dvw - 2.5rem));
+}
+
 /* El aire de los extremos es lo que permite centrar la primera y la última. */
 .carril > .caja:first-child {
   margin-left: var(--margen-carril, 0);
@@ -420,6 +563,39 @@ button.fila__marca:hover {
 
 .carril > .caja:last-child {
   margin-right: var(--margen-carril, 0);
+}
+
+/* --- Arrastre de cajas. La pieza que se mueve deja su hueco atenuado; la que
+ * sigue al puntero es una copia en el `body` (la pinta `Carril`), fuera del
+ * carril, para que no la recorte su scroll. --- */
+.carril--movible {
+  /* Se agarra de cualquier punto libre de la caja; los campos, los botones y
+   * los títulos editables conservan su cursor propio. */
+  cursor: grab;
+}
+
+/* Mientras dura un arrastre, el texto de la copia no se selecciona: con el
+ * `user-select: none` del `body` basta, y aquí no se toca la tipografía. */
+.carril__pieza--arrastrada {
+  opacity: 0.35;
+  transition: opacity 120ms ease-out;
+}
+
+.carril__copia {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  margin: 0;
+  /* Levantada del papel: una sombra corta y un borde firme, sin escalarla (el
+   * gesto ya mueve la pieza, no hace falta decirlo dos veces). */
+  box-shadow: 0 0.4rem 1.4rem rgb(27 27 25 / 0.18), 0 0 0 1px var(--tinta-tenue);
+  pointer-events: none;
+  will-change: transform;
+}
+
+:root[data-tema='oscuro'] .carril__copia {
+  box-shadow: 0 0.4rem 1.6rem rgb(0 0 0 / 0.7), 0 0 0 1px var(--tinta-tenue);
 }
 
 .aviso {
@@ -430,6 +606,19 @@ button.fila__marca:hover {
 
 .aviso--error {
   color: var(--sangre);
+}
+
+/* Lista vacía: una nota pequeña y centrada, sin la talla del cuerpo ni el aire
+ * de una fila. Va con el alta, así que no debe competir con ella. */
+.aviso--vacio {
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+  letter-spacing: 0.08em;
+  /* Centrado sobre la caja entera: el scroll reserva 12px a la derecha para
+   * la barra, y sin descontarlos la nota caería 6px a la izquierda. */
+  text-align: center;
+  text-transform: uppercase;
+  padding: 1.5rem 0.75rem 1.5rem 0;
 }
 
 /* Cargando: en el centro de la caja, con un punto que respira. Solo comunica
@@ -464,6 +653,58 @@ button.fila__marca:hover {
 @keyframes latirCargando {
   0%, 100% { opacity: 0.25; transform: scale(0.8); }
   50% { opacity: 1; transform: scale(1); }
+}
+
+/* Por debajo de este ancho, una caja centrada ya no deja sitio a la columna
+ * (8rem más el hueco): los paneles pasan arriba, en fila. */
+@media (max-width: 50rem) {
+  /* Sin sitio al costado, los paneles se tumban encima de la caja: la caja
+   * conserva su ancho y la columna pasa a ser una fila que se desliza. */
+  /* Una sola fila arriba —los paneles a la izquierda, los iconos a la
+   * derecha— y la caja debajo, con todo su ancho. */
+  .marco__unica {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'paneles acciones'
+      'caja caja';
+    gap: 0.5rem 0.75rem;
+    max-width: none;
+  }
+
+  /* Las dos barras vuelven al flujo: fuera del costado no hay borde del que
+   * colgar, y una `position` que se quede absoluta las deja fuera de su celda. */
+  .barra--paneles,
+  .barra--acciones-suelta {
+    position: static;
+    align-items: center;
+  }
+
+  .barra--paneles {
+    grid-area: paneles;
+    min-width: 0;
+  }
+
+  .barra--acciones-suelta {
+    grid-area: acciones;
+  }
+
+  .marco__unica > .caja {
+    grid-area: caja;
+    width: min(var(--ancho), 100%);
+    justify-self: center;
+  }
+
+  .pestanas--costado {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .pestanas--costado .pestana__cuerpo {
+    width: auto;
+  }
 }
 
 @media (max-width: 30rem) {
@@ -508,6 +749,16 @@ button.fila__marca:hover {
   color: var(--tinta-tenue);
 }
 
+/* Tipo fijo del alta (caja de tareas sola o de hábitos sola): el mismo sitio y
+ * color que el icono del menú, pero sin botón: no hay nada que elegir. */
+.alta__tipo {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem;
+  color: var(--tinta-tenue);
+  line-height: 0;
+}
+
 /* Círculo de importancia del alta: el tamaño y el sitio del punto de la fila,
  * para que lo elegido se reconozca sin leer el nombre del nivel. */
 .alta__nivel {
@@ -535,6 +786,59 @@ button.fila__marca:hover {
   right: 0;
   width: 15rem;
   padding: 0.4rem 0.55rem;
+}
+
+/* --- Nota: texto libre en lugar de una lista. El campo ocupa el alto de la
+ * caja —su scroll es el de la caja— y se lee con la misma tinta y el mismo
+ * ritmo que una fila; el rótulo es la única marca de que no es una lista. --- */
+.nota {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  /* Todo el alto útil del scroll: escribir es la tarea de esta caja. */
+  min-height: 100%;
+  padding-right: 0.75rem;
+}
+
+.nota__campo {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tinta);
+  font-family: inherit;
+  font-size: var(--texto-campo-nota);
+  line-height: var(--ritmo);
+  resize: none;
+  outline: none;
+  overflow-wrap: anywhere;
+}
+
+.nota__campo::placeholder {
+  color: var(--tinta-tenue);
+}
+
+/* Privacidad: el texto se esconde como el de una fila, y se aclara al entrar
+ * en el campo. Editarlo necesita verlo, así que el foco manda. */
+.caja--privacidad .nota__campo {
+  filter: blur(var(--desenfoque));
+  opacity: var(--velo);
+  transition: filter 90ms ease-out, opacity 90ms ease-out;
+}
+
+.caja--privacidad .nota__campo:focus,
+.caja--privacidad-todas .nota:hover .nota__campo,
+.caja--privacidad-todas .nota:focus-within .nota__campo {
+  filter: none;
+  opacity: 1;
+}
+
+/* El rótulo de la nota no es un disparador y no se toca; el campo sí. */
+.nota__campo::selection {
+  background: var(--tinta);
+  color: var(--panel);
 }
 
 /* En pantallas estrechas el panel anclado a la derecha del botón se saldría

@@ -59,6 +59,108 @@
   color: var(--tinta);
 }
 
+/* --- Con contenido dentro: el icono y el título del panel. La pestaña es un
+ * `div` (un título editable no cabe en un `button`), así que se centra a mano.
+ * El título hereda color y talla de la pestaña y, al pasar el ratón, no se
+ * oscurece por su cuenta: la pestaña ya lo hace entera. --- */
+.pestana__cuerpo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 12rem;
+  min-width: 0;
+}
+
+/* El icono de tipo se apaga un poco: es una ayuda para distinguir, no una
+ * marca que compita con el nombre. */
+.pestana__cuerpo svg {
+  flex: none;
+  opacity: 0.7;
+}
+
+/* Título de la pestaña: la misma talla que la pestaña, sin mayúsculas forzadas
+ * ni filete propio (el del título editable de una caja no cabe aquí). */
+/* sentinel-disable-next-line claseHuerfana — falso positivo del scanner: la clase se pasa por parámetro desde `Lista.tsx` (`titulo(panel, 'pestana__titulo', 'doble')`); nunca aparece en un literal className. */
+.pestana__titulo {
+  min-width: 0;
+  /* El padding del título editable no lo necesita aquí: la pestaña ya tiene el
+   * suyo y el texto iría corrido respecto al icono. */
+  padding: 0;
+  /* En reposo el título es un botón: así el cursor no parece un campo de texto
+   * cuando lo único que hace es abrirlo. */
+  cursor: inherit;
+  /* La talla de la pestaña, no la del cuerpo: un título editable dentro de una
+   * pestaña no puede crecer al pasar de texto a campo. */
+  font-size: inherit;
+  overflow: hidden;
+  /* La talla la pone la regla del título en su sitio; aquí solo la letra. */
+  font-family: inherit;
+  font-style: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-overflow: ellipsis;
+  text-transform: inherit;
+  white-space: nowrap;
+}
+
+.pestana__titulo.titulo--editable {
+  border-radius: 0;
+}
+
+/* En la pestaña activa el texto va en el color del panel: el campo del título
+ * también, si se está renombrando desde ahí. */
+.pestana .titulo--campo {
+  /* El color y la talla los pone la pestaña: una activa lleva tinta invertida y
+   * una inactiva, tenue. El campo solo aporta el comportamiento. */
+  color: inherit;
+  min-width: 4rem;
+}
+
+/* --- Variante costado: los paneles al lado de la caja. Sin filete ni fondo,
+ * porque aquí el nombre es texto y no un botón: lo que marca el panel abierto
+ * es la tinta, y los nombres se recortan para que la columna no empuje la caja
+ * ni cambie de ancho al renombrar. --- */
+.pestanas--costado {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  /* Lo justo para un nombre reconocible: si la columna fuera más ancha, la
+   * caja centrada dejaría de tener aire a su izquierda en pantallas medianas. */
+  width: 8rem;
+  padding: 0;
+  overflow: visible;
+}
+
+.pestanas--costado .pestana {
+  max-width: 100%;
+  padding: 0.05rem 0;
+  border: 0;
+  background: none;
+  color: var(--tinta-tenue);
+}
+
+.pestanas--costado .pestana:hover {
+  background: none;
+  color: var(--tinta);
+}
+
+.pestanas--costado .pestana--activa {
+  background: none;
+  color: var(--tinta);
+}
+
+/* El contenido se pega a la derecha y se recorta por la izquierda del nombre:
+ * lo que se lee primero es el principio del título. */
+.pestanas--costado .pestana__cuerpo {
+  width: 100%;
+  max-width: none;
+  justify-content: flex-end;
+}
+
+.pestanas--costado .pestana__titulo {
+  flex: 0 1 auto;
+}
+
 /* --- Variante lateral: pestañas en columna, para agrupar un formulario largo.
  * Mismo filete y misma marca de activa, girados: la columna no se desliza, así
  * que se quita el scroll de la fila. --- */

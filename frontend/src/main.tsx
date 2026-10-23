@@ -8,6 +8,7 @@ import './estilos/dropdownPanel.css';
 import './estilos/modal.css';
 import './estilos/pestanas.css';
 import './estilos/listas.css';
+import './estilos/ventana.css';
 
 const raiz = document.getElementById('raiz');
 if (!raiz) throw new Error('Falta el nodo #raiz en index.html');

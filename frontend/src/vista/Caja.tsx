@@ -12,6 +12,8 @@ import { claveFila, type Editando } from './usarLista';
 interface Props {
   /** Texto accesible: qué grupo muestra esta caja. */
   etiqueta: string;
+  /** Id del panel dueño de la caja, para que el arrastre sepa a quién mueve. */
+  idPanel?: string;
   /** Ajustes de lectura: deciden los modificadores de la caja. */
   preferencias: Preferencias;
   cabecera: ReactNode;
@@ -28,10 +30,13 @@ interface Props {
   /** Menú abierto con clic derecho, con la clave de su fila y el punto. */
   menuAbierto: { clave: string; x: number; y: number } | null;
   onMenuAbierto: (punto: { clave: string; x: number; y: number } | null) => void;
+  /** Clic derecho fuera de las filas: el menú del panel, no el de una fila. */
+  onContexto?: (punto: { x: number; y: number }) => void;
 }
 
 export function Caja({
   etiqueta,
+  idPanel,
   preferencias,
   cabecera,
   alta,
@@ -44,6 +49,7 @@ export function Caja({
   hoy,
   menuAbierto,
   onMenuAbierto,
+  onContexto,
 }: Props) {
   return (
     <section
@@ -76,6 +82,16 @@ export function Caja({
         } as CSSProperties
       }
       aria-label={etiqueta}
+      // El carril identifica la pieza por este atributo, sin saber su clase.
+      data-panel={idPanel}
+      // Las filas ya gastan el clic derecho en su propio menú; aquí solo llega
+      // el que nace fuera de ellas (la cabecera, el aire de la caja).
+      onContextMenu={(evento) => {
+        if (!onContexto) return;
+        if ((evento.target as HTMLElement).closest('.fila, [role="menu"], input')) return;
+        evento.preventDefault();
+        onContexto({ x: evento.clientX, y: evento.clientY });
+      }}
     >
       {cabecera}
 
@@ -84,7 +100,7 @@ export function Caja({
       <div className="scroll">
         {alta}
         {filas.length === 0 ? (
-          <p className="aviso">{completados ? 'Nada completado.' : 'Nada pendiente.'}</p>
+          <p className="aviso aviso--vacio">{completados ? 'Nada completado.' : 'Nada pendiente.'}</p>
         ) : (
           <ul className={`lista${completados ? ' lista--completados' : ''}`}>
             {filas.map((fila) => {

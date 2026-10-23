@@ -170,7 +170,7 @@ export function Menu({ etiqueta, items, onElegir, titulo, claseBoton, abierto, o
   }, [sub]);
 
   return (
-    <div className="menu" ref={contenedor}>
+    <div className={`menu${etiqueta === null ? ' menu--punto' : ''}`} ref={contenedor}>
       {etiqueta !== null && (
         <button
           type="button"

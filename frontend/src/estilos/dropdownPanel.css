@@ -8,6 +8,18 @@
   display: inline-flex;
 }
 
+/* Menú sin disparador (clic derecho): el ancla es el punto de la pantalla, no
+ * un hueco en el flujo. Fuera del flujo y sin tamaño, para que abrirlo no
+ * empuje nada: dentro de un marco centrado, una línea de más mueve la página
+ * entera hacia arriba. Su panel es `fixed` y se mide contra la ventana. */
+.menu--punto {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+}
+
 .menu__panel {
   position: absolute;
   top: calc(100% + 0.3rem);

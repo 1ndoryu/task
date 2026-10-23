@@ -1,94 +1,145 @@
-/* Carril de cajas: varias cajas iguales en fila que se recorren a lo ancho.
- * El desplazamiento es por caja, con imán, y se detiene antes de que una caja
- * cruce el centro de la pantalla: así siempre hay una caja centrada de verdad,
- * nunca dos a medias. La primera caja arranca centrada porque a sus lados hay
- * un margen que se calcula al medir (mitad de pantalla menos ancho de caja).
- * El carril no usa `scroll-snap`: el imán se pone al soltar, para que la caja
- * más cercana al centro sea la que quede centrada, no la que encuentre el
- * navegador. Todo se mide con los desplazamientos de las cajas, no con la
- * distancia entre centros: así el aire entre cajas no se da por supuesto. */
-import { useEffect, useRef, type ReactNode } from 'react';
-
-/** Cuánto se espera tras el último gesto antes de imantar. */
-const ESPERA = 140;
+/* Carril de piezas en fila: varias cajas iguales que se recorren a lo ancho.
+ * El desplazamiento es por pieza, con imán, y se detiene antes de que una cruce
+ * el centro de la pantalla: así siempre hay una centrada de verdad, nunca dos a
+ * medias. La primera arranca centrada porque a sus lados hay un margen que se
+ * calcula al medir (mitad de pantalla menos ancho de pieza).
+ *
+ * No usa `scroll-snap`: el imán entra al soltar, para que quede centrada la más
+ * cercana al centro, no la que encuentre el navegador. Todo se mide con los
+ * desplazamientos de las piezas, no con la distancia entre centros: así el aire
+ * entre ellas no se da por supuesto.
+ *
+ * Arrastre: tampoco usa el arrastre del navegador, que pinta su propia imagen y
+ * no se puede asistir. Aquí el gesto se sigue con eventos de puntero, la pieza
+ * se despega como una tarjeta que sigue al cursor y las demás se apartan solas
+ * (el orden se avisa en vivo y el salto se disuelve con una animación FLIP). El
+ * carril no sabe qué pinta dentro: mide sus hijos directos, sean cajas o
+ * cualquier otra cosa, y no toca su contenido.
+ *
+ * El trabajo va repartido por hooks: el imán y la rueda (`usarImpas`), las
+ * medidas (`usarMedidas`), el centrado y el FLIP (`usarDesplazamiento`) y el
+ * gesto de puntero (`usarArrastre`). Aquí quedan los refs compartidos, la
+ * pieza centrada y el teclado. */
+import { useCallback, useEffect, useRef, type ReactNode } from 'react';
+import type { Gesto } from './carril/tipos';
+import { usarArrastre } from './carril/usarArrastre';
+import { usarDesplazamiento } from './carril/usarDesplazamiento';
+import { usarImpas } from './carril/usarImpas';
+import { usarMedidas } from './carril/usarMedidas';
 
 interface Props {
-  /** Cuántas cajas hay: al cambiar cambia el margen de los extremos. */
-  total: number;
   children: ReactNode;
+  /** Pieza que debe quedar centrada. Sin esto manda el propio carril. */
+  indiceActivo?: number;
+  /** Avisa de la pieza que acaba centrada, para reaccionar fuera. */
+  onActiva?: (indice: number) => void;
+  /** Se llama en vivo al cruzar otra pieza: el padre reordena y el carril
+   *  anima el salto. Sin esto no hay arrastre. */
+  onMover?: (movida: string, destino: string) => void;
+  /** El arrastre terminó: es el momento de guardar el orden, no antes. */
+  onSoltar?: () => void;
+  /** Una pieza que no se arrastra ni sirve de destino. */
+  fija?: (pieza: HTMLElement) => boolean;
+  /** Nombre accesible: se entra con Tab y se recorre con las flechas. */
+  etiqueta?: string;
 }
 
-export function Carril({ total, children }: Props) {
+export function Carril({
+  children,
+  indiceActivo,
+  onActiva,
+  onMover,
+  onSoltar,
+  fija,
+  etiqueta = 'Cajas',
+}: Props) {
   const pista = useRef<HTMLDivElement>(null);
-  const temporizador = useRef<number | undefined>(undefined);
-
-  const cajas = () => [...(pista.current?.querySelectorAll<HTMLElement>(':scope > .caja') ?? [])];
-
-  /** Centro de una caja en coordenadas del contenido (sin descontar el scroll). */
-  const centro = (caja: HTMLElement) => caja.offsetLeft + caja.offsetWidth / 2;
-
-  /** Lleva una caja al centro; si el carril no llega hasta ahí, a su límite. */
-  const irA = (indice: number, suave: boolean) => {
-    const nodo = pista.current;
-    const caja = cajas()[indice];
-    if (!nodo || !caja) return;
-    const limite = Math.max(0, nodo.scrollWidth - nodo.clientWidth);
-    const x = Math.min(limite, Math.max(0, centro(caja) - nodo.clientWidth / 2));
-    nodo.scrollTo({ left: x, behavior: suave ? 'smooth' : 'auto' });
-  };
-
-  // El margen lateral es lo que hace que la primera caja quede centrada sin
-  // poder rodar más allá: mitad de pantalla menos mitad de caja.
+  /** El imán va moviendo el carril y eso también emite `scroll`: sin esta
+   *  marca, cada vuelta reprogramaría el temporizador y no se posaría nunca. */
+  const moviendo = useRef(false);
+  /** Índice de la pieza centrada: es lo que se restaura al redimensionar. */
+  const centrada = useRef(0);
+  /** Arrastre en curso, si lo hay: congela el imán mientras dura. */
+  const gesto = useRef<Gesto | null>(null);
+  // El callback se lee por referencia para que su identidad no obligue a
+  // reenganchar los escuchadores en cada render del padre.
+  const alActivar = useRef(onActiva);
+  const alMover = useRef(onMover);
+  const alSoltar = useRef(onSoltar);
+  const esFija = useRef(fija);
+  const centrarRef = useRef<(indice: number, suave: boolean) => void>(() => {});
+  /** Colocar la copia del arrastre: lo usa también la animación FLIP. */
+  const colocarRef = useRef<((gesto: Gesto, x: number, y: number) => void) | null>(null);
   useEffect(() => {
-    const nodo = pista.current;
-    if (!nodo || !total) return;
-    const medir = () => {
-      const caja = cajas()[0];
-      if (!caja) return;
-      nodo.style.setProperty('--margen-carril', `${Math.max(0, (nodo.clientWidth - caja.offsetWidth) / 2)}px`);
-      irA(0, false);
-    };
-    medir();
-    window.addEventListener('resize', medir);
-    return () => window.removeEventListener('resize', medir);
-  }, [total]);
+    alActivar.current = onActiva;
+    alMover.current = onMover;
+    alSoltar.current = onSoltar;
+    esFija.current = fija;
+  });
 
-  /** Tras soltar, la caja que contiene el centro —o la más cercana— se centra. */
-  const imantar = () => {
-    const nodo = pista.current;
-    if (!nodo) return;
-    const mitad = nodo.scrollLeft + nodo.clientWidth / 2;
-    let elegida = 0;
-    let menor = Infinity;
-    cajas().forEach((caja, indice) => {
-      const distancia = Math.abs(centro(caja) - mitad);
-      if (distancia < menor) {
-        menor = distancia;
-        elegida = indice;
-      }
-    });
-    irA(elegida, true);
-  };
+  /** Los hijos directos son las piezas; el carril no mira su clase ni su tipo. */
+  const piezas = useCallback(
+    (): HTMLElement[] => (pista.current ? [...(pista.current.children as HTMLCollectionOf<HTMLElement>)] : []),
+    [],
+  );
 
-  const aplazar = () => {
-    window.clearTimeout(temporizador.current);
-    temporizador.current = window.setTimeout(imantar, ESPERA);
-  };
+  /** Centro de una pieza en coordenadas del contenido (sin descontar el scroll). */
+  const centro = useCallback((pieza: HTMLElement) => pieza.offsetLeft + pieza.offsetWidth / 2, []);
 
-  useEffect(() => () => window.clearTimeout(temporizador.current), []);
+  /** Lleva una pieza al centro; si el carril no llega hasta ahí, a su límite. */
+  const centrar = useCallback(
+    (indice: number, suave: boolean) => {
+      const nodo = pista.current;
+      const pieza = piezas()[indice];
+      if (!nodo || !pieza) return;
+      const limite = Math.max(0, nodo.scrollWidth - nodo.clientWidth);
+      const x = Math.min(limite, Math.max(0, centro(pieza) - nodo.clientWidth / 2));
+      // Ya está ahí: un `scrollTo` al mismo sitio no aporta y, en suave, deja
+      // la marca de movimiento puesta sin que llegue ningún evento de scroll.
+      if (Math.abs(nodo.scrollLeft - x) < 1) return;
+      if (suave) moviendo.current = true;
+      nodo.scrollTo({ left: x, behavior: suave ? 'smooth' : 'auto' });
+    },
+    [piezas, centro],
+  );
+
+  /** Fija qué pieza manda y solo avisa cuando cambia de verdad. */
+  const marcar = useCallback((indice: number) => {
+    if (centrada.current === indice) return;
+    centrada.current = indice;
+    alActivar.current?.(indice);
+  }, []);
+
+  const { iman, aplazar, alRodar } = usarImpas({ pista, piezas, centro, marcar, centrar, moviendo });
+
+  usarMedidas({ pista, piezas, centrar, centrada, gesto });
+  usarDesplazamiento({ pista, piezas, centrar, centrarRef, gesto, colocarRef, centrada, indiceActivo });
+  usarArrastre({ pista, piezas, centro, aplazar, iman, gesto, colocarRef, alMover, alSoltar, esFija });
 
   return (
     <div
-      className="carril"
+      className={`carril${onMover ? ' carril--movible' : ''}`}
       ref={pista}
-      // Rueda vertical sobre una fila: lo natural es que mueva el carril.
-      onWheel={(evento) => {
-        const nodo = pista.current;
-        if (!nodo || Math.abs(evento.deltaX) > Math.abs(evento.deltaY)) return;
-        nodo.scrollLeft += evento.deltaY;
-        aplazar();
+      role="group"
+      aria-label={etiqueta}
+      // Se entra con Tab para poder recorrerlo con el teclado; las flechas solo
+      // se atienden cuando el foco es del carril, no de un campo de dentro.
+      tabIndex={0}
+      onKeyDown={(evento) => {
+        if (evento.target !== pista.current) return;
+        const paso = evento.key === 'ArrowRight' ? 1 : evento.key === 'ArrowLeft' ? -1 : 0;
+        const salto =
+          evento.key === 'Home' ? 0 : evento.key === 'End' ? piezas().length - 1 : centrada.current + paso;
+        if (!paso && !['Home', 'End'].includes(evento.key)) return;
+        evento.preventDefault();
+        // Un imán pendiente de un gesto anterior saltaría a mitad de este
+        // desplazamiento y centraría la pieza por la que se pasa: se descarta.
+        window.clearTimeout(iman.current);
+        const destino = Math.min(piezas().length - 1, Math.max(0, salto));
+        marcar(destino);
+        centrar(destino, true);
       }}
-      onScroll={aplazar}
+      onScroll={alRodar}
     >
       {children}
     </div>

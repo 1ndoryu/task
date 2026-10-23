@@ -33,11 +33,16 @@ interface Props {
   onCrear: (fila: NuevaFila) => void;
   /** La pestaña de completados no da de alta: ahí no hay nada que añadir. */
   oculto: boolean;
+  /** Caja separada: solo da de alta esa clase de fila y la otra no se ofrece. */
+  solo?: 'tareas' | 'habitos';
 }
 
-export function NuevaFila({ grupo, grupos, colores, onCrear, oculto }: Props) {
+export function NuevaFila({ grupo, grupos, colores, onCrear, oculto, solo }: Props) {
   const [texto, setTexto] = useState('');
-  const [tipo, setTipo] = useState<'tarea' | 'habito'>('tarea');
+  const [elegido, setTipo] = useState<'tarea' | 'habito'>('tarea');
+  // Con la caja fijada a una clase, manda la caja: el estado no la cambia (el
+  // alta es el mismo componente al saltar de pestaña y conservaría el tipo).
+  const tipo = solo === 'habitos' ? 'habito' : solo === 'tareas' ? 'tarea' : elegido;
   const [prioridad, setPrioridad] = useState<NivelPrioridad>('media');
   const [frecuencia, setFrecuencia] = useState<FrecuenciaDetalle>(() => frecuenciaDe(SIN_HABITO));
   // La pestaña manda, pero se puede apuntar a otro grupo sin cambiar de vista.
@@ -111,17 +116,24 @@ export function NuevaFila({ grupo, grupos, colores, onCrear, oculto }: Props) {
 
       {/* Qué se crea, al final de la fila: casilla para tarea, vuelta para
           hábito. Es lo último que se elige, porque lo normal es escribir el
-          texto y dejarlo como tarea. */}
-      <Menu
-        etiqueta={tipo === 'tarea' ? <IconoTarea /> : <IconoHabito />}
-        titulo={tipo === 'tarea' ? 'Tarea' : 'Hábito'}
-        claseBoton="barra__boton barra__icono"
-        items={[
-          { id: 'tarea', etiqueta: 'Tarea', activo: tipo === 'tarea', icono: <IconoTarea /> },
-          { id: 'habito', etiqueta: 'Hábito', activo: tipo === 'habito', icono: <IconoHabito /> },
-        ]}
-        onElegir={(id) => setTipo(id as 'tarea' | 'habito')}
-      />
+          texto y dejarlo como tarea. En una caja separada no hay elección: el
+          icono solo dice qué se va a crear. */}
+      {solo ? (
+        <span className="alta__tipo" aria-hidden="true">
+          {tipo === 'tarea' ? <IconoTarea /> : <IconoHabito />}
+        </span>
+      ) : (
+        <Menu
+          etiqueta={tipo === 'tarea' ? <IconoTarea /> : <IconoHabito />}
+          titulo={tipo === 'tarea' ? 'Tarea' : 'Hábito'}
+          claseBoton="barra__boton barra__icono"
+          items={[
+            { id: 'tarea', etiqueta: 'Tarea', activo: tipo === 'tarea', icono: <IconoTarea /> },
+            { id: 'habito', etiqueta: 'Hábito', activo: tipo === 'habito', icono: <IconoHabito /> },
+          ]}
+          onElegir={(id) => setTipo(id as 'tarea' | 'habito')}
+        />
+      )}
     </div>
   );
 }
