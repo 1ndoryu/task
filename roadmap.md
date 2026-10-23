@@ -22,6 +22,14 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
   Decidir la regla (urgencia, o prioridad con la urgencia como desempate) y
   aplicarla al punto; confirmar si el hábito mantiene la importancia.
 
+- [ ] `21AE-2` — **Dónde se ven las notas y los grupos archivados.**
+  El archivado ya existe (`archivada` en `notes`, `PUT /api/notes/{id}/archivo`,
+  lista `archivadas`, y los grupos archivados en `localStorage`), pero la vista
+  no los muestra: una nota archivada solo reaparece por API. Decidir el sitio
+  (un panel «Archivados» fijo al final, o dentro del menú de su tipo) y
+  desarchivar desde ahí. La usuaria lo dejó aparcado a propósito; preguntar la
+  forma antes de pintar.
+
 - [ ] `21AA-5` — **`frontend/src` nuevo sin type-check en el gate.**
   `npx tsc` está bloqueado por el guard del proyecto y `scripts/quality/stages.json`
   solo declara la etapa de Sentinel: el front se compila en la 89 pero nadie
