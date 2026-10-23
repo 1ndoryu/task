@@ -16,6 +16,16 @@ serde_json = "1"
 # [por que] Sin zona horaria ni formato extra: solo la marca de fecha de los respaldos.
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 
+# [por que] Solo para las esquinas redondeadas de la ventana sin marco: DWM las
+# declara y la región de GDI las recorta.
+[target."cfg(windows)".dependencies]
+windows = { version = "0.62", features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Dwm",
+  "Win32_Graphics_Gdi",
+  "Win32_UI_WindowsAndMessaging",
+] }
+
 # [por que] Binario pequeño y poca RAM: sin símbolos, LTO y un solo hilo de codegen.
 [profile.release]
 opt-level = "s"

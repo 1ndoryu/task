@@ -4,15 +4,92 @@
   <meta charset="utf-8">
   <title>PROYECTO TASKS</title>
   <style>
-    html, body { height: 100%; margin: 0; background: #111; color: #ddd; font-family: system-ui, sans-serif; }
-    main { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
-    p { margin: 0; max-width: 80ch; text-align: center; white-space: pre-wrap; }
+    /* Pantalla de carga: la ventana abre sin decoración de Windows y sin el
+     * front todavía (el backend tarda en levantar), así que esta página pone
+     * el fondo plano, la franja de arrastre y los tres botones. Los colores
+     * son los del front para que el cambio de página no dé un salto. */
+    :root {
+      color-scheme: light;
+      --fondo: #faf9f7;
+      --tinta: #1b1b19;
+      --tinta-tenue: #8a8781;
+      --sangre: #9c3d2e;
+      --velo: rgb(27 27 25 / 0.18);
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--fondo);
+      color: var(--tinta);
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      user-select: none;
+    }
+    main {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    img { width: 64px; height: 64px; opacity: 0.9; }
+    p { margin: 0; max-width: 70ch; text-align: center; white-space: pre-wrap; }
+    #estado { color: var(--tinta-tenue); }
+
+    /* Botones de la ventana, en su sitio de siempre: arriba a la derecha. */
+    .ventana { position: fixed; top: 0; right: 0; display: flex; height: 1.75rem; }
+    .ventana button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.75rem;
+      padding: 0;
+      border: 0;
+      background: none;
+      color: var(--tinta-tenue);
+      font: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .ventana button:hover { background: var(--velo); color: var(--tinta); }
+    .ventana button.cerrar:hover { background: var(--sangre); color: var(--fondo); }
+
+    /* La franja que arrastra: solo la zona de arriba, para no robar clics. */
+    .franja { position: fixed; top: 0; left: 0; right: 8.25rem; height: 1.75rem; }
+
+    /* Sin el API de Tauri (una página abierta en un navegador) los controles
+     * no sirven: se esconden en vez de quedarse mudos. */
+    body:not(.tauri) .ventana,
+    body:not(.tauri) .franja { display: none; }
+    body:not(.tauri) main { padding-top: 0; }
   </style>
 </head>
 <body>
+  <div class="franja" data-tauri-drag-region></div>
+  <div class="ventana">
+    <button type="button" title="Minimizar" aria-label="Minimizar" data-accion="minimize">&#x2013;</button>
+    <button type="button" title="Maximizar" aria-label="Maximizar" data-accion="toggleMaximize">&#x25A1;</button>
+    <button type="button" class="cerrar" title="Cerrar" aria-label="Cerrar" data-accion="close">&#x2715;</button>
+  </div>
   <main>
+    <img src="gato.png" alt="">
     <p>PROYECTO TASKS</p>
     <p id="estado">Arrancando…</p>
   </main>
+  <script>
+    /* Los botones de la ventana usan el API global de Tauri, que aquí sí está
+     * (la página la sirve la propia app). `estado` lo escribe el lanzador. */
+    const api = window.__TAURI__ && window.__TAURI__.window;
+    if (api) {
+      document.body.classList.add('tauri');
+      const ventana = api.getCurrentWindow();
+      for (const boton of document.querySelectorAll('.ventana button')) {
+        boton.addEventListener('click', () => ventana[boton.dataset.accion]());
+      }
+    }
+  </script>
 </body>
 </html>

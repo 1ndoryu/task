@@ -66,10 +66,88 @@ impl Ajustes {
     }
 }
 
+/* Esquinas redondeadas de la ventana sin bordes. Windows 11 solo redondea
+ * las ventanas que llevan marco, y a la nuestra le pedimos el redondeo a DWM.
+ * Va en el lanzador y no en el front porque es cosa del sistema: así también
+ * están redondeadas mientras se ve la pantalla de espera. */
+#[cfg(windows)]
+mod esquinas {
+    use windows::Win32::Foundation::HWND;
+    use windows::Win32::Graphics::Dwm::{
+        DwmSetWindowAttribute, DWMWA_WINDOW_CORNER_PREFERENCE, DWMWCP_ROUND,
+    };
+
+    /// Radio del recorte, en píxeles lógicos (el de Windows 11).
+    const RADIO: f64 = 8.0;
+
+    pub fn aplicar(ventana: &tauri::WebviewWindow) {
+        // [por que] El HWND viaja por `isize` para no atarse a la versión del crate
+        // `windows` que use Tauri por dentro.
+        let Ok(handle) = ventana.hwnd() else { return };
+        let hwnd = HWND(handle.0 as isize as *mut core::ffi::c_void);
+
+        // DWM: en Windows 11 redondea por su cuenta. En Windows 10 no existe el
+        // atributo, falla y no pasa nada: el recorte de abajo cubre ese caso.
+        let preferencia = DWMWCP_ROUND;
+        unsafe {
+            let _ = DwmSetWindowAttribute(
+                hwnd,
+                DWMWA_WINDOW_CORNER_PREFERENCE,
+                &preferencia as *const _ as *const core::ffi::c_void,
+                core::mem::size_of::<i32>() as u32,
+            );
+        }
+
+        let redondear = !ventana.is_maximized().unwrap_or(false);
+        recortar(redondear, ventana.scale_factor().unwrap_or(1.0), hwnd);
+    }
+
+    /// Recorte real de la ventana: DWM redondea el cristal, pero el área que
+    /// Windows cree de la ventana sigue cuadrada —sin esto, la esquina muestra
+    /// el fondo de la propia ventana en vez del escritorio—. Maximizada se quita,
+    /// que ahí las esquinas son las de la pantalla.
+    pub fn recortar(redondear: bool, escala: f64, hwnd: HWND) {
+        use windows::Win32::Graphics::Gdi::{CreateRoundRectRgn, SetWindowRgn};
+        use windows::Win32::UI::WindowsAndMessaging::GetClientRect;
+
+        let mut rect = Default::default();
+        if !redondear || unsafe { GetClientRect(hwnd, &mut rect) }.is_err() {
+            unsafe {
+                SetWindowRgn(hwnd, None, true);
+            }
+            return;
+        }
+        let radio = (RADIO * escala).round() as i32;
+        // +1: la región es exclusiva por la derecha y por abajo.
+        unsafe {
+            let region = CreateRoundRectRgn(0, 0, rect.right + 1, rect.bottom + 1, radio, radio);
+            SetWindowRgn(hwnd, Some(region), true);
+        }
+    }
+}
+
 fn main() {
     let construida = tauri::Builder::default()
         .manage(Hijos::default())
+        // [por que] La región de recorte se queda con el tamaño viejo: se rehace
+        // con cada redimensionado, y maximizar y restaurar entran por aquí.
+        .on_window_event(|ventana, evento| {
+            #[cfg(windows)]
+            if matches!(evento, tauri::WindowEvent::Resized(_)) {
+                if let Ok(handle) = ventana.hwnd() {
+                    esquinas::recortar(
+                        !ventana.is_maximized().unwrap_or(false),
+                        ventana.scale_factor().unwrap_or(1.0),
+                        windows::Win32::Foundation::HWND(handle.0 as isize as *mut core::ffi::c_void),
+                    );
+                }
+            }
+        })
         .setup(|app| {
+            #[cfg(windows)]
+            if let Some(ventana) = app.get_webview_window("main") {
+                esquinas::aplicar(&ventana);
+            }
             let app_handle = app.handle().clone();
             // [por que] El arranque espera a puertos; va en un hilo para que la ventana aparezca ya.
             thread::spawn(move || {
