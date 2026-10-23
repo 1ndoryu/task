@@ -8,8 +8,8 @@ use validator::Validate;
 use crate::errors::AppError;
 use crate::middleware::AuthUser;
 use crate::models::{
-    CreateNoteFolderRequest, CreateNoteRequest, Note, NoteFolder, PaginatedNotes,
-    UpdateNoteFolderRequest, UpdateNoteRequest,
+    ArchiveNoteRequest, CreateNoteFolderRequest, CreateNoteRequest, Note, NoteFolder,
+    PaginatedNotes, UpdateNoteFolderRequest, UpdateNoteRequest,
 };
 use crate::services::NoteService;
 use crate::AppState;
@@ -60,6 +60,9 @@ pub struct NoteListQuery {
     #[serde(default)]
     #[validate(length(max = 100))]
     pub search: Option<String>,
+    /// `true` lista las archivadas; por defecto, solo las vivas.
+    #[serde(default)]
+    pub archivadas: bool,
 }
 
 fn default_page() -> i64 {
@@ -172,6 +175,31 @@ pub async fn move_note(
     ))
 }
 
+/// Archivar una nota, o devolverla a la lista de vivas
+#[utoipa::path(
+    put,
+    tag = "notes",
+    path = "/api/notes/{id}/archivo",
+    params(("id" = Uuid, Path, description = "ID de la nota")),
+    request_body = ArchiveNoteRequest,
+    responses(
+        (status = 200, description = "Estado de archivo aplicado", body = Note),
+        (status = 404, description = "Nota no encontrada", body = ErrorResponse),
+        (status = 401, description = "No autorizado", body = ErrorResponse)
+    ),
+    security(("session_cookie" = []))
+)]
+pub async fn archive_note(
+    State(state): State<AppState>,
+    auth: AuthUser,
+    Path(id): Path<Uuid>,
+    Json(req): Json<ArchiveNoteRequest>,
+) -> Result<Json<Note>, AppError> {
+    Ok(Json(
+        NoteService::archivar(&state.pool, id, auth.user_id, req.archivada).await?,
+    ))
+}
+
 /// Obtener una nota por ID
 #[utoipa::path(
     get,
@@ -223,6 +251,7 @@ pub async fn list_notes(
         params.per_page,
         params.folder_id,
         params.search.as_deref(),
+        params.archivadas,
     )
     .await?;
     Ok(Json(notes))
@@ -290,6 +319,7 @@ pub fn routes(state: &AppState) -> Router<AppState> {
             get(get_note).put(update_note).delete(delete_note),
         )
         .route("/notes/:id/folder", axum::routing::put(move_note))
+        .route("/notes/:id/archivo", axum::routing::put(archive_note))
         /* [249A-1] Cuota del grupo escritura (IP/min): ver `auth.rs`. */
         .route_layer(axum::middleware::from_fn_with_state(
             (

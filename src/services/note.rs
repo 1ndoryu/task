@@ -38,12 +38,14 @@ impl NoteService {
         per_page: i64,
         folder_id: Option<Uuid>,
         search: Option<&str>,
+        archivadas: bool,
     ) -> Result<PaginatedNotes, AppError> {
         if let Some(folder_id) = folder_id {
             ensure_folder(pool, folder_id, user_id).await?;
         }
         let (notes, total) =
-            NoteRepository::list(pool, user_id, page, per_page, folder_id, search).await?;
+            NoteRepository::list(pool, user_id, page, per_page, folder_id, search, archivadas)
+                .await?;
         Ok(PaginatedNotes {
             items: notes,
             total,
@@ -67,6 +69,18 @@ impl NoteService {
         )
         .await?
         .ok_or_else(|| AppError::NotFound("Nota no encontrada".into()))
+    }
+
+    /// Archivar y recuperar comparten camino: solo cambia el signo.
+    pub async fn archivar(
+        pool: &PgPool,
+        note_id: Uuid,
+        user_id: Uuid,
+        archivada: bool,
+    ) -> Result<Note, AppError> {
+        NoteRepository::archivar(pool, note_id, user_id, archivada)
+            .await?
+            .ok_or_else(|| AppError::NotFound("Nota no encontrada".into()))
     }
 
     pub async fn delete(pool: &PgPool, note_id: Uuid, user_id: Uuid) -> Result<(), AppError> {

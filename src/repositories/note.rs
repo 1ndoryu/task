@@ -20,7 +20,7 @@ impl NoteRepository {
         sqlx::query_as::<_, Note>(
             "INSERT INTO notes (id, user_id, folder_id, title, content) \
              VALUES ($1, $2, $3, $4, $5) \
-             RETURNING id, user_id, folder_id, title, content, created_at, updated_at",
+             RETURNING id, user_id, folder_id, title, content, archived_at, created_at, updated_at",
         )
         .bind(id)
         .bind(user_id)
@@ -37,7 +37,7 @@ impl NoteRepository {
         user_id: Uuid,
     ) -> Result<Option<Note>, sqlx::Error> {
         sqlx::query_as::<_, Note>(
-            "SELECT id, user_id, folder_id, title, content, created_at, updated_at \
+            "SELECT id, user_id, folder_id, title, content, archived_at, created_at, updated_at \
              FROM notes WHERE id = $1 AND user_id = $2",
         )
         .bind(id)
@@ -53,13 +53,17 @@ impl NoteRepository {
         per_page: i64,
         folder_id: Option<Uuid>,
         search: Option<&str>,
+        archivadas: bool,
     ) -> Result<(Vec<Note>, i64), sqlx::Error> {
         let offset = page.saturating_sub(1).saturating_mul(per_page);
         let escaped_search = search.map(escape_like_literal);
 
+        // `archivadas` es el único criterio de la columna archivada: las vivas
+        // y las archivadas nunca se mezclan en una misma lista.
         let notes = sqlx::query_as::<_, Note>(
-            "SELECT id, user_id, folder_id, title, content, created_at, updated_at \
+            "SELECT id, user_id, folder_id, title, content, archived_at, created_at, updated_at \
              FROM notes WHERE user_id = $1 \
+               AND (archived_at IS NOT NULL) = $6::bool \
                AND ($4::uuid IS NULL OR folder_id = $4) \
                AND ($5::text IS NULL OR title ILIKE '%' || $5 || '%' ESCAPE '\\' OR content ILIKE '%' || $5 || '%' ESCAPE '\\') \
              ORDER BY created_at DESC LIMIT $2 OFFSET $3",
@@ -69,18 +73,21 @@ impl NoteRepository {
         .bind(offset)
         .bind(folder_id)
         .bind(escaped_search.as_deref())
+        .bind(archivadas)
         .fetch_all(pool)
         .await?;
 
         let (total,): (i64,) = sqlx::query_as(
             "SELECT COUNT(*) FROM notes
              WHERE user_id = $1
+               AND (archived_at IS NOT NULL) = $4::bool
                AND ($2::uuid IS NULL OR folder_id = $2)
                AND ($3::text IS NULL OR title ILIKE '%' || $3 || '%' ESCAPE '\\' OR content ILIKE '%' || $3 || '%' ESCAPE '\\')",
         )
             .bind(user_id)
             .bind(folder_id)
             .bind(escaped_search.as_deref())
+            .bind(archivadas)
             .fetch_one(pool)
             .await?;
 
@@ -100,10 +107,32 @@ impl NoteRepository {
                  content = COALESCE($2, content), \
                  updated_at = NOW() \
              WHERE id = $3 AND user_id = $4 \
-             RETURNING id, user_id, folder_id, title, content, created_at, updated_at",
+             RETURNING id, user_id, folder_id, title, content, archived_at, created_at, updated_at",
         )
         .bind(title)
         .bind(content)
+        .bind(id)
+        .bind(user_id)
+        .fetch_optional(pool)
+        .await
+    }
+
+    /// Archiva o desarchiva: la fecha es el estado, así que desarchivar es
+    /// volver a `NULL` y no un campo aparte que pueda contradecirla.
+    pub async fn archivar(
+        pool: &PgPool,
+        id: Uuid,
+        user_id: Uuid,
+        archivada: bool,
+    ) -> Result<Option<Note>, sqlx::Error> {
+        sqlx::query_as::<_, Note>(
+            "UPDATE notes \
+             SET archived_at = CASE WHEN $1 THEN NOW() ELSE NULL END, \
+                 updated_at = NOW() \
+             WHERE id = $2 AND user_id = $3 \
+             RETURNING id, user_id, folder_id, title, content, archived_at, created_at, updated_at",
+        )
+        .bind(archivada)
         .bind(id)
         .bind(user_id)
         .fetch_optional(pool)
@@ -203,7 +232,7 @@ impl NoteRepository {
         sqlx::query_as::<_, Note>(
             "UPDATE notes SET folder_id = $1, updated_at = NOW()
              WHERE id = $2 AND user_id = $3
-             RETURNING id, user_id, folder_id, title, content, created_at, updated_at",
+             RETURNING id, user_id, folder_id, title, content, archived_at, created_at, updated_at",
         )
         .bind(folder_id)
         .bind(note_id)

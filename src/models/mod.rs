@@ -31,8 +31,8 @@ pub use habit_history::{
     HabitHistorySummaryDay, MarkHabitDayRequest,
 };
 pub use note::{
-    CreateNoteFolderRequest, CreateNoteRequest, Note, NoteFolder, PaginatedNotes, PaginationParams,
-    UpdateNoteFolderRequest, UpdateNoteRequest,
+    ArchiveNoteRequest, CreateNoteFolderRequest, CreateNoteRequest, Note, NoteFolder,
+    PaginatedNotes, PaginationParams, UpdateNoteFolderRequest, UpdateNoteRequest,
 };
 pub use notifications::*;
 pub use reminder::{

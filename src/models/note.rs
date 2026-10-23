@@ -13,6 +13,9 @@ pub struct Note {
     pub folder_id: Option<Uuid>,
     pub title: String,
     pub content: String,
+    /// Cuándo se archivó; `None` mientras la nota está viva. Archivar no borra:
+    /// el texto sigue ahí para una vista de archivadas.
+    pub archived_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -38,6 +41,13 @@ pub struct UpdateNoteRequest {
     pub title: Option<String>,
     #[validate(length(max = 10000))]
     pub content: Option<String>,
+}
+
+/// Request para archivar o recuperar una nota.
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct ArchiveNoteRequest {
+    /// `true` la archiva, `false` la devuelve a la lista de vivas.
+    pub archivada: bool,
 }
 
 /// Carpeta de notas propiedad del usuario.
