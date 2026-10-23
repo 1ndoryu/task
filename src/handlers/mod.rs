@@ -15,6 +15,7 @@ mod backup;
 mod collaboration;
 mod dashboard;
 mod feedback;
+mod frontend_estatico;
 mod habit_history;
 mod health;
 mod notes;
@@ -28,18 +29,14 @@ mod storage;
 mod subscription;
 mod timeline;
 
-use axum::body::Body;
 use axum::error_handling::HandleErrorLayer;
-use axum::http::{header::CONTENT_TYPE, HeaderName, HeaderValue, Request, StatusCode};
+use axum::http::StatusCode;
 use axum::middleware::from_fn_with_state;
-use axum::response::Response;
 use axum::Router;
 use std::time::Duration;
 use tower::{timeout::TimeoutLayer, BoxError, ServiceBuilder};
 use tower_http::cors::{AllowHeaders, AllowMethods, AllowOrigin, CorsLayer};
 use tower_http::limit::RequestBodyLimitLayer;
-use tower_http::services::ServeDir;
-use tower_http::set_header::SetResponseHeaderLayer;
 use tower_http::trace::TraceLayer;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -96,6 +93,7 @@ impl utoipa::Modify for SecurityAddon {
         notes::rename_folder,
         notes::delete_folder,
         notes::move_note,
+        notes::archive_note,
         notes::get_note,
         notes::list_notes,
         notes::update_note,
@@ -220,6 +218,7 @@ impl utoipa::Modify for SecurityAddon {
         crate::models::CreateNoteFolderRequest,
         crate::models::UpdateNoteFolderRequest,
         notes::MoveNoteRequest,
+        crate::models::ArchiveNoteRequest,
         crate::models::UpdateNoteRequest,
         crate::models::PaginatedNotes,
         crate::models::DashboardReadResponse,
@@ -394,73 +393,13 @@ pub fn create_router(
         .layer(cors)
         .with_state(state);
 
+    // El reparto de archivos del front y las cabeceras comunes viven en
+    // `frontend_estatico`: aquí solo se decide si hay front compilado.
     let router = match config.frontend_dist {
-        Some(frontend_dist) => {
-            let index = std::path::Path::new(&frontend_dist).join("index.html");
-            let static_dir = ServeDir::new(frontend_dist).append_index_html_on_directories(true);
-            let fallback = tower::service_fn(move |request: Request<Body>| {
-                let index = index.clone();
-                let static_dir = static_dir.clone();
-                async move {
-                    /* `ServeDir` declara `Error = Infallible`: la respuesta
-                     * siempre es `Ok`. Se consume el `Result` con un `match`
-                     * exhaustivo (`match imposible {}`) en lugar de paniquear. */
-                    let static_response = match tower::ServiceExt::oneshot(static_dir, request)
-                        .await
-                    {
-                        Ok(respuesta) => respuesta,
-                        Err(imposible) => match imposible {},
-                    };
-                    if static_response.status() != axum::http::StatusCode::NOT_FOUND {
-                        let (parts, body) = static_response.into_parts();
-                        return Ok::<_, std::convert::Infallible>(Response::from_parts(
-                            parts,
-                            Body::new(body),
-                        ));
-                    }
-                    /* Sin `Response::builder()`: el status y la cabecera son
-                     * constantes válidas, así que no hay `Result` que gestionar
-                     * ni motivo para un `expect`. */
-                    let response = match tokio::fs::read(index).await {
-                        Ok(contents) => {
-                            let mut respuesta = Response::new(Body::from(contents));
-                            respuesta.headers_mut().insert(
-                                CONTENT_TYPE,
-                                HeaderValue::from_static("text/html; charset=utf-8"),
-                            );
-                            respuesta
-                        }
-                        Err(_) => {
-                            let mut respuesta = Response::new(Body::empty());
-                            *respuesta.status_mut() = axum::http::StatusCode::NOT_FOUND;
-                            respuesta
-                        }
-                    };
-                    Ok::<_, std::convert::Infallible>(response)
-                }
-            });
-            router.fallback_service(fallback)
-        }
+        Some(dist) => frontend_estatico::servir_front(router, dist),
         None => router,
     };
-
-    Ok(router
-        .layer(SetResponseHeaderLayer::if_not_present(
-            HeaderName::from_static("x-content-type-options"),
-            HeaderValue::from_static("nosniff"),
-        ))
-        .layer(SetResponseHeaderLayer::if_not_present(
-            HeaderName::from_static("x-frame-options"),
-            HeaderValue::from_static("DENY"),
-        ))
-        .layer(SetResponseHeaderLayer::if_not_present(
-            HeaderName::from_static("referrer-policy"),
-            HeaderValue::from_static("strict-origin-when-cross-origin"),
-        ))
-        .layer(SetResponseHeaderLayer::if_not_present(
-            HeaderName::from_static("permissions-policy"),
-            HeaderValue::from_static("camera=(), microphone=(), geolocation=()"),
-        )))
+    Ok(frontend_estatico::cabeceras_seguridad(router))
 }
 
 fn api_routes(state: &AppState, agente_desactivado: bool) -> Router<AppState> {
