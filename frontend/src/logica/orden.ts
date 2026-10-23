@@ -25,8 +25,8 @@ export const PESTANA_COMPLETADOS = 'completados';
  * `grupoEjecucion` (`null` = sin grupo, la pestaña «Tareas»). */
 export type Grupo = string | null;
 
-/** Nombre con el que se guardan los grupos conocidos aunque hoy estén vacíos
- * (paridad con `gruposConocidos` del front original). */
+/** Nombre con el que se guardan los grupos conocidos aunque hoy estén vacíos:
+ *  un grupo sin filas sigue siendo una caja. */
 export const CLAVE_GRUPOS = 'tareas-nuevo:v1:grupos';
 
 /* Los nombres de grupo son texto libre del usuario: se recortan y se ignoran
@@ -36,28 +36,6 @@ export function limpiarGrupo(crudo: unknown): Grupo {
   const nombre = crudo.trim();
   // «Completados» es de sistema: un grupo con ese nombre no tendría pestaña.
   return nombre && nombre.toLowerCase() !== PESTANA_COMPLETADOS ? nombre : null;
-}
-
-/** Pestañas de la lista: «Tareas» (sin grupo), los grupos y, al final, la de
- * completados. Los grupos conservan el orden en que se movieron a mano; los
- * que no están en `ordenGuardado` entran al final, en alfabético. */
-export function pestanasDeGrupos(
-  gruposDeFilas: Iterable<Grupo>,
-  conocidos: Iterable<string>,
-  ordenGuardado: Iterable<string> = [],
-): { id: string; etiqueta: string }[] {
-  const nombres = new Set<string>(conocidos);
-  for (const grupo of gruposDeFilas) if (grupo) nombres.add(grupo);
-  const fijos = new Set<string>();
-  for (const nombre of ordenGuardado) if (nombres.has(nombre)) fijos.add(nombre);
-  const nuevos = [...nombres]
-    .filter((nombre) => !fijos.has(nombre))
-    .sort((a, b) => a.localeCompare(b, 'es'));
-  return [
-    { id: '', etiqueta: 'Tareas' },
-    ...[...fijos, ...nuevos].map((nombre) => ({ id: nombre, etiqueta: nombre })),
-    { id: PESTANA_COMPLETADOS, etiqueta: 'Completados' },
-  ];
 }
 
 const PESO_URGENCIA: Record<string, number> = {

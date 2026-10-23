@@ -54,6 +54,9 @@ export interface Habito {
   frecuencia?: Frecuencia | string | FrecuenciaDetalle;
   historialCompletados?: string[];
   historialPospuestos?: string[];
+  /** Primer día en que vuelve tras aplazarlo (`YYYY-MM-DD`, como el legacy).
+   *  Mientras sea futuro, el hábito no toca y se esconde de la lista. */
+  pospuestoHasta?: string;
   racha?: number;
   diasInactividad?: number;
   ultimoCompletado?: string | null;

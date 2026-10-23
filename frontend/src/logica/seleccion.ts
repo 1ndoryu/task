@@ -1,6 +1,7 @@
 /* Qué se pinta: tareas y hábitos en una sola lista, ordenados por el mismo
  * criterio (como el panel de ejecución del front original) y filtrados por la
  * pestaña activa. Lógica pura. */
+import { aplazadoHasta } from './aplazos';
 import { fechaLocal } from './fechas';
 import { tocaHoy } from './frecuencia';
 import { comparador, entradaDeHabito, entradaDeTarea, PESTANA_COMPLETADOS, type Grupo, type ModoOrden } from './orden';
@@ -15,6 +16,9 @@ export interface Vista {
   filas: Fila[];
   /** La pestaña muestra lo completado: las filas se pintan tachadas. */
   completados: boolean;
+  /** Los hábitos aplazados de toda la lista, por fecha de vuelta. Es el
+   *  contenido de la caja «Aplazado», viva en cualquier pestaña. */
+  aplazados: Fila[];
 }
 
 export function hechoHoy(habito: Habito, hoy: string): boolean {
@@ -41,8 +45,15 @@ export function seleccionar(
     orden: ModoOrden;
     /** Pestaña activa; `null` es la de «Tareas» (sin grupo). */
     grupo?: Grupo;
+    /** Pinta la pestaña de completados. Va aparte de `grupo` porque esa
+     *  pestaña recoge lo hecho de todos los grupos y su panel no lleva
+     *  ninguno: si dependiera de `grupo`, nunca se activaría. */
+    completados?: boolean;
     /** Esconder los hábitos ya cumplidos según su frecuencia (ajuste). */
     ocultarHabitos?: boolean;
+    /** Solo una clase de fila: el panel de hábitos de la vista separada. Sin
+     *  él, tareas y hábitos comparten lista como siempre. */
+    solo?: 'tareas' | 'habitos';
     hoy?: string;
     /** Tareas recién completadas que siguen en pantalla mientras salen.
      * La clave es `tarea<id>`, la misma que arma `claveFila` en la vista. */
@@ -50,7 +61,7 @@ export function seleccionar(
   },
 ): Vista {
   const hoy = opciones.hoy ?? fechaLocal();
-  const completados = opciones.grupo === PESTANA_COMPLETADOS;
+  const completados = opciones.completados ?? opciones.grupo === PESTANA_COMPLETADOS;
   const grupo = completados ? null : (opciones.grupo ?? null);
   const saliendo = (id: number) => opciones.saliendo?.has(`tarea${id}`) ?? false;
 
@@ -63,18 +74,35 @@ export function seleccionar(
       (completados ? t.completado : !t.completado || saliendo(t.id)) &&
       (completados || (enGrupo(t.grupoEjecucion, grupo) && (grupo !== null || t.proyectoId == null))),
   );
+  // Aplazado es un estado propio: el hábito no toca y no se queda en su pestaña
+  // (allí parecería pendiente); vive en la caja «Aplazado» hasta que vuelve.
+  const aplazadosDe = (h: Habito) => aplazadoHasta(h, hoy) !== null;
   const habitos = (completados ? datos.habitos.filter((h) => hechoHoy(h, hoy)) : datos.habitos.filter((h) => enGrupo(h.grupoEjecucion, grupo))).filter(
-    (h) => completados || !ocultarCompletado(h, hoy, opciones.ocultarHabitos ?? false),
+    (h) => completados || (!aplazadosDe(h) && !ocultarCompletado(h, hoy, opciones.ocultarHabitos ?? false)),
   );
+  // La caja «Aplazado» recoge los de todas las pestañas: lo que se pospone sale
+  // de su grupo, y buscarlo ahí sería no encontrarlo.
+  const aplazados: Fila[] = completados
+    ? []
+    : datos.habitos
+        .filter(aplazadosDe)
+        // Vuelve antes quien tiene la vuelta más cercana.
+        .sort((a, b) => (aplazadoHasta(a, hoy) ?? '').localeCompare(aplazadoHasta(b, hoy) ?? ''))
+        .map((habito) => ({ tipo: 'habito' as const, habito }));
 
+  // La vista separada pide una sola clase de fila; sin `solo`, van las dos.
   const pares = [
-    ...tareas.map((tarea) => ({ fila: { tipo: 'tarea', tarea } as Fila, entrada: entradaDeTarea(tarea) })),
-    ...habitos.map((habito) => ({ fila: { tipo: 'habito', habito } as Fila, entrada: entradaDeHabito(habito, hoy) })),
+    ...(opciones.solo === 'habitos'
+      ? []
+      : tareas.map((tarea) => ({ fila: { tipo: 'tarea', tarea } as Fila, entrada: entradaDeTarea(tarea) }))),
+    ...(opciones.solo === 'tareas'
+      ? []
+      : habitos.map((habito) => ({ fila: { tipo: 'habito', habito } as Fila, entrada: entradaDeHabito(habito, hoy) }))),
   ];
 
   // El comparador guarda los pesos calculados: se crea una sola vez.
   const comparar = comparador(opciones.orden, hoy);
   pares.sort((a, b) => comparar(a.entrada, b.entrada));
 
-  return { filas: pares.map((par) => par.fila), completados };
+  return { filas: pares.map((par) => par.fila), completados, aplazados };
 }

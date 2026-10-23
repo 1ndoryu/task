@@ -93,7 +93,7 @@ export function diaCorto(fecha: string): string {
 }
 
 /** `YYYY-MM-DD` más días, en calendario local. */
-function sumarDias(fecha: string, dias: number): string {
+export function sumarDias(fecha: string, dias: number): string {
   const base = new Date(`${fecha}T00:00:00`);
   base.setDate(base.getDate() + dias);
   return fechaLocal(base);
