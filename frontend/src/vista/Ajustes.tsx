@@ -5,12 +5,18 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import {
   COLORES_NIVEL,
+  FUENTE_MAXIMA,
+  FUENTE_MINIMA,
+  FUENTE_NOTA_MAXIMA,
+  FUENTE_NOTA_MINIMA,
+  FUENTE_NOTA_POR_DEFECTO,
+  FUENTE_POR_DEFECTO,
   type Altura,
   type AlcancePrivacidad,
-  type Fuente,
   type Preferencias,
   type Tema,
 } from '../logica/preferencias';
+import { CampoTamano } from './CampoTamano';
 import { ColoresNivel } from './ColoresNivel';
 import { PestanasLaterales } from './PestanasLaterales';
 
@@ -53,11 +59,36 @@ function Campo<T extends string>({
   );
 }
 
-const FUENTES: { id: Fuente; etiqueta: string }[] = [
-  { id: 'pequena', etiqueta: 'Pequeña' },
-  { id: 'normal', etiqueta: 'Normal' },
-  { id: 'grande', etiqueta: 'Grande' },
-];
+/** Una caja que se puede esconder: un interruptor con su nombre, su nota y sin
+ *  nada más. Todas las de este tipo viven en un solo bloque, porque juntas se
+ *  leen como lo que son —qué hay en pantalla— y sueltas alargaban la pestaña. */
+function CajaVisible({
+  nombre,
+  visible,
+  nota,
+  onCambiar,
+}: {
+  nombre: string;
+  visible: boolean;
+  nota: string;
+  onCambiar: (visible: boolean) => void;
+}) {
+  return (
+    <li className="casilla">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={visible}
+        className={`casilla__interruptor${visible ? ' casilla__interruptor--activo' : ''}`}
+        onClick={() => onCambiar(!visible)}
+      >
+        <span className="casilla__marca" aria-hidden="true" />
+        <span className="casilla__nombre">{nombre}</span>
+      </button>
+      <p className="campo__nota">{nota}</p>
+    </li>
+  );
+}
 
 const ALTURAS: { id: Altura; etiqueta: string }[] = [
   { id: 'compacta', etiqueta: 'Compacta' },
@@ -156,16 +187,22 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
           >
             {pestana === 'vista' && (
               <>
-                <Campo
+                <CampoTamano
                   titulo="Tamaño de la fuente"
                   valor={preferencias.fuente}
-                  opciones={FUENTES}
+                  minima={FUENTE_MINIMA}
+                  maxima={FUENTE_MAXIMA}
+                  porDefecto={FUENTE_POR_DEFECTO}
+                  muestra="Una tarea de la lista, con su subhábito debajo"
                   onElegir={(fuente) => onCambiar({ fuente })}
                 />
-                <Campo
+                <CampoTamano
                   titulo="Tamaño del texto de las notas"
                   valor={preferencias.fuenteNota}
-                  opciones={FUENTES}
+                  minima={FUENTE_NOTA_MINIMA}
+                  maxima={FUENTE_NOTA_MAXIMA}
+                  porDefecto={FUENTE_NOTA_POR_DEFECTO}
+                  muestra="Una nota se lee de corrido, sin filas ni casillas."
                   onElegir={(fuenteNota) => onCambiar({ fuenteNota })}
                   nota="Solo el texto de las notas: se lee de corrido y no tiene por qué seguir la talla de las filas."
                 />
@@ -186,7 +223,7 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
                   valor={preferencias.separarHabitos ? 'si' : 'no'}
                   opciones={SI_NO}
                   onElegir={(valor) => onCambiar({ separarHabitos: valor === 'si' })}
-                  nota="La caja «Tareas» se parte en dos: las tareas sueltas por un lado y los hábitos sin grupo por otro. En las pestañas, «Hábitos» estrena su propia pestaña."
+                  nota="La caja «Tareas» se parte en dos: las tareas sueltas por un lado y los hábitos sin grupo por otro. En las pestañas, «Hábitos» estrena la suya."
                 />
                 <Campo
                   titulo="Separar grupos en cajas"
@@ -195,6 +232,26 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
                   onElegir={(valor) => onCambiar({ separarGrupos: valor === 'si' })}
                   nota="Cada grupo pasa a su propia caja, en fila, con movimiento lateral. El grupo sigue siendo el mismo: cambia dónde se pinta."
                 />
+                {/* Lo que se puede quitar de en medio va junto: son la misma
+                    decisión —qué cajas quiero ver— y así no se pierden entre
+                    los ajustes de forma. */}
+                <div className="campo">
+                  <p className="campo__titulo">Cajas visibles</p>
+                  <ul className="casillas">
+                    <CajaVisible
+                      nombre="Aplazado"
+                      visible={preferencias.mostrarAplazados}
+                      onCambiar={(visible) => onCambiar({ mostrarAplazados: visible })}
+                      nota="Apagada desaparece la caja «Aplazado», también de las pestañas. Lo aplazado sigue aplazado: vuelve solo cuando llega su fecha."
+                    />
+                    <CajaVisible
+                      nombre="Completados"
+                      visible={preferencias.mostrarCompletados}
+                      onCambiar={(visible) => onCambiar({ mostrarCompletados: visible })}
+                      nota="Apagada desaparece la caja «Completados», también de las pestañas. Lo hecho sigue guardado: vuelve a verse al encenderla."
+                    />
+                  </ul>
+                </div>
                 <Campo
                   titulo="Tema"
                   valor={preferencias.tema}
@@ -227,6 +284,13 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
                   opciones={ALCANCES}
                   onElegir={(privacidadAlcance) => onCambiar({ privacidadAlcance })}
                   nota={preferencias.privacidad ? undefined : 'Solo se aplica con la privacidad activa.'}
+                />
+                <Campo
+                  titulo="Mostrar siempre la primera"
+                  valor={preferencias.primeraVisible ? 'si' : 'no'}
+                  opciones={SI_NO}
+                  onElegir={(valor) => onCambiar({ primeraVisible: valor === 'si' })}
+                  nota="Con la privacidad activa, la primera tarea o hábito de cada caja se lee sin pasar el ratón: sabes por dónde empieza la lista sin enseñar el resto."
                 />
               </>
             )}
