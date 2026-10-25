@@ -61,8 +61,18 @@ export function usarPaneles(d: Dependencias): Disposicion {
       gruposArchivados,
       ajustes.separarHabitos,
       hayAplazados,
+      ajustes.mostrarCompletados,
     );
-  }, [estado, gruposConocidos, notas, ordenPestanas, gruposArchivados, ajustes.separarHabitos, hayAplazados]);
+  }, [
+    estado,
+    gruposConocidos,
+    notas,
+    ordenPestanas,
+    gruposArchivados,
+    ajustes.separarHabitos,
+    hayAplazados,
+    ajustes.mostrarCompletados,
+  ]);
 
   // Solo los grupos: los menús de la fila y el alta no admiten una nota.
   const grupos = useMemo(() => paneles.filter((p) => p.tipo === 'tareas' && !p.fija).map((p) => p.id), [paneles]);
@@ -84,43 +94,42 @@ export function usarPaneles(d: Dependencias): Disposicion {
     return nombres;
   }, [estado, gruposConocidos]);
 
+  /** El orden de todos los paneles, tal como se ven. Es el espacio en el que se
+   *  mueven: también entran «Tareas», «Completados» y los de sistema, que se
+   *  arrastran igual. Los que no se pueden mover quedan fuera (`mueve`). */
+  const movibles = useMemo(() => paneles.filter((p) => p.mueve).map((p) => p.id), [paneles]);
+
   /** Orden tras un arrastre: se guarda al soltar, no a cada paso. El carril da
-   *  el índice en la fila de paneles; el orden guardado solo cuenta los
-   *  movibles, así que el destino se busca por id, no por número: soltar sobre
-   *  una fija (o fuera) manda al principio o al final. */
+   *  la posición del panel de destino en la lista, que es la misma que cuenta
+   *  `movibles`. */
   const moverPanel = useCallback(
     (movido: string, indice: number) => {
-      const ordenables = paneles.filter((p) => !p.fija).map((p) => p.id);
       const destinoPanel = paneles[indice];
-      const destino =
-        destinoPanel && !destinoPanel.fija
-          ? ordenables.indexOf(destinoPanel.id)
-          : indice <= 0
-            ? 0
-            : ordenables.length;
+      const destino = destinoPanel ? movibles.indexOf(destinoPanel.id) : -1;
       if (destino < 0) return;
-      d.setOrdenPestanas(moverA(ordenables, movido, destino));
+      d.setOrdenPestanas(moverA(movibles, movido, destino));
     },
-    [paneles, d],
+    [paneles, movibles, d],
   );
 
   /** Orden desde la fila de pestañas: se guarda en el acto, porque no hay
    *  gesto que diga cuándo terminó. */
   const moverPestana = useCallback(
     (movido: string, hasta: string) => {
-      // Solo se reordenan paneles movibles: «Tareas» y «Completados» tienen su
-      // sitio. El índice de destino es el del panel que se cruza.
-      const ordenables = paneles.filter((p) => !p.fija).map((p) => p.id);
-      const destino = ordenables.indexOf(hasta);
-      if (destino < 0 || movido === hasta) return;
-      const nuevo = moverA(ordenables, movido, destino);
+      if (movido === hasta) return;
+      // El índice de destino es el del panel que se cruza.
+      const destino = movibles.indexOf(hasta);
+      if (destino < 0) return;
+      const nuevo = moverA(movibles, movido, destino);
       d.setOrdenPestanas(nuevo);
       guardarOrdenPaneles(nuevo);
     },
-    [paneles, d],
+    [movibles, d],
   );
 
-  const guardarOrden = useCallback(() => guardarOrdenPaneles(ordenPestanas), [ordenPestanas]);
+  /** El carril pide guardar con el orden que ya está en la pantalla: se guarda
+   *  lo visible, no el estado guardado, que puede ir un paso por detrás. */
+  const guardarOrden = useCallback(() => guardarOrdenPaneles(paneles.map((p) => p.id)), [paneles]);
 
   /** Un panel borrado o archivado sale del orden guardado y, si estaba abierto,
    *  la lista vuelve a «Tareas»: su id no puede quedar vivo esperando a otra
