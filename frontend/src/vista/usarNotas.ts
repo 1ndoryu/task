@@ -36,8 +36,12 @@ export interface Notas {
   /** Crea una nota vacía y devuelve su id para centrar la caja. */
   crear: () => Promise<string | null>;
   borrar: (id: string) => void;
-  /** La saca de las cajas sin borrarla: se podrá recuperar desde el archivo. */
+  /** La saca de las cajas sin borrarla: aparece en el panel de archivados. */
   archivar: (id: string) => void;
+  /** Archivadas, para su panel: id y título, sin cuerpo. */
+  archivadas: { id: string; titulo: string }[];
+  /** La devuelve al final de las cajas y la quita de archivadas. */
+  recuperar: (id: string) => void;
 }
 
 export function usarNotas(): Notas {
@@ -45,6 +49,7 @@ export function usarNotas(): Notas {
   const [cuerpos, setCuerpos] = useState<Record<string, string>>({});
   const [cargando, setCargando] = useState(true);
   const [fallo, setFallo] = useState<string | null>(null);
+  const [archivadas, setArchivadas] = useState<{ id: string; titulo: string }[]>([]);
   // Temporizadores por nota: cada caja tiene su propia espera.
   const pendientes = useRef(new Map<string, number>());
   // Último texto de cada nota, para mandar lo escrito sin depender del estado.
@@ -65,6 +70,21 @@ export function usarNotas(): Notas {
       })
       .finally(() => {
         if (vigente) setCargando(false);
+      });
+    return () => {
+      vigente = false;
+    };
+  }, []);
+
+  // Las archivadas no son cajas: se cargan aparte, solo para su panel.
+  useEffect(() => {
+    let vigente = true;
+    leerNotas(true)
+      .then((notas) => {
+        if (vigente) setArchivadas(notas.map(resumen));
+      })
+      .catch(() => {
+        if (vigente) setFallo('No se pudieron leer las notas archivadas.');
       });
     return () => {
       vigente = false;
@@ -143,6 +163,7 @@ export function usarNotas(): Notas {
       setLista((previas) => previas.filter((n) => n.id !== id));
       archivarNota(id)
         .then(() => {
+          if (previa) setArchivadas((previas) => [...previas, previa]);
           setCuerpos((previos) => {
             const resto = { ...previos };
             delete resto[id];
@@ -159,6 +180,26 @@ export function usarNotas(): Notas {
     [lista],
   );
 
+  /** Vuelve a ser una caja, al final, con el cuerpo que trajo el servidor. Si
+   *  falla, sigue en el panel de archivados y se dice. */
+  const recuperar = useCallback(
+    (id: string) => {
+      const previa = archivadas.find((n) => n.id === id);
+      setArchivadas((previas) => previas.filter((n) => n.id !== id));
+      archivarNota(id, false)
+        .then((nota) => {
+          setLista((previas) => [...previas, resumen(nota)]);
+          setCuerpos((previos) => ({ ...previos, [nota.id]: nota.content }));
+          textos.current.set(nota.id, nota.content);
+        })
+        .catch(() => {
+          if (previa) setArchivadas((previas) => [...previas, previa]);
+          setFallo('Una nota no se pudo recuperar.');
+        });
+    },
+    [archivadas],
+  );
+
   const borrar = useCallback((id: string) => {
     setLista((previas) => previas.filter((n) => n.id !== id));
     setCuerpos((previos) => {
@@ -170,7 +211,20 @@ export function usarNotas(): Notas {
     void borrarNota(id).catch(() => setFallo('Una nota no se pudo borrar.'));
   }, []);
 
-  return { lista, cuerpos, cargando, fallo, escribir, confirmar, renombrar, crear, borrar, archivar };
+  return {
+    lista,
+    cuerpos,
+    cargando,
+    fallo,
+    escribir,
+    confirmar,
+    renombrar,
+    crear,
+    borrar,
+    archivar,
+    archivadas,
+    recuperar,
+  };
 }
 
 export type { Nota };
