@@ -19,13 +19,19 @@ export interface AccionesFila {
 }
 
 /** Nivel de la fila en el id común: la tarea ya lo trae y la importancia del
- * hábito llega como texto (`Muy Alta`), así que se traduce aquí. */
+ * hábito llega como texto (`Muy Alta`), así que se traduce aquí. El subhábito
+ * hereda el nivel de su padre cuando no trae uno propio. */
 export function prioridadDe(fila: NonNullable<Editando>): string {
-  return nivelDe(fila.tipo === 'tarea' ? fila.tarea.prioridad : fila.habito.importancia);
+  if (fila.tipo === 'tarea') return nivelDe(fila.tarea.prioridad);
+  if (fila.tipo === 'habito') return nivelDe(fila.habito.importancia);
+  return nivelDe(fila.subhabito.importancia ?? fila.padre.importancia);
 }
 
+/** Grupo de la fila: el subhábito no tiene, manda el de su padre. */
 export function grupoDe(fila: NonNullable<Editando>): string | null {
-  return (fila.tipo === 'tarea' ? fila.tarea.grupoEjecucion : fila.habito.grupoEjecucion) ?? null;
+  if (fila.tipo === 'tarea') return fila.tarea.grupoEjecucion ?? null;
+  if (fila.tipo === 'habito') return fila.habito.grupoEjecucion ?? null;
+  return fila.padre.grupoEjecucion ?? null;
 }
 
 /** Menú de una fila: lo justo para no salir de la lista. Vale para tarea y hábito.
@@ -43,6 +49,11 @@ export function opcionesFila(
   const esTarea = fila.tipo === 'tarea';
   const nombre = esTarea ? 'la tarea' : 'el hábito';
   const actual = prioridadDe(fila);
+  // El subhábito no tiene formulario propio: su nombre y su frecuencia se
+  // editan en el modal del padre, así que aquí no hay «Configurar».
+  if (fila.tipo === 'subhabito') {
+    return [{ id: 'borrar', etiqueta: 'Eliminar el subhábito', accion: true, peligro: true, icono: <IconoBorrar /> }];
+  }
   return [
     { id: 'editar', etiqueta: `Configurar ${nombre}`, accion: true, icono: <IconoEditar /> },
     // Solo el hábito se aplaza: una tarea se completa o se deja.
