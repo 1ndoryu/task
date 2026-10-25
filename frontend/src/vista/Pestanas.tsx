@@ -1,8 +1,7 @@
 /* Pestañas de un solo nivel: fila de opciones excluyentes. La receta visual
  * vive en `estilos/pestanas.css`; aquí solo el comportamiento accesible y el
- * arrastre para reordenar los paneles (grupos y notas). «Tareas» y
- * «Completados» son fijas: no se arrastran ni reciben, porque su sitio lo manda
- * la vista.
+ * arrastre para reordenar los paneles (grupos, notas y los de sistema). Todos
+ * se arrastran: ser de sistema solo quita renombrar y borrar.
  *
  * Cada pestaña es un `div` con `role="tab"`, no un `button`: dentro va el
  * contenido que ponga quien llama, y un título editable es un campo, que no
@@ -21,7 +20,7 @@ interface Props<T extends string> {
   onElegir: (id: T) => void;
   /** Si se pasa, los paneles se pueden arrastrar para reordenarlos. */
   onMover?: (movida: string, hasta: string) => void;
-  /** Una pestaña fija no se arrastra ni sirve de destino. */
+  /** Una pestaña fija no se arrastra ni sirve de destino (hoy, ninguna). */
   esFija?: (id: T) => boolean;
   /** Clases extra por pestaña (por ejemplo, el tipo de panel). */
   claseDe?: (id: T) => string | undefined;
