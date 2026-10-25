@@ -7,8 +7,10 @@
  * texto: el scroll es el de la caja, como en una lista. El guardado va con
  * retardo desde `usarNotas`; aquí solo se avisa al cerrar el campo y al salir
  * de la nota. */
-import { useEffect, useRef, type ReactNode } from 'react';
-import type { Preferencias } from '../logica/preferencias';
+import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
+import type { Preferencias, TamanoCaja } from '../logica/preferencias';
+import { AsaTamano } from './AsaTamano';
+import { variablesDeTamano } from './tamano';
 
 interface Props {
   preferencias: Preferencias;
@@ -24,6 +26,10 @@ interface Props {
   /** Clic derecho fuera del campo: el menú del panel. Dentro del texto no,
    *  porque ahí el clic derecho es del campo (cortar, pegar). */
   onContexto?: (punto: { x: number; y: number }) => void;
+  /** Tamaño propio de la caja; sin él, el de fábrica. */
+  tamano?: TamanoCaja;
+  /** Con esto la caja lleva asa y se puede redimensionar. */
+  onTamano?: (tamano: TamanoCaja | undefined) => void;
 }
 
 export function CajaNota({
@@ -35,8 +41,11 @@ export function CajaNota({
   onEscribir,
   onConfirmar,
   onContexto,
+  tamano,
+  onTamano,
 }: Props) {
   const campo = useRef<HTMLTextAreaElement>(null);
+  const nodo = useRef<HTMLElement>(null);
   // La confirmación se lee por referencia: desmontar no debe avisar con una
   // versión vieja del guardado.
   const confirmar = useRef(onConfirmar);
@@ -50,19 +59,25 @@ export function CajaNota({
 
   return (
     <section
+      ref={nodo}
       className={[
         'caja',
         'caja--nota',
         preferencias.privacidad && 'caja--privacidad',
-        preferencias.fuente === 'pequena' && 'caja--fuente-pequena',
-        preferencias.fuente === 'grande' && 'caja--fuente-grande',
-        preferencias.fuenteNota === 'pequena' && 'caja--nota-fuente-pequena',
-        preferencias.fuenteNota === 'grande' && 'caja--nota-fuente-grande',
         preferencias.altura === 'compacta' && 'caja--altura-compacta',
         preferencias.altura === 'amplia' && 'caja--altura-amplia',
+        tamano?.crecido && 'caja--crecida',
       ]
         .filter(Boolean)
         .join(' ')}
+      // La nota lleva su propia talla: cambia el texto del campo, no el de las
+      // filas de las otras cajas.
+      style={
+        {
+          '--texto-campo-nota': `${preferencias.fuenteNota}px`,
+          ...variablesDeTamano(tamano),
+        } as CSSProperties
+      }
       aria-label={titulo}
       // Mismo gancho que la caja de lista: el carril agarra por aquí.
       data-panel={idPanel}
@@ -74,7 +89,9 @@ export function CajaNota({
       }}
     >
       {cabecera}
-      <div className="scroll">
+      {onTamano && <AsaTamano caja={nodo} onTamano={onTamano} />}
+      {/* `data-rueda-propia`: la nota se lee con la rueda sin mover el carril. */}
+      <div className="scroll" data-rueda-propia>
         <label className="nota">
           <textarea
             ref={campo}
