@@ -1,7 +1,7 @@
 /* Vocabulario del formulario de fila: lo que el modal puede cambiar y las
  * listas cerradas que ofrece. Vive aparte para que quien lo use (el modal y la
  * lista) no tenga que importar el componente entero. */
-import type { FrecuenciaDetalle } from '../logica/tipos';
+import type { FrecuenciaDetalle, SubHabito } from '../logica/tipos';
 
 /** Cambios de una fila según lo edita el modal; cada uno se guarda al momento. */
 export interface CambiosFilaForm {
@@ -14,6 +14,8 @@ export interface CambiosFilaForm {
   grupoEjecucion: string;
   /** Solo hábitos. */
   frecuencia?: FrecuenciaDetalle;
+  /** Solo hábitos: la lista entera, que vive en el payload del padre. */
+  subhabitos?: SubHabito[];
 }
 
 export const URGENCIAS = [
