@@ -16,6 +16,8 @@ export interface AccionesDeLista {
 export function accionesDeLista(lista: Lista): AccionesDeLista {
   /** Guarda el modal en el tipo que corresponda. */
   const guardarCambios = (fila: NonNullable<Editando>, cambios: CambiosFilaForm): void => {
+    // El subhábito no tiene formulario: sus ajustes son los del padre.
+    if (fila.tipo === 'subhabito') return;
     const grupo = cambios.grupoEjecucion.trim() || null;
     if (fila.tipo === 'tarea') {
       lista.editarTarea(fila.tarea.id, {
@@ -32,6 +34,7 @@ export function accionesDeLista(lista: Lista): AccionesDeLista {
         prioridad: cambios.prioridad,
         grupoEjecucion: grupo,
         frecuencia: cambios.frecuencia,
+        subhabitos: cambios.subhabitos,
       });
     }
   };
@@ -39,8 +42,14 @@ export function accionesDeLista(lista: Lista): AccionesDeLista {
   const acciones: AccionesFila = {
     completar: lista.completar,
     editar: lista.abrirEdicion,
-    borrar: (fila) => (fila.tipo === 'tarea' ? lista.borrarTarea(fila.tarea.id) : lista.borrarHabito(fila.habito.id)),
+    borrar: (fila) => {
+      if (fila.tipo === 'tarea') lista.borrarTarea(fila.tarea.id);
+      else if (fila.tipo === 'habito') lista.borrarHabito(fila.habito.id);
+      else lista.borrarSubhabito(fila.padre.id, fila.subhabito.id);
+    },
     prioridad: (fila, prioridad) => {
+      // El subhábito hereda el nivel: se cambia en el padre, no aquí.
+      if (fila.tipo === 'subhabito') return;
       // El menú elige en ids; el hábito los guarda como texto (`Muy Alta`).
       const nivel = prioridad ?? 'media';
       guardarCambios(fila, {
