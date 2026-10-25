@@ -219,7 +219,9 @@ export function IconoHabito({ tam = 12 }: PropsIcono) {
   );
 }
 
-/** Flecha circular: la frecuencia con la que vuelve un hábito. */
+/** Calendario con un punto: con qué frecuencia vuelve un hábito. No es la
+ *  flecha circular del hábito —eran el mismo dibujo y no se distinguían—: la
+ *  frecuencia es cuándo, y eso se lee mejor como calendario. */
 export function IconoFrecuencia({ tam = 12 }: PropsIcono) {
   return (
     <svg
@@ -234,8 +236,9 @@ export function IconoFrecuencia({ tam = 12 }: PropsIcono) {
       aria-hidden="true"
       focusable="false"
     >
-      <path d="M20 12a8 8 0 1 1-2.3-5.6" />
-      <path d="M21 3v5h-5" />
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+      <path d="M12 14.5v1.5M12 18.5v.01" />
     </svg>
   );
 }
@@ -257,6 +260,24 @@ export function IconoMaximizar({ tam = 10 }: PropsIcono) {
   return (
     <svg width={tam} height={tam} viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true" focusable="false">
       <rect x="1.5" y="1.5" width="7" height="7" />
+    </svg>
+  );
+}
+
+/** Cebo hacia abajo: la fila tiene hijos y ahora se ven. Rota con `abierta`. */
+export function IconoDesplegar({ tam = 10 }: PropsIcono) {
+  return (
+    <svg width={tam} height={tam} viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      <path d="M2.5 4l2.5 2.5L7.5 4" />
+    </svg>
+  );
+}
+
+/** Cebo hacia la derecha: los hijos están plegados. */
+export function IconoPlegar({ tam = 10 }: PropsIcono) {
+  return (
+    <svg width={tam} height={tam} viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      <path d="M4 2.5l2.5 2.5L4 7.5" />
     </svg>
   );
 }
