@@ -1,7 +1,8 @@
 /* Contratos compartidos de la lista: qué es una fila abierta, qué cambios
  * acepta y cómo se nombra. Viven aquí para que los módulos de la vista
  * (`usarLista`, `usarEscritura`, `usarGrupos`) no se importen entre ellos. */
-import type { Dashboard, FrecuenciaDetalle, Habito, Tarea } from '../logica/tipos';
+import type { Fila as FilaDatos } from '../logica/seleccion';
+import type { Dashboard, FrecuenciaDetalle, Habito, SubHabito, Tarea } from '../logica/tipos';
 
 /** Fases de la lista: cargando, con datos o con el fallo de carga. */
 export type Estado =
@@ -9,8 +10,14 @@ export type Estado =
   | { fase: 'listo'; datos: Dashboard }
   | { fase: 'error'; mensaje: string };
 
-/** Lo que el modal de configuración puede abrir: una tarea o un hábito. */
-export type Editando = { tipo: 'tarea'; tarea: Tarea } | { tipo: 'habito'; habito: Habito } | null;
+/** Lo que el modal de configuración puede abrir: una tarea o un hábito. El
+ *  subhábito no tiene ajustes propios (los hereda del padre): su fila se
+ *  completa y se borra, y lo demás se edita en el modal del padre. */
+export type Editando =
+  | { tipo: 'tarea'; tarea: Tarea }
+  | { tipo: 'habito'; habito: Habito }
+  | { tipo: 'subhabito'; subhabito: SubHabito; padre: Habito }
+  | null;
 
 /** Cambios comunes de una fila. `grupoEjecucion` llega desde el modal. */
 export interface CambiosFila {
@@ -22,11 +29,25 @@ export interface CambiosFila {
   grupoEjecucion?: string | null;
   /** Solo hábitos: frecuencia completa; el `tipo` va a la columna del backend. */
   frecuencia?: FrecuenciaDetalle;
+  /** Solo hábitos: la lista entera de subhábitos, dentro del payload. */
+  subhabitos?: SubHabito[];
 }
 
 /** Clave de una fila en el conjunto de salidas: tareas y hábitos comparten id. */
-export const claveFila = (fila: NonNullable<Editando>) =>
-  `${fila.tipo}${fila.tipo === 'tarea' ? fila.tarea.id : fila.habito.id}`;
+export function claveFila(fila: NonNullable<Editando>): string {
+  if (fila.tipo === 'tarea') return `tarea${fila.tarea.id}`;
+  if (fila.tipo === 'habito') return `habito${fila.habito.id}`;
+  // Los subhábitos no tienen fila propia en el backend: su id solo es único
+  // dentro del padre, así que la clave lleva también el padre.
+  return `subhabito${fila.padre.id}-${fila.subhabito.id}`;
+}
+
+/** Una fila de la lista, en la forma que entienden el modal y las acciones. */
+export function valorDe(fila: FilaDatos): NonNullable<Editando> {
+  if (fila.tipo === 'tarea') return { tipo: 'tarea', tarea: fila.tarea };
+  if (fila.tipo === 'habito') return { tipo: 'habito', habito: fila.habito };
+  return { tipo: 'subhabito', subhabito: fila.subhabito, padre: fila.padre };
+}
 
 /** Id de una fila nueva. El contrato usa `legacy_id` positivo como clave, así
  * que el id es la marca de tiempo en milisegundos (por mil) más un contador:
