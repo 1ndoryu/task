@@ -18,6 +18,12 @@
   left: 0;
   width: 0;
   height: 0;
+  /* [por que] Con la privacidad activa, el texto de las filas lleva `filter:
+   * blur()`, y un filtro estrena su propia capa: esa capa se pintaba por
+   * encima del panel y el menú salía transparente. Peor, el puntero caía en la
+   * fila, que al perder el `:hover` recuperaba el desenfoque y volvía a taparlo:
+   * de ahí el parpadeo. Con el ancla por delante, el panel manda siempre. */
+  z-index: 30;
 }
 
 .menu__panel {
