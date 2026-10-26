@@ -180,15 +180,16 @@ export function Lista() {
     />
   );
 
-  /** El panel de archivados va al final de las dos formas de la vista. */
-  const archivados = (
+  /** El panel de archivados va al final de las dos formas de la vista; apagado
+   *  en Ajustes, no se monta: no hay nada que mirar ni que recuperar aquí. */
+  const archivados = preferencias.mostrarArchivados ? (
     <Archivados
       grupos={lista.gruposArchivados}
       notas={lista.notasArchivadas}
       onDesarchivarGrupo={lista.desarchivarGrupo}
       onRecuperarNota={lista.recuperarNota}
     />
-  );
+  ) : null;
 
   // Modo cajas: una por panel, en fila. Cada una se pinta con su propio grupo o
   // su propio texto, así que la que se esté mirando no depende de la activa.

@@ -44,15 +44,16 @@ const TEMAS: { id: Tema; etiqueta: string }[] = [
   { id: 'oscuro', etiqueta: 'Oscuro' },
 ];
 
-/** Los cuatro bloques del panel: la lista, las notas, qué se esconde y los
- * colores. Cada uno cabe en una pantalla, así que no hay que recorrer una
- * tira larga para llegar al último ajuste. Las notas tienen bloque propio
- * porque su texto se lee de corrido y no comparte talla ni aire con las filas. */
-type Pestana = 'vista' | 'notas' | 'privacidad' | 'colores';
+/** Los cinco bloques del panel: la lista, las notas, las cajas que se ven,
+ * qué se esconde y los colores. Cada uno cabe en una pantalla, así que no hay que
+ * recorrer una tira larga para llegar al último ajuste. Las notas tienen bloque
+ * propio porque su texto se lee de corrido y no comparte talla ni aire con las filas. */
+type Pestana = 'vista' | 'notas' | 'cajas' | 'privacidad' | 'colores';
 
 const TABS: { id: Pestana; etiqueta: string }[] = [
   { id: 'vista', etiqueta: 'Vista' },
   { id: 'notas', etiqueta: 'Notas' },
+  { id: 'cajas', etiqueta: 'Cajas' },
   { id: 'privacidad', etiqueta: 'Privacidad' },
   { id: 'colores', etiqueta: 'Colores' },
 ];
@@ -171,27 +172,33 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
                   onElegir={(valor) => onCambiar({ separarGrupos: valor === 'si' })}
                   nota="Cada grupo pasa a su propia caja, en fila, con movimiento lateral. El grupo sigue siendo el mismo: cambia dónde se pinta."
                 />
-                {/* Lo que se puede quitar de en medio va junto: son la misma
-                    decisión —qué cajas quiero ver— y así no se pierden entre
-                    los ajustes de forma. */}
-                <div className="campo">
-                  <p className="campo__titulo">Cajas visibles</p>
-                  <ul className="casillas">
-                    <CajaVisible
-                      nombre="Aplazado"
-                      visible={preferencias.mostrarAplazados}
-                      onCambiar={(visible) => onCambiar({ mostrarAplazados: visible })}
-                      nota="Apagada desaparece la caja «Aplazado», también de las pestañas. Lo aplazado sigue aplazado: vuelve solo cuando llega su fecha."
-                    />
-                    <CajaVisible
-                      nombre="Completados"
-                      visible={preferencias.mostrarCompletados}
-                      onCambiar={(visible) => onCambiar({ mostrarCompletados: visible })}
-                      nota="Apagada desaparece la caja «Completados», también de las pestañas. Lo hecho sigue guardado: vuelve a verse al encenderla."
-                    />
-                  </ul>
-                </div>
               </>
+            )}
+
+            {pestana === 'cajas' && (
+              <div className="campo">
+                <p className="campo__titulo">Cajas visibles</p>
+                <ul className="casillas">
+                  <CajaVisible
+                    nombre="Aplazado"
+                    visible={preferencias.mostrarAplazados}
+                    onCambiar={(visible) => onCambiar({ mostrarAplazados: visible })}
+                    nota="Apagada desaparece la caja «Aplazado», también de las pestañas. Lo aplazado sigue aplazado: vuelve solo cuando llega su fecha."
+                  />
+                  <CajaVisible
+                    nombre="Completados"
+                    visible={preferencias.mostrarCompletados}
+                    onCambiar={(visible) => onCambiar({ mostrarCompletados: visible })}
+                    nota="Apagada desaparece la caja «Completados», también de las pestañas. Lo hecho sigue guardado: vuelve a verse al encenderla."
+                  />
+                  <CajaVisible
+                    nombre="Archivados"
+                    visible={preferencias.mostrarArchivados}
+                    onCambiar={(visible) => onCambiar({ mostrarArchivados: visible })}
+                    nota="Apagada desaparece el panel «Archivados», con sus grupos y sus notas. Nada se borra: para recuperar algo, vuelve a encenderla."
+                  />
+                </ul>
+              </div>
             )}
 
             {pestana === 'notas' && (
