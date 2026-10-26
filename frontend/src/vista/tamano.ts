@@ -2,7 +2,6 @@
  * cómo se escribe en la caja. El de fábrica no se guarda ni se duplica como
  * número: es un token de la hoja (`--ancho`, `--alto-caja`, `--alto-cajas`), y
  * aquí solo se traduce a píxeles para el imán y para el tope del arrastre. */
-import type { CSSProperties } from 'react';
 import { ALTO_CAJA_MINIMO, ANCHO_CAJA_MINIMO, type TamanoCaja } from '../logica/preferencias';
 
 /** Imán al soltar cerca del tamaño de fábrica: por debajo de esto, la caja
@@ -49,10 +48,10 @@ export function acotarTamano(tamano: TamanoCaja, defecto: { ancho: number; alto:
 
 /* El ancho solo tiene suelo y el de la ventana; el alto tiene además el tope de
  * fábrica. Los dos viajan como variables propias (`--*-usuario`) para no pisar
- * los tokens de la hoja, que siguen siendo el valor de fábrica. */
-export function variablesDeTamano(tamano?: TamanoCaja): CSSProperties {
-  return {
-    '--ancho-usuario': tamano?.ancho !== undefined ? `${tamano.ancho}px` : undefined,
-    '--alto-caja-usuario': tamano?.alto !== undefined ? `${tamano.alto}px` : undefined,
-  } as CSSProperties;
-}
+ * los tokens de la hoja, que siguen siendo el valor de fábrica. Cada una se
+ * escribe como clave literal en el `style` de la caja: así el objeto solo
+ * define custom properties. */
+export const anchoUsuario = (tamano?: TamanoCaja) =>
+  tamano?.ancho !== undefined ? `${tamano.ancho}px` : undefined;
+export const altoUsuario = (tamano?: TamanoCaja) =>
+  tamano?.alto !== undefined ? `${tamano.alto}px` : undefined;

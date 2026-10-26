@@ -7,7 +7,7 @@ import type { ColoresNivel, Preferencias, TamanoCaja } from '../logica/preferenc
 import type { Fila as FilaDatos } from '../logica/seleccion';
 import { AsaTamano } from './AsaTamano';
 import { Fila } from './Fila';
-import { variablesDeTamano } from './tamano';
+import { altoUsuario, anchoUsuario } from './tamano';
 import type { AccionesFila } from './accionesFila';
 import { claveFila, valorDe } from './usarLista';
 
@@ -153,7 +153,8 @@ export function Caja({
           '--nivel-muy_alta': colores.muy_alta,
           // Las tallas llegan como número de píxeles; la hoja solo las usa.
           '--texto-fila': `${preferencias.fuente}px`,
-          ...variablesDeTamano(tamano),
+          '--ancho-usuario': anchoUsuario(tamano),
+          '--alto-caja-usuario': altoUsuario(tamano),
         } as CSSProperties
       }
       aria-label={etiqueta}

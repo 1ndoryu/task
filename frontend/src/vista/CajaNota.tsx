@@ -10,7 +10,7 @@
 import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import type { Preferencias, TamanoCaja } from '../logica/preferencias';
 import { AsaTamano } from './AsaTamano';
-import { variablesDeTamano } from './tamano';
+import { altoUsuario, anchoUsuario } from './tamano';
 
 interface Props {
   preferencias: Preferencias;
@@ -77,7 +77,8 @@ export function CajaNota({
       style={
         {
           '--texto-campo-nota': `${preferencias.fuenteNota}px`,
-          ...variablesDeTamano(tamano),
+          '--ancho-usuario': anchoUsuario(tamano),
+          '--alto-caja-usuario': altoUsuario(tamano),
         } as CSSProperties
       }
       aria-label={titulo}

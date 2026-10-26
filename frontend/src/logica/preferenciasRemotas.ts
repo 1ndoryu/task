@@ -13,6 +13,7 @@
  * quedó sin él, el servidor lo devuelve. */
 
 import { pedir } from './cliente';
+import { anotarFallo } from './fallos';
 import { CLAVES_VISTA } from './orden';
 
 /** Dónde vive cada bloque en el `localStorage` de este equipo. */
@@ -109,7 +110,7 @@ export async function leerRespaldo(): Promise<Partial<Record<ClaveRespaldo, Entr
 export function subirRespaldo(clave: ClaveRespaldo, valor: unknown, ts: number): void {
   const cuerpo = { preferencias: { [CLAVES_RESPALDO[clave]]: { valor, ts } } };
   void pedir<void>('/dashboard/settings', { method: 'PUT', body: JSON.stringify(cuerpo) }).catch((error: unknown) => {
-    console.warn(`No se pudo respaldar «${clave}» en el servidor`, error);
+    anotarFallo(`respaldo de «${clave}»`, error);
   });
 }
 
@@ -161,6 +162,6 @@ export function subirTodo(bloques: Partial<Record<ClaveRespaldo, unknown>>): voi
   }
   if (Object.keys(preferencias).length === 0) return;
   void pedir<void>('/dashboard/settings', { method: 'PUT', body: JSON.stringify({ preferencias }) }).catch(
-    (error: unknown) => console.warn('No se pudo respaldar la vista en el servidor', error),
+    (error: unknown) => anotarFallo('respaldo de la vista', error),
   );
 }

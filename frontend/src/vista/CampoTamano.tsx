@@ -6,7 +6,7 @@
  * El modal lleva además los atajos de siempre: el valor por defecto y un paso
  * arriba o abajo. La mayoría de las veces se quiere volver o moverse un punto,
  * no pensar un número. */
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react';
 
 interface Props {
   /** Título del ajuste en el panel de ajustes. */
@@ -32,7 +32,7 @@ export function CampoTamano({ titulo, valor, minima, maxima, porDefecto, muestra
     <div className="campo">
       <p className="campo__titulo">{titulo}</p>
       <button type="button" className="campo__valor" onClick={() => setAbierto(true)}>
-        <span className="campo__muestra" style={{ fontSize: valor }}>
+        <span className="campo__muestra" style={{ '--talla-muestra': `${valor}px` } as CSSProperties}>
           {muestra}
         </span>
         <span className="campo__cifra">
@@ -117,7 +117,7 @@ function ModalNumero({
           {titulo}
         </p>
         {/* La muestra cambia con el borrador: se decide viendo, no imaginando. */}
-        <p className="numero__muestra" style={{ fontSize: elegido }} aria-live="polite">
+        <p className="numero__muestra" style={{ '--talla-muestra': `${elegido}px` } as CSSProperties} aria-live="polite">
           {muestra}
         </p>
         <div className="numero__fila">
@@ -172,7 +172,7 @@ function ModalNumero({
           </button>
           <button
             type="button"
-            className="boton boton--principal"
+            className="boton numero__aceptar"
             disabled={!valido}
             onClick={() => onAceptar(elegido)}
           >
