@@ -10,6 +10,7 @@ import './estilos/dropdownPanel.css';
 import './estilos/modal.css';
 import './estilos/pestanas.css';
 import './estilos/listas.css';
+import './estilos/cajas.css';
 import './estilos/archivados.css';
 import './estilos/ventana.css';
 

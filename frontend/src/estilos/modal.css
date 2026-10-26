@@ -145,6 +145,20 @@
   color: var(--panel);
 }
 
+/* Aplicar del modal de tamaño: el tono del principal, dicho por el propio
+ * ajuste y no por la clase genérica del botón. */
+.numero__aceptar {
+  border-color: var(--tinta);
+  background: var(--tinta);
+  color: var(--panel);
+}
+
+.numero__aceptar:hover {
+  border-color: var(--tinta);
+  background: var(--tinta);
+  color: var(--panel);
+}
+
 /* --- Talla numérica: el ajuste enseña el número y una muestra; el modal lleva
  * el campo, el contador y los atajos. La muestra es el propio texto a su talla,
  * así que se decide mirando en vez de imaginando. --- */
@@ -171,6 +185,7 @@
 /* La muestra puede ser larga: recorta con puntos en vez de empujar la cifra. */
 .campo__muestra {
   min-width: 0;
+  font-size: var(--talla-muestra);
   overflow: hidden;
   color: var(--tinta);
   line-height: 1.25;
@@ -204,6 +219,7 @@
  * y crece o encoge con el borrador. */
 .numero__muestra {
   margin: 0.4rem 0 0.7rem;
+  font-size: var(--talla-muestra);
   color: var(--tinta);
   line-height: 1.3;
   overflow-wrap: anywhere;
@@ -552,7 +568,7 @@
   width: 0.85rem;
   height: 0.85rem;
   border: 1px solid var(--linea);
-  border-radius: 0.15rem;
+  border-radius: var(--redondoMarca);
 }
 
 .casilla__interruptor--activo .casilla__marca {
