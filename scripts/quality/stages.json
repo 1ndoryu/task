@@ -9,6 +9,15 @@
       "expectedSchemaVersion": "1",
       "timeoutMs": 120000,
       "cwd": "."
+    },
+    {
+      "name": "front",
+      "executable": "node",
+      "args": ["scripts/quality/front-stage.mjs", "{reportPath}"],
+      "reportPath": "front.json",
+      "expectedSchemaVersion": "1",
+      "timeoutMs": 900000,
+      "cwd": "."
     }
   ]
 }
