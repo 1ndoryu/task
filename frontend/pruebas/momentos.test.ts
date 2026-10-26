@@ -1,7 +1,7 @@
 /* «Cuándo es mejor hacer»: lectura, alterno y peso de los momentos del día. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { alternarMomento, leerMomentos, momentoDe, pesoDeMomentos } from '../src/logica/momentos.ts';
+import { alternarMomento, aplicarMomentos, leerMomentos, momentoDe } from '../src/logica/momentos.ts';
 
 test('el momento del día sale de la hora', () => {
   const a = (hora: number) => momentoDe(new Date(2026, 9, 26, hora));
@@ -22,16 +22,15 @@ test('alternar añade o quita sin tocar el original', () => {
   assert.deepEqual(inicial, ['noche']);
 });
 
-test('el peso: suma en su momento, resta fuera y es neutro sin momentos o con los tres', () => {
-  assert.ok(pesoDeMomentos(['tarde'], 'tarde') > 0);
-  assert.ok(pesoDeMomentos(['tarde'], 'noche') < 0);
-  assert.equal(pesoDeMomentos([], 'tarde'), 0);
-  assert.equal(pesoDeMomentos(undefined, 'tarde'), 0);
-  assert.equal(pesoDeMomentos(['temprano', 'tarde', 'noche'], 'tarde'), 0);
+test('en su momento duplica el peso base; si no, lo deja igual', () => {
+  assert.equal(aplicarMomentos(300, ['tarde'], 'tarde'), 600);
+  assert.equal(aplicarMomentos(300, ['tarde'], 'noche'), 300);
+  assert.equal(aplicarMomentos(300, [], 'tarde'), 300);
+  assert.equal(aplicarMomentos(300, undefined, 'tarde'), 300);
+  assert.equal(aplicarMomentos(300, ['temprano', 'tarde', 'noche'], 'tarde'), 300);
 });
 
-test('a igual peso base, lo de su momento queda por delante de lo neutro y de lo de otro momento', () => {
-  const peso = (momentos: Parameters<typeof pesoDeMomentos>[0]) => pesoDeMomentos(momentos, 'temprano');
-  assert.ok(peso(['temprano']) > peso(undefined));
-  assert.ok(peso(undefined) > peso(['noche']));
+test('un peso base no positivo no se duplica, ni siquiera en su momento', () => {
+  assert.equal(aplicarMomentos(0, ['tarde'], 'tarde'), 0);
+  assert.equal(aplicarMomentos(-200, ['tarde'], 'tarde'), -200);
 });
