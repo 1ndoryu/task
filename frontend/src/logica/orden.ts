@@ -6,7 +6,7 @@
 import { diferenciaDias, fechaLocal } from './fechas';
 import { rachaDe, ultimoHecho } from './frecuencia';
 import { nivelDe } from './importancia';
-import { leerMomentos, momentoDe, pesoDeMomentos, type Momento } from './momentos';
+import { aplicarMomentos, leerMomentos, momentoDe, type Momento } from './momentos';
 import type { Habito, Tarea } from './tipos';
 
 export type ModoOrden = 'inteligente' | 'manual' | 'fecha' | 'prioridad';
@@ -124,15 +124,15 @@ function pesoFecha(fecha: string | undefined, hoy: string): number {
   return 0;
 }
 
+/* Los momentos van al final: duplican el peso base si toca ahora (ver `aplicarMomentos`). */
 function pesoTotal(entrada: EntradaOrdenable, hoy: string, momento: Momento): number {
   const retraso = entrada.fechaMaxima ? Math.max(0, -diferenciaDias(hoy, entrada.fechaMaxima)) : 0;
-  return (
+  const base =
     (PESO_URGENCIA[entrada.urgencia] ?? 0) +
     (PESO_PRIORIDAD[entrada.prioridad] ?? 100) +
     pesoFecha(entrada.fechaMaxima, hoy) +
-    retraso * PESO_POR_DIA_RETRASO +
-    pesoDeMomentos(entrada.momentos, momento)
-  );
+    retraso * PESO_POR_DIA_RETRASO;
+  return aplicarMomentos(base, entrada.momentos, momento);
 }
 
 const porFecha = (a: EntradaOrdenable, b: EntradaOrdenable): number => {

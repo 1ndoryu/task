@@ -1,7 +1,7 @@
 /* «Cuándo es mejor hacer»: los momentos del día en que conviene una tarea o un
  * hábito (uno, varios o ninguno). Solo pesa en el orden inteligente: lo que
- * toca ahora sube, lo que toca en otro momento baja un poco y lo que no dice
- * nada no se mueve. Lógica pura, sin DOM ni reloj propio. */
+ * toca en el momento actual duplica su peso; el resto no se mueve. Lógica pura,
+ * sin DOM ni reloj propio. */
 
 export type Momento = 'temprano' | 'tarde' | 'noche';
 
@@ -11,10 +11,8 @@ export const MOMENTOS: { id: Momento; etiqueta: string }[] = [
   { id: 'noche', etiqueta: 'Noche' },
 ];
 
-/** Lo que suma estar en su momento y lo que resta estar fuera de él. Menos que
- *  una prioridad alta (300): ayuda a desempatar, no pasa por encima de lo grave. */
-export const PESO_EN_SU_MOMENTO = 150;
-export const PESO_FUERA_DE_SU_MOMENTO = -100;
+/** Cuánto se multiplica el peso base de una tarea o hábito que toca ahora. */
+export const MULTIPLICADOR_EN_SU_MOMENTO = 2;
 
 /** Momento del día de una hora: temprano de 5 a 12, tarde de 12 a 19, noche el resto. */
 export function momentoDe(ahora: Date): Momento {
@@ -35,9 +33,11 @@ export function alternarMomento(momentos: readonly Momento[], id: Momento): Mome
   return leerMomentos(momentos.includes(id) ? momentos.filter((otro) => otro !== id) : [...momentos, id]);
 }
 
-/** Peso que un conjunto de momentos suma al orden inteligente a esta hora.
+/** Peso final en el orden inteligente: si la hora actual es uno de sus momentos
+ *  y el peso base es positivo, se duplica; si no, queda igual. Un peso base
+ *  negativo no se duplica, para que estar en su momento nunca empeore nada.
  *  Sin momentos, o con los tres (da igual a qué hora), no cambia nada. */
-export function pesoDeMomentos(momentos: readonly Momento[] | undefined, ahora: Momento): number {
-  if (!momentos?.length || momentos.length >= MOMENTOS.length) return 0;
-  return momentos.includes(ahora) ? PESO_EN_SU_MOMENTO : PESO_FUERA_DE_SU_MOMENTO;
+export function aplicarMomentos(pesoBase: number, momentos: readonly Momento[] | undefined, ahora: Momento): number {
+  if (!momentos?.length || momentos.length >= MOMENTOS.length) return pesoBase;
+  return momentos.includes(ahora) && pesoBase > 0 ? pesoBase * MULTIPLICADOR_EN_SU_MOMENTO : pesoBase;
 }
