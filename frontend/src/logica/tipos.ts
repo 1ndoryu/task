@@ -3,8 +3,12 @@
  * intacto dentro de cada entidad y se ignora. Origen: los tipos del front
  * original (`frontend-legacy/src/app/types/`). */
 
+import type { Momento } from './momentos';
+
 export interface ConfiguracionTarea {
   fechaMaxima?: string;
+  /** «Cuándo es mejor hacer»: pesa en el orden inteligente. */
+  momentos?: Momento[];
   fechaCompletado?: string;
   descripcion?: string;
   [clave: string]: unknown;
@@ -62,6 +66,8 @@ export interface Habito {
   ultimoCompletado?: string | null;
   /** Grupo de ejecución, el mismo campo que en las tareas. */
   grupoEjecucion?: string | null;
+  /** «Cuándo es mejor hacer»: pesa en el orden inteligente. */
+  momentos?: Momento[];
   /** Subhábitos: viven dentro del payload del padre (un solo nivel), como en
    *  el legacy; no tienen grupo ni fila propia en el backend. */
   subhabitos?: SubHabito[];

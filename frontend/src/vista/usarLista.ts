@@ -337,6 +337,7 @@ export function usarLista(): Lista {
           // El hábito guarda su escala como texto (`Muy Alta`), no como id.
           importancia: cambios.prioridad ? importanciaDeHabito(cambios.prioridad) : undefined,
           grupoEjecucion: cambios.grupoEjecucion,
+          momentos: cambios.momentos,
           frecuencia: cambios.frecuencia,
           subhabitos: cambios.subhabitos,
         }),

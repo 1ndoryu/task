@@ -6,10 +6,12 @@
  * del formulario (`estilos/modal.css`). */
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { frecuenciaDe } from '../logica/frecuencia';
+import { leerMomentos } from '../logica/momentos';
 import type { ColoresNivel } from '../logica/preferencias';
 import type { Proyecto } from '../logica/tipos';
 import { grupoDe, prioridadDe } from './accionesFila';
 import { FrecuenciaCampos } from './FrecuenciaCampos';
+import { MomentosCampo } from './MomentosCampo';
 import { Opciones } from './Opciones';
 import { SubHabitos } from './SubHabitos';
 import { PRIORIDADES, URGENCIAS, type CambiosFilaForm } from './opcionesFila';
@@ -33,6 +35,7 @@ function borradorDe(fila: NonNullable<Editando>): CambiosFilaForm {
       urgencia: 'normal',
       proyectoId: null,
       fechaMaxima: '',
+      momentos: leerMomentos(fila.habito.momentos),
       frecuencia: { tipo, cadaDias, diasSemana, vecesAlMes },
     };
   }
@@ -42,6 +45,7 @@ function borradorDe(fila: NonNullable<Editando>): CambiosFilaForm {
     urgencia: fila.tarea.urgencia ?? 'normal',
     proyectoId: fila.tarea.proyectoId ?? null,
     fechaMaxima: fila.tarea.configuracion?.fechaMaxima ?? '',
+    momentos: leerMomentos(fila.tarea.configuracion?.momentos),
   };
 }
 
@@ -222,6 +226,8 @@ export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar
                 />
               </div>
             )}
+
+            <MomentosCampo momentos={borrador.momentos ?? []} onCambiar={(momentos) => aplicar({ momentos })} />
 
             {/* Los subhábitos se gestionan desde el padre: no tienen modal
                 propio. El modal los lee del hábito vivo, no del borrador, para

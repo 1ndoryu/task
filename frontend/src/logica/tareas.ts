@@ -4,6 +4,7 @@
  * que hacía el front original (`frontend-legacy/src/app/utils/mappersContrato.ts`).
  * `expectedUpdatedAt` va a null: sin conflictos de versión, la última escritura manda. */
 import { pedir } from './cliente';
+import { leerMomentos, type Momento } from './momentos';
 import type { Tarea } from './tipos';
 
 export interface RespuestaEscritura {
@@ -46,6 +47,8 @@ export function editarTarea(
     urgencia?: string | null;
     proyectoId?: number | null;
     fechaMaxima?: string;
+    /** `undefined` deja los momentos como estaban; una lista vacía los quita. */
+    momentos?: Momento[];
     /** `undefined` deja el grupo como estaba; `null` la devuelve a «Tareas». */
     grupoEjecucion?: string | null;
   },
@@ -54,6 +57,10 @@ export function editarTarea(
   // La fecha límite vive en la configuración; vaciarla la quita del payload.
   if (cambios.fechaMaxima) configuracion.fechaMaxima = cambios.fechaMaxima;
   else delete configuracion.fechaMaxima;
+  if (cambios.momentos !== undefined) {
+    if (cambios.momentos.length) configuracion.momentos = leerMomentos(cambios.momentos);
+    else delete configuracion.momentos;
+  }
   return {
     ...tarea,
     texto: cambios.texto,

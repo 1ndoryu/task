@@ -6,6 +6,7 @@
 import { diferenciaDias, fechaLocal } from './fechas';
 import { rachaDe, ultimoHecho } from './frecuencia';
 import { nivelDe } from './importancia';
+import { leerMomentos, momentoDe, pesoDeMomentos, type Momento } from './momentos';
 import type { Habito, Tarea } from './tipos';
 
 export type ModoOrden = 'inteligente' | 'manual' | 'fecha' | 'prioridad';
@@ -89,6 +90,8 @@ export interface EntradaOrdenable {
   prioridad: string;
   urgencia: string;
   fechaMaxima?: string;
+  /** Cuándo conviene hacerlo; solo cuenta en el modo inteligente. */
+  momentos?: Momento[];
 }
 
 export function entradaDeTarea(tarea: Tarea): EntradaOrdenable {
@@ -97,6 +100,7 @@ export function entradaDeTarea(tarea: Tarea): EntradaOrdenable {
     prioridad: nivelDe(tarea.prioridad),
     urgencia: tarea.urgencia ?? 'normal',
     fechaMaxima: tarea.configuracion?.fechaMaxima,
+    momentos: leerMomentos(tarea.configuracion?.momentos),
   };
 }
 
@@ -105,6 +109,7 @@ export function entradaDeHabito(habito: Habito, hoy: string): EntradaOrdenable {
     orden: habito.orden ?? 0,
     prioridad: nivelDe(habito.importancia),
     urgencia: urgenciaDeHabito(habito, hoy),
+    momentos: leerMomentos(habito.momentos),
   };
 }
 
@@ -119,13 +124,14 @@ function pesoFecha(fecha: string | undefined, hoy: string): number {
   return 0;
 }
 
-function pesoTotal(entrada: EntradaOrdenable, hoy: string): number {
+function pesoTotal(entrada: EntradaOrdenable, hoy: string, momento: Momento): number {
   const retraso = entrada.fechaMaxima ? Math.max(0, -diferenciaDias(hoy, entrada.fechaMaxima)) : 0;
   return (
     (PESO_URGENCIA[entrada.urgencia] ?? 0) +
     (PESO_PRIORIDAD[entrada.prioridad] ?? 100) +
     pesoFecha(entrada.fechaMaxima, hoy) +
-    retraso * PESO_POR_DIA_RETRASO
+    retraso * PESO_POR_DIA_RETRASO +
+    pesoDeMomentos(entrada.momentos, momento)
   );
 }
 
@@ -144,7 +150,11 @@ const porPrioridad = (a: EntradaOrdenable, b: EntradaOrdenable): number => {
 };
 
 /** Comparador del modo elegido, listo para `Array.sort` sobre entradas. */
-export function comparador(modo: ModoOrden, hoy = fechaLocal()): (a: EntradaOrdenable, b: EntradaOrdenable) => number {
+export function comparador(
+  modo: ModoOrden,
+  hoy = fechaLocal(),
+  momento: Momento = momentoDe(new Date()),
+): (a: EntradaOrdenable, b: EntradaOrdenable) => number {
   switch (modo) {
     case 'manual':
       return (a, b) => a.orden - b.orden;
@@ -156,8 +166,8 @@ export function comparador(modo: ModoOrden, hoy = fechaLocal()): (a: EntradaOrde
       // El peso se calcula una vez por elemento: comparar es O(n log n).
       const pesos = new WeakMap<EntradaOrdenable, number>();
       return (a, b) => {
-        const pa = pesos.get(a) ?? pesoTotal(a, hoy);
-        const pb = pesos.get(b) ?? pesoTotal(b, hoy);
+        const pa = pesos.get(a) ?? pesoTotal(a, hoy, momento);
+        const pb = pesos.get(b) ?? pesoTotal(b, hoy, momento);
         pesos.set(a, pa);
         pesos.set(b, pb);
         return pb - pa || porFecha(a, b);

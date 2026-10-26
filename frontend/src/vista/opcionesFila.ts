@@ -1,6 +1,7 @@
 /* Vocabulario del formulario de fila: lo que el modal puede cambiar y las
  * listas cerradas que ofrece. Vive aparte para que quien lo use (el modal y la
  * lista) no tenga que importar el componente entero. */
+import type { Momento } from '../logica/momentos';
 import type { FrecuenciaDetalle, SubHabito } from '../logica/tipos';
 
 /** Cambios de una fila según lo edita el modal; cada uno se guarda al momento. */
@@ -10,6 +11,8 @@ export interface CambiosFilaForm {
   urgencia: string;
   proyectoId: number | null;
   fechaMaxima: string;
+  /** «Cuándo es mejor hacer»: tareas y hábitos. */
+  momentos?: Momento[];
   /** `''` es «Tareas»; el nombre libre es el grupo. */
   grupoEjecucion: string;
   /** Solo hábitos. */

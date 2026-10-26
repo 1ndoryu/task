@@ -26,6 +26,7 @@ export function accionesDeLista(lista: Lista): AccionesDeLista {
         urgencia: cambios.urgencia,
         proyectoId: cambios.proyectoId,
         fechaMaxima: cambios.fechaMaxima,
+        momentos: cambios.momentos,
         grupoEjecucion: grupo,
       });
     } else {
@@ -33,6 +34,7 @@ export function accionesDeLista(lista: Lista): AccionesDeLista {
         texto: cambios.texto,
         prioridad: cambios.prioridad,
         grupoEjecucion: grupo,
+        momentos: cambios.momentos,
         frecuencia: cambios.frecuencia,
         subhabitos: cambios.subhabitos,
       });

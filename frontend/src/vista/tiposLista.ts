@@ -2,6 +2,7 @@
  * acepta y cómo se nombra. Viven aquí para que los módulos de la vista
  * (`usarLista`, `usarEscritura`, `usarGrupos`) no se importen entre ellos. */
 import type { Fila as FilaDatos } from '../logica/seleccion';
+import type { Momento } from '../logica/momentos';
 import type { Dashboard, FrecuenciaDetalle, Habito, SubHabito, Tarea } from '../logica/tipos';
 
 /** Fases de la lista: cargando, con datos o con el fallo de carga. */
@@ -26,6 +27,8 @@ export interface CambiosFila {
   urgencia?: string | null;
   proyectoId?: number | null;
   fechaMaxima?: string;
+  /** «Cuándo es mejor hacer»; en tareas y hábitos. */
+  momentos?: Momento[];
   grupoEjecucion?: string | null;
   /** Solo hábitos: frecuencia completa; el `tipo` va a la columna del backend. */
   frecuencia?: FrecuenciaDetalle;
