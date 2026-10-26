@@ -145,6 +145,145 @@
   color: var(--panel);
 }
 
+/* --- Talla numérica: el ajuste enseña el número y una muestra; el modal lleva
+ * el campo, el contador y los atajos. La muestra es el propio texto a su talla,
+ * así que se decide mirando en vez de imaginando. --- */
+.campo__valor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.25rem 0.45rem;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoChico);
+  background: var(--panel);
+  color: var(--tinta-tenue);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.campo__valor:hover {
+  border-color: var(--tinta-tenue);
+}
+
+/* La muestra puede ser larga: recorta con puntos en vez de empujar la cifra. */
+.campo__muestra {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--tinta);
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.campo__cifra {
+  flex: none;
+  color: var(--tinta);
+  font-size: var(--texto-menu);
+  font-variant-numeric: tabular-nums;
+}
+
+.campo__unidad {
+  margin-left: 0.15rem;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+}
+
+/* El modal del número es más estrecho y no lleva pestañas: solo su cifra. */
+.modal--numero {
+  max-width: 18rem;
+}
+
+.modal--numero .modal__caja {
+  padding: 0.9rem 1.1rem 0;
+}
+
+/* La muestra ocupa el sitio de una fila de la lista: mismo aire, misma tinta,
+ * y crece o encoge con el borrador. */
+.numero__muestra {
+  margin: 0.4rem 0 0.7rem;
+  color: var(--tinta);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.numero__fila {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Los dos pasos son botones de la misma altura que el campo, para que la fila
+ * lea como un solo contador. */
+.numero__paso {
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoChico);
+  background: var(--panel);
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--texto-base);
+  line-height: 0;
+  cursor: pointer;
+}
+
+.numero__paso:hover:not(:disabled) {
+  border-color: var(--tinta);
+}
+
+.numero__paso:disabled {
+  color: var(--linea);
+  cursor: default;
+}
+
+.numero__caja {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  gap: 0.2rem;
+  min-width: 0;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoChico);
+}
+
+/* La cifra es la protagonista: grande, tabular y sin las flechitas del campo
+ * numérico nativo, que aquí sobran porque ya hay dos botones. */
+.numero__campo {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--texto-base);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  outline: none;
+}
+
+.numero__campo::-webkit-outer-spin-button,
+.numero__campo::-webkit-inner-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.numero__unidad {
+  flex: none;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+}
+
+.modal--numero .modal__pie {
+  margin: 0.7rem -1.1rem 0;
+}
+
 /* --- Panel de grupos: alta arriba y una fila por grupo con su cuenta y sus
  * dos acciones. La fila es la unidad de lectura, así que el nombre cede ancho
  * antes que los botones. --- */
@@ -371,6 +510,78 @@
   border-bottom: 0;
 }
 
+.casillas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0.15rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cada caja con su interruptor: el nombre y la nota como el resto de ajustes. */
+.casilla {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.casilla__interruptor {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tinta-tenue);
+  font: inherit;
+  font-size: var(--texto-menu);
+  text-align: left;
+  cursor: pointer;
+}
+
+.casilla__interruptor--activo {
+  color: var(--tinta);
+}
+
+/* La marca es una casilla dibujada: se ve puesta o vacía sin leer el nombre,
+ * que es lo que un ajuste de mostrar u ocultar pide. */
+.casilla__marca {
+  position: relative;
+  flex: none;
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 1px solid var(--linea);
+  border-radius: 0.15rem;
+}
+
+.casilla__interruptor--activo .casilla__marca {
+  border-color: var(--tinta-tenue);
+}
+
+/* El trazo de la marca: un ángulo de dos lados, girado como una «v». */
+.casilla__interruptor--activo .casilla__marca::before {
+  content: '';
+  position: absolute;
+  top: 0.1rem;
+  left: 0.22rem;
+  width: 0.25rem;
+  height: 0.45rem;
+  border: solid var(--tinta-tenue);
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+
+.casilla__interruptor:hover .casilla__nombre {
+  text-decoration: underline;
+  text-decoration-color: var(--linea);
+  text-underline-offset: 0.2em;
+}
+
+.casilla .campo__nota {
+  margin-left: 1.35rem;
+}
+
 .campo__titulo {
   margin: 0;
   color: var(--tinta-tenue);
@@ -405,6 +616,39 @@
  * dónde se escribe. */
 .entrada:focus-visible {
   outline: none;
+}
+
+/* --- Subhábitos del hábito: una fila por sub con su nombre editable y su
+ * quitar; el alta va debajo, como en el panel de grupos. --- */
+.subhabitos {
+  margin: 0 0 0.35rem;
+  padding: 0;
+  list-style: none;
+}
+
+.subhabitos__fila {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0;
+}
+
+.subhabitos__fila .entrada {
+  flex: 1;
+  min-width: 0;
+}
+
+.subhabitos__quitar {
+  flex: none;
+  padding: 0.2rem;
+  border: 0;
+  background: none;
+  color: var(--tinta-tenue);
+  cursor: pointer;
+}
+
+.subhabitos__quitar:hover {
+  color: var(--tinta);
 }
 
 /* Valores en fila: el activo lleva el punto delante, sin desplazar el texto. */

@@ -47,7 +47,9 @@ export function usarFilas(d: Dependencias) {
   const moverGrupo = useCallback(
     (fila: NonNullable<Editando>, destino: string | null) => {
       if (fila.tipo === 'tarea') void escribirTarea(fila.tarea.id, (t) => editarTarea(t, { texto: t.texto, grupoEjecucion: destino }));
-      else void escribirHabito(fila.habito.id, (h) => editarHabito(h, { nombre: h.nombre, grupoEjecucion: destino }));
+      else if (fila.tipo === 'habito') void escribirHabito(fila.habito.id, (h) => editarHabito(h, { nombre: h.nombre, grupoEjecucion: destino }));
+      // El subhábito manda el grupo de su padre: no tiene uno propio.
+      else void escribirHabito(fila.padre.id, (h) => editarHabito(h, { nombre: h.nombre, grupoEjecucion: destino }));
       anotarGrupo(destino);
     },
     [escribirTarea, escribirHabito, anotarGrupo],
@@ -112,6 +114,23 @@ export function usarFilas(d: Dependencias) {
   const completar = useCallback(
     (fila: NonNullable<Editando>) => {
       const clave = claveFila(fila);
+      // El subhábito no tiene fila en el backend: la ruta de historial solo
+      // existe para hábitos de verdad. Se marca dentro del payload del padre,
+      // que es donde vive, con un solo PUT.
+      if (fila.tipo === 'subhabito') {
+        const { id: idSub } = fila.subhabito;
+        void escribirHabito(fila.padre.id, (h) => {
+          const historial = new Set(fila.subhabito.historialCompletados ?? []);
+          if (historial.has(hoy)) historial.delete(hoy);
+          else historial.add(hoy);
+          const fechas = [...historial].sort();
+          const subhabitos = (h.subhabitos ?? []).map((s) =>
+            s.id === idSub ? { ...s, historialCompletados: fechas, ultimoCompletado: fechas.at(-1) ?? null } : s,
+          );
+          return { ...h, subhabitos };
+        });
+        return;
+      }
       const quedaHecha = fila.tipo === 'tarea' ? !fila.tarea.completado : !hechoHoy(fila.habito, hoy);
       // Solo sale de la lista la tarea: el hábito se queda todo el día, tachado,
       // así que animarle la salida sería un parpadeo sin efecto.

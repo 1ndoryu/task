@@ -62,6 +62,23 @@ export interface Habito {
   ultimoCompletado?: string | null;
   /** Grupo de ejecución, el mismo campo que en las tareas. */
   grupoEjecucion?: string | null;
+  /** Subhábitos: viven dentro del payload del padre (un solo nivel), como en
+   *  el legacy; no tienen grupo ni fila propia en el backend. */
+  subhabitos?: SubHabito[];
+}
+
+/** Un hábito hijo: mismo contrato que el padre en pequeño. Lo que comparte
+ *  con él (grupo) no se guarda aquí: manda el padre. */
+export interface SubHabito {
+  id: number;
+  nombre: string;
+  importancia?: string;
+  frecuencia?: Frecuencia | string | FrecuenciaDetalle;
+  historialCompletados?: string[];
+  historialPospuestos?: string[];
+  ultimoCompletado?: string | null;
+  racha?: number;
+  pausado?: boolean;
 }
 
 export interface Dashboard {

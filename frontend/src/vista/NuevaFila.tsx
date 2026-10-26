@@ -100,19 +100,21 @@ export function NuevaFila({ grupo, grupos, colores, onCrear, oculto, solo }: Pro
         onElegir={(id) => setGrupoElegido(id === 'grupo-' ? null : id.slice('grupo-'.length))}
       />
 
-      {/* La frecuencia solo existe en un hábito: en una tarea el botón se apaga. */}
-      <Panel
-        etiqueta={<IconoFrecuencia />}
-        titulo={tipo === 'habito' ? `Frecuencia: ${nombreFrecuencia}` : 'Elige «Hábito» para poner frecuencia'}
-        abierto={panel === 'frecuencia'}
-        onAbrir={(abierto) => setPanel(abierto ? 'frecuencia' : null)}
-        deshabilitado={tipo !== 'habito'}
-      >
-        <FrecuenciaCampos
-          frecuencia={frecuencia}
-          onCambiar={(cambios) => setFrecuencia((previa) => ({ ...previa, ...cambios }))}
-        />
-      </Panel>
+      {/* La frecuencia solo existe en un hábito: en una tarea el botón no se
+          pinta. Apagado ocupaba sitio por algo que no se puede usar. */}
+      {tipo === 'habito' && (
+        <Panel
+          etiqueta={<IconoFrecuencia />}
+          titulo={`Frecuencia: ${nombreFrecuencia}`}
+          abierto={panel === 'frecuencia'}
+          onAbrir={(abierto) => setPanel(abierto ? 'frecuencia' : null)}
+        >
+          <FrecuenciaCampos
+            frecuencia={frecuencia}
+            onCambiar={(cambios) => setFrecuencia((previa) => ({ ...previa, ...cambios }))}
+          />
+        </Panel>
+      )}
 
       {/* Qué se crea, al final de la fila: casilla para tarea, vuelta para
           hábito. Es lo último que se elige, porque lo normal es escribir el
@@ -145,14 +147,12 @@ function Panel({
   titulo,
   abierto,
   onAbrir,
-  deshabilitado,
   children,
 }: {
   etiqueta: ReactNode;
   titulo: string;
   abierto: boolean;
   onAbrir: (abierto: boolean) => void;
-  deshabilitado: boolean;
   children: ReactNode;
 }) {
   const contenedor = useRef<HTMLDivElement>(null);
@@ -198,7 +198,6 @@ function Panel({
         aria-controls={abierto ? idPanel : undefined}
         aria-label={titulo}
         title={titulo}
-        disabled={deshabilitado}
         onClick={() => onAbrir(!abierto)}
       >
         {etiqueta}

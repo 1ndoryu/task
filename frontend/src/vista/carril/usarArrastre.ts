@@ -9,8 +9,8 @@ import { DURACION, type Gesto } from './tipos';
 const UMBRAL = 5;
 /** Borde del carril donde el arrastre empieza a desplazarlo solo. */
 const BORDE = 72;
-/** Tope de lo que avanza el carril en un cuadro: lejos del borde el puntero
- *  puede quedar fuera de la ventana y sin tope el carril saldría disparado. */
+/** Tope de lo que avanza el carril por cada movimiento del puntero: cuanto más
+ *  adentro del borde, más rápido, pero nunca de un salto. */
 const PASO_MAXIMO = 18;
 
 /** Elementos que se usan con el ratón: sobre ellos el gesto no arrastra. */
@@ -87,10 +87,8 @@ export function usarArrastre({
     const nodo = pista.current;
     if (!nodo) return;
     let inicio: { pieza: HTMLElement; x: number; y: number; puntero: number } | null = null;
-    let cuadro = 0;
 
     const terminar = (soltar: boolean) => {
-      window.cancelAnimationFrame(cuadro);
       const actual = gesto.current;
       if (inicio) {
         // Solo se suelta la captura si se llegó a tomar: sin arrastre, no hay
@@ -189,11 +187,11 @@ export function usarArrastre({
         } catch {
           /* Sin captura el arrastre sigue: se pierde si el puntero sale. */
         }
-        empujarBorde(evento.clientX);
       }
 
       const actual = gesto.current;
       colocar(actual, evento.clientX, evento.clientY);
+      empujarBorde(evento.clientX);
       const destino = destinoEn(evento.clientX);
       const hasta = idDe(destino);
       // La copia ya está sobre su hueco: no hay nada que reordenar y animar el
@@ -201,7 +199,11 @@ export function usarArrastre({
       if (hasta !== null && hasta !== actual.id) alMover.current?.(actual.id, hasta);
     };
 
-    /** Acerca el carril solo cuando el puntero se queda en un borde. */
+    /** Acerca el carril cuando la mano llega a un borde. Avanza **solo al mover
+     *  el puntero**, no en un bucle propio: con un bucle, dejar quieta la mano
+     *  junto al borde hacía pasar todas las cajas por debajo y la arrastrada
+     *  acababa al final con un gesto de dos píxeles. Con el paso atado al
+     *  movimiento, el carril avanza justo lo que avanza la mano. */
     const empujarBorde = (xCliente: number) => {
       const nodoPista = pista.current;
       if (!nodoPista) return;
@@ -212,7 +214,6 @@ export function usarArrastre({
         izquierda < BORDE ? -Math.ceil((BORDE - izquierda) / 8) : derecha < BORDE ? Math.ceil((BORDE - derecha) / 8) : 0;
       const paso = Math.max(-PASO_MAXIMO, Math.min(PASO_MAXIMO, crudo));
       if (paso) nodoPista.scrollLeft += paso;
-      if (gesto.current) cuadro = window.requestAnimationFrame(() => empujarBorde(xCliente));
     };
 
     const alPulsar = (evento: PointerEvent) => {
@@ -242,7 +243,6 @@ export function usarArrastre({
       nodo.removeEventListener('pointermove', alMoverPuntero);
       nodo.removeEventListener('pointerup', alSoltarPuntero);
       nodo.removeEventListener('pointercancel', alCancelar);
-      window.cancelAnimationFrame(cuadro);
       gesto.current?.copia.remove();
       gesto.current = null;
       colocarRef.current = null;

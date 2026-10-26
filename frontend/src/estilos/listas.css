@@ -32,6 +32,9 @@
   --redondoChico: 0.35rem;
   --redondoMenu: 0.6rem;
   --redondoPunto: 50%;
+  /* Tamaño de fábrica de una caja. No es solo el valor inicial: es también el
+   * tope del alto que se puede pedir, y el sitio al que vuelve el imán cuando
+   * se suelta cerca. El ancho sí admite más; solo tiene suelo. */
   --ancho: 32rem;
   --alto-caja: 80dvh;
   /* En modo cajas conservan un poco de aire con el borde de la pantalla. */
@@ -126,7 +129,7 @@ body {
 .marco__unica {
   position: relative;
   width: 100%;
-  max-width: var(--ancho);
+  max-width: var(--ancho-usuario, var(--ancho));
 }
 
 /* La caja: alto fijo en pantalla, todo el contenido con su propio scroll. */
@@ -134,8 +137,11 @@ body {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: var(--ancho);
-  height: var(--alto-caja);
+  max-width: var(--ancho-usuario, var(--ancho));
+  /* Cada caja puede llevar su ancho y su alto en línea; si no, los de fábrica.
+   * El tope del `clamp` también es el de fábrica: una caja nunca es más alta
+   * que la de siempre, aunque el número guardado venga de una pantalla mayor. */
+  height: clamp(6rem, var(--alto-caja-usuario, var(--alto-caja)), var(--alto-caja));
   padding: 0.75rem 0.5rem 0.5rem 1.25rem;
   border: 1px solid var(--linea);
   border-radius: var(--redondo);
@@ -211,6 +217,45 @@ body {
   padding: 0.5rem 0;
   border-bottom: 1px solid var(--linea);
   font-size: var(--texto-fila);
+}
+
+/* Subtareas y subhábitos: cuelgan de su padre, sangrados y con el punto más
+ * pequeño, para que se lea la jerarquía sin añadir un icono más. La raya de la
+ * izquierda es el «esto pertenece a lo de arriba», como en el legacy. */
+.fila--sub {
+  padding-left: 1.25rem;
+  /* La raya guía el ojo hasta el padre: misma sangría que el nombre del padre. */
+  border-left: 1px solid var(--linea);
+  margin-left: 0.4rem;
+}
+
+.fila--sub .fila__marca {
+  width: 0.375rem;
+  height: 0.375rem;
+}
+
+.fila--sub .fila__texto {
+  color: var(--tinta-tenue);
+}
+
+/* Flecha de plegar: dice que la fila tiene hijos y los esconde. Va al final de
+ * la fila y hereda la tinta tenue de las notas, para no competir con el texto. */
+.fila__plegar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tinta-tenue);
+  cursor: pointer;
+}
+
+.fila__plegar:hover {
+  color: var(--tinta);
 }
 
 /* Salida de una tarea completada: se tacha, se apaga y deja su hueco libre
@@ -343,23 +388,9 @@ button.fila__marca:hover {
 
 /* Ajustes de lectura. La vista solo pone modificadores en la caja; aquí se
  * decide cuánto mide el texto y cuánto aire lleva cada fila. */
-.caja--fuente-pequena {
-  --texto-fila: 0.75rem;
-}
-
-.caja--fuente-grande {
-  --texto-fila: 0.9375rem;
-}
-
 /* La talla de las notas va por su cuenta: cambia `--texto-campo-nota`, no la
- * de las filas, y así una nota deja de arrastrar el ajuste de la lista. */
-.caja--nota-fuente-pequena {
-  --texto-campo-nota: 0.75rem;
-}
-
-.caja--nota-fuente-grande {
-  --texto-campo-nota: 1rem;
-}
+ * de las filas, y así una nota deja de arrastrar el ajuste de la lista. Las dos
+ * tallas llegan como número de píxeles desde las preferencias. */
 
 /* El interlineado de las notas es un multiplicador de su talla: así se mantiene
  * proporcional al tamaño elegido. Sin clase, la nota usa el normal (1.5). */
@@ -418,6 +449,25 @@ button.fila__marca:hover {
   opacity: 1;
 }
 
+/* Ajuste «mostrar siempre la primera»: con privacidad, la primera fila se lee
+ * sin tocar nada y las demás no se aclaran ni con el ratón encima. Va después
+ * del desvelado y con más peso, para que sea la última palabra.
+ * La marca es `fila--primera`, que pone la vista en el índice 0 y también en
+ * los hijos de esa fila: `:first-child` no sirve, porque los hijos son
+ * hermanos en el `<ul>` y con la flecha abierta la primera fila no es la
+ * única que se ve. */
+.caja--privacidad.caja--primera-visible .fila--primera .fila__texto,
+.caja--privacidad.caja--primera-visible .fila--primera .fila__nota {
+  filter: none;
+  opacity: 1;
+}
+
+.caja--privacidad.caja--primera-visible .fila:not(.fila--primera) .fila__texto,
+.caja--privacidad.caja--primera-visible .fila:not(.fila--primera) .fila__nota {
+  filter: blur(var(--desenfoque));
+  opacity: var(--velo);
+}
+
 /* --- Modo cajas: un carril horizontal con una caja por grupo. La caja es la
  * misma de siempre; cambia dónde se pinta. El carril reserva a cada lado medio
  * hueco de pantalla (lo calcula `Carril.tsx` al medir), y así la primera y la
@@ -432,6 +482,19 @@ button.fila__marca:hover {
   position: relative;
   height: 100dvh;
   padding: 0;
+  /* El aire alrededor de las cajas también se agarra: pulsar ahí y arrastrar
+   * recorre el carril, como en un mapa. Las cajas y sus controles ya tienen su
+   * propio cursor, así que este solo se ve donde no hay nada. */
+  cursor: grab;
+}
+
+/* Mientras la mano arrastra el fondo, el cursor dice que el carril se mueve,
+ * también si el puntero pasa por encima de una caja. */
+.marco--cajas:has(.carril--paneando),
+.carril--paneando,
+.carril--paneando * {
+  cursor: grabbing;
+  user-select: none;
 }
 
 /* La barra del carril no es la de una caja: va sobre el conjunto, alineada con
@@ -450,13 +513,13 @@ button.fila__marca:hover {
   );
   left: 50%;
   z-index: 5;
-  width: min(var(--ancho), calc(100% - 2.5rem));
+  width: min(var(--ancho-pieza-carril, var(--ancho)), calc(100% - 2.5rem));
   transform: translate(-50%, -100%);
-  justify-content: flex-end;
-  /* La barra del carril comparte el borde exterior de la caja, pero no su
-   * relleno: borde (1px) más relleno de la caja (8px) más el aire del scroll
-   * (12px) deja los iconos en la misma vertical que los del alta y la fila. */
-  padding: 0 1.3125rem 0.5rem 0;
+  /* En el carril los iconos van centrados sobre la caja: la barra se mueve con
+   * la pieza centrada, así que el centro de la pantalla es su centro, y el ojo
+   * los encuentra sin buscarlos en una esquina. */
+  justify-content: center;
+  padding: 0 0 0.5rem;
 }
 
 /* Nombre del grupo, con la talla y el aire de una pestaña. */
@@ -548,15 +611,31 @@ button.fila__marca:hover {
  * en vez de salirse, porque el carril ya ofrece el movimiento lateral. */
 .carril > .caja {
   flex: none;
-  width: min(var(--ancho), calc(100dvw - 2.5rem));
-  height: var(--alto-cajas);
+  width: min(var(--ancho-usuario, var(--ancho)), calc(100dvw - 2.5rem));
+  /* Aquí el alto se mide con su propio token: la caja única y la del carril
+   * llevan aire distinto, y el «de fábrica» de una no es el de la otra.
+   * El `clamp` no es adorno: el alto guardado va en píxeles, y al encoger la
+   * ventana esos píxeles ya no caben. El tope es el de fábrica, así que la caja
+   * se encoge con la pantalla en vez de salirse por abajo. */
+  height: clamp(6rem, var(--alto-caja-usuario, var(--alto-cajas)), var(--alto-cajas));
   max-width: none;
 }
 
 /* La nota no es más estrecha que una lista: el carril es una fila de cajas
  * iguales, y una de texto que se arrastra se lee peor si cambia de talla. */
 .carril > .caja--nota {
-  width: min(var(--ancho), calc(100dvw - 2.5rem));
+  width: min(var(--ancho-usuario, var(--ancho)), calc(100dvw - 2.5rem));
+}
+
+/* Una caja más ancha que el de fábrica no necesita el aire de los extremos: ese
+ * margen solo existe para poder centrar una caja estrecha, y en una ancha
+ * empujaría el carril entero. */
+.carril > .caja--crecida:first-child {
+  margin-left: 0;
+}
+
+.carril > .caja--crecida:last-child {
+  margin-right: 0;
 }
 
 /* El aire de los extremos es lo que permite centrar la primera y la última. */
@@ -575,6 +654,52 @@ button.fila__marca:hover {
   /* Se agarra de cualquier punto libre de la caja; los campos, los botones y
    * los títulos editables conservan su cursor propio. */
   cursor: grab;
+}
+
+/* --- Asa de tamaño: la esquina inferior derecha de la caja. Se ve tenue y se
+ * llena al pasar el ratón, para que no compita con el contenido; el gesto es el
+ * del sistema (`nwse-resize`) y no toca el arrastre de la caja. --- */
+.caja {
+  position: relative;
+}
+
+.caja__asa {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: 0.2rem;
+  color: var(--tinta-tenue);
+  cursor: nwse-resize;
+  /* El gesto es de puntero: sin esto el navegador intenta desplazar la página. */
+  touch-action: none;
+  opacity: 0.45;
+  transition: opacity 120ms ease-out, color 120ms ease-out;
+}
+
+.caja:hover .caja__asa,
+.caja__asa:focus-visible,
+.caja__asa--activa {
+  color: var(--tinta);
+  opacity: 1;
+}
+
+/* Tres rayitas en diagonal: el idioma de siempre para «esto se estira». */
+.caja__asa::before {
+  content: '';
+  width: 0.55rem;
+  height: 0.55rem;
+  background-image: repeating-linear-gradient(
+    135deg,
+    currentColor 0 1px,
+    transparent 1px 4px
+  );
+  /* Solo la mitad baja: el relleno queda como un triángulo de rayas. */
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
 }
 
 /* Mientras dura un arrastre, el texto de la copia no se selecciona: con el
@@ -694,7 +819,7 @@ button.fila__marca:hover {
 
   .marco__unica > .caja {
     grid-area: caja;
-    width: min(var(--ancho), 100%);
+    width: min(var(--ancho-usuario, var(--ancho)), 100%);
     justify-self: center;
   }
 

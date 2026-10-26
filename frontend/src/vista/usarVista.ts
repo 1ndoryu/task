@@ -4,6 +4,7 @@
  * de la API ni de los datos, solo de lo que hay que abrir. */
 import { createElement, useState, type ReactNode } from 'react';
 import type { Panel } from '../logica/paneles';
+import type { Preferencias } from '../logica/preferencias';
 import type { Borrado } from './ConfirmarPanel';
 import { opcionesPanel } from './menuPanel';
 import { TituloEditable } from './TituloEditable';
@@ -13,6 +14,10 @@ interface Entrada {
   cambiarGrupo: (grupo: string) => void;
   archivarNota: (panel: string) => void;
   archivarGrupo: (nombre: string) => void;
+  /** Qué filas están plegadas, ya leído de las preferencias guardadas. */
+  plegadasGuardadas: string[];
+  /** Un solo punto de escritura, el mismo de los demás ajustes. */
+  cambiarPreferencias: (cambios: Partial<Preferencias>) => void;
 }
 
 /** Punto de la pantalla donde nació un clic derecho. */
@@ -25,7 +30,14 @@ export type TituloPanel = (panel: Panel, clase: string, abrir?: 'clic' | 'doble'
 /** El clic derecho de un panel, o nada si es de sistema y no tiene menú. */
 export type ContextoPanel = (panel: Panel) => ((punto: Punto) => void) | undefined;
 
-export function usarVista({ renombrarPanel, cambiarGrupo, archivarNota, archivarGrupo }: Entrada) {
+export function usarVista({
+  renombrarPanel,
+  cambiarGrupo,
+  archivarNota,
+  archivarGrupo,
+  plegadasGuardadas,
+  cambiarPreferencias,
+}: Entrada) {
   // Menú abierto con clic derecho, con la clave de la fila y el punto pulsado.
   // Se guarda aquí porque el clic derecho nace fuera del propio menú.
   const [menuAbierto, setMenuAbierto] = useState<{ clave: string; x: number; y: number } | null>(null);
@@ -41,6 +53,21 @@ export function usarVista({ renombrarPanel, cambiarGrupo, archivarNota, archivar
   const [borrando, setBorrando] = useState<Borrado | null>(null);
   // Menú de una caja abierto con clic derecho: el panel y el punto pulsado.
   const [menuPanel, setMenuPanel] = useState<{ panel: Panel; x: number; y: number } | null>(null);
+  // Filas con sus hijos plegados, por clave `panel:fila`. Se recuerda entre
+  // sesiones como cualquier ajuste: quien pliega una tarea larga espera
+  // encontrarla plegada al volver.
+  const [plegadas, setPlegadas] = useState<ReadonlySet<string>>(() => new Set(plegadasGuardadas));
+
+  /** Pliega o despliega los hijos de una fila y lo deja guardado. El guardado
+   *  va fuera del actualizador: React puede llamarlo dos veces y el efecto no
+   *  debe duplicarse. */
+  const alternarPlegada = (clave: string) => {
+    const siguiente = new Set(plegadas);
+    if (siguiente.has(clave)) siguiente.delete(clave);
+    else siguiente.add(clave);
+    setPlegadas(siguiente);
+    cambiarPreferencias({ plegadas: [...siguiente] });
+  };
 
   /** Abre el menú de un panel en el punto pulsado. */
   const abrirMenuPanel = (panel: Panel, punto: Punto) => {
@@ -100,6 +127,8 @@ export function usarVista({ renombrarPanel, cambiarGrupo, archivarNota, archivar
     setBorrando,
     menuPanel,
     setMenuPanel,
+    plegadas,
+    alternarPlegada,
     abrirMenuPanel,
     contextoDe,
     titulo,

@@ -4,7 +4,7 @@
  * del reparto y solo depende del panel, no de en qué rama de la vista esté. */
 import type { ReactNode } from 'react';
 import type { Dashboard } from '../logica/tipos';
-import type { Preferencias } from '../logica/preferencias';
+import type { Preferencias, TamanoCaja } from '../logica/preferencias';
 import type { ModoOrden } from '../logica/orden';
 import type { Panel } from '../logica/paneles';
 import { seleccionar, type Fila as FilaDatos } from '../logica/seleccion';
@@ -33,6 +33,12 @@ interface Props {
   /** Menú de fila abierto con clic derecho; lo comparte toda la vista. */
   menuAbierto: { clave: string; x: number; y: number } | null;
   onMenuAbierto: (punto: { clave: string; x: number; y: number } | null) => void;
+  /** Filas con los hijos plegados, por clave `panel:fila`. */
+  plegadas: ReadonlySet<string>;
+  onPlegar: (clave: string) => void;
+  /** Con esto cada caja lleva asa: solo en el carril, donde hay sitio. */
+  redimensionable?: boolean;
+  onTamano: (id: string, tamano: TamanoCaja | undefined) => void;
 }
 
 export function ContenidoPanel({
@@ -51,6 +57,10 @@ export function ContenidoPanel({
   contextoDe,
   menuAbierto,
   onMenuAbierto,
+  plegadas,
+  onPlegar,
+  redimensionable,
+  onTamano,
 }: Props): ReactNode {
   const tipo = panel.tipo;
   const conMenu = contextoDe(panel);
@@ -65,6 +75,8 @@ export function ContenidoPanel({
         texto={laNota.texto}
         onEscribir={laNota.escribir}
         onConfirmar={laNota.confirmar}
+        tamano={preferencias.tamanos[panel.id]}
+        onTamano={redimensionable ? (tamano) => onTamano(panel.id, tamano) : undefined}
         // Mismo gesto que en la caja de lista: el clic derecho es del panel.
         onContexto={conMenu}
         cabecera={
@@ -106,13 +118,15 @@ export function ContenidoPanel({
         <header className="barra">
           {titulo(panel, 'barra__titulo')}
           <div className="barra__acciones">
-            {!panel.fija && (
-              <MenuOrdenCaja
-                panel={panel}
-                orden={ordenDe(panel.id)}
-                onElegir={(modo: ModoOrden) => cambiarOrdenCaja(panel.id, modo)}
-              />
-            )}
+            {/* Toda caja ordena la suya, también las de sistema: `fija` habla
+                de la identidad (no se renombra ni se borra), no del orden. Con
+                la condición de antes, al separar hábitos y tareas las dos cajas
+                resultantes se quedaban sin la elección. */}
+            <MenuOrdenCaja
+              panel={panel}
+              orden={ordenDe(panel.id)}
+              onElegir={(modo: ModoOrden) => cambiarOrdenCaja(panel.id, modo)}
+            />
           </div>
         </header>
       }
@@ -135,6 +149,10 @@ export function ContenidoPanel({
       hoy={hoy}
       menuAbierto={menuAbierto}
       onMenuAbierto={onMenuAbierto}
+      plegadas={plegadas}
+      onPlegar={onPlegar}
+      tamano={preferencias.tamanos[panel.id]}
+      onTamano={redimensionable ? (tamano) => onTamano(panel.id, tamano) : undefined}
       // El menú del panel también nace de la caja: en cajas es la única vía
       // (no hay pestañas) y en la caja única es el mismo gesto de la pestaña.
       onContexto={conMenu}

@@ -104,6 +104,21 @@ export function Menu({ etiqueta, items, onElegir, titulo, claseBoton, abierto, o
     else setAbiertoLocal(valor);
   };
   const [sub, setSub] = useState<string | null>(null);
+  /* [por que] Al pasar del ítem al submenú el puntero cruza su borde y, durante
+   * un instante, cae en la fila de detrás (con privacidad, además desenfocada).
+   * Si eso cerrara el submenú, al volver el ratón lo reabriría: un parpadeo.
+   * Con una espera corta, el hueco entre ambos no lo cierra. */
+  const cierreSub = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const aplazarCierre = (id: string) => {
+    if (cierreSub.current) clearTimeout(cierreSub.current);
+    cierreSub.current = setTimeout(() => setSub((previo) => (previo === id ? null : previo)), 250);
+  };
+  const cancelarCierre = () => {
+    if (cierreSub.current) clearTimeout(cierreSub.current);
+    cierreSub.current = null;
+  };
+  // Al desmontar no queda un temporizador vivo.
+  useEffect(() => cancelarCierre, []);
   const itemRefs = useRef(new Map<string, HTMLButtonElement>());
   const panel = useRef<HTMLDivElement | null>(null);
   const panelSub = useRef<HTMLDivElement | null>(null);
@@ -210,8 +225,10 @@ export function Menu({ etiqueta, items, onElegir, titulo, claseBoton, abierto, o
               <div
                 key={item.id}
                 className="menu__fila"
-                // Ratón fuera del bloque: el submenú se recoge.
-                onPointerLeave={() => setSub((previo) => (previo === item.id ? null : previo))}
+                // Ratón fuera del bloque: el submenú se recoge, con la espera
+                // que perdona el salto entre el ítem y el panel de al lado.
+                onPointerLeave={() => aplazarCierre(item.id)}
+                onPointerEnter={cancelarCierre}
               >
                 {separa && <p className="menu__grupo">{item.grupo}</p>}
                 <button
@@ -236,6 +253,9 @@ export function Menu({ etiqueta, items, onElegir, titulo, claseBoton, abierto, o
                     className="menu__panel menu__subpanel"
                     role="menu"
                     aria-label={item.etiqueta}
+                    // El panel de al lado también sostiene la espera: pasar
+                    // de la flecha al submenú no debe cerrarlo.
+                    onPointerEnter={cancelarCierre}
                     ref={(nodo) => {
                       panelSub.current = nodo;
                       colocarSub();

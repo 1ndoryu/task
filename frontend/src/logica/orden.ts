@@ -17,8 +17,9 @@ export const MODOS_ORDEN: { id: ModoOrden; etiqueta: string }[] = [
   { id: 'prioridad', etiqueta: 'Prioridad' },
 ];
 
-/** Pestaña de sistema con lo completado: siempre la última y no se mueve ni
- * se renombra. Los grupos nunca pueden llamarse así: `limpiarGrupo` lo impide. */
+/** Pestaña de sistema con lo completado: no se renombra ni se borra, pero sí
+ *  se mueve como cualquier otra. Los grupos nunca pueden llamarse así:
+ *  `limpiarGrupo` lo impide. */
 export const PESTANA_COMPLETADOS = 'completados';
 
 /** Grupo de ejecución: el nombre que la tarea o el hábito lleva en
@@ -28,6 +29,13 @@ export type Grupo = string | null;
 /** Nombre con el que se guardan los grupos conocidos aunque hoy estén vacíos:
  *  un grupo sin filas sigue siendo una caja. */
 export const CLAVE_GRUPOS = 'tareas-nuevo:v1:grupos';
+/** Las claves del respaldo local de la vista, en un sitio: las leen y las
+ *  escriben `preferencias.ts` y `grupos.ts`, y las sube `preferenciasRemotas.ts`. */
+export const CLAVES_VISTA = {
+  preferencias: 'tareas-nuevo:v1:vista',
+  orden: 'tareas-nuevo:v1:orden-pestanas',
+  grupos: CLAVE_GRUPOS,
+} as const;
 
 /* Los nombres de grupo son texto libre del usuario: se recortan y se ignoran
  * los vacíos para que no aparezcan pestañas fantasma. */

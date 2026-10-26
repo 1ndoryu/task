@@ -3,15 +3,19 @@
  * la fila; no hay botón visible. Vive aparte de `Lista` para que cada archivo
  * tenga una sola responsabilidad. */
 import { aplazadoHasta, fechaAplazo } from '../logica/aplazos';
-import { diaCorto, proximaRepeticion, rachaDe } from '../logica/frecuencia';
+import { diaCorto, proximaRepeticion, rachaDe, type ConFrecuencia } from '../logica/frecuencia';
 import type { ColoresNivel } from '../logica/preferencias';
 import { hechoHoy } from '../logica/seleccion';
+import type { Habito } from '../logica/tipos';
+import { IconoDesplegar, IconoPlegar } from './Iconos';
 import { Menu } from './Menu';
 import { opcionesFila, prioridadDe, type AccionesFila } from './accionesFila';
 import type { Editando } from './usarLista';
 
 interface Props {
   fila: NonNullable<Editando>;
+  /** Va colgada bajo su padre: se indenta y pierde el punto grande. */
+  sub?: boolean;
   saliendo: boolean;
   acciones: AccionesFila;
   grupos: string[];
@@ -24,31 +28,58 @@ interface Props {
   /** El menú abierto desde el clic derecho de esta fila, y dónde. */
   menuAbierto: { x: number; y: number } | null;
   onMenuAbierto: (punto: { x: number; y: number } | null) => void;
+  /** Es la primera fila de la caja (o hija de ella): con «mostrar siempre la
+   *  primera» se lee sin velo aunque haya privacidad. */
+  primera?: boolean;
+  /** Tiene hijos que se pueden plegar: se pinta la flecha de la derecha. */
+  plegable?: boolean;
+  /** Los hijos se ven; `false` los esconde `Caja`. */
+  desplegada?: boolean;
+  onPlegar?: () => void;
 }
 
-export function Fila({ fila, saliendo, acciones, grupos, colores, completados, hoy, menuAbierto, onMenuAbierto }: Props) {
+export function Fila({
+  fila,
+  sub = false,
+  saliendo,
+  acciones,
+  grupos,
+  colores,
+  completados,
+  hoy,
+  menuAbierto,
+  onMenuAbierto,
+  primera = false,
+  plegable = false,
+  desplegada = true,
+  onPlegar,
+}: Props) {
   const esTarea = fila.tipo === 'tarea';
-  const tarea = esTarea ? fila.tarea : null;
-  const habito = esTarea ? null : fila.habito;
-  // El punto de la fila lleva el color de su nivel: el mismo para tareas y
-  // hábitos. La urgencia no se pinta aquí porque el color es uno solo y el
-  // nivel es lo que se elige en la configuración.
+  const esSub = fila.tipo === 'subhabito';
+  // El subhábito se lee como un hábito: mismo punto de nivel, misma racha.
+  // Lo único propio es que su historial vive en el payload del padre.
+  const habito: ConFrecuencia | null = fila.tipo === 'habito' ? fila.habito : esSub ? fila.subhabito : null;
+  // El aplazo solo existe en el padre: el subhábito no trae `pospuestoHasta`.
+  const conAplazo: Habito | null = fila.tipo === 'habito' ? fila.habito : null;
   const nivel = prioridadDe(fila);
-  const hecho = tarea ? tarea.completado : habito !== null && hechoHoy(habito, hoy);
-  const texto = tarea ? tarea.texto : (habito?.nombre ?? '');
+  const hecho = fila.tipo === 'tarea' ? fila.tarea.completado : habito !== null && hechoHoy(habito, hoy);
+  const texto = fila.tipo === 'tarea' ? fila.tarea.texto : (habito?.nombre ?? '');
   // La racha se cuenta del historial: el `racha` del payload es del front viejo.
   const racha = habito !== null ? rachaDe(habito, hoy) : 0;
   // Lo ya hecho de un hábito no sale de la lista (solo se tacha), así que se
-  // dice cuándo vuelve: sin eso, marcarlo parece no hacer nada.
-  const vuelve = habito !== null && hecho ? proximaRepeticion(habito, hoy) : null;
+  // dice cuándo vuelve: sin eso, marcarlo parece no hacer nada. Un subhábito
+  // no se aplaza por separado: hereda la vuelta de su padre, así que no dice nada.
+  const vuelve = habito !== null && esSub === false && hecho ? proximaRepeticion(habito, hoy) : null;
   // Aplazado: lo que la fila dice en vez de «vuelve el …», que es lo mismo.
-  const aplazado = habito !== null ? aplazadoHasta(habito, hoy) : null;
+  const aplazado = conAplazo !== null ? aplazadoHasta(conAplazo, hoy) : null;
 
   return (
     <li
       className={[
         'fila',
-        esTarea ? 'fila--tarea' : 'fila--habito',
+        esTarea ? 'fila--tarea' : esSub ? 'fila--subhabito' : 'fila--habito',
+        sub && 'fila--sub',
+        primera && 'fila--primera',
         `fila--nivel-${nivel}`,
         hecho && 'fila--hecho',
         saliendo && 'fila--saliendo',
@@ -83,6 +114,20 @@ export function Fila({ fila, saliendo, acciones, grupos, colores, completados, h
         vuelve !== null && vuelve !== hoy && <span className="fila__nota">vuelve el {diaCorto(vuelve)}</span>
       )}
       {racha > 1 && <span className="fila__nota">{racha} días</span>}
+      {/* La flecha es del padre: dice cuántos hijos hay y los pliega. Va a la
+          derecha, después de las notas, para no moverse con ellas. */}
+      {plegable && (
+        <button
+          type="button"
+          className="fila__plegar"
+          aria-expanded={desplegada}
+          aria-label={`${desplegada ? 'Ocultar' : 'Mostrar'} lo que cuelga de ${texto}`}
+          title={desplegada ? 'Ocultar subtareas' : 'Mostrar subtareas'}
+          onClick={() => onPlegar?.()}
+        >
+          {desplegada ? <IconoDesplegar /> : <IconoPlegar />}
+        </button>
+      )}
       {/* Sin disparador: el ancla es el punto del clic derecho. */}
       <Menu
         etiqueta={null}

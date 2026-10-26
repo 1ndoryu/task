@@ -11,12 +11,16 @@ import type { Proyecto } from '../logica/tipos';
 import { grupoDe, prioridadDe } from './accionesFila';
 import { FrecuenciaCampos } from './FrecuenciaCampos';
 import { Opciones } from './Opciones';
+import { SubHabitos } from './SubHabitos';
 import { PRIORIDADES, URGENCIAS, type CambiosFilaForm } from './opcionesFila';
 import { opcionesFecha, Selector } from './Selector';
 import type { Editando } from './usarLista';
 
 /** Borrador inicial de la fila abierta, en los campos que entiende el modal. */
 function borradorDe(fila: NonNullable<Editando>): CambiosFilaForm {
+  // El subhábito no abre este modal (`abrirEdicion` lo filtra); si llegara
+  // aquí, se cae al padre, que es quien tiene los ajustes de verdad.
+  if (fila.tipo === 'subhabito') return borradorDe({ tipo: 'habito', habito: fila.padre });
   const base = {
     prioridad: prioridadDe(fila),
     grupoEjecucion: grupoDe(fila) ?? '',
@@ -217,6 +221,13 @@ export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar
                   onElegir={(id) => aplicar({ urgencia: id })}
                 />
               </div>
+            )}
+
+            {/* Los subhábitos se gestionan desde el padre: no tienen modal
+                propio. El modal los lee del hábito vivo, no del borrador, para
+                que un cambio se vea al instante. */}
+            {fila.tipo === 'habito' && (
+              <SubHabitos subhabitos={fila.habito.subhabitos ?? []} onCambiar={(subhabitos) => onGuardar(fila, { ...borradorDe(fila), ...borrador, subhabitos } as CambiosFilaForm)} />
             )}
           </div>
         </div>

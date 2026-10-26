@@ -13,6 +13,7 @@ import { Fragment, useEffect } from 'react';
 import type { Panel } from '../logica/paneles';
 import { accionesDeLista } from './accionesDeLista';
 import { AccionesBarra } from './AccionesBarra';
+import { Archivados } from './Archivados';
 import { BarraVentana } from './BarraVentana';
 import { Carril } from './Carril';
 import { ContenidoPanel } from './ContenidoPanel';
@@ -31,6 +32,9 @@ export function Lista() {
     cambiarGrupo: lista.cambiarGrupo,
     archivarNota: lista.archivarNota,
     archivarGrupo: lista.archivarGrupo,
+    // El plegado se recuerda como un ajuste más; su lectura vive en `usarLista`.
+    plegadasGuardadas: lista.preferencias.plegadas,
+    cambiarPreferencias: lista.cambiarPreferencias,
   });
 
   // El tema se escribe en `<html>` y no en un contenedor: así lo heredan el
@@ -160,6 +164,29 @@ export function Lista() {
       contextoDe={vista.contextoDe}
       menuAbierto={vista.menuAbierto}
       onMenuAbierto={vista.setMenuAbierto}
+      plegadas={vista.plegadas}
+      onPlegar={vista.alternarPlegada}
+      // Solo en el carril: es donde las cajas se ven de una en una y tienen
+      // sitio para crecer. En la caja única el ancho lo manda la pantalla.
+      redimensionable={enCajas}
+      onTamano={(id, tamano) => {
+        // Un tamaño igual al de fábrica sale de las preferencias: así la caja
+        // sigue al tamaño de siempre si la ventana cambia.
+        const tamanos = { ...preferencias.tamanos };
+        if (tamano) tamanos[id] = tamano;
+        else delete tamanos[id];
+        lista.cambiarPreferencias({ tamanos });
+      }}
+    />
+  );
+
+  /** El panel de archivados va al final de las dos formas de la vista. */
+  const archivados = (
+    <Archivados
+      grupos={lista.gruposArchivados}
+      notas={lista.notasArchivadas}
+      onDesarchivarGrupo={lista.desarchivarGrupo}
+      onRecuperarNota={lista.recuperarNota}
     />
   );
 
@@ -186,13 +213,18 @@ export function Lista() {
             // La nota ya está en su sitio: no vuelve a centrarse al soltar.
             vista.setNotaNueva(null);
           }}
-          fija={(pieza) => Boolean(lista.paneles.find((p) => p.id === (pieza.dataset.panel ?? null))?.fija)}
+          /* Toda caja se arrastra, también «Tareas», «Hábitos», «Aplazado» y
+             «Completados»: ser de sistema solo quita renombrar y borrar. */
+          fija={(pieza) => !lista.paneles.find((p) => p.id === (pieza.dataset.panel ?? null))?.mueve}
         >
           {/* Cada panel pinta su propia `section.caja`: es la pieza que el
               carril mide y arrastra, sin capas de por medio. */}
           {lista.paneles.map((panel) => (
             <Fragment key={panel.id}>{contenido(panel)}</Fragment>
           ))}
+          {/* Al final del carril y sin arrastre (no lleva `data-panel`): es donde
+              se recupera lo archivado, no un panel más. */}
+          {archivados}
         </Carril>
         {/* El menú de la caja se pinta aquí, fuera de su `section`: es la
             pieza que el carril arrastra y nada más. */}
@@ -233,7 +265,7 @@ export function Lista() {
             }))}
             onElegir={lista.cambiarGrupo}
             onMover={lista.moverPestana}
-            esFija={(id) => Boolean(lista.paneles.find((p) => p.id === id)?.fija)}
+            esFija={(id) => !lista.paneles.find((p) => p.id === id)?.mueve}
             panelDe={(id) => lista.paneles.find((p) => p.id === id)}
             onAccion={(id, accion) => {
               const panel = lista.paneles.find((p) => p.id === id);
@@ -246,6 +278,7 @@ export function Lista() {
           />
         </header>
         {contenido(activo)}
+        {archivados}
         {/* El menú de la caja única: en las pestañas va dentro de su lista; en
             la caja, aquí, porque su `section` no es envoltorio del menú. */}
         <MenuCaja

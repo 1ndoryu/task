@@ -1,0 +1,39 @@
+/* Panel «Archivados»: una caja más, con sus grupos y notas en filas simples. */
+
+.caja--archivados .scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.archivados__subtitulo {
+  margin: 0.75rem 0 0.25rem;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+  font-weight: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Una fila por grupo o nota: el nombre se recorta y «Recuperar» queda a la derecha. */
+.archivado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--linea);
+}
+
+.archivado__nombre {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* El foco de teclado se ve: el botón de recuperar no tiene más marca que el texto. */
+.archivado .barra__boton:focus-visible {
+  outline: 2px solid var(--tinta);
+  outline-offset: 2px;
+}

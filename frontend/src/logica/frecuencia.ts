@@ -4,6 +4,10 @@
  * guarda el tipo en una columna y el objeto entero dentro del `payload`, así
  * que `cadaDias`, `diasSemana` y `vecesAlMes` viven aquí. */
 import { diferenciaDias, fechaLocal } from './fechas';
+/** Lo mínimo para saber si toca y cuándo vuelve: lo cumplen el hábito y su
+ *  subhábito, que solo comparten frecuencia e historial. */
+export type ConFrecuencia = Pick<Habito, 'nombre' | 'frecuencia' | 'historialCompletados' | 'ultimoCompletado'>;
+
 import type { Frecuencia, Habito } from './tipos';
 
 export const FRECUENCIAS: { id: Frecuencia; etiqueta: string }[] = [
@@ -18,7 +22,7 @@ export const FRECUENCIAS: { id: Frecuencia; etiqueta: string }[] = [
 export const DIAS_SEMANA = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'] as const;
 
 /** La frecuencia tal como la entiende la vista, venga como string o como objeto. */
-export function frecuenciaDe(habito: Habito): { tipo: Frecuencia; cadaDias: number; diasSemana: string[]; vecesAlMes: number } {
+export function frecuenciaDe(habito: ConFrecuencia): { tipo: Frecuencia; cadaDias: number; diasSemana: string[]; vecesAlMes: number } {
   const cruda = habito.frecuencia;
   const objeto = typeof cruda === 'object' && cruda !== null ? cruda : null;
   const tipo = (typeof cruda === 'string' ? cruda : objeto?.tipo) as Frecuencia | undefined;
@@ -33,7 +37,7 @@ export function frecuenciaDe(habito: Habito): { tipo: Frecuencia; cadaDias: numb
 /** Último día cumplido. Sale del historial, que es lo que escribe esta vista;
  * `ultimoCompletado` lo mantenía el front legacy y quedó congelado al migrar,
  * así que solo vale como respaldo cuando no hay historial. */
-export function ultimoHecho(habito: Habito): string | null {
+export function ultimoHecho(habito: ConFrecuencia): string | null {
   const fechas = habito.historialCompletados ?? [];
   let ultima: string | null = null;
   for (const fecha of fechas) if (ultima === null || fecha > ultima) ultima = fecha;
@@ -42,7 +46,7 @@ export function ultimoHecho(habito: Habito): string | null {
 
 /** Días seguidos cumplidos que terminan hoy o ayer. Se calcula del historial:
  * el `racha` del payload lo escribía el front legacy y aquí no se actualiza. */
-export function rachaDe(habito: Habito, hoy: string): number {
+export function rachaDe(habito: ConFrecuencia, hoy: string): number {
   const hechos = new Set(habito.historialCompletados ?? []);
   let dias = 0;
   // El día de hoy puede no estar hecho todavía sin que la racha esté perdida.
@@ -67,7 +71,7 @@ export function restarDias(fecha: string, dias: number): string {
 /** Primer día en que vuelve a tocar, contando desde que se hace hoy. Es la
  * misma regla que `tocaHoy`: sirve para decirlo al marcar y que la fila no
  * parezca desaparecer sin motivo. */
-export function proximaRepeticion(habito: Habito, hoy: string): string {
+export function proximaRepeticion(habito: ConFrecuencia, hoy: string): string {
   const { tipo, cadaDias, diasSemana, vecesAlMes } = frecuenciaDe(habito);
   if (tipo === 'diario') return hoy;
   if (tipo === 'cadaXDias') return sumarDias(hoy, cadaDias);
@@ -101,7 +105,7 @@ export function sumarDias(fecha: string, dias: number): string {
 
 /** Si el hábito toca hoy. La fecha de referencia entra como parámetro para
  * poder probarlo sin depender del reloj. */
-export function tocaHoy(habito: Habito, hoy: string): boolean {
+export function tocaHoy(habito: ConFrecuencia, hoy: string): boolean {
   const { tipo, cadaDias, diasSemana, vecesAlMes } = frecuenciaDe(habito);
   // Sin marca previa cualquier frecuencia toca: es lo que hace el legacy.
   const ultimo = ultimoHecho(habito);

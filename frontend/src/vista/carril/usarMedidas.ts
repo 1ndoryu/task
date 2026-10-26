@@ -29,7 +29,11 @@ export function usarMedidas({ pista, piezas, centrar, centrada, gesto }: Entrada
     const medir = () => {
       const primera = piezas()[0];
       if (!primera) return;
-      const { offsetWidth: ancho, offsetHeight: alto } = primera;
+      // El alto que manda es el mayor de las piezas, no el de la primera: cada
+      // caja puede tener el suyo, y la barra flotante se apoya sobre la más
+      // alta para no caer dentro de ninguna.
+      const { offsetWidth: ancho } = primera;
+      const alto = Math.max(0, ...piezas().map((pieza) => pieza.offsetHeight));
       nodo.style.setProperty('--margen-carril', `${Math.max(0, (nodo.clientWidth - ancho) / 2)}px`);
       // Lo que la vista coloque sobre el carril (la barra de acciones) necesita
       // saber dónde cae su borde superior; la pieza va centrada, así que sale
@@ -38,6 +42,10 @@ export function usarMedidas({ pista, piezas, centrar, centrada, gesto }: Entrada
       // del carril se come unos píxeles abajo y desplaza el centro de las piezas.
       nodo.parentElement?.style.setProperty('--alto-pieza-carril', `${alto}px`);
       nodo.parentElement?.style.setProperty('--alto-carril', `${nodo.clientHeight}px`);
+      // La barra flotante se alinea con la caja que se está mirando, y las
+      // cajas pueden tener anchos distintos: se publica el suyo.
+      const centradaAhora = piezas()[Math.min(centrada.current, piezas().length - 1)] ?? primera;
+      nodo.parentElement?.style.setProperty('--ancho-pieza-carril', `${centradaAhora.offsetWidth}px`);
     };
 
     const reajustar = () => {

@@ -9,10 +9,17 @@ import { aplazadoHasta } from '../logica/aplazos';
 import { fechaLocal } from '../logica/fechas';
 import { editarHabito } from '../logica/habitos';
 import { importanciaDeHabito } from '../logica/importancia';
-import { anotarGrupos, leerGruposArchivados, leerGruposConocidos, leerOrdenPestanas } from '../logica/grupos';
-import type { ModoOrden } from '../logica/orden';
+import {
+  anotarGrupos,
+  archivarGrupoGuardado,
+  leerGruposArchivados,
+  leerGruposConocidos,
+  leerOrdenPestanas,
+} from '../logica/grupos';
+import { CLAVES_VISTA, type ModoOrden } from '../logica/orden';
 import { idDeNota, type Panel } from '../logica/paneles';
 import { guardarPreferencias, leerPreferencias, type Preferencias } from '../logica/preferencias';
+import { subirTodo } from '../logica/preferenciasRemotas';
 import type { Pendientes } from '../logica/store';
 import { editarTarea } from '../logica/tareas';
 import type { Dashboard } from '../logica/tipos';
@@ -26,7 +33,7 @@ import { usarCarga } from './usarCarga';
 import { usarOrdenCajas, usarPaneles } from './usarPaneles';
 
 export type { CambiosFila, Editando } from './tiposLista';
-export { claveFila } from './tiposLista';
+export { claveFila, valorDe } from './tiposLista';
 
 export interface Lista {
   estado: Estado;
@@ -55,6 +62,14 @@ export interface Lista {
   archivarNota: (panel: string) => void;
   /** Saca un grupo de las pestañas sin tocar sus filas. */
   archivarGrupo: (nombre: string) => void;
+  /** Vuelve a poner un grupo archivado como pestaña, al final. */
+  desarchivarGrupo: (nombre: string) => void;
+  /** Grupos archivados, para su panel de archivados. */
+  gruposArchivados: string[];
+  /** Notas archivadas (id y título) para su panel. */
+  notasArchivadas: { id: string; titulo: string }[];
+  /** Devuelve una nota archivada a las cajas. */
+  recuperarNota: (id: string) => void;
   /** Cuerpo y escritura de una nota, por su id de panel. */
   nota: (panel: string) => { texto: string; escribir: (contenido: string) => void; confirmar: () => void } | null;
   /** Ajustes de lectura: privacidad, fuente, altura y separador. */
@@ -78,6 +93,8 @@ export interface Lista {
   editarHabito: (id: number, cambios: CambiosFila) => void;
   borrarTarea: (id: number) => void;
   borrarHabito: (id: number) => void;
+  /** Quita un subhábito del payload de su padre. */
+  borrarSubhabito: (padreId: number, subId: number) => void;
   /** Mueve una fila de grupo desde el menú de la fila. */
   moverGrupo: (fila: NonNullable<Editando>, grupo: string | null) => void;
   /** Aplaza un hábito hasta `hasta`; `null` le quita el aplazo. */
@@ -114,8 +131,31 @@ export function usarLista(): Lista {
   // el estado que crea aquella: el ref rompe el círculo. La carga ocurre en un
   // efecto, ya tras el primer render, así que para entonces está puesto.
   const abrirCuentaRef = useRef<((correo: string) => Pendientes) | null>(null);
+  // Siembra del respaldo: en el primer arranque tras actualizar, el servidor
+  // todavía no tiene copia de esta vista. Se sube una vez lo que ya está en el
+  // equipo para que, si el webview se vacía, haya de dónde volver. Los valores
+  // salen del `localStorage` y no de los estados de arriba porque estos se
+  // leen una sola vez, antes de esta carga.
+  const sembrado = useRef(false);
   const [estado, setEstado] = usarCarga(
     useCallback((correo: string) => abrirCuentaRef.current?.(correo) ?? { tareas: {}, habitos: {} }, []),
+    useCallback(() => {
+      if (sembrado.current) return;
+      sembrado.current = true;
+      const leer = (clave: string): unknown => {
+        try {
+          const crudo = localStorage.getItem(clave);
+          return crudo === null ? undefined : (JSON.parse(crudo) as unknown);
+        } catch {
+          return undefined;
+        }
+      };
+      subirTodo({
+        preferencias: leer(CLAVES_VISTA.preferencias),
+        orden: leer(CLAVES_VISTA.orden),
+        grupos: leer(CLAVES_VISTA.grupos),
+      });
+    }, []),
   );
   const { anotar, abrirCuenta, escribirTarea, escribirHabito, quitarTarea, quitarHabito } = usarEscritura(
     estado,
@@ -141,11 +181,15 @@ export function usarLista(): Lista {
 
   const notas = usarNotas();
 
-  // La caja «Aplazado» solo existe mientras haya algo dentro: se pregunta a los
-  // datos, no a la pestaña, porque recoge los aplazados de todos los grupos.
+  // La caja «Aplazado» solo existe si el ajuste lo permite y hay algo dentro: se
+  // pregunta a los datos, no a la pestaña, porque recoge los aplazados de todos
+  // los grupos.
   const hayAplazados = useMemo(
-    () => estado.fase === 'listo' && estado.datos.habitos.some((h) => aplazadoHasta(h, hoy) !== null),
-    [estado, hoy],
+    () =>
+      ajustes.mostrarAplazados &&
+      estado.fase === 'listo' &&
+      estado.datos.habitos.some((h) => aplazadoHasta(h, hoy) !== null),
+    [estado, hoy, ajustes.mostrarAplazados],
   );
 
   const paneles = usarPaneles({
@@ -183,6 +227,12 @@ export function usarLista(): Lista {
     [archivarGrupoBase],
   );
 
+  /** Desarchivar no toca las filas: el grupo vuelve a tener panel, al final. */
+  const desarchivarGrupo = useCallback((nombre: string) => {
+    archivarGrupoGuardado(nombre, false);
+    setGruposArchivados(leerGruposArchivados());
+  }, []);
+
   /** Borrar una nota es borrar su panel: el orden guardado se limpia con él
    *  para que el id no quede vivo esperando a otra nota con el mismo uuid. */
   const borrarNota = useCallback(
@@ -216,6 +266,10 @@ export function usarLista(): Lista {
       paneles.olvidarPanel(panel);
     },
     archivarGrupo,
+    desarchivarGrupo,
+    gruposArchivados,
+    notasArchivadas: notas.archivadas,
+    recuperarNota: notas.recuperar,
     nota: (panel: string) => {
       const id = idDeNota({ id: panel } as Panel);
       if (!id) return null;
@@ -264,7 +318,8 @@ export function usarLista(): Lista {
     },
     abrirAjustes: setAjustesAbiertos,
     editando,
-    abrirEdicion: setEditando,
+    // Un subhábito no abre formulario: sus ajustes están en el del padre.
+    abrirEdicion: (fila) => setEditando(fila?.tipo === 'subhabito' ? null : fila),
     completar,
     editarTarea: (id, cambios) => {
       // Un grupo escrito a mano en el modal también estrena pestaña.
@@ -280,11 +335,18 @@ export function usarLista(): Lista {
           importancia: cambios.prioridad ? importanciaDeHabito(cambios.prioridad) : undefined,
           grupoEjecucion: cambios.grupoEjecucion,
           frecuencia: cambios.frecuencia,
+          subhabitos: cambios.subhabitos,
         }),
       );
     },
     borrarTarea: quitarTarea,
     borrarHabito: quitarHabito,
+    // El subhábito solo existe dentro del payload del padre: borrarlo es un
+    // PUT de ese padre con la lista sin él. No hay borrado optimista: el
+    // estado lo aplica la propia escritura al momento.
+    borrarSubhabito: (padreId, subId) => {
+      void escribirHabito(padreId, (h) => ({ ...h, subhabitos: (h.subhabitos ?? []).filter((s) => s.id !== subId) }));
+    },
     moverGrupo,
     aplazar,
     crear,

@@ -4,7 +4,8 @@
  * del front original). También se recuerda en qué orden se dejaron las
  * pestañas al arrastrarlas; ese orden es el de los paneles, así que lleva
  * también las notas (`nota:<id>`): una sola lista para una sola fila. */
-import { CLAVE_GRUPOS, limpiarGrupo, PESTANA_COMPLETADOS } from './orden';
+import { CLAVE_GRUPOS, limpiarGrupo } from './orden';
+import { respaldar } from './preferenciasRemotas';
 import { PREFIJO_NOTA } from './paneles';
 
 const CLAVE_ORDEN = 'tareas-nuevo:v1:orden-pestanas';
@@ -36,6 +37,7 @@ export function anotarGrupos(nombres: Iterable<string>): void {
     if (limpio) conocidos.add(limpio);
   }
   localStorage.setItem(CLAVE_GRUPOS, JSON.stringify([...conocidos]));
+  respaldar('grupos');
 }
 
 /** Saca un nombre de los grupos y del orden de pestañas: el grupo deja de
@@ -45,8 +47,10 @@ export function olvidarGrupo(nombre: string): void {
   if (!limpio) return;
   const quedan = leerGruposConocidos().filter((g) => g !== limpio);
   localStorage.setItem(CLAVE_GRUPOS, JSON.stringify(quedan));
+  respaldar('grupos');
   const orden = leerOrdenPestanas().filter((g) => g !== limpio);
   localStorage.setItem(CLAVE_ORDEN, JSON.stringify(orden));
+  respaldar('orden');
   // Borrar de verdad también lo saca del archivo: si no, volvería al recuperar.
   archivarGrupoGuardado(limpio, false);
 }
@@ -68,6 +72,7 @@ export function archivarGrupoGuardado(nombre: string, archivado: boolean): void 
   // El orden de paneles no lleva archivados: uno que vuelve entra al final.
   if (archivado) {
     localStorage.setItem(CLAVE_ORDEN, JSON.stringify(leerOrdenPestanas().filter((id) => id !== limpio)));
+    respaldar('orden');
   }
 }
 
@@ -80,20 +85,38 @@ export function renombrarGrupoGuardado(viejo: string, nuevo: string): void {
   const renombrado = (nombre: string) => (nombre === desde ? hasta : nombre);
   localStorage.setItem(CLAVE_GRUPOS, JSON.stringify([...new Set(leerGruposConocidos().map(renombrado))]));
   localStorage.setItem(CLAVE_ORDEN, JSON.stringify([...new Set(leerOrdenPestanas().map(renombrado))]));
+  respaldar('grupos');
+  respaldar('orden');
 }
 
 /** Orden de los paneles (grupos y notas) tal como los dejó la usuaria. Los ids
  *  de nota ya vienen con su prefijo `nota:`; `limpiarGrupo` los deja pasar tal
  *  cual porque son texto no vacío. */
 export function leerOrdenPestanas(): string[] {
-  return leerNombres(CLAVE_ORDEN);
+  // Aquí no vale `limpiarGrupo`: tiraría los ids de sistema (`''` es «Tareas» y
+  // `completados` choca con la regla de nombres de grupo) y el orden no los
+  // distingue de un grupo. Solo se recortan las cadenas y se quitan repetidos.
+  try {
+    const crudo = JSON.parse(localStorage.getItem(CLAVE_ORDEN) ?? '[]') as unknown;
+    if (!Array.isArray(crudo)) return [];
+    const ids = crudo.filter((id): id is string => typeof id === 'string');
+    return [...new Set(ids.map((id) => id.trim()))];
+  } catch {
+    return [];
+  }
 }
 
 export function guardarOrdenPaneles(ids: Iterable<string>): void {
-  const limpios = [...ids].map(limpiarGrupo).filter((g): g is string => g !== null && g !== PESTANA_COMPLETADOS);
+  // Aquí tampoco se limpia como nombre de grupo: el orden lleva también los
+  // paneles de sistema (`''` es «Tareas», `completados`, `sistema:*`). Solo se
+  // recortan y se quitan repetidos; `''` es un id bueno y va delante.
+  const limpios = [...new Set([...ids].filter((id): id is string => typeof id === 'string'))].map((id) =>
+    id.trim(),
+  );
   localStorage.setItem(CLAVE_ORDEN, JSON.stringify(limpios));
   // Un grupo reordenado ya es un grupo conocido: no debe desaparecer al
   // quedarse sin filas. Las notas no van a la lista de grupos: su panel sale
   // de la propia nota, no de un nombre recordado.
   anotarGrupos(limpios.filter((id) => !id.startsWith(PREFIJO_NOTA)));
+  respaldar('orden');
 }

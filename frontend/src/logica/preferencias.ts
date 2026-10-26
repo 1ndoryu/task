@@ -3,16 +3,43 @@
  * backend, solo cómo mira la usuaria su lista. */
 
 import type { NivelPrioridad } from './importancia';
-import { MODOS_ORDEN } from './orden';
+import { CLAVES_VISTA, MODOS_ORDEN } from './orden';
+import { respaldar } from './preferenciasRemotas';
 
-const CLAVE = 'tareas-nuevo:v1:vista';
+const CLAVE = CLAVES_VISTA.preferencias;
 // Los valores válidos salen de su fuente única: si se añade un modo, aquí entra.
 const MODOS = MODOS_ORDEN.map((m) => m.id as string);
 // Valores de `grupo` de la versión anterior (modos de agrupación, no grupos).
 const MODOS_GRUPO_VIEJOS = ['ninguno', 'proyecto', 'prioridad', 'urgencia'];
 
-/** Tamaño del texto de las filas. */
-export type Fuente = 'pequena' | 'normal' | 'grande';
+/** Talla del texto, en píxeles. Se elige con un número: la escala cerrada de
+ *  antes (pequeña/normal/grande) no dejaba afinar. */
+export const FUENTE_MINIMA = 10;
+export const FUENTE_MAXIMA = 22;
+export const FUENTE_POR_DEFECTO = 13;
+/** La talla de una nota va aparte de la de las filas y admite algo más. */
+export const FUENTE_NOTA_MINIMA = 10;
+export const FUENTE_NOTA_MAXIMA = 24;
+export const FUENTE_NOTA_POR_DEFECTO = 14;
+
+/** Tamaño propio de una caja, en píxeles. La dimensión que falte sigue el
+ *  tamaño de fábrica, que además es el tope del alto.
+ *  `crecido` marca el ancho que se pasó del de fábrica: por debajo de él, la
+ *  caja recupera el aire de los extremos del carril, que solo hace falta para
+ *  que la primera y la última puedan centrarse. */
+export interface TamanoCaja {
+  ancho?: number;
+  alto?: number;
+  crecido?: boolean;
+}
+
+/** Suelo de una caja redimensionada: por debajo no cabe ni la cabecera. El
+ *  tope del alto no está aquí: es el tamaño de fábrica, y lo impone la hoja. */
+export const ANCHO_CAJA_MINIMO = 288;
+export const ALTO_CAJA_MINIMO = 224;
+/** Tope de lectura para no arrastrar valores absurdos guardados a mano. */
+const TAMANO_MAXIMO = 4000;
+
 /** Aire vertical de cada fila. */
 export type Altura = 'compacta' | 'normal' | 'amplia';
 /** Aire entre líneas de una nota: un multiplicador de su talla, no una medida fija. */
@@ -34,12 +61,28 @@ export interface Preferencias {
   /** Modo privacidad: el texto de la lista va difuminado hasta pasar el ratón. */
   privacidad: boolean;
   privacidadAlcance: AlcancePrivacidad;
-  fuente: Fuente;
-  /** Talla del texto de las notas. Va aparte de la de las filas: una nota se
-   *  lee de corrido y pide otro tamaño que una lista de líneas cortas. */
-  fuenteNota: Fuente;
+  /** Con privacidad: la primera fila de cada caja se lee siempre, sin ratón. */
+  primeraVisible: boolean;
+  /** Filas con sus subtareas o subhábitos plegados, por clave `panel:fila`.
+   *  Es estado de la vista, pero también un ajuste: se recuerda entre sesiones. */
+  plegadas: string[];
+  /** Pintar la caja «Aplazado». Apagada, los aplazados existen igual —lo que
+   *  sigue aplazado no vuelve a su grupo—, solo no tienen caja donde verse. */
+  mostrarAplazados: boolean;
+  /** Pintar la caja «Completados». Apagada, lo hecho sigue guardado: solo no
+   *  tiene caja donde verse. */
+  mostrarCompletados: boolean;
+  /** Talla del texto de las filas, en píxeles. */
+  fuente: number;
+  /** Talla del texto de las notas, en píxeles. Va aparte de la de las filas:
+   *  una nota se lee de corrido y pide otro tamaño que una lista de líneas
+   *  cortas. */
+  fuenteNota: number;
   /** Aire entre líneas de las notas; las filas no lo usan. */
   interlineadoNota: Interlineado;
+  /** Tamaño propio de cada caja, por id de panel. La caja que no está aquí
+   *  usa el de fábrica; una dimensión ausente también. */
+  tamanos: Record<string, TamanoCaja>;
   altura: Altura;
   /** Filete entre filas. */
   separador: boolean;
@@ -81,6 +124,49 @@ function leerColores(valor: unknown): ColoresNivel {
   return colores;
 }
 
+/** Claves de filas plegadas guardadas: solo cadenas no vacías. Una fila que ya
+ *  no exista deja su clave, y no pasa nada: nunca se busca por ella. */
+function leerPlegadas(valor: unknown): string[] {
+  if (!Array.isArray(valor)) return [];
+  return valor.filter((clave): clave is string => typeof clave === 'string' && clave.trim() !== '');
+}
+
+/** Escala vieja de tallas, en píxeles, para que los ajustes guardados sigan
+ *  viéndose igual tras el cambio a número. */
+const FUENTES_VIEJAS: Record<string, number> = { pequena: 12, normal: 13, grande: 15 };
+const FUENTES_NOTA_VIEJAS: Record<string, number> = { pequena: 12, normal: 14, grande: 16 };
+
+/** Una talla guardada: número dentro de sus límites, o la escala vieja. Cualquier
+ *  otra cosa cae al valor por defecto. */
+function leerFuente(valor: unknown, viejas: Record<string, number>, porDefecto: number, minima: number, maxima: number): number {
+  const numero = typeof valor === 'number' ? valor : typeof valor === 'string' ? viejas[valor] : undefined;
+  if (numero === undefined || !Number.isFinite(numero)) return porDefecto;
+  return Math.min(maxima, Math.max(minima, numero));
+}
+
+/** Tamaños por caja guardados: solo enteros finitos y dentro de sus límites.
+ *  Una caja que ya no exista deja su entrada y no pasa nada: nunca se busca. */
+function leerTamanos(valor: unknown): Record<string, TamanoCaja> {
+  const guardado = (typeof valor === 'object' && valor !== null ? valor : {}) as Record<string, unknown>;
+  const tamanos: Record<string, TamanoCaja> = {};
+  for (const [id, bruto] of Object.entries(guardado)) {
+    // `''` es un id bueno: es la caja «Tareas». Descartarlo aquí hacía que su
+    // tamaño no volviera al recargar, aunque se guardaba bien.
+    if (typeof bruto !== 'object' || bruto === null) continue;
+    const { ancho, alto, crecido } = bruto as Record<string, unknown>;
+    const tamano: TamanoCaja = {};
+    if (crecido === true) tamano.crecido = true;
+    if (typeof ancho === 'number' && Number.isFinite(ancho)) {
+      tamano.ancho = Math.min(TAMANO_MAXIMO, Math.max(ANCHO_CAJA_MINIMO, ancho));
+    }
+    if (typeof alto === 'number' && Number.isFinite(alto)) {
+      tamano.alto = Math.min(TAMANO_MAXIMO, Math.max(ALTO_CAJA_MINIMO, alto));
+    }
+    if (tamano.ancho !== undefined || tamano.alto !== undefined) tamanos[id] = tamano;
+  }
+  return tamanos;
+}
+
 /** Órdenes por caja guardados: solo las claves y valores que siguen siendo
  *  modos válidos. Una caja borrada deja su entrada, y no pasa nada: su id no
  *  vuelve a pintarse; se descarta al leer para no arrastrar basura. */
@@ -88,7 +174,9 @@ function leerOrdenes(valor: unknown): Record<string, string> {
   const guardado = (typeof valor === 'object' && valor !== null ? valor : {}) as Record<string, unknown>;
   const ordenes: Record<string, string> = {};
   for (const [id, modo] of Object.entries(guardado)) {
-    if (id && typeof modo === 'string' && MODOS.includes(modo)) ordenes[id] = modo;
+    // `''` es un id bueno: es la caja «Tareas». Excluirlo le impedía recordar
+    // su modo de orden propio.
+    if (typeof modo === 'string' && MODOS.includes(modo)) ordenes[id] = modo;
   }
   return ordenes;
 }
@@ -100,9 +188,14 @@ const POR_DEFECTO: Preferencias = {
   ocultarHabitos: true,
   privacidad: false,
   privacidadAlcance: 'una',
-  fuente: 'normal',
-  fuenteNota: 'normal',
+  primeraVisible: false,
+  plegadas: [],
+  mostrarAplazados: true,
+  mostrarCompletados: true,
+  fuente: FUENTE_POR_DEFECTO,
+  fuenteNota: FUENTE_NOTA_POR_DEFECTO,
   interlineadoNota: 'normal',
+  tamanos: {},
   altura: 'normal',
   separador: true,
   separarGrupos: false,
@@ -126,8 +219,6 @@ export function leerPreferencias(): Preferencias {
     const ordenViejo = typeof guardado.ordenTareas === 'string' ? guardado.ordenTareas : undefined;
     const orden =
       texto('orden', MODOS) ?? (ordenViejo && MODOS.includes(ordenViejo) ? ordenViejo : POR_DEFECTO.orden);
-    const fuente = texto('fuente', ['pequena', 'normal', 'grande']);
-    const fuenteNota = texto('fuenteNota', ['pequena', 'normal', 'grande']);
     const interlineadoNota = texto('interlineadoNota', ['ajustado', 'normal', 'amplio']);
     const altura = texto('altura', ['compacta', 'normal', 'amplia']);
     const tema = texto('tema', ['claro', 'oscuro']);
@@ -148,9 +239,25 @@ export function leerPreferencias(): Preferencias {
         typeof guardado.ocultarHabitos === 'boolean' ? guardado.ocultarHabitos : POR_DEFECTO.ocultarHabitos,
       privacidad: typeof guardado.privacidad === 'boolean' ? guardado.privacidad : POR_DEFECTO.privacidad,
       privacidadAlcance: texto('privacidadAlcance', ['una', 'todas']) as AlcancePrivacidad ?? POR_DEFECTO.privacidadAlcance,
-      fuente: (fuente as Fuente) ?? POR_DEFECTO.fuente,
-      fuenteNota: (fuenteNota as Fuente) ?? POR_DEFECTO.fuenteNota,
+      primeraVisible:
+        typeof guardado.primeraVisible === 'boolean' ? guardado.primeraVisible : POR_DEFECTO.primeraVisible,
+      plegadas: leerPlegadas(guardado.plegadas),
+      mostrarAplazados:
+        typeof guardado.mostrarAplazados === 'boolean' ? guardado.mostrarAplazados : POR_DEFECTO.mostrarAplazados,
+      mostrarCompletados:
+        typeof guardado.mostrarCompletados === 'boolean'
+          ? guardado.mostrarCompletados
+          : POR_DEFECTO.mostrarCompletados,
+      fuente: leerFuente(guardado.fuente, FUENTES_VIEJAS, POR_DEFECTO.fuente, FUENTE_MINIMA, FUENTE_MAXIMA),
+      fuenteNota: leerFuente(
+        guardado.fuenteNota,
+        FUENTES_NOTA_VIEJAS,
+        POR_DEFECTO.fuenteNota,
+        FUENTE_NOTA_MINIMA,
+        FUENTE_NOTA_MAXIMA,
+      ),
       interlineadoNota: (interlineadoNota as Interlineado) ?? POR_DEFECTO.interlineadoNota,
+      tamanos: leerTamanos(guardado.tamanos),
       altura: (altura as Altura) ?? POR_DEFECTO.altura,
       separador: typeof guardado.separador === 'boolean' ? guardado.separador : POR_DEFECTO.separador,
       separarGrupos:
@@ -168,4 +275,7 @@ export function leerPreferencias(): Preferencias {
 export function guardarPreferencias(cambios: Partial<Preferencias>): void {
   const actuales = leerPreferencias();
   localStorage.setItem(CLAVE, JSON.stringify({ ...actuales, ...cambios }));
+  // Cada ajuste deja copia en el servidor: el `localStorage` del webview se
+  // vacía con una reinstalación, y la vista no debe volver a la de fábrica.
+  respaldar('preferencias');
 }

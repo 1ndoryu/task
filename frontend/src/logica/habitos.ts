@@ -5,7 +5,7 @@
 import { pedir } from './cliente';
 import { frecuenciaDe } from './frecuencia';
 import { importanciaDeHabito } from './importancia';
-import type { FrecuenciaDetalle, Habito } from './tipos';
+import type { FrecuenciaDetalle, Habito, SubHabito } from './tipos';
 
 /** Cuerpo que espera `UpsertHabitRequest` en Rust (camelCase). */
 function habitoARequest(habito: Habito): Record<string, unknown> {
@@ -51,6 +51,8 @@ export function editarHabito(
     grupoEjecucion?: string | null;
     /** Si falta, la frecuencia se queda como estaba. */
     frecuencia?: FrecuenciaDetalle;
+    /** Si falta, los subhábitos se quedan como estaban: son del payload. */
+    subhabitos?: SubHabito[];
   },
 ): Habito {
   return {
@@ -64,5 +66,6 @@ export function editarHabito(
       cambios.frecuencia === undefined
         ? habito.frecuencia
         : { ...(typeof habito.frecuencia === 'object' && habito.frecuencia !== null ? habito.frecuencia : {}), ...cambios.frecuencia },
+    subhabitos: cambios.subhabitos ?? habito.subhabitos,
   };
 }

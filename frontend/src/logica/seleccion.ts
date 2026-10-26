@@ -3,14 +3,29 @@
  * pestaña activa. Lógica pura. */
 import { aplazadoHasta } from './aplazos';
 import { fechaLocal } from './fechas';
-import { tocaHoy } from './frecuencia';
+import { tocaHoy, type ConFrecuencia } from './frecuencia';
 import { comparador, entradaDeHabito, entradaDeTarea, PESTANA_COMPLETADOS, type Grupo, type ModoOrden } from './orden';
-import type { Dashboard, Habito, Tarea } from './tipos';
+import type { Dashboard, Habito, SubHabito, Tarea } from './tipos';
 
 export { fechaLocal };
 
-/** Una fila de la lista: o una tarea real o un hábito. */
-export type Fila = { tipo: 'tarea'; tarea: Tarea } | { tipo: 'habito'; habito: Habito };
+/** Una fila de la lista: una tarea, un hábito o un subhábito. `hijos` son sus
+ *  subtareas o subhábitos, ya resueltos: se pintan indentados bajo el padre.
+ *  El subhábito no tiene registro propio en el backend —vive en el payload de
+ *  su padre—, así que la fila lleva el padre para poder escribirlo. */
+export type Fila =
+  | { tipo: 'tarea'; tarea: Tarea; hijos?: Fila[] }
+  | { tipo: 'habito'; habito: Habito; hijos?: Fila[] }
+  | { tipo: 'subhabito'; subhabito: SubHabito; padre: Habito };
+
+/** Subhábitos del padre como filas. Los sin nombre se saltan: el legacy dejó
+ *  algunos fantasma que no se podían ni borrar. Un subhábito pausado tampoco
+ *  se pinta, igual que en el legacy. */
+export function subfilas(padre: Habito, hoy: string, ocultar: boolean): Fila[] {
+  return (padre.subhabitos ?? [])
+    .filter((s) => s.nombre?.trim() && !s.pausado && !ocultarCompletado(s, hoy, ocultar))
+    .map((subhabito) => ({ tipo: 'subhabito' as const, subhabito, padre }));
+}
 
 export interface Vista {
   filas: Fila[];
@@ -21,7 +36,7 @@ export interface Vista {
   aplazados: Fila[];
 }
 
-export function hechoHoy(habito: Habito, hoy: string): boolean {
+export function hechoHoy(habito: ConFrecuencia, hoy: string): boolean {
   return habito.historialCompletados?.includes(hoy) ?? false;
 }
 
@@ -35,7 +50,7 @@ export function enGrupo(grupoDeFila: Grupo | undefined, activo: Grupo): boolean 
  * ejecución del legacy: se muestra si toca hoy **y** no está hecho; lo hecho
  * se esconde, y lo que no toca (cada X días, semanal, mensual, días fijos)
  * también, hasta que la frecuencia lo traiga de vuelta. */
-export function ocultarCompletado(habito: Habito, hoy: string, ocultar: boolean): boolean {
+export function ocultarCompletado(habito: ConFrecuencia, hoy: string, ocultar: boolean): boolean {
   return ocultar && (hechoHoy(habito, hoy) || !tocaHoy(habito, hoy));
 }
 
@@ -70,10 +85,21 @@ export function seleccionar(
   // tarea con proyecto pertenece al proyecto y no se repite aquí.
   const tareas = datos.tareas.filter(
     (t) =>
-      t.parentId == null &&
       (completados ? t.completado : !t.completado || saliendo(t.id)) &&
       (completados || (enGrupo(t.grupoEjecucion, grupo) && (grupo !== null || t.proyectoId == null))),
   );
+  // El legado anidaba un solo nivel: una tarea con padre no es fila propia, se
+  // pinta debajo de él. Si el padre no está en esta vista (otra pestaña, otro
+  // proyecto o ya hecho), la hija sube a raíz: perder una tarea es peor.
+  const porPadre = (t: Tarea) => t.parentId != null && tareas.some((p) => p.id === t.parentId);
+  const hijasDe = new Map<number, Fila[]>();
+  for (const t of tareas) {
+    if (!porPadre(t)) continue;
+    const lista = hijasDe.get(t.parentId as number) ?? [];
+    lista.push({ tipo: 'tarea', tarea: t });
+    hijasDe.set(t.parentId as number, lista);
+  }
+  const raices = tareas.filter((t) => !porPadre(t));
   // Aplazado es un estado propio: el hábito no toca y no se queda en su pestaña
   // (allí parecería pendiente); vive en la caja «Aplazado» hasta que vuelve.
   const aplazadosDe = (h: Habito) => aplazadoHasta(h, hoy) !== null;
@@ -94,10 +120,17 @@ export function seleccionar(
   const pares = [
     ...(opciones.solo === 'habitos'
       ? []
-      : tareas.map((tarea) => ({ fila: { tipo: 'tarea', tarea } as Fila, entrada: entradaDeTarea(tarea) }))),
+      : raices.map((tarea) => ({
+          fila: { tipo: 'tarea', tarea, hijos: hijasDe.get(tarea.id) } as Fila,
+          entrada: entradaDeTarea(tarea),
+        }))),
     ...(opciones.solo === 'tareas'
       ? []
-      : habitos.map((habito) => ({ fila: { tipo: 'habito', habito } as Fila, entrada: entradaDeHabito(habito, hoy) }))),
+      : habitos.map((habito) => ({
+          // En completados no se esconde nada: los hijos van tal cual, como el padre.
+          fila: { tipo: 'habito', habito, hijos: subfilas(habito, hoy, completados ? false : (opciones.ocultarHabitos ?? false)) } as Fila,
+          entrada: entradaDeHabito(habito, hoy),
+        }))),
   ];
 
   // El comparador guarda los pesos calculados: se crea una sola vez.

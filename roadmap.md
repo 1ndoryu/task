@@ -10,6 +10,7 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Pendientes
 
+- [ ] `21AG-1` — **Reintegrar el trabajo del rescate 2026-10-25 sobre main.** Tamaño de las cajas, pestañas de archivados y lo demás del rescate, sin perder 21AF-1. Hecho cuando la app instalada muestra esos ajustes, el gate queda sin hallazgos nuevos y la rama de rescate sigue archivada en su bundle.
 - [ ] `21AC-1` — **Mostrar las tareas con proyecto en una vista por proyecto.** Hoy 228 pendientes con proyecto no
   aparecen en ninguna pestaña. Decidido 2026-10-25: una pestaña por proyecto. Hecho cuando ninguna tarea con proyecto
   queda fuera de todas las pestañas, verificado en la 89.

@@ -5,10 +5,11 @@
  * Añadir un tipo de caja nuevo = añadir un valor a `TipoPanel`, un constructor
  * en `panelesDe` y su vista. Nada de lo demás cambia.
  *
- * El orden es una sola lista de ids, con los mismos nombres que el panel:
- * los grupos por su nombre, las notas por `nota:<id>`. «Tareas» y
- * «Completados» no están en la lista: son de sistema y su sitio lo manda la
- * vista (primera y última).
+ * El orden es una sola lista de ids, con los mismos nombres que el panel: los
+ * grupos por su nombre, las notas por `nota:<id>` y los de sistema por su id
+ * fijo (`''`, `sistema:*`, `completados`). Todos se arrastran, también los de
+ * sistema: lo único que no se puede de ellos es renombrarlos o borrarlos, y
+ * eso lo dice `fija`, que solo habla de la identidad, no del sitio.
  * Lógica pura: sin React y sin tocar el `localStorage`. */
 import type { ResumenNota } from './notas';
 import { PESTANA_COMPLETADOS, type Grupo } from './orden';
@@ -32,8 +33,13 @@ export interface Panel {
   tipo: TipoPanel;
   /** Nombre visible. En los paneles de nota es el título de la nota. */
   etiqueta: string;
-  /** Las de sistema no se renombran, no se borran y no se arrastran. */
+  /** Panel de sistema: no se renombra ni se borra. Del sitio no habla esto:
+   *  también se arrastra, como cualquier otro (`mueve` dice los que hoy se
+   *  pueden mover, que por ahora son todos). */
   fija: boolean;
+  /** Se puede cambiar de sitio. Separado de `fija` porque una caja puede ser de
+   *  sistema y aun así moverse: antes iban juntos y «Tareas» quedaba clavada. */
+  mueve: boolean;
   /** Grupo de ejecución que filtra la caja; `null` donde no filtra. */
   grupo: Grupo;
 }
@@ -48,9 +54,12 @@ export function idDeNota(panel: Panel): string | null {
   return panel.id.startsWith(PREFIJO_NOTA) ? panel.id.slice(PREFIJO_NOTA.length) : null;
 }
 
-/** Los paneles en orden: «Tareas», los ordenables (grupos y notas mezclados en
- *  el orden guardado) y «Completados» al final. Los que no están en el orden
- *  guardado entran al final, en alfabético por nombre. */
+/** Los paneles en el orden guardado: los de sistema y los demás en una sola
+ *  lista, porque todos se arrastran. Lo que no está en el orden guardado entra
+ *  al final en su sitio de fábrica: los de sistema primero (Tareas, Hábitos,
+ *  Aplazado) y luego los grupos y notas en alfabético. Así una lista vieja
+ *  —guardada antes de que los de sistema se movieran— sigue abriendo igual que
+ *  antes. */
 export function panelesDe(
   gruposDeFilas: Iterable<Grupo>,
   gruposConocidos: Iterable<string>,
@@ -64,6 +73,9 @@ export function panelesDe(
   /** Hay hábitos aplazados: la caja «Aplazado» solo existe mientras haya algo
    *  dentro. Vacía no se pinta, y así no ocupa sitio en la vista de nadie. */
   hayAplazados = false,
+  /** La caja «Completados» se puede esconder: apagada no es un panel, y su
+   *  pestaña desaparece con ella. */
+  mostrarCompletados = true,
 ): Panel[] {
   const grupos = new Set<string>(gruposConocidos);
   for (const grupo of gruposDeFilas) if (grupo) grupos.add(grupo);
@@ -71,37 +83,53 @@ export function panelesDe(
   const listaNotas = new Map<string, string>();
   for (const nota of notas) listaNotas.set(panelDeNota(nota.id), nota.titulo);
 
-  const ordenables = new Map<string, Panel>();
+  const porId = new Map<string, Panel>();
   for (const nombre of grupos) {
-    ordenables.set(nombre, { id: nombre, tipo: 'tareas', etiqueta: nombre, fija: false, grupo: nombre });
+    porId.set(nombre, { id: nombre, tipo: 'tareas', etiqueta: nombre, fija: false, mueve: true, grupo: nombre });
   }
   for (const [id, titulo] of listaNotas) {
-    ordenables.set(id, { id, tipo: 'nota', etiqueta: titulo, fija: false, grupo: null });
+    porId.set(id, { id, tipo: 'nota', etiqueta: titulo, fija: false, mueve: true, grupo: null });
   }
-
-  const guardados = [...new Set(ordenGuardado)].filter((id) => ordenables.has(id));
-  const resto = [...ordenables.keys()]
-    .filter((id) => !guardados.includes(id))
-    .sort((a, b) => (ordenables.get(a)?.etiqueta ?? '').localeCompare(ordenables.get(b)?.etiqueta ?? '', 'es'));
-
-  return [
-    { id: '', tipo: 'tareas', etiqueta: 'Tareas', fija: true, grupo: null },
+  // Los de sistema aparte: sin orden guardado van delante, en este orden de
+  // fábrica, y los grupos y notas detrás, alfabéticos.
+  const sistema: Panel[] = [
+    { id: '', tipo: 'tareas', etiqueta: 'Tareas', fija: true, mueve: true, grupo: null },
     ...(separarHabitos
-      ? [{ id: PANEL_HABITOS, tipo: 'habitos' as const, etiqueta: 'Hábitos', fija: true, grupo: null }]
+      ? [{ id: PANEL_HABITOS, tipo: 'habitos' as const, etiqueta: 'Hábitos', fija: true, mueve: true, grupo: null }]
       : []),
     ...(hayAplazados
-      ? [{ id: PANEL_APLAZADOS, tipo: 'aplazados' as const, etiqueta: 'Aplazado', fija: true, grupo: null }]
+      ? [{ id: PANEL_APLAZADOS, tipo: 'aplazados' as const, etiqueta: 'Aplazado', fija: true, mueve: true, grupo: null }]
       : []),
-    ...[...guardados, ...resto].map((id) => ordenables.get(id) as Panel),
-    // Sin grupo: este panel no filtra por grupo, recoge lo hecho de todos.
-    // Si llevara uno, `seleccionar` no Marcaría la pestaña de completados.
-    { id: PESTANA_COMPLETADOS, tipo: 'completados', etiqueta: 'Completados', fija: true, grupo: null },
+    ...(mostrarCompletados
+      ? [
+          // Sin grupo: este panel no filtra por grupo, recoge lo hecho de todos.
+          // Si llevara uno, `seleccionar` no Marcaría la pestaña de completados.
+          {
+            id: PESTANA_COMPLETADOS,
+            tipo: 'completados' as const,
+            etiqueta: 'Completados',
+            fija: true,
+            mueve: true,
+            grupo: null,
+          },
+        ]
+      : []),
   ];
+  for (const panel of sistema) porId.set(panel.id, panel);
+
+  const guardados = [...new Set(ordenGuardado)].filter((id) => porId.has(id));
+  const sinSitio = [...porId.values()].filter((panel) => !guardados.includes(panel.id));
+  // Los de sistema conservan su orden de fábrica; los demás van alfabéticos.
+  const deSistema = sistema.filter((panel) => sinSitio.includes(panel));
+  const resto = sinSitio
+    .filter((panel) => !panel.fija)
+    .sort((a, b) => a.etiqueta.localeCompare(b.etiqueta, 'es'));
+  return [...guardados.map((id) => porId.get(id) as Panel), ...deSistema, ...resto];
 }
 
-/** Mueve un panel a una posición entre los ordenables. El índice cuenta solo
- *  los que se pueden mover (sin «Tareas» ni «Completados»), que es el mismo
- *  espacio que usa el carril al soltar. Un índice fuera de rango se recorta. */
+/** Mueve un panel a una posición de la lista completa. El índice es el de esa
+ *  lista, que es el mismo espacio que usa el carril al soltar. Un índice fuera
+ *  de rango se recorta. */
 export function moverA(orden: string[], movido: string, indice: number): string[] {
   const desde = orden.indexOf(movido);
   if (desde < 0) return orden;
