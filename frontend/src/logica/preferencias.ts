@@ -3,6 +3,7 @@
  * backend, solo cómo mira la usuaria su lista. */
 
 import type { NivelPrioridad } from './importancia';
+import { leerMinimizadas } from './minimizadas';
 import { CLAVES_VISTA, MODOS_ORDEN } from './orden';
 import { respaldar } from './preferenciasRemotas';
 
@@ -66,6 +67,9 @@ export interface Preferencias {
   /** Filas con sus subtareas o subhábitos plegados, por clave `panel:fila`.
    *  Es estado de la vista, pero también un ajuste: se recuerda entre sesiones. */
   plegadas: string[];
+  /** Cajas minimizadas (solo se ve su título), por id de panel. `''` es la caja
+   *  «Tareas». Se recuerda entre sesiones, como el tamaño. */
+  minimizadas: string[];
   /** Pintar la caja «Aplazado». Apagada, los aplazados existen igual —lo que
    *  sigue aplazado no vuelve a su grupo—, solo no tienen caja donde verse. */
   mostrarAplazados: boolean;
@@ -196,6 +200,7 @@ const POR_DEFECTO: Preferencias = {
   privacidadAlcance: 'una',
   primeraVisible: false,
   plegadas: [],
+  minimizadas: [],
   mostrarAplazados: true,
   mostrarCompletados: true,
   mostrarArchivados: true,
@@ -250,6 +255,7 @@ export function leerPreferencias(): Preferencias {
       primeraVisible:
         typeof guardado.primeraVisible === 'boolean' ? guardado.primeraVisible : POR_DEFECTO.primeraVisible,
       plegadas: leerPlegadas(guardado.plegadas),
+      minimizadas: leerMinimizadas(guardado.minimizadas),
       mostrarAplazados:
         typeof guardado.mostrarAplazados === 'boolean' ? guardado.mostrarAplazados : POR_DEFECTO.mostrarAplazados,
       mostrarCompletados:
