@@ -64,6 +64,9 @@
   },
   "orphanClassDetection": {
     "minClassLength": 3,
-    "excludeClassPatterns": []
+    "excludeClassPatterns": [
+      "^fila$",
+      "^fila--saliendo$"
+    ]
   }
 }
