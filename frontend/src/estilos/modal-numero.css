@@ -1,0 +1,156 @@
+/* Talla numérica y su Aplicar: el modal de tamaño de fuente y de caja.
+ * Va en hoja propia para que modal.css siga bajo el límite de líneas. */
+/* Aplicar del modal de tamaño: el tono del principal, dicho por el propio
+ * ajuste y no por la clase genérica del botón. */
+.numero__aceptar {
+  border-color: var(--tinta);
+  background: var(--tinta);
+  color: var(--panel);
+}
+
+.numero__aceptar:hover {
+  border-color: var(--tinta);
+  background: var(--tinta);
+  color: var(--panel);
+}
+
+/* --- Talla numérica: el ajuste enseña el número y una muestra; el modal lleva
+ * el campo, el contador y los atajos. La muestra es el propio texto a su talla,
+ * así que se decide mirando en vez de imaginando. --- */
+.campo__valor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.25rem 0.45rem;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoChico);
+  background: var(--panel);
+  color: var(--tinta-tenue);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.campo__valor:hover {
+  border-color: var(--tinta-tenue);
+}
+
+/* La muestra puede ser larga: recorta con puntos en vez de empujar la cifra. */
+.campo__muestra {
+  min-width: 0;
+  font-size: var(--talla-muestra);
+  overflow: hidden;
+  color: var(--tinta);
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.campo__cifra {
+  flex: none;
+  color: var(--tinta);
+  font-size: var(--texto-menu);
+  font-variant-numeric: tabular-nums;
+}
+
+.campo__unidad {
+  margin-left: 0.15rem;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+}
+
+/* El modal del número es más estrecho y no lleva pestañas: solo su cifra. */
+.modal--numero {
+  max-width: 18rem;
+}
+
+.modal--numero .modal__caja {
+  padding: 0.9rem 1.1rem 0;
+}
+
+/* La muestra ocupa el sitio de una fila de la lista: mismo aire, misma tinta,
+ * y crece o encoge con el borrador. */
+.numero__muestra {
+  margin: 0.4rem 0 0.7rem;
+  font-size: var(--talla-muestra);
+  color: var(--tinta);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.numero__fila {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Los dos pasos son botones de la misma altura que el campo, para que la fila
+ * lea como un solo contador. */
+.numero__paso {
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoChico);
+  background: var(--panel);
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--texto-base);
+  line-height: 0;
+  cursor: pointer;
+}
+
+.numero__paso:hover:not(:disabled) {
+  border-color: var(--tinta);
+}
+
+.numero__paso:disabled {
+  color: var(--linea);
+  cursor: default;
+}
+
+.numero__caja {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  gap: 0.2rem;
+  min-width: 0;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoChico);
+}
+
+/* La cifra es la protagonista: grande, tabular y sin las flechitas del campo
+ * numérico nativo, que aquí sobran porque ya hay dos botones. */
+.numero__campo {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  font-size: var(--texto-base);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  outline: none;
+}
+
+.numero__campo::-webkit-outer-spin-button,
+.numero__campo::-webkit-inner-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.numero__unidad {
+  flex: none;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+}
+
+.modal--numero .modal__pie {
+  margin: 0.7rem -1.1rem 0;
+}

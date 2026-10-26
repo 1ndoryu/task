@@ -8,6 +8,7 @@ import { Lista } from './vista/Lista';
 import './estilos/button.css';
 import './estilos/dropdownPanel.css';
 import './estilos/modal.css';
+import './estilos/modal-numero.css';
 import './estilos/pestanas.css';
 import './estilos/listas.css';
 import './estilos/cajas.css';
