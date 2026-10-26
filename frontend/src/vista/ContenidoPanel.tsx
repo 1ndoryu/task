@@ -86,7 +86,7 @@ export function ContenidoPanel({
         hoy={hoy}
         preferencias={preferencias}
         acceso={diario}
-        tamano={preferencias.tamanos[panel.id]}
+        tamano={redimensionable ? preferencias.tamanos[panel.id] : undefined}
         onTamano={redimensionable ? (tamano) => onTamano(panel.id, tamano) : undefined}
         minimizada={minimizada}
         botonMinimizar={botonMinimizar}
@@ -104,7 +104,7 @@ export function ContenidoPanel({
         texto={laNota.texto}
         onEscribir={laNota.escribir}
         onConfirmar={laNota.confirmar}
-        tamano={preferencias.tamanos[panel.id]}
+        tamano={redimensionable ? preferencias.tamanos[panel.id] : undefined}
         onTamano={redimensionable ? (tamano) => onTamano(panel.id, tamano) : undefined}
         // Mismo gesto que en la caja de lista: el clic derecho es del panel.
         onContexto={conMenu}
@@ -182,7 +182,7 @@ export function ContenidoPanel({
       onMenuAbierto={onMenuAbierto}
       plegadas={plegadas}
       onPlegar={onPlegar}
-      tamano={preferencias.tamanos[panel.id]}
+      tamano={redimensionable ? preferencias.tamanos[panel.id] : undefined}
       onTamano={redimensionable ? (tamano) => onTamano(panel.id, tamano) : undefined}
       minimizada={minimizada}
       // El menú del panel también nace de la caja: en cajas es la única vía
