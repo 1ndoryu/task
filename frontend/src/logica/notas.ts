@@ -49,15 +49,19 @@ export function resumen(nota: Nota): ResumenNota {
 }
 
 /** Una entrada del diario es una nota con título reservado, `diario:AAAA-MM-DD`:
- *  así no hace falta una tabla nueva y las cajas la dejan fuera. */
+ *  así no hace falta una tabla nueva y las cajas la dejan fuera. Un día puede
+ *  tener capítulos: el 1 es el título a secas (así cuadra con lo ya escrito) y
+ *  los demás llevan `#n` al final. */
 const PREFIJO_DIARIO = 'diario:';
-const FECHA_DIARIO = /^diario:(\d{4}-\d{2}-\d{2})$/;
+const ENTRADA_DIARIO = /^diario:(\d{4}-\d{2}-\d{2})(?:#(\d+))?$/;
 
-export const tituloDiario = (fecha: string): string => `${PREFIJO_DIARIO}${fecha}`;
+export const tituloDiario = (fecha: string, capitulo = 1): string =>
+  capitulo === 1 ? `${PREFIJO_DIARIO}${fecha}` : `${PREFIJO_DIARIO}${fecha}#${capitulo}`;
 
-/** Día de una entrada del diario, o `null` si la nota es una caja normal. */
-export function fechaDeDiario(titulo: string): string | null {
-  return FECHA_DIARIO.exec(titulo)?.[1] ?? null;
+/** Día y capítulo de una entrada del diario, o `null` si la nota es una caja normal. */
+export function entradaDeDiario(titulo: string): { fecha: string; capitulo: number } | null {
+  const partes = ENTRADA_DIARIO.exec(titulo);
+  return partes ? { fecha: partes[1], capitulo: Number(partes[2] ?? 1) } : null;
 }
 
 export async function crearNota(titulo = TITULO_NOTA, contenido = ''): Promise<Nota> {

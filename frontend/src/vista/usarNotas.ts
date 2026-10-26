@@ -10,7 +10,7 @@ import {
   archivarNota,
   borrarNota,
   crearNota,
-  fechaDeDiario,
+  entradaDeDiario,
   guardarNota,
   leerNotas,
   resumen,
@@ -22,14 +22,26 @@ import {
 /** Cuánto se espera tras la última tecla antes de guardar. */
 const ESPERA_GUARDADO = 600;
 
-/** Lo que la caja «Diario» necesita de una entrada: leer y escribir por día. */
+/** Lo que la caja «Diario» necesita: leer y escribir por día y capítulo. */
 export interface AccesoDiario {
-  /** Texto de un día; vacío si todavía no se ha escrito nada. */
-  textoDe: (fecha: string) => string;
-  escribir: (fecha: string, contenido: string) => void;
-  /** Fuerza el guardado pendiente de un día (al cerrar el campo). */
-  confirmar: (fecha: string) => void;
+  /** Capítulos de un día, en orden. Siempre incluye el 1, aunque esté vacío. */
+  capitulos: (fecha: string) => number[];
+  /** Texto de un capítulo; vacío si todavía no se ha escrito nada. */
+  textoDe: (fecha: string, capitulo: number) => string;
+  escribir: (fecha: string, capitulo: number, contenido: string) => void;
+  /** Fuerza el guardado pendiente de un capítulo (al cerrar el campo). */
+  confirmar: (fecha: string, capitulo: number) => void;
+  /** Añade un capítulo al día y devuelve su número. */
+  nuevo: (fecha: string) => number;
+  /** Borra un capítulo. El 1 no desaparece: queda vacío, como un día sin escribir. */
+  borrar: (fecha: string, capitulo: number) => void;
 }
+
+/** Clave de un capítulo en los mapas del diario: día y número juntos. */
+const claveCapitulo = (fecha: string, capitulo: number) => `${fecha}#${capitulo}`;
+
+/** Capítulos de un día en orden, con el 1 siempre presente. */
+const ordenados = (lista: number[]) => [...new Set([1, ...lista])].sort((a, b) => a - b);
 
 export interface Notas {
   /** Entradas del diario por día. No son cajas: no entran en `lista`. */
@@ -67,9 +79,11 @@ export function usarNotas(): Notas {
   const pendientes = useRef(new Map<string, number>());
   // Último texto de cada nota, para mandar lo escrito sin depender del estado.
   const textos = useRef(new Map<string, string>());
-  // Diario: texto por día para pintar, id de la nota de cada día y creaciones en
-  // curso. Una entrada nace con la primera letra, no al abrir el día.
+  // Diario: texto por capítulo para pintar, id de la nota de cada capítulo y
+  // creaciones en curso. Un capítulo nace con la primera letra, no al abrir el día.
+  // Las claves son `día#capítulo`; `diarioCaps` lista los capítulos de cada día.
   const [diarioTextos, setDiarioTextos] = useState<Record<string, string>>({});
+  const [diarioCaps, setDiarioCaps] = useState<Record<string, number[]>>({});
   const diarioTexto = useRef(new Map<string, string>());
   const diarioIds = useRef(new Map<string, string>());
   const diarioCreando = useRef(new Map<string, Promise<string | null>>());
@@ -82,19 +96,24 @@ export function usarNotas(): Notas {
         // Las entradas del diario se separan: no son cajas, pero su cuerpo también llega aquí.
         const cajas: Nota[] = [];
         const dias: Record<string, string> = {};
+        const caps: Record<string, number[]> = {};
         for (const nota of notas) {
           textos.current.set(nota.id, nota.content);
-          const fecha = fechaDeDiario(nota.title);
-          if (!fecha) {
+          const entrada = entradaDeDiario(nota.title);
+          if (!entrada) {
             cajas.push(nota);
             continue;
           }
-          diarioIds.current.set(fecha, nota.id);
-          diarioTexto.current.set(fecha, nota.content);
-          dias[fecha] = nota.content;
+          const clave = claveCapitulo(entrada.fecha, entrada.capitulo);
+          diarioIds.current.set(clave, nota.id);
+          diarioTexto.current.set(clave, nota.content);
+          dias[clave] = nota.content;
+          caps[entrada.fecha] = [...(caps[entrada.fecha] ?? []), entrada.capitulo];
         }
+        for (const fecha of Object.keys(caps)) caps[fecha] = ordenados(caps[fecha]);
         setLista(cajas.map(resumen));
         setDiarioTextos(dias);
+        setDiarioCaps(caps);
         // El cuerpo llega con la lista: no hay una segunda petición por caja.
         setCuerpos(Object.fromEntries(notas.map((n) => [n.id, n.content])));
       })
@@ -169,16 +188,17 @@ export function usarNotas(): Notas {
     };
   }, [enviar]);
 
-  /** Id de la entrada de un día, creándola si no existe. Se pide una vez por día:
+  /** Id de un capítulo, creándolo si no existe. Se pide una vez por capítulo:
    *  las pulsaciones seguidas esperan a la misma creación y no abren dos notas. */
-  const asegurarDiario = useCallback((fecha: string): Promise<string | null> => {
-    const id = diarioIds.current.get(fecha);
+  const asegurarCapitulo = useCallback((fecha: string, capitulo: number): Promise<string | null> => {
+    const clave = claveCapitulo(fecha, capitulo);
+    const id = diarioIds.current.get(clave);
     if (id) return Promise.resolve(id);
-    const enCurso = diarioCreando.current.get(fecha);
+    const enCurso = diarioCreando.current.get(clave);
     if (enCurso) return enCurso;
-    const creacion = crearNota(tituloDiario(fecha))
+    const creacion = crearNota(tituloDiario(fecha, capitulo))
       .then((nota) => {
-        diarioIds.current.set(fecha, nota.id);
+        diarioIds.current.set(clave, nota.id);
         textos.current.set(nota.id, nota.content);
         setCuerpos((previos) => ({ ...previos, [nota.id]: nota.content }));
         return nota.id;
@@ -187,46 +207,85 @@ export function usarNotas(): Notas {
         setFallo('No se pudo crear la entrada del diario.');
         return null;
       })
-      .finally(() => diarioCreando.current.delete(fecha));
-    diarioCreando.current.set(fecha, creacion);
+      .finally(() => diarioCreando.current.delete(clave));
+    diarioCreando.current.set(clave, creacion);
     return creacion;
   }, []);
 
-  /** Escribe el día: si la entrada ya existe, va por el mismo guardado con retardo
-   *  que las notas; si no, primero se crea y luego se guarda lo escrito. */
+  /** Escribe el capítulo: si la entrada ya existe, va por el mismo guardado con
+   *  retardo que las notas; si no, primero se crea y luego se guarda lo escrito. */
   const escribirDiario = useCallback(
-    (fecha: string, contenido: string) => {
-      diarioTexto.current.set(fecha, contenido);
-      setDiarioTextos((previos) => ({ ...previos, [fecha]: contenido }));
-      const id = diarioIds.current.get(fecha);
+    (fecha: string, capitulo: number, contenido: string) => {
+      const clave = claveCapitulo(fecha, capitulo);
+      diarioTexto.current.set(clave, contenido);
+      setDiarioTextos((previos) => ({ ...previos, [clave]: contenido }));
+      const id = diarioIds.current.get(clave);
       if (id) {
         escribir(id, contenido);
         return;
       }
-      // Un día en blanco no crea nota: no ensucia el diario con días vacíos.
+      // Un capítulo en blanco no crea nota: no ensucia el diario con vacíos.
       if (!contenido) return;
-      void asegurarDiario(fecha).then((nuevo) => {
-        if (nuevo) escribir(nuevo, diarioTexto.current.get(fecha) ?? '');
+      void asegurarCapitulo(fecha, capitulo).then((nuevo) => {
+        if (nuevo) escribir(nuevo, diarioTexto.current.get(clave) ?? '');
       });
     },
-    [escribir, asegurarDiario],
+    [escribir, asegurarCapitulo],
   );
 
   const confirmarDiario = useCallback(
-    (fecha: string) => {
-      const id = diarioIds.current.get(fecha);
+    (fecha: string, capitulo: number) => {
+      const id = diarioIds.current.get(claveCapitulo(fecha, capitulo));
       if (id) confirmar(id);
     },
     [confirmar],
   );
 
+  /** Añade el capítulo siguiente. Se crea ya, vacío, para que sobreviva a recargar. */
+  const nuevoCapitulo = useCallback(
+    (fecha: string): number => {
+      const numero = Math.max(...(diarioCaps[fecha] ?? [1])) + 1;
+      setDiarioCaps((previos) => ({ ...previos, [fecha]: ordenados([...(previos[fecha] ?? []), numero]) }));
+      void asegurarCapitulo(fecha, numero);
+      return numero;
+    },
+    [diarioCaps, asegurarCapitulo],
+  );
+
+  /** Quita un capítulo: su nota se borra y su texto se olvida. El 1 no desaparece
+   *  (`ordenados` lo devuelve), así que un día siempre tiene un capítulo que escribir. */
+  const borrarCapitulo = useCallback((fecha: string, capitulo: number) => {
+    const clave = claveCapitulo(fecha, capitulo);
+    const id = diarioIds.current.get(clave);
+    diarioIds.current.delete(clave);
+    diarioTexto.current.delete(clave);
+    setDiarioTextos((previos) => {
+      const resto = { ...previos };
+      delete resto[clave];
+      return resto;
+    });
+    setDiarioCaps((previos) => ({
+      ...previos,
+      [fecha]: ordenados((previos[fecha] ?? [1]).filter((n) => n !== capitulo)),
+    }));
+    if (!id) return;
+    // Lo pendiente de guardar se cancela: escribir después a una nota borrada daría error.
+    window.clearTimeout(pendientes.current.get(id));
+    pendientes.current.delete(id);
+    textos.current.delete(id);
+    void borrarNota(id).catch(() => setFallo('Un capítulo no se pudo borrar.'));
+  }, []);
+
   const diario = useMemo<AccesoDiario>(
     () => ({
-      textoDe: (fecha) => diarioTextos[fecha] ?? '',
+      capitulos: (fecha) => diarioCaps[fecha] ?? [1],
+      textoDe: (fecha, capitulo) => diarioTextos[claveCapitulo(fecha, capitulo)] ?? '',
       escribir: escribirDiario,
       confirmar: confirmarDiario,
+      nuevo: nuevoCapitulo,
+      borrar: borrarCapitulo,
     }),
-    [diarioTextos, escribirDiario, confirmarDiario],
+    [diarioCaps, diarioTextos, escribirDiario, confirmarDiario, nuevoCapitulo, borrarCapitulo],
   );
 
   const renombrar = useCallback((id: string, titulo: string) => {
