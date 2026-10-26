@@ -22,16 +22,10 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
   (`~/taller/PROYECTO TASKS/frontend`, con `~/.local/share/fnm/node-versions/v24.21.0/installation/bin` en el PATH)
   y pasa en verde.
 
-- [ ] `19AA-4` — **Dominios con credenciales externas.** Hecho externo: la usuaria elige proveedores y crea las cuentas
-  y llaves (WhatsApp, agent actions/research, Magnific, Google OAuth, grupos Facebook, Stripe con webhooks, servidor
-  MCP). Hasta entonces se degradan con mensaje claro; el chat IA y la nutrición ya funcionan vía proxy
-  `/api/ai/chat` + `/api/ai/nutricion` (`.env.example`, `run.md`). Decidido 2026-10-25: no es implementable aquí.
-- [ ] `21AE-2` — **Mostrar las notas y los grupos archivados.** Hecho externo: la forma de la vista la decide la usuaria
-  (aparcado a propósito). El archivado ya existe (`archivada` en `notes`, `PUT /api/notes/{id}/archivo`, lista
-  `archivadas`, grupos archivados en `localStorage`); falta el panel y desarchivar desde él.
-
 ## Bloqueos
 
+- Bloqueo `19AA-4` — dominios con credenciales externas: la usuaria elige proveedores y crea las cuentas y llaves (WhatsApp, agent actions/research, Magnific, Google OAuth, grupos Facebook, Stripe con webhooks, servidor MCP). Hasta entonces se degradan con mensaje claro; el chat IA y la nutrición ya funcionan vía proxy `/api/ai/chat` + `/api/ai/nutricion` (`.env.example`, `run.md`). Se desbloquea con esas credenciales.
+- Bloqueo `21AE-2` — mostrar las notas y los grupos archivados: la forma de la vista la decide la usuaria (aparcado a propósito). El archivado ya existe (`archivada` en `notes`, `PUT /api/notes/{id}/archivo`, lista `archivadas`, grupos archivados en `localStorage`); falta el panel y desarchivar desde él.
 - **Rama `origin/legacy-php` (12-10-2026, decidido: no integrar aquí).** Sin ancestro común con `main` (874 commits; `main…legacy-php` = 1561 archivos, +61958/−94282). Integrarla exige `--allow-unrelated-histories` y resolver el árbol entero: decisión de la usuaria. Se conserva en remoto; bundle verificado en `C:/tmp/bundles/task-legacy-php.bundle` (copia de trabajo en C:\tmp, no respaldo definitivo). Desbloquea: decidir entre integrarla o archivarla en `rescate/legacy-php`.
 
 ## Planes activos
