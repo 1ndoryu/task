@@ -10,6 +10,7 @@ import type { Panel } from '../logica/paneles';
 import { seleccionar, type Fila as FilaDatos } from '../logica/seleccion';
 import type { AccionesFila } from './accionesFila';
 import { MenuOrdenCaja } from './AccionesBarra';
+import { BotonMinimizar } from './BotonMinimizar';
 import { Caja } from './Caja';
 import { CajaDiario } from './CajaDiario';
 import { CajaNota } from './CajaNota';
@@ -43,6 +44,8 @@ interface Props {
   /** Con esto cada caja lleva asa: solo en el carril, donde hay sitio. */
   redimensionable?: boolean;
   onTamano: (id: string, tamano: TamanoCaja | undefined) => void;
+  /** Con esto cada caja lleva botón de minimizar: solo en el carril. */
+  onMinimizar?: (id: string) => void;
 }
 
 export function ContenidoPanel({
@@ -66,9 +69,15 @@ export function ContenidoPanel({
   onPlegar,
   redimensionable,
   onTamano,
+  onMinimizar,
 }: Props): ReactNode {
   const tipo = panel.tipo;
   const conMenu = contextoDe(panel);
+  // Sin carril no hay botón: allí solo se ve una caja y plegarla no deja nada.
+  const minimizada = !!onMinimizar && preferencias.minimizadas.includes(panel.id);
+  const botonMinimizar = onMinimizar && (
+    <BotonMinimizar minimizada={minimizada} onAlternar={() => onMinimizar(panel.id)} />
+  );
   // El diario no tiene menú ni alta: es una sola caja que cambia de día.
   if (tipo === 'diario') {
     return (
@@ -79,6 +88,8 @@ export function ContenidoPanel({
         acceso={diario}
         tamano={preferencias.tamanos[panel.id]}
         onTamano={redimensionable ? (tamano) => onTamano(panel.id, tamano) : undefined}
+        minimizada={minimizada}
+        botonMinimizar={botonMinimizar}
       />
     );
   }
@@ -97,12 +108,13 @@ export function ContenidoPanel({
         onTamano={redimensionable ? (tamano) => onTamano(panel.id, tamano) : undefined}
         // Mismo gesto que en la caja de lista: el clic derecho es del panel.
         onContexto={conMenu}
+        minimizada={minimizada}
         cabecera={
           <header className="barra">
             {titulo(panel, 'barra__titulo')}
-            {/* Sin botones: borrar y archivar viven en el menú contextual de
-                la caja, junto a renombrar. El título ya no pide nada más. */}
-            <div className="barra__acciones" />
+            {/* Borrar y archivar viven en el menú contextual de la caja, junto
+                a renombrar: aquí solo va el botón de minimizar. */}
+            <div className="barra__acciones">{botonMinimizar}</div>
           </header>
         }
       />
@@ -145,6 +157,7 @@ export function ContenidoPanel({
               orden={ordenDe(panel.id)}
               onElegir={(modo: ModoOrden) => cambiarOrdenCaja(panel.id, modo)}
             />
+            {botonMinimizar}
           </div>
         </header>
       }
@@ -171,6 +184,7 @@ export function ContenidoPanel({
       onPlegar={onPlegar}
       tamano={preferencias.tamanos[panel.id]}
       onTamano={redimensionable ? (tamano) => onTamano(panel.id, tamano) : undefined}
+      minimizada={minimizada}
       // El menú del panel también nace de la caja: en cajas es la única vía
       // (no hay pestañas) y en la caja única es el mismo gesto de la pestaña.
       onContexto={conMenu}

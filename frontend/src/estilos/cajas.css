@@ -201,6 +201,37 @@
   margin-right: var(--margen-carril, 0);
 }
 
+/* --- Caja minimizada: solo la cabecera. El contenido se oculta, no se desmonta
+ * (una nota no pierde lo escrito) y el alto guardado queda intacto para cuando
+ * se vuelva a maximizar. --- */
+.carril > .caja--minimizada {
+  height: auto;
+}
+
+.caja--minimizada > :not(.barra) {
+  display: none;
+}
+
+.caja--minimizada > .barra {
+  padding-bottom: 0;
+}
+
+/* Cabecera simétrica (el diario): el título ocupa la columna central y el botón
+ * la derecha, así que la fecha queda en el centro de la caja con o sin botón. */
+.barra.barra--centrada {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+}
+
+.barra--centrada > .barra__titulo {
+  grid-column: 2;
+}
+
+.barra--centrada > .barra__acciones {
+  grid-column: 3;
+  justify-self: end;
+}
+
 /* --- Arrastre de cajas. La pieza que se mueve deja su hueco atenuado; la que
  * sigue al puntero es una copia en el `body` (la pinta `Carril`), fuera del
  * carril, para que no la recorte su scroll. --- */

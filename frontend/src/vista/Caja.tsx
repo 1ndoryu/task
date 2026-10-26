@@ -41,6 +41,8 @@ interface Props {
   tamano?: TamanoCaja;
   /** Con esto la caja lleva asa y se puede redimensionar. */
   onTamano?: (tamano: TamanoCaja | undefined) => void;
+  /** Solo se ve la cabecera: el resto se oculta con CSS, sin desmontar nada. */
+  minimizada?: boolean;
 }
 
 /** Una fila suelta dentro de la lista, con su clave y su menú. Va aparte porque
@@ -120,6 +122,7 @@ export function Caja({
   onPlegar,
   tamano,
   onTamano,
+  minimizada,
 }: Props) {
   const nodo = useRef<HTMLElement>(null);
   return (
@@ -137,6 +140,7 @@ export function Caja({
         preferencias.privacidadAlcance === 'todas' && 'caja--privacidad-todas',
         preferencias.primeraVisible && 'caja--primera-visible',
         tamano?.crecido && 'caja--crecida',
+        minimizada && 'caja--minimizada',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -170,7 +174,7 @@ export function Caja({
       }}
     >
       {cabecera}
-      {onTamano && <AsaTamano caja={nodo} onTamano={onTamano} />}
+      {onTamano && !minimizada && <AsaTamano caja={nodo} onTamano={onTamano} />}
 
       {/* El alta va dentro del scroll: es la primera fila, no una franja fija;
           así sube con la lista y deja sitio a lo que se está leyendo. */}

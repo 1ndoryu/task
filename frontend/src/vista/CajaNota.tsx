@@ -32,6 +32,8 @@ interface Props {
   tamano?: TamanoCaja;
   /** Con esto la caja lleva asa y se puede redimensionar. */
   onTamano?: (tamano: TamanoCaja | undefined) => void;
+  /** Solo se ve la cabecera: el campo sigue montado, así no se pierde lo escrito. */
+  minimizada?: boolean;
 }
 
 export function CajaNota({
@@ -46,6 +48,7 @@ export function CajaNota({
   onContexto,
   tamano,
   onTamano,
+  minimizada,
 }: Props) {
   const campo = useRef<HTMLTextAreaElement>(null);
   const nodo = useRef<HTMLElement>(null);
@@ -72,6 +75,7 @@ export function CajaNota({
         preferencias.altura === 'compacta' && 'caja--altura-compacta',
         preferencias.altura === 'amplia' && 'caja--altura-amplia',
         tamano?.crecido && 'caja--crecida',
+        minimizada && 'caja--minimizada',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -95,7 +99,7 @@ export function CajaNota({
       }}
     >
       {cabecera}
-      {onTamano && <AsaTamano caja={nodo} onTamano={onTamano} />}
+      {onTamano && !minimizada && <AsaTamano caja={nodo} onTamano={onTamano} />}
       {/* `data-rueda-propia`: la nota se lee con la rueda sin mover el carril. */}
       <div className="scroll" data-rueda-propia>
         <label className="nota">

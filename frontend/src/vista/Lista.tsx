@@ -10,6 +10,7 @@
  * Lo que no es reparto de paneles vive fuera: las ventanas abiertas en
  * `usarVista`, y la barra, los modales y el menú de caja en sus componentes. */
 import { Fragment, useEffect } from 'react';
+import { alternarMinimizada } from '../logica/minimizadas';
 import type { Panel } from '../logica/paneles';
 import { accionesDeLista } from './accionesDeLista';
 import { AccionesBarra } from './AccionesBarra';
@@ -178,6 +179,7 @@ export function Lista() {
         else delete tamanos[id];
         lista.cambiarPreferencias({ tamanos });
       }}
+      onMinimizar={enCajas ? (id) => lista.cambiarPreferencias({ minimizadas: alternarMinimizada(preferencias.minimizadas, id) }) : undefined}
     />
   );
 

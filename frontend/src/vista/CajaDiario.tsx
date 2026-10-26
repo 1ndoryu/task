@@ -4,7 +4,7 @@
  *
  * El día visible vive aquí y no en `usarNotas`: es estado de la vista, no de
  * los datos. Lo escrito se guarda por día a través de `acceso`. */
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { fechaEnPalabras, sumarDias } from '../logica/fechas';
 import type { Preferencias, TamanoCaja } from '../logica/preferencias';
 import { CajaNota } from './CajaNota';
@@ -19,9 +19,12 @@ interface Props {
   acceso: AccesoDiario;
   tamano?: TamanoCaja;
   onTamano?: (tamano: TamanoCaja | undefined) => void;
+  minimizada?: boolean;
+  /** Botón de minimizar de la cabecera, ya montado por la vista. */
+  botonMinimizar?: ReactNode;
 }
 
-export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTamano }: Props) {
+export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTamano, minimizada, botonMinimizar }: Props) {
   // Arranca en hoy: al abrir el diario se ve lo de hoy, no un día viejo.
   const [fecha, setFecha] = useState(hoy);
   const esHoy = fecha >= hoy;
@@ -40,10 +43,13 @@ export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTaman
       onConfirmar={() => acceso.confirmar(fecha)}
       tamano={tamano}
       onTamano={onTamano}
-      // La cabecera solo lleva la fecha, centrada; moverse de día es del pie.
+      minimizada={minimizada}
+      // La cabecera lleva la fecha centrada (columna central de una rejilla
+      // simétrica) y el botón a la derecha; moverse de día es del pie.
       cabecera={
-        <header className="barra">
+        <header className="barra barra--centrada">
           <span className="barra__titulo barra__titulo--centrado">{titulo}</span>
+          <div className="barra__acciones">{botonMinimizar}</div>
         </header>
       }
       pie={
