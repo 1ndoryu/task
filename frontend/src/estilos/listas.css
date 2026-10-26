@@ -181,13 +181,6 @@ body {
   flex-direction: row;
 }
 
-/* Las pestañas ocupan la cabecera; el orden y los iconos no se encogen. */
-.barra__pestanas {
-  flex: 1;
-  min-width: 0;
-  padding: 0;
-}
-
 /* Los iconos de la derecha: el mismo hueco que los del alta, para que las dos
  * filas caigan una debajo de la otra icono a icono. */
 .barra__acciones {
