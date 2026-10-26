@@ -153,10 +153,12 @@ export function usarArrastre({
       const pieza = actual.pieza.getBoundingClientRect();
       actual.x = xCliente;
       actual.y = yCliente;
+      /* varsense-disable cssInlineScript — ver `terminar`. */
       actual.copia.style.width = `${pieza.width}px`;
       actual.copia.style.height = `${pieza.height}px`;
       const x = xCliente - actual.puntero * pieza.width;
       actual.copia.style.transform = `translate(${x}px, ${yCliente - actual.dentro}px)`;
+      /* varsense-enable */
     };
     colocarRef.current = colocar;
 
