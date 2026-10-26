@@ -4,6 +4,7 @@
 import { aplazadoHasta } from './aplazos';
 import { fechaLocal } from './fechas';
 import { tocaHoy, type ConFrecuencia } from './frecuencia';
+import { contarProgreso } from './progreso';
 import { comparador, entradaDeHabito, entradaDeTarea, PESTANA_COMPLETADOS, type Grupo, type ModoOrden } from './orden';
 import type { Dashboard, Habito, SubHabito, Tarea } from './tipos';
 
@@ -52,6 +53,21 @@ export function enGrupo(grupoDeFila: Grupo | undefined, activo: Grupo): boolean 
  * también, hasta que la frecuencia lo traiga de vuelta. */
 export function ocultarCompletado(habito: ConFrecuencia, hoy: string, ocultar: boolean): boolean {
   return ocultar && (hechoHoy(habito, hoy) || !tocaHoy(habito, hoy));
+}
+
+/** Cuántos hábitos de hoy hay hechos y cuántos hay en total. Cuenta desde los
+ *  datos y no desde la lista pintada: con «ocultar cumplidos» lo hecho desaparece
+ *  de las filas y la barra perdería su numerador. Entran los que tocan hoy o ya
+ *  están hechos; quedan fuera los aplazados y los de otro grupo. */
+export function progresoHabitos(datos: Dashboard, grupo: Grupo, hoy: string): { hechos: number; total: number } {
+  return contarProgreso(
+    datos.habitos
+      .filter((h) => enGrupo(h.grupoEjecucion, grupo))
+      .map((h) => ({
+        hecho: hechoHoy(h, hoy),
+        cuenta: aplazadoHasta(h, hoy) === null && (hechoHoy(h, hoy) || tocaHoy(h, hoy)),
+      })),
+  );
 }
 
 export function seleccionar(
