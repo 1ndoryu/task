@@ -43,6 +43,8 @@ interface Props {
   onTamano?: (tamano: TamanoCaja | undefined) => void;
   /** Solo se ve la cabecera: el resto se oculta con CSS, sin desmontar nada. */
   minimizada?: boolean;
+  /** Progreso del día (hábitos hechos de los que tocan): barra al pie de la caja. */
+  progreso?: { hechos: number; total: number };
 }
 
 /** Una fila suelta dentro de la lista, con su clave y su menú. Va aparte porque
@@ -123,6 +125,7 @@ export function Caja({
   tamano,
   onTamano,
   minimizada,
+  progreso,
 }: Props) {
   const nodo = useRef<HTMLElement>(null);
   return (
@@ -223,6 +226,24 @@ export function Caja({
           </ul>
         )}
       </div>
+      {/* Fuera del scroll: la barra se queda al pie aunque la lista ruede. */}
+      {progreso && progreso.total > 0 && (
+        <div
+          className="progreso"
+          role="progressbar"
+          aria-label="Hábitos de hoy"
+          aria-valuemin={0}
+          aria-valuemax={progreso.total}
+          aria-valuenow={progreso.hechos}
+        >
+          <div className="progreso__pista">
+            <div className="progreso__relleno" style={{ '--progreso': `${(progreso.hechos / progreso.total) * 100}%` } as CSSProperties} />
+          </div>
+          <span className="progreso__cuenta">
+            {progreso.hechos}/{progreso.total}
+          </span>
+        </div>
+      )}
     </section>
   );
 }

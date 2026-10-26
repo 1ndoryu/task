@@ -26,6 +26,37 @@
   min-width: 100%;
 }
 
+/* Progreso del día al pie de la caja de hábitos: pista fina con el relleno en
+ * tinta y la cuenta a un lado. El ancho llega como variable desde la vista. */
+.progreso {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: none;
+  padding: 0.55rem 0.9rem 0.7rem;
+}
+
+.progreso__pista {
+  flex: 1;
+  height: 0.3rem;
+  border-radius: 0.15rem;
+  background: var(--linea);
+  overflow: hidden;
+}
+
+.progreso__relleno {
+  width: var(--progreso, 0%);
+  height: 100%;
+  background: var(--tinta);
+  transition: width 0.25s ease;
+}
+
+.progreso__cuenta {
+  font-size: var(--texto-etiqueta);
+  letter-spacing: 0.08em;
+  color: var(--tinta-tenue);
+}
+
 /* Dónde se apilará la caja arrastrada si se suelta ahora: una línea en el borde
  * de la caja de destino, por dentro para que ni la columna ni la caja la recorten. */
 .caja[data-destino='antes'] {

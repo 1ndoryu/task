@@ -7,7 +7,7 @@ import type { Dashboard } from '../logica/tipos';
 import type { Preferencias, TamanoCaja } from '../logica/preferencias';
 import type { ModoOrden } from '../logica/orden';
 import type { Panel } from '../logica/paneles';
-import { seleccionar, type Fila as FilaDatos } from '../logica/seleccion';
+import { progresoHabitos, seleccionar, type Fila as FilaDatos } from '../logica/seleccion';
 import type { AccionesFila } from './accionesFila';
 import { MenuOrdenCaja } from './AccionesBarra';
 import { BotonMinimizar } from './BotonMinimizar';
@@ -185,6 +185,7 @@ export function ContenidoPanel({
       tamano={redimensionable ? preferencias.tamanos[panel.id] : undefined}
       onTamano={redimensionable ? (tamano) => onTamano(panel.id, tamano) : undefined}
       minimizada={minimizada}
+      progreso={tipo === 'habitos' ? progresoHabitos(datos, panel.grupo ?? null, hoy) : undefined}
       // El menú del panel también nace de la caja: en cajas es la única vía
       // (no hay pestañas) y en la caja única es el mismo gesto de la pestaña.
       onContexto={conMenu}
