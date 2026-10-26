@@ -5,10 +5,11 @@
 import { aplazadoHasta, fechaAplazo } from '../logica/aplazos';
 import { diaCorto, proximaRepeticion, rachaDe, type ConFrecuencia } from '../logica/frecuencia';
 import type { ColoresNivel } from '../logica/preferencias';
-import { leerMomentos, MOMENTOS } from '../logica/momentos';
+import { leerMomentos } from '../logica/momentos';
 import { hechoHoy } from '../logica/seleccion';
 import type { Habito } from '../logica/tipos';
 import { IconoDesplegar, IconoPlegar } from './Iconos';
+import { IconoMomento } from './IconosMomento';
 import { Menu } from './Menu';
 import { opcionesFila, prioridadDe, type AccionesFila } from './accionesFila';
 import type { Editando } from './usarLista';
@@ -63,11 +64,9 @@ export function Fila({
   // El aplazo solo existe en el padre: el subhábito no trae `pospuestoHasta`.
   const conAplazo: Habito | null = fila.tipo === 'habito' ? fila.habito : null;
   const nivel = prioridadDe(fila);
-  // Los momentos configurados se dibujan como arcos del círculo. Con los tres
-  // no se dibuja nada: es lo mismo que no tener ninguno (ver `aplicarMomentos`).
+  // El momento configurado va como icono dentro del círculo; sin él, el círculo liso.
   const momentosGuardados = fila.tipo === 'tarea' ? fila.tarea.configuracion?.momentos : fila.tipo === 'habito' ? fila.habito.momentos : undefined;
-  const momentos = leerMomentos(momentosGuardados);
-  const momentosVisibles = momentos.length < MOMENTOS.length ? momentos.join(' ') : undefined;
+  const [momento] = leerMomentos(momentosGuardados);
   const hecho = fila.tipo === 'tarea' ? fila.tarea.completado : habito !== null && hechoHoy(habito, hoy);
   const texto = fila.tipo === 'tarea' ? fila.tarea.texto : (habito?.nombre ?? '');
   // La racha se cuenta del historial: el `racha` del payload es del front viejo.
@@ -101,12 +100,14 @@ export function Fila({
       <button
         type="button"
         className="fila__marca"
-        // Atributo y no clase: la hoja pinta un arco por cada momento listado aquí.
-        data-momentos={momentosVisibles}
+        // Atributo y no clase: la hoja agranda el círculo y pinta el icono solo si hay momento.
+        data-momento={momento}
         aria-label={`Completar ${texto}`}
         title="Completar"
         onClick={() => acciones.completar(fila)}
-      />
+      >
+        {momento && <IconoMomento momento={momento} />}
+      </button>
       <button
         type="button"
         className="fila__texto"

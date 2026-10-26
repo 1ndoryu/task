@@ -1,7 +1,7 @@
-/* «Cuándo es mejor hacer»: los momentos del día en que conviene una tarea o un
- * hábito (uno, varios o ninguno). Solo pesa en el orden inteligente: lo que
- * toca en el momento actual duplica su peso; el resto no se mueve. Lógica pura,
- * sin DOM ni reloj propio. */
+/* «Cuándo es mejor hacer»: el momento del día en que conviene una tarea o un
+ * hábito (uno o ninguno). Solo pesa en el orden inteligente: si toca en el
+ * momento actual duplica su peso; el resto no se mueve. Lógica pura, sin DOM
+ * ni reloj propio. */
 
 export type Momento = 'temprano' | 'tarde' | 'noche';
 
@@ -22,22 +22,23 @@ export function momentoDe(ahora: Date): Momento {
   return 'noche';
 }
 
-/** Lo guardado, saneado: solo momentos conocidos, sin repetir y en el orden del día. */
+/** Lo guardado, saneado: como mucho un momento. Si había varios de antes, queda el
+ *  primero del día; así lo que se ve y lo que pesa es lo mismo. */
 export function leerMomentos(valor: unknown): Momento[] {
   if (!Array.isArray(valor)) return [];
-  return MOMENTOS.map((m) => m.id).filter((id) => valor.includes(id));
+  const primero = MOMENTOS.find((m) => valor.includes(m.id));
+  return primero ? [primero.id] : [];
 }
 
-/** La lista con `id` quitado si estaba y añadido si no, siempre en el orden del día. */
-export function alternarMomento(momentos: readonly Momento[], id: Momento): Momento[] {
-  return leerMomentos(momentos.includes(id) ? momentos.filter((otro) => otro !== id) : [...momentos, id]);
+/** Lo elegido al pulsar `id`: pulsar el activo lo quita; pulsar otro lo cambia. */
+export function elegirMomento(actual: Momento | undefined, id: Momento): Momento[] {
+  return actual === id ? [] : [id];
 }
 
-/** Peso final en el orden inteligente: si la hora actual es uno de sus momentos
- *  y el peso base es positivo, se duplica; si no, queda igual. Un peso base
- *  negativo no se duplica, para que estar en su momento nunca empeore nada.
- *  Sin momentos, o con los tres (da igual a qué hora), no cambia nada. */
+/** Peso final en el orden inteligente: si la hora actual es su momento y el peso
+ *  base es positivo, se duplica; si no, queda igual. Un peso base negativo no se
+ *  duplica, para que estar en su momento nunca empeore nada. Sin momento no cambia. */
 export function aplicarMomentos(pesoBase: number, momentos: readonly Momento[] | undefined, ahora: Momento): number {
-  if (!momentos?.length || momentos.length >= MOMENTOS.length) return pesoBase;
-  return momentos.includes(ahora) && pesoBase > 0 ? pesoBase * MULTIPLICADOR_EN_SU_MOMENTO : pesoBase;
+  const [momento] = leerMomentos(momentos);
+  return momento === ahora && pesoBase > 0 ? pesoBase * MULTIPLICADOR_EN_SU_MOMENTO : pesoBase;
 }

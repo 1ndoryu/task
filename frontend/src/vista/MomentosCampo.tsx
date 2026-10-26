@@ -1,7 +1,6 @@
-/* «Cuándo es mejor hacer» en el modal de una fila: se pueden elegir varios
- * momentos del día (o ninguno). Usa la receta de `.segmento`, pero cada opción
- * es una casilla suelta y no un valor excluyente como en `Opciones`. */
-import { alternarMomento, MOMENTOS, type Momento } from '../logica/momentos';
+/* «Cuándo es mejor hacer» en el modal de una fila: se elige un solo momento del
+ * día, o ninguno. Usa la receta de `.segmento` y de un grupo de opción única. */
+import { elegirMomento, leerMomentos, MOMENTOS, type Momento } from '../logica/momentos';
 
 interface Props {
   momentos: readonly Momento[];
@@ -9,20 +8,21 @@ interface Props {
 }
 
 export function MomentosCampo({ momentos, onCambiar }: Props) {
+  const [activo] = leerMomentos(momentos);
   return (
     <div className="campo">
       <p className="campo__titulo">Cuándo es mejor hacer</p>
-      <div className="opciones" role="group" aria-label="Cuándo es mejor hacer">
+      <div className="opciones" role="radiogroup" aria-label="Cuándo es mejor hacer">
         {MOMENTOS.map((momento) => {
-          const activo = momentos.includes(momento.id);
+          const marcado = activo === momento.id;
           return (
             <button
               key={momento.id}
               type="button"
-              role="checkbox"
-              aria-checked={activo}
-              className={`segmento${activo ? ' segmento--activo' : ''}`}
-              onClick={() => onCambiar(alternarMomento(momentos, momento.id))}
+              role="radio"
+              aria-checked={marcado}
+              className={`segmento${marcado ? ' segmento--activo' : ''}`}
+              onClick={() => onCambiar(elegirMomento(activo, momento.id))}
             >
               {momento.etiqueta}
             </button>

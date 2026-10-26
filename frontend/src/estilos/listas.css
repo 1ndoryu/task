@@ -301,29 +301,20 @@ body {
   transform: translateY(-0.1em);
 }
 
-/* Cuándo es mejor hacer: un arco alrededor del círculo por cada momento
- * configurado (arriba temprano, derecha tarde, abajo noche). El color del nivel
- * no cambia y sin momentos sigue siendo el círculo liso. El arco es un
- * pseudoelemento transparente hasta que un momento lo pinta. */
-.fila__marca[data-momentos]::after {
-  content: '';
-  position: absolute;
-  inset: -0.3rem;
-  border: 0.1rem solid transparent;
-  border-radius: var(--redondoPunto);
-  pointer-events: none;
+/* Cuándo es mejor hacer: con un momento el círculo crece y lleva su icono. El
+ * color del nivel no cambia; sin momento sigue siendo el círculo liso. El icono
+ * va en tinta oscura porque el fondo del nivel es pastel en los dos temas. */
+.fila__marca[data-momento] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  color: var(--tinta-sobre-nivel);
 }
 
-.fila__marca[data-momentos~='temprano']::after {
-  border-top-color: var(--tinta);
-}
-
-.fila__marca[data-momentos~='tarde']::after {
-  border-right-color: var(--tinta);
-}
-
-.fila__marca[data-momentos~='noche']::after {
-  border-bottom-color: var(--tinta);
+.fila button.fila__marca[data-momento]:hover {
+  color: var(--fondo);
 }
 
 button.fila__marca {
@@ -351,6 +342,9 @@ button.fila__marca:hover {
   --nivel-media: #f6eecb;
   --nivel-alta: #f6d9bd;
   --nivel-muy_alta: #e8a09b;
+  /* Tinta para lo que va sobre el color del nivel: esos pastel son claros en
+   * los dos temas, así que no sirve la tinta del tema oscuro. */
+  --tinta-sobre-nivel: #1b1b19;
 }
 
 .fila--nivel-muy_baja .fila__marca {
