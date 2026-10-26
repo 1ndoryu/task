@@ -1,9 +1,17 @@
 /* Gesto de arrastre del carril: se engancha en el nodo y decide en el primer
  * movimiento si era un clic (sobre un botón, un campo o un texto) o un
- * arrastre. La pieza real se queda de hueco, una copia sigue al puntero, el
- * orden se avisa en vivo y la copia vuela al hueco al soltar. */
-import { useCallback, useEffect, type MutableRefObject, type RefObject } from 'react';
-import { destinoPorCruce, type Candidata } from '../../logica/destinoArrastre';
+ * arrastre. Lo que se arrastra es la **caja** (`[data-panel]`), no su columna:
+ * la caja real se queda de hueco, una copia sigue al puntero, el cambio de
+ * columna se avisa en vivo y la copia vuela al hueco al soltar. Apilar una caja
+ * sobre otra no es en vivo: se marca el destino y se aplica al soltar. */
+import { useEffect, type MutableRefObject, type RefObject } from 'react';
+import {
+  destinoApilar,
+  destinoEnPila,
+  destinoPorBorde,
+  type ColumnaMedida,
+  type Movimiento,
+} from '../../logica/destinoArrastre';
 import { DURACION, type Gesto } from './tipos';
 
 /** Píxeles que hay que mover para que un clic se convierta en arrastre. */
@@ -19,8 +27,8 @@ const INTERACTIVO = 'button, a, input, textarea, select, [contenteditable="true"
 
 interface Entrada {
   pista: RefObject<HTMLDivElement>;
-  piezas: () => HTMLElement[];
-  centro: (pieza: HTMLElement) => number;
+  /** Las cajas arrastrables (`[data-panel]`), estén en la columna que estén. */
+  cajas: () => HTMLElement[];
   /** Rearma el imán al terminar el gesto. */
   aplazar: () => void;
   /** El imán pendiente se descarta al empezar el arrastre. */
@@ -29,15 +37,14 @@ interface Entrada {
   gesto: MutableRefObject<Gesto | null>;
   /** Colocar la copia del arrastre: lo usa también la animación FLIP. */
   colocarRef: MutableRefObject<((gesto: Gesto, x: number, y: number) => void) | null>;
-  alMover: MutableRefObject<((movida: string, destino: string) => void) | undefined>;
-  alSoltar: MutableRefObject<(() => void) | undefined>;
+  alMover: MutableRefObject<((movida: string, movimiento: Movimiento) => void) | undefined>;
+  alSoltar: MutableRefObject<((movida: string, apilado: Movimiento | null) => void) | undefined>;
   esFija: MutableRefObject<((pieza: HTMLElement) => boolean) | undefined>;
 }
 
 export function usarArrastre({
   pista,
-  piezas,
-  centro,
+  cajas,
   aplazar,
   iman,
   gesto,
@@ -46,44 +53,49 @@ export function usarArrastre({
   alSoltar,
   esFija,
 }: Entrada): void {
-  /** Pieza bajo un nodo, subiendo hasta los hijos directos del carril. */
-  const piezaDe = useCallback(
-    (nodo: Element | null): HTMLElement | null => {
-      const pistaNodo = pista.current;
-      let actual = nodo;
-      while (actual && actual.parentElement !== pistaNodo) actual = actual.parentElement;
-      return actual && actual !== pistaNodo ? (actual as HTMLElement) : null;
-    },
-    [pista],
-  );
-
-  /** Id del panel de una pieza; `''` en la de «Tareas» (su atributo va vacío). */
-  const idDe = (pieza: HTMLElement | null) => pieza?.dataset.panel ?? null;
-
-  /** Id de la pieza con la que la arrastrada cambia de sitio, o `null` si se
-   *  queda: solo cuenta cruzar el centro de una vecina movible (ver
-   *  `destinoPorCruce`). Las fijas no admiten soltar encima. */
-  const destinoEn = useCallback(
-    (xCliente: number, movida: string): string | null => {
-      const nodo = pista.current;
-      if (!nodo) return null;
-      const x = xCliente - nodo.getBoundingClientRect().left + nodo.scrollLeft;
-      const candidatas: Candidata[] = [];
-      for (const pieza of piezas()) {
-        const id = idDe(pieza);
-        if (id !== null && !esFija.current?.(pieza)) candidatas.push({ id, centro: centro(pieza) });
-      }
-      return destinoPorCruce(candidatas, movida, x);
-    },
-    [pista, piezas, centro, esFija],
-  );
-
   // Arrastre: se engancha en el carril y se decide en el primer movimiento si
   // el gesto era un clic (sobre un botón, un campo o un texto) o un arrastre.
   useEffect(() => {
     const nodo = pista.current;
     if (!nodo) return;
-    let inicio: { pieza: HTMLElement; x: number; y: number; puntero: number } | null = null;
+    let inicio: { pieza: HTMLElement; x: number; y: number; puntero: number; tactil: boolean } | null = null;
+    /** Apilado que se aplicará al soltar y la caja que lo señala. */
+    let pendiente: Movimiento | null = null;
+    let marcada: HTMLElement | null = null;
+
+    /** La caja bajo un nodo, sin salirse del carril. */
+    const cajaDe = (destino: Element | null): HTMLElement | null => {
+      const caja = destino?.closest<HTMLElement>('[data-panel]') ?? null;
+      return caja && nodo.contains(caja) ? caja : null;
+    };
+
+    /** Pinta (o quita) la línea que dice dónde se apilará la caja. */
+    const marcar = (movimiento: Movimiento | null) => {
+      pendiente = movimiento;
+      const destino = movimiento ? (cajas().find((c) => c.dataset.panel === movimiento.referencia) ?? null) : null;
+      if (marcada && marcada !== destino) marcada.removeAttribute('data-destino');
+      marcada = destino;
+      if (destino && movimiento) destino.dataset.destino = movimiento.despues ? 'despues' : 'antes';
+    };
+
+    /** Las columnas como las ve el ojo, con las medidas que usa la regla de
+     *  destino. Una columna es el padre de sus cajas; las fijas no cuentan. */
+    const medir = (): ColumnaMedida[] => {
+      const porColumna = new Map<HTMLElement, ColumnaMedida>();
+      for (const caja of cajas()) {
+        const columna = caja.parentElement;
+        if (!columna || esFija.current?.(caja)) continue;
+        const rect = caja.getBoundingClientRect();
+        let medida = porColumna.get(columna);
+        if (!medida) {
+          const c = columna.getBoundingClientRect();
+          medida = { izq: c.left, der: c.right, cajas: [] };
+          porColumna.set(columna, medida);
+        }
+        medida.cajas.push({ id: caja.dataset.panel ?? '', arriba: rect.top, abajo: rect.bottom });
+      }
+      return [...porColumna.values()].sort((a, b) => a.izq - b.izq);
+    };
 
     const terminar = (soltar: boolean) => {
       const actual = gesto.current;
@@ -97,32 +109,39 @@ export function usarArrastre({
         }
       }
       inicio = null;
+      const apilado = soltar ? pendiente : null;
+      marcar(null);
       if (!actual) return;
       gesto.current = null;
       colocarRef.current = null;
       document.body.style.removeProperty('user-select');
       actual.pieza.classList.remove('carril__pieza--arrastrada');
-      // La copia vuela hasta el hueco que dejó: el ojo sigue la pieza hasta su
-      // sitio en vez de verla desaparecer donde se soltó.
+      const copia = actual.copia;
       /* varsense-disable cssInlineScript — la copia que vuela y la que sigue
        * al puntero se dimensionan y se mueven con la geometría medida en vivo:
        * esos píxeles los decide el gesto, no una clase CSS. */
-      const destino = actual.pieza.getBoundingClientRect();
-      const copia = actual.copia;
-      copia.style.width = `${destino.width}px`;
-      copia.style.height = `${destino.height}px`;
-      const vuelo = copia.animate(
-        [
-          { transform: copia.style.transform, opacity: 1 },
-          {
-            transform: `translate(${destino.left}px, ${destino.top}px)`,
-            opacity: 0,
-          },
-        ],
-        { duration: DURACION, easing: 'cubic-bezier(.22,.61,.36,1)' },
-      );
-      vuelo.finished.catch(() => {}).finally(() => copia.remove());
-      if (soltar) alSoltar.current?.();
+      if (apilado) {
+        // La caja cambia de columna al soltar: no hay hueco al que volar, la
+        // copia se disuelve donde se soltó y la caja aparece en su sitio nuevo.
+        const vuelo = copia.animate([{ opacity: 1 }, { opacity: 0 }], { duration: DURACION / 2 });
+        vuelo.finished.catch(() => {}).finally(() => copia.remove());
+      } else {
+        // La copia vuela hasta el hueco que dejó: el ojo sigue la pieza hasta su
+        // sitio en vez de verla desaparecer donde se soltó.
+        const destino = actual.pieza.getBoundingClientRect();
+        copia.style.width = `${destino.width}px`;
+        copia.style.height = `${destino.height}px`;
+        const vuelo = copia.animate(
+          [
+            { transform: copia.style.transform, opacity: 1 },
+            { transform: `translate(${destino.left}px, ${destino.top}px)`, opacity: 0 },
+          ],
+          { duration: DURACION, easing: 'cubic-bezier(.22,.61,.36,1)' },
+        );
+        vuelo.finished.catch(() => {}).finally(() => copia.remove());
+      }
+      /* varsense-enable */
+      if (soltar) alSoltar.current?.(actual.id, apilado);
       aplazar();
     };
 
@@ -141,6 +160,25 @@ export function usarArrastre({
     };
     colocarRef.current = colocar;
 
+    /** Qué hacer con la caja en este punto: primero lo que se aplica en vivo
+     *  (pasar por el borde de otra columna, reordenar la propia pila) y, si no
+     *  hay nada, el apilado que se aplicará al soltar. */
+    const decidir = (id: string, x: number, y: number) => {
+      const columnas = medir();
+      const enVivo =
+        destinoPorBorde(columnas, id, x) ??
+        (() => {
+          const propia = columnas.find((c) => c.cajas.some((caja) => caja.id === id));
+          return propia && propia.cajas.length > 1 ? destinoEnPila(propia, id, y) : null;
+        })();
+      if (enVivo) {
+        marcar(null);
+        alMover.current?.(id, enVivo);
+        return;
+      }
+      marcar(destinoApilar(columnas, id, x, y));
+    };
+
     const alMoverPuntero = (evento: PointerEvent) => {
       const nodoPista = pista.current;
       if (!inicio || !nodoPista) return;
@@ -148,8 +186,11 @@ export function usarArrastre({
       const dy = evento.clientY - inicio.y;
 
       if (!gesto.current) {
-        // Un gesto vertical o corto todavía puede ser un clic o un scroll.
-        if (Math.abs(dx) < UMBRAL || Math.abs(dx) < Math.abs(dy)) return;
+        // Un gesto corto todavía puede ser un clic; con el dedo, uno vertical es
+        // el scroll de la página. Con el ratón se arrastra en cualquier dirección:
+        // apilar es un gesto vertical.
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < UMBRAL) return;
+        if (inicio.tactil && Math.abs(dx) < Math.abs(dy)) return;
         if (esFija.current?.(inicio.pieza)) return;
 
         // Copia flotante: la pieza real se queda de hueco y esta sigue al dedo.
@@ -157,8 +198,10 @@ export function usarArrastre({
         copia.classList.add('carril__copia');
         copia.classList.remove('carril__pieza--arrastrada');
         copia.removeAttribute('id');
+        copia.removeAttribute('data-destino');
         copia.setAttribute('aria-hidden', 'true');
         const caja = inicio.pieza.getBoundingClientRect();
+        /* varsense-disable cssInlineScript — ver `terminar`. */
         copia.style.width = `${caja.width}px`;
         copia.style.height = `${caja.height}px`;
         document.body.append(copia);
@@ -168,7 +211,7 @@ export function usarArrastre({
         const actual: Gesto = {
           pieza: inicio.pieza,
           copia,
-          id: idDe(inicio.pieza) ?? '',
+          id: inicio.pieza.dataset.panel ?? '',
           puntero: (inicio.x - caja.left) / caja.width,
           dentro: inicio.y - caja.top,
           x: evento.clientX,
@@ -189,10 +232,7 @@ export function usarArrastre({
       const actual = gesto.current;
       colocar(actual, evento.clientX, evento.clientY);
       empujarBorde(evento.clientX);
-      // Sin cruce no hay nada que reordenar: animar el orden otra vez
-      // devolvería la pieza a su sitio.
-      const hasta = destinoEn(evento.clientX, actual.id);
-      if (hasta !== null && hasta !== actual.id) alMover.current?.(actual.id, hasta);
+      decidir(actual.id, evento.clientX, evento.clientY);
     };
 
     /** Acerca el carril cuando la mano llega a un borde. Avanza **solo al mover
@@ -216,9 +256,15 @@ export function usarArrastre({
       if (evento.button !== 0 || gesto.current) return;
       // Las acciones de la cabecera y los campos son suyos: no inician arrastre.
       if (evento.target instanceof Element && evento.target.closest(INTERACTIVO)) return;
-      const pieza = piezaDe(evento.target as Element | null);
+      const pieza = cajaDe(evento.target as Element | null);
       if (!pieza) return;
-      inicio = { pieza, x: evento.clientX, y: evento.clientY, puntero: evento.pointerId };
+      inicio = {
+        pieza,
+        x: evento.clientX,
+        y: evento.clientY,
+        puntero: evento.pointerId,
+        tactil: evento.pointerType === 'touch',
+      };
       // La captura llega al empezar el arrastre, no al pulsar: un clic normal
       // sigue siendo del botón de dentro.
     };
@@ -239,11 +285,12 @@ export function usarArrastre({
       nodo.removeEventListener('pointermove', alMoverPuntero);
       nodo.removeEventListener('pointerup', alSoltarPuntero);
       nodo.removeEventListener('pointercancel', alCancelar);
+      marcar(null);
       gesto.current?.copia.remove();
       gesto.current = null;
       colocarRef.current = null;
       inicio = null;
       document.body.style.removeProperty('user-select');
     };
-  }, [pista, piezaDe, destinoEn, aplazar, iman, gesto, colocarRef, alMover, alSoltar, esFija]);
+  }, [pista, cajas, aplazar, iman, gesto, colocarRef, alMover, alSoltar, esFija]);
 }

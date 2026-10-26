@@ -4,9 +4,11 @@
 /** Duración del apartado de las otras piezas y del regreso de la arrastrada. */
 export const DURACION = 220;
 
-/** Una pieza que se está arrastrando: su copia flotante, el id del panel que
+/** Una caja que se está arrastrando: su copia flotante, el id del panel que
  *  lleva y la coordenada del puntero dentro de ella. */
 export interface Gesto {
+  /** La caja real, que queda de hueco. Al cambiar de columna React la vuelve a
+   *  montar: el FLIP la busca de nuevo por su `data-panel` en cada pintado. */
   pieza: HTMLElement;
   copia: HTMLElement;
   id: string;

@@ -163,7 +163,8 @@
 
 /* Cada caja conserva su ancho; en pantallas estrechas se ajusta a la ventana
  * en vez de salirse, porque el carril ya ofrece el movimiento lateral. */
-.carril > .caja {
+.carril > .caja,
+.carril__columna > .caja {
   flex: none;
   width: min(var(--ancho-usuario, var(--ancho)), calc(100dvw - 2.5rem));
   /* Aquí el alto se mide con su propio token: la caja única y la del carril
@@ -177,34 +178,38 @@
 
 /* La nota no es más estrecha que una lista: el carril es una fila de cajas
  * iguales, y una de texto que se arrastra se lee peor si cambia de talla. */
-.carril > .caja--nota {
+.carril > .caja--nota,
+.carril__columna > .caja--nota {
   width: min(var(--ancho-usuario, var(--ancho)), calc(100dvw - 2.5rem));
 }
 
 /* Una caja más ancha que el de fábrica no necesita el aire de los extremos: ese
  * margen solo existe para poder centrar una caja estrecha, y en una ancha
  * empujaría el carril entero. */
-.carril > .caja--crecida:first-child {
+.carril > .caja--crecida:first-child,
+.carril > .carril__columna:has(.caja--crecida):first-child {
   margin-left: 0;
 }
 
-.carril > .caja--crecida:last-child {
+.carril > .caja--crecida:last-child,
+.carril > .carril__columna:has(.caja--crecida):last-child {
   margin-right: 0;
 }
 
 /* El aire de los extremos es lo que permite centrar la primera y la última. */
-.carril > .caja:first-child {
+.carril > :first-child {
   margin-left: var(--margen-carril, 0);
 }
 
-.carril > .caja:last-child {
+.carril > :last-child {
   margin-right: var(--margen-carril, 0);
 }
 
 /* --- Caja minimizada: solo la cabecera. El contenido se oculta, no se desmonta
  * (una nota no pierde lo escrito) y el alto guardado queda intacto para cuando
  * se vuelva a maximizar. --- */
-.carril > .caja--minimizada {
+.carril > .caja--minimizada,
+.carril__columna > .caja--minimizada {
   height: auto;
 }
 

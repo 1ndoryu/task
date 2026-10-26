@@ -87,16 +87,18 @@ export function usarImpas({ pista, piezas, centro, marcar, centrar, moviendo }: 
     const alGirar = (evento: WheelEvent) => {
       // Un gesto claramente horizontal es de quien esté dentro: no se toca.
       if (Math.abs(evento.deltaX) > Math.abs(evento.deltaY)) return;
-      // La lista de una caja tiene su propio scroll: mientras le quede camino
-      // en esa dirección, la rueda es suya. Al llegar al final, el gesto pasa
-      // al carril, que es lo que espera quien sigue girando.
-      const dentro = (evento.target as Element | null)?.closest?.('[data-rueda-propia]');
-      if (dentro instanceof HTMLElement) {
-        const haciaAbajo = evento.deltaY > 0;
+      // La lista de una caja y la columna que apila varias tienen su propio
+      // scroll: mientras al más interno le quede camino en esa dirección, la
+      // rueda es suya; al llegar al final pasa al siguiente y, por último, al
+      // carril, que es lo que espera quien sigue girando.
+      const haciaAbajo = evento.deltaY > 0;
+      let dentro = (evento.target as Element | null)?.closest?.('[data-rueda-propia]') ?? null;
+      while (dentro instanceof HTMLElement) {
         const queda = haciaAbajo
           ? dentro.scrollTop + dentro.clientHeight < dentro.scrollHeight - 1
           : dentro.scrollTop > 0;
         if (queda) return;
+        dentro = dentro.parentElement?.closest('[data-rueda-propia]') ?? null;
       }
       evento.preventDefault();
       nodo.scrollLeft += evento.deltaY;

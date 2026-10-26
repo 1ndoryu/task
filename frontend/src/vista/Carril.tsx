@@ -13,14 +13,16 @@
  * no se puede asistir. Aquí el gesto se sigue con eventos de puntero, la pieza
  * se despega como una tarjeta que sigue al cursor y las demás se apartan solas
  * (el orden se avisa en vivo y el salto se disuelve con una animación FLIP). El
- * carril no sabe qué pinta dentro: mide sus hijos directos, sean cajas o
- * cualquier otra cosa, y no toca su contenido.
+ * carril no sabe qué pinta dentro: sus hijos directos son las piezas del imán
+ * (columnas, que pueden apilar varias cajas) y lo que se arrastra son las cajas
+ * (`[data-panel]`) de dentro, estén en la columna que estén.
  *
  * El trabajo va repartido por hooks: el imán y la rueda (`usarImpas`), las
  * medidas (`usarMedidas`), el centrado y el FLIP (`usarDesplazamiento`) y el
  * gesto de puntero (`usarArrastre`). Aquí quedan los refs compartidos, la
  * pieza centrada y el teclado. */
 import { useCallback, useEffect, useRef, type ReactNode } from 'react';
+import type { Movimiento } from '../logica/destinoArrastre';
 import type { Gesto } from './carril/tipos';
 import { usarArrastre } from './carril/usarArrastre';
 import { usarDesplazamiento } from './carril/usarDesplazamiento';
@@ -33,12 +35,13 @@ interface Props {
   indiceActivo?: number;
   /** Avisa de la pieza que acaba centrada, para reaccionar fuera. */
   onActiva?: (indice: number) => void;
-  /** Se llama en vivo al cruzar otra pieza: el padre reordena y el carril
-   *  anima el salto. Sin esto no hay arrastre. */
-  onMover?: (movida: string, destino: string) => void;
-  /** El arrastre terminó: es el momento de guardar el orden, no antes. */
-  onSoltar?: () => void;
-  /** Una pieza que no se arrastra ni sirve de destino. */
+  /** Se llama en vivo al pasar a otra columna o recolocarse en su pila: el
+   *  padre reordena y el carril anima el salto. Sin esto no hay arrastre. */
+  onMover?: (movida: string, movimiento: Movimiento) => void;
+  /** El arrastre terminó: es el momento de guardar, no antes. Si se soltó sobre
+   *  otra caja, trae el apilado pendiente, que solo se aplica ahora. */
+  onSoltar?: (movida: string, apilado: Movimiento | null) => void;
+  /** Una caja que no se arrastra ni sirve de destino. */
   fija?: (pieza: HTMLElement) => boolean;
   /** Nombre accesible: se entra con Tab y se recorre con las flechas. */
   etiqueta?: string;
@@ -83,6 +86,12 @@ export function Carril({
     [],
   );
 
+  /** Las cajas arrastrables, en cualquier columna: lo que lleva `data-panel`. */
+  const cajas = useCallback(
+    (): HTMLElement[] => (pista.current ? [...pista.current.querySelectorAll<HTMLElement>('[data-panel]')] : []),
+    [],
+  );
+
   /** Centro de una pieza en coordenadas del contenido (sin descontar el scroll). */
   const centro = useCallback((pieza: HTMLElement) => pieza.offsetLeft + pieza.offsetWidth / 2, []);
 
@@ -119,8 +128,8 @@ export function Carril({
   const { iman, aplazar, alRodar } = usarImpas({ pista, piezas, centro, marcar, centrar, moviendo });
 
   usarMedidas({ pista, piezas, centrar, centrada, gesto });
-  usarDesplazamiento({ pista, piezas, centrar, centrarRef, gesto, colocarRef, centrada, indiceActivo });
-  usarArrastre({ pista, piezas, centro, aplazar, iman, gesto, colocarRef, alMover, alSoltar, esFija });
+  usarDesplazamiento({ pista, piezas, cajas, centrar, centrarRef, gesto, colocarRef, centrada, indiceActivo });
+  usarArrastre({ pista, cajas, aplazar, iman, gesto, colocarRef, alMover, alSoltar, esFija });
 
   return (
     <div

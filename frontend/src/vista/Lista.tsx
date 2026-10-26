@@ -9,7 +9,7 @@
  * qué pinta según `panel.tipo`. Un tipo nuevo es una rama más aquí y nada más.
  * Lo que no es reparto de paneles vive fuera: las ventanas abiertas en
  * `usarVista`, y la barra, los modales y el menú de caja en sus componentes. */
-import { Fragment, useEffect } from 'react';
+import { useEffect } from 'react';
 import { alternarMinimizada } from '../logica/minimizadas';
 import type { Panel } from '../logica/paneles';
 import { accionesDeLista } from './accionesDeLista';
@@ -17,6 +17,7 @@ import { AccionesBarra } from './AccionesBarra';
 import { Archivados } from './Archivados';
 import { BarraVentana } from './BarraVentana';
 import { Carril } from './Carril';
+import { ColumnasCarril } from './ColumnasCarril';
 import { ContenidoPanel } from './ContenidoPanel';
 import { MenuCaja } from './MenuCaja';
 import { Modales } from './Modales';
@@ -197,7 +198,8 @@ export function Lista() {
   // Modo cajas: una por panel, en fila. Cada una se pinta con su propio grupo o
   // su propio texto, así que la que se esté mirando no depende de la activa.
   if (enCajas) {
-    const indiceNueva = vista.notaNueva ? lista.paneles.findIndex((p) => p.id === vista.notaNueva) : -1;
+    // El carril centra columnas, no cajas: la nota nueva es la de su columna.
+    const indiceNueva = vista.notaNueva ? lista.columnas.findIndex((c) => c.includes(vista.notaNueva ?? '')) : -1;
     return (
       <main className={`marco marco--cajas${escritorio ? ' marco--escritorio' : ''}`} data-tauri-drag-region>
         <BarraVentana />
@@ -206,14 +208,9 @@ export function Lista() {
           etiqueta="Paneles en cajas"
           // La nota nueva se centra sola; después manda el gesto de quien mira.
           indiceActivo={indiceNueva >= 0 ? indiceNueva : undefined}
-          onMover={(movida, destino) =>
-            lista.moverPanel(
-              movida,
-              lista.paneles.findIndex((p) => p.id === destino),
-            )
-          }
-          onSoltar={() => {
-            lista.guardarOrdenPaneles();
+          onMover={lista.moverPanel}
+          onSoltar={(movida, apilado) => {
+            lista.soltarPanel(movida, apilado);
             // La nota ya está en su sitio: no vuelve a centrarse al soltar.
             vista.setNotaNueva(null);
           }}
@@ -221,11 +218,9 @@ export function Lista() {
              «Completados»: ser de sistema solo quita renombrar y borrar. */
           fija={(pieza) => !lista.paneles.find((p) => p.id === (pieza.dataset.panel ?? null))?.mueve}
         >
-          {/* Cada panel pinta su propia `section.caja`: es la pieza que el
-              carril mide y arrastra, sin capas de por medio. */}
-          {lista.paneles.map((panel) => (
-            <Fragment key={panel.id}>{contenido(panel)}</Fragment>
-          ))}
+          {/* Cada panel pinta su propia `section.caja`, la pieza que se arrastra;
+              el carril mide las columnas que las agrupan. */}
+          <ColumnasCarril columnas={lista.columnas} paneles={lista.paneles} contenido={contenido} />
           {/* Al final del carril y sin arrastre (no lleva `data-panel`): es donde
               se recupera lo archivado, no un panel más. */}
           {archivados}
