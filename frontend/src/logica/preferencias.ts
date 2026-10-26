@@ -3,6 +3,7 @@
  * backend, solo cómo mira la usuaria su lista. */
 
 import type { NivelPrioridad } from './importancia';
+import { leerApiladas } from './columnas';
 import { leerMinimizadas } from './minimizadas';
 import { CLAVES_VISTA, MODOS_ORDEN } from './orden';
 import { respaldar } from './preferenciasRemotas';
@@ -67,9 +68,10 @@ export interface Preferencias {
   /** Filas con sus subtareas o subhábitos plegados, por clave `panel:fila`.
    *  Es estado de la vista, pero también un ajuste: se recuerda entre sesiones. */
   plegadas: string[];
-  /** Cajas minimizadas (solo se ve su título), por id de panel. `''` es la caja
-   *  «Tareas». Se recuerda entre sesiones, como el tamaño. */
+  /** Cajas minimizadas (solo se ve su título), por id de panel; `''` es «Tareas». */
   minimizadas: string[];
+  /** Cajas que van debajo de la anterior en vez de abrir columna (ver `columnas`). */
+  apiladas: string[];
   /** Pintar la caja «Aplazado». Apagada, los aplazados existen igual —lo que
    *  sigue aplazado no vuelve a su grupo—, solo no tienen caja donde verse. */
   mostrarAplazados: boolean;
@@ -84,14 +86,12 @@ export interface Preferencias {
   mostrarDiario: boolean;
   /** Talla del texto de las filas, en píxeles. */
   fuente: number;
-  /** Talla del texto de las notas, en píxeles. Va aparte de la de las filas:
-   *  una nota se lee de corrido y pide otro tamaño que una lista de líneas
-   *  cortas. */
+  /** Talla del texto de las notas, en píxeles: se leen de corrido y piden otra
+   *  que las filas. */
   fuenteNota: number;
   /** Aire entre líneas de las notas; las filas no lo usan. */
   interlineadoNota: Interlineado;
-  /** Tamaño propio de cada caja, por id de panel. La caja que no está aquí
-   *  usa el de fábrica; una dimensión ausente también. */
+  /** Tamaño propio de cada caja, por id de panel; sin entrada, el de fábrica. */
   tamanos: Record<string, TamanoCaja>;
   altura: Altura;
   /** Filete entre filas. */
@@ -201,6 +201,7 @@ const POR_DEFECTO: Preferencias = {
   primeraVisible: false,
   plegadas: [],
   minimizadas: [],
+  apiladas: [],
   mostrarAplazados: true,
   mostrarCompletados: true,
   mostrarArchivados: true,
@@ -256,6 +257,7 @@ export function leerPreferencias(): Preferencias {
         typeof guardado.primeraVisible === 'boolean' ? guardado.primeraVisible : POR_DEFECTO.primeraVisible,
       plegadas: leerPlegadas(guardado.plegadas),
       minimizadas: leerMinimizadas(guardado.minimizadas),
+      apiladas: leerApiladas(guardado.apiladas),
       mostrarAplazados:
         typeof guardado.mostrarAplazados === 'boolean' ? guardado.mostrarAplazados : POR_DEFECTO.mostrarAplazados,
       mostrarCompletados:
