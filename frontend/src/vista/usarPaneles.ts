@@ -4,6 +4,8 @@
  * `localStorage`. Vive aparte para que `usarLista` se lea como lo que hace
  * —cargar y escribir— y no como la suma de las dos cosas. */
 import { useCallback, useMemo, type Dispatch, type SetStateAction } from 'react';
+import { aplanar, apilar, columnasDe, separar, type Columnas } from '../logica/columnas';
+import type { Movimiento } from '../logica/destinoArrastre';
 import { guardarOrdenPaneles } from '../logica/grupos';
 import type { ModoOrden } from '../logica/orden';
 import { moverA, panelesDe, type Panel } from '../logica/paneles';
@@ -19,10 +21,14 @@ export interface Disposicion {
   grupoActivo: string;
   /** Grupos de ejecución que existen: los guardados y los de las filas. */
   nombresConocidos: Set<string>;
-  moverPanel: (movido: string, indice: number) => void;
+  /** Las cajas agrupadas en columnas (una pila = varias en la misma columna). */
+  columnas: Columnas;
+  /** Mueve una caja en vivo: a columna propia junto a otra, o dentro de su pila. */
+  moverPanel: (movido: string, movimiento: Movimiento) => void;
   moverPestana: (movido: string, hasta: string) => void;
-  /** Fija el orden de los paneles tal como quedó tras un arrastre. */
-  guardarOrden: () => void;
+  /** Termina un arrastre: aplica el apilado pendiente, si lo hay, y fija el
+   *  orden y las pilas tal como quedaron. */
+  soltarPanel: (movido: string, apilado: Movimiento | null) => void;
   /** Quita un panel del orden guardado y vuelve a «Tareas» si estaba abierto. */
   olvidarPanel: (panel: string) => void;
 }
@@ -35,6 +41,7 @@ interface Dependencias {
   gruposArchivados: string[];
   ordenPestanas: string[];
   setOrdenPestanas: Dispatch<SetStateAction<string[]>>;
+  setAjustes: Dispatch<SetStateAction<Preferencias>>;
   /** Hay hábitos aplazados: la caja «Aplazado» solo vive mientras los haya. */
   hayAplazados: boolean;
   grupo: string;
@@ -101,17 +108,40 @@ export function usarPaneles(d: Dependencias): Disposicion {
    *  arrastran igual. Los que no se pueden mover quedan fuera (`mueve`). */
   const movibles = useMemo(() => paneles.filter((p) => p.mueve).map((p) => p.id), [paneles]);
 
-  /** Orden tras un arrastre: se guarda al soltar, no a cada paso. El carril da
-   *  la posición del panel de destino en la lista, que es la misma que cuenta
-   *  `movibles`. */
-  const moverPanel = useCallback(
-    (movido: string, indice: number) => {
-      const destinoPanel = paneles[indice];
-      const destino = destinoPanel ? movibles.indexOf(destinoPanel.id) : -1;
-      if (destino < 0) return;
-      d.setOrdenPestanas(moverA(movibles, movido, destino));
+  /** Las cajas en columnas: el orden plano de siempre y, aparte, cuáles van
+   *  debajo de la anterior. Sin pilas es una caja por columna. */
+  const columnas = useMemo(() => columnasDe(movibles, ajustes.apiladas), [movibles, ajustes.apiladas]);
+
+  /** Columnas tras un movimiento (la misma si no hay dónde ponerlo). */
+  const aplicar = useCallback(
+    (movido: string, m: Movimiento): Columnas =>
+      m.modo === 'apilar'
+        ? apilar(columnas, movido, m.referencia, m.despues)
+        : separar(columnas, movido, m.referencia, m.despues),
+    [columnas],
+  );
+
+  /** Cambio en vivo: solo la pantalla; se guarda al soltar, no a cada paso. */
+  const poner = useCallback(
+    (nuevas: Columnas) => {
+      const { orden, apiladas } = aplanar(nuevas);
+      d.setOrdenPestanas(orden);
+      d.setAjustes((previas) => ({ ...previas, apiladas }));
     },
-    [paneles, movibles, d],
+    [d],
+  );
+
+  const moverPanel = useCallback((movido: string, m: Movimiento) => poner(aplicar(movido, m)), [poner, aplicar]);
+
+  const soltarPanel = useCallback(
+    (movido: string, apilado: Movimiento | null) => {
+      const finales = apilado ? aplicar(movido, apilado) : columnas;
+      if (apilado) poner(finales);
+      const { orden, apiladas } = aplanar(finales);
+      guardarOrdenPaneles(orden);
+      guardarPreferencias({ apiladas });
+    },
+    [aplicar, columnas, poner],
   );
 
   /** Orden desde la fila de pestañas: se guarda en el acto, porque no hay
@@ -129,10 +159,6 @@ export function usarPaneles(d: Dependencias): Disposicion {
     [movibles, d],
   );
 
-  /** El carril pide guardar con el orden que ya está en la pantalla: se guarda
-   *  lo visible, no el estado guardado, que puede ir un paso por detrás. */
-  const guardarOrden = useCallback(() => guardarOrdenPaneles(paneles.map((p) => p.id)), [paneles]);
-
   /** Un panel borrado o archivado sale del orden guardado y, si estaba abierto,
    *  la lista vuelve a «Tareas»: su id no puede quedar vivo esperando a otra
    *  nota con el mismo uuid. */
@@ -149,7 +175,17 @@ export function usarPaneles(d: Dependencias): Disposicion {
     [ordenPestanas, grupoActivo, d],
   );
 
-  return { paneles, grupos, grupoActivo, nombresConocidos, moverPanel, moverPestana, guardarOrden, olvidarPanel };
+  return {
+    paneles,
+    grupos,
+    grupoActivo,
+    nombresConocidos,
+    columnas,
+    moverPanel,
+    moverPestana,
+    soltarPanel,
+    olvidarPanel,
+  };
 }
 
 /** El orden de cada caja, que vive en las preferencias y no en un estado aparte. */

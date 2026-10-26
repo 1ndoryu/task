@@ -6,6 +6,8 @@
  * reescribe filas ni calcula pestañas. */
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { aplazadoHasta } from '../logica/aplazos';
+import type { Columnas } from '../logica/columnas';
+import type { Movimiento } from '../logica/destinoArrastre';
 import { fechaLocal } from '../logica/fechas';
 import { editarHabito } from '../logica/habitos';
 import { importanciaDeHabito } from '../logica/importancia';
@@ -49,10 +51,12 @@ export interface Lista {
   paneles: Panel[];
   /** Solo los grupos, por su nombre: para menús que no admiten notas. */
   grupos: string[];
-  /** Mueve un panel a otra posición entre los ordenables. */
-  moverPanel: (movido: string, indice: number) => void;
-  /** Fija el orden de los paneles tal como quedó tras un arrastre. */
-  guardarOrdenPaneles: () => void;
+  /** Las cajas en columnas (una pila = varias en la misma columna). */
+  columnas: Columnas;
+  /** Mueve una caja en vivo: a columna propia junto a otra, o dentro de su pila. */
+  moverPanel: (movido: string, movimiento: Movimiento) => void;
+  /** Termina un arrastre: aplica el apilado pendiente y fija orden y pilas. */
+  soltarPanel: (movido: string, apilado: Movimiento | null) => void;
   /** Renombra un panel: el grupo muda sus filas, la nota cambia su título. */
   renombrarPanel: (panel: Panel, titulo: string) => void;
   /** Crea una nota y devuelve su id de panel para centrarlo. */
@@ -202,6 +206,7 @@ export function usarLista(): Lista {
     gruposArchivados,
     ordenPestanas,
     setOrdenPestanas,
+    setAjustes,
     hayAplazados,
     grupo,
     setGrupo,
@@ -255,8 +260,9 @@ export function usarLista(): Lista {
     grupo: paneles.grupoActivo,
     paneles: paneles.paneles,
     grupos: paneles.grupos,
+    columnas: paneles.columnas,
     moverPanel: paneles.moverPanel,
-    guardarOrdenPaneles: paneles.guardarOrden,
+    soltarPanel: paneles.soltarPanel,
     crearNota: notas.crear,
     borrarNota,
     /** Archivar una nota es sacarla de los paneles, igual que borrarla: su
