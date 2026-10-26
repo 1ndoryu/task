@@ -228,13 +228,46 @@
   grid-template-columns: 1fr auto 1fr;
 }
 
-.barra--centrada > .barra__titulo {
+.barra--centrada > .barra__titulo,
+.barra--centrada > .diario__dias {
   grid-column: 2;
 }
 
 .barra--centrada > .barra__acciones {
   grid-column: 3;
   justify-self: end;
+}
+
+/* Días del diario: «‹ fecha ›» en el centro de la cabecera. El título ocupa lo
+ * que quede entre las flechas, así que una fecha larga no las empuja fuera. */
+.diario__dias {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.diario__dias > .barra__titulo--centrado {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Capítulos del diario, en el pie: «‹  cap. i/n  +  −  ›». El grupo central va
+ * junto, y las flechas quedan en los extremos como en el resto de pies. */
+.diario__grupo {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.diario__cuenta {
+  font-size: var(--texto-etiqueta);
+  letter-spacing: 0.08em;
+  color: var(--tinta-tenue);
+  white-space: nowrap;
 }
 
 /* --- Arrastre de cajas. La pieza que se mueve deja su hueco atenuado; la que
@@ -530,14 +563,15 @@
   gap: 0.15rem;
   /* Todo el alto útil del scroll: escribir es la tarea de esta caja. */
   min-height: 100%;
-  padding-right: 0.75rem;
 }
 
+/* La barra que se ve es la del propio campo: su borde derecho debe ser el de la
+ * caja. El aire con el texto va como padding del campo, no fuera de él. */
 .nota__campo {
   flex: 1;
   min-height: 0;
   width: 100%;
-  padding: 0;
+  padding: 0 0.75rem 0 0;
   border: 0;
   background: none;
   color: var(--tinta);
