@@ -6,20 +6,9 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Siguiente bloque
 
-- `21AJ-1` → `21AK-1` → `21AL-1` → `21AM-1` (cajas del carril: diario, arrastre, minimizar, columnas).
+- Ninguno.
 
 ## Pendientes
-
-- [ ] `21AJ-1` — **Diario con título centrado y flechas de día abajo.** Hecho cuando la cabecera solo lleva la fecha
-  centrada y las flechas ← → viven en un pie al final de la caja, con tests y gate en la 89.
-- [ ] `21AK-1` — **Arrastre estable: poner una caja al lado de otra sin que salte al final.** Hecho cuando el carril
-  no se recentra durante el gesto y el destino usa histéresis (cruzar el centro en el sentido de la marcha), con test
-  de la regla y gate en la 89.
-- [ ] `21AL-1` — **Botón minimizar/maximizar en todas las cajas.** Hecho cuando cada caja muestra solo su título al
-  minimizar, vuelve al maximizar y el estado se recuerda entre sesiones.
-- [ ] `21AM-1` — **Apilar cajas en columnas con scroll vertical invisible.** (Tras `21AK-1` y `21AL-1`.) Hecho cuando
-  se puede soltar una caja encima/debajo de otra, la columna scrollea sin barra visible si no caben y el orden se
-  recuerda, con tests de la lógica de columnas y gate en la 89.
 
 - [ ] `21AC-1` — **Mostrar las tareas con proyecto en una vista por proyecto.** Hoy 228 pendientes con proyecto no
   aparecen en ninguna pestaña. Decidido 2026-10-25: una pestaña por proyecto. Hecho cuando ninguna tarea con proyecto
