@@ -29,6 +29,7 @@
 /* Progreso del día al pie de la caja de hábitos: pista fina con el relleno en
  * tinta y la cuenta a un lado. El ancho llega como variable desde la vista. */
 .progreso {
+  --progreso-alto: 0.3rem;
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -38,8 +39,9 @@
 
 .progreso__pista {
   flex: 1;
-  height: 0.3rem;
-  border-radius: var(--redondoPunto);
+  height: var(--progreso-alto);
+  /* Medio alto en cada esquina: extremos redondos. Un porcentaje daría elipses puntiagudas. */
+  border-radius: calc(var(--progreso-alto) / 2);
   background: var(--linea);
   overflow: hidden;
 }
