@@ -40,33 +40,34 @@ export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTaman
       onConfirmar={() => acceso.confirmar(fecha)}
       tamano={tamano}
       onTamano={onTamano}
+      // La cabecera solo lleva la fecha, centrada; moverse de día es del pie.
       cabecera={
         <header className="barra">
-          <div className="barra__acciones">
-            <button
-              type="button"
-              className="barra__boton barra__icono"
-              aria-label="Día anterior"
-              title="Día anterior"
-              onClick={() => setFecha(sumarDias(fecha, -1))}
-            >
-              <IconoAnterior />
-            </button>
-          </div>
-          <span className="barra__titulo">{titulo}</span>
-          <div className="barra__acciones">
-            <button
-              type="button"
-              className="barra__boton barra__icono"
-              aria-label="Día siguiente"
-              title={esHoy ? 'Hoy: no hay días posteriores' : 'Día siguiente'}
-              disabled={esHoy}
-              onClick={() => setFecha(sumarDias(fecha, 1))}
-            >
-              <IconoSiguiente />
-            </button>
-          </div>
+          <span className="barra__titulo barra__titulo--centrado">{titulo}</span>
         </header>
+      }
+      pie={
+        <footer className="caja__pie">
+          <button
+            type="button"
+            className="barra__boton barra__icono"
+            aria-label="Día anterior"
+            title="Día anterior"
+            onClick={() => setFecha(sumarDias(fecha, -1))}
+          >
+            <IconoAnterior />
+          </button>
+          <button
+            type="button"
+            className="barra__boton barra__icono"
+            aria-label="Día siguiente"
+            title={esHoy ? 'Hoy: no hay días posteriores' : 'Día siguiente'}
+            disabled={esHoy}
+            onClick={() => setFecha(sumarDias(fecha, 1))}
+          >
+            <IconoSiguiente />
+          </button>
+        </footer>
       }
     />
   );

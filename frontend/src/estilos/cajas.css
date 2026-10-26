@@ -70,6 +70,26 @@
   white-space: nowrap;
 }
 
+/* Título centrado (el diario): la cabecera es simétrica, así que el centro del
+ * título es el de la caja. */
+.barra__titulo--centrado {
+  text-align: center;
+}
+
+/* Pie de caja: las flechas del diario, una a cada extremo, bajo el texto. El
+ * relleno derecho deja libre el asa de tamaño de la esquina. */
+.caja__pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.35rem 1rem 0 0;
+}
+
+.barra__icono:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 /* --- Título editable. El texto se ve como el título y se comporta como un
  * disparador; el campo que lo sustituye hereda talla, color y aire, así que
  * renombrar no cambia el alto de la cabecera ni mueve los iconos de al lado. --- */

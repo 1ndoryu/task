@@ -18,6 +18,8 @@ interface Props {
   idPanel?: string;
   /** Qué lleva la cabecera: la pone la vista, como en cualquier caja. */
   cabecera: ReactNode;
+  /** Franja fija al final de la caja, bajo el texto (las flechas del diario). */
+  pie?: ReactNode;
   titulo: string;
   texto: string;
   onEscribir: (contenido: string) => void;
@@ -36,6 +38,7 @@ export function CajaNota({
   preferencias,
   idPanel,
   cabecera,
+  pie,
   titulo,
   texto,
   onEscribir,
@@ -108,6 +111,7 @@ export function CajaNota({
           />
         </label>
       </div>
+      {pie}
     </section>
   );
 }
