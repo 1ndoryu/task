@@ -11,8 +11,10 @@ import { seleccionar, type Fila as FilaDatos } from '../logica/seleccion';
 import type { AccionesFila } from './accionesFila';
 import { MenuOrdenCaja } from './AccionesBarra';
 import { Caja } from './Caja';
+import { CajaDiario } from './CajaDiario';
 import { CajaNota } from './CajaNota';
 import { NuevaFila, type NuevaFila as DatosNuevaFila } from './NuevaFila';
+import type { AccesoDiario } from './usarNotas';
 import type { ContextoPanel, TituloPanel } from './usarVista';
 
 interface Props {
@@ -28,6 +30,8 @@ interface Props {
   hoy: string;
   saliendo: ReadonlySet<string>;
   nota: (panel: string) => { texto: string; escribir: (contenido: string) => void; confirmar: () => void } | null;
+  /** Entradas del diario por día, para la caja «Diario». */
+  diario: AccesoDiario;
   titulo: TituloPanel;
   contextoDe: ContextoPanel;
   /** Menú de fila abierto con clic derecho; lo comparte toda la vista. */
@@ -53,6 +57,7 @@ export function ContenidoPanel({
   hoy,
   saliendo,
   nota,
+  diario,
   titulo,
   contextoDe,
   menuAbierto,
@@ -64,6 +69,19 @@ export function ContenidoPanel({
 }: Props): ReactNode {
   const tipo = panel.tipo;
   const conMenu = contextoDe(panel);
+  // El diario no tiene menú ni alta: es una sola caja que cambia de día.
+  if (tipo === 'diario') {
+    return (
+      <CajaDiario
+        idPanel={panel.id}
+        hoy={hoy}
+        preferencias={preferencias}
+        acceso={diario}
+        tamano={preferencias.tamanos[panel.id]}
+        onTamano={redimensionable ? (tamano) => onTamano(panel.id, tamano) : undefined}
+      />
+    );
+  }
   if (tipo === 'nota') {
     const laNota = nota(panel.id);
     if (!laNota) return null;

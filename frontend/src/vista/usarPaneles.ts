@@ -62,6 +62,7 @@ export function usarPaneles(d: Dependencias): Disposicion {
       ajustes.separarHabitos,
       hayAplazados,
       ajustes.mostrarCompletados,
+      ajustes.mostrarDiario,
     );
   }, [
     estado,
@@ -72,6 +73,7 @@ export function usarPaneles(d: Dependencias): Disposicion {
     ajustes.separarHabitos,
     hayAplazados,
     ajustes.mostrarCompletados,
+    ajustes.mostrarDiario,
   ]);
 
   // Solo los grupos: los menús de la fila y el alta no admiten una nota.

@@ -8,6 +8,25 @@ export function fechaLocal(ahora: Date = new Date()): string {
   return `${ahora.getFullYear()}-${mes}-${dia}`;
 }
 
+/** Suma días a una fecha `YYYY-MM-DD` en el calendario local. Se construye con
+ *  componentes y no con texto para que el cambio de mes y de año salgan solos. */
+export function sumarDias(fecha: string, dias: number): string {
+  const [anio, mes, dia] = fecha.split('-').map(Number);
+  return fechaLocal(new Date(anio, mes - 1, dia + dias));
+}
+
+/** Fecha en palabras para un título: «Domingo, 26 de octubre de 2026». */
+export function fechaEnPalabras(fecha: string): string {
+  const [anio, mes, dia] = fecha.split('-').map(Number);
+  const texto = new Date(anio, mes - 1, dia).toLocaleDateString('es', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+  return texto.replace(/^./, (letra) => letra.toUpperCase());
+}
+
 /** Días de `hasta` menos `desde`, ambos `YYYY-MM-DD` (positivo si `hasta` es futuro). */
 export function diferenciaDias(desde: string, hasta: string): number {
   const a = new Date(`${desde}T00:00:00`).getTime();

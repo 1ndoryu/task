@@ -7,11 +7,13 @@
 import type { ReactNode } from 'react';
 import type { Panel } from '../logica/paneles';
 import { IconoHabito, IconoNota, IconoTarea } from './Iconos';
+import { IconoDiario } from './IconosDiario';
 import { IconoAplazar } from './MenuOpciones';
 
 /** El icono de la pestaña, para distinguir un tipo de otro sin leer. */
 export function iconoDePanel(panel: Panel): ReactNode {
   if (panel.tipo === 'nota') return <IconoNota tam={10} />;
+  if (panel.tipo === 'diario') return <IconoDiario tam={10} />;
   if (panel.tipo === 'habitos') return <IconoHabito tam={10} />;
   if (panel.tipo === 'aplazados') return <IconoAplazar />;
   return <IconoTarea tam={10} />;

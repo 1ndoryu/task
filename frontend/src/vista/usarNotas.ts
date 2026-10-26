@@ -5,22 +5,35 @@
  * La escritura del cuerpo va con retardo: escribir no debe mandar un PUT por
  * tecla. El retardo se cancela al salir de la nota y se fuerza al cerrar el
  * campo, para que no se pierda la última pulsación. */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   archivarNota,
   borrarNota,
   crearNota,
+  fechaDeDiario,
   guardarNota,
   leerNotas,
   resumen,
   TITULO_NOTA,
+  tituloDiario,
   type Nota,
 } from '../logica/notas';
 
 /** Cuánto se espera tras la última tecla antes de guardar. */
 const ESPERA_GUARDADO = 600;
 
+/** Lo que la caja «Diario» necesita de una entrada: leer y escribir por día. */
+export interface AccesoDiario {
+  /** Texto de un día; vacío si todavía no se ha escrito nada. */
+  textoDe: (fecha: string) => string;
+  escribir: (fecha: string, contenido: string) => void;
+  /** Fuerza el guardado pendiente de un día (al cerrar el campo). */
+  confirmar: (fecha: string) => void;
+}
+
 export interface Notas {
+  /** Entradas del diario por día. No son cajas: no entran en `lista`. */
+  diario: AccesoDiario;
   /** Resúmenes en orden de carga: id y título, lo que pinta el carril. */
   lista: { id: string; titulo: string }[];
   /** Cuerpo de cada nota, por id; solo las que se han abierto. */
@@ -54,16 +67,36 @@ export function usarNotas(): Notas {
   const pendientes = useRef(new Map<string, number>());
   // Último texto de cada nota, para mandar lo escrito sin depender del estado.
   const textos = useRef(new Map<string, string>());
+  // Diario: texto por día para pintar, id de la nota de cada día y creaciones en
+  // curso. Una entrada nace con la primera letra, no al abrir el día.
+  const [diarioTextos, setDiarioTextos] = useState<Record<string, string>>({});
+  const diarioTexto = useRef(new Map<string, string>());
+  const diarioIds = useRef(new Map<string, string>());
+  const diarioCreando = useRef(new Map<string, Promise<string | null>>());
 
   useEffect(() => {
     let vigente = true;
     leerNotas()
       .then((notas) => {
         if (!vigente) return;
-        setLista(notas.map(resumen));
+        // Las entradas del diario se separan: no son cajas, pero su cuerpo también llega aquí.
+        const cajas: Nota[] = [];
+        const dias: Record<string, string> = {};
+        for (const nota of notas) {
+          textos.current.set(nota.id, nota.content);
+          const fecha = fechaDeDiario(nota.title);
+          if (!fecha) {
+            cajas.push(nota);
+            continue;
+          }
+          diarioIds.current.set(fecha, nota.id);
+          diarioTexto.current.set(fecha, nota.content);
+          dias[fecha] = nota.content;
+        }
+        setLista(cajas.map(resumen));
+        setDiarioTextos(dias);
         // El cuerpo llega con la lista: no hay una segunda petición por caja.
         setCuerpos(Object.fromEntries(notas.map((n) => [n.id, n.content])));
-        for (const nota of notas) textos.current.set(nota.id, nota.content);
       })
       .catch(() => {
         if (vigente) setFallo('No se pudieron leer las notas.');
@@ -135,6 +168,66 @@ export function usarNotas(): Notas {
       }
     };
   }, [enviar]);
+
+  /** Id de la entrada de un día, creándola si no existe. Se pide una vez por día:
+   *  las pulsaciones seguidas esperan a la misma creación y no abren dos notas. */
+  const asegurarDiario = useCallback((fecha: string): Promise<string | null> => {
+    const id = diarioIds.current.get(fecha);
+    if (id) return Promise.resolve(id);
+    const enCurso = diarioCreando.current.get(fecha);
+    if (enCurso) return enCurso;
+    const creacion = crearNota(tituloDiario(fecha))
+      .then((nota) => {
+        diarioIds.current.set(fecha, nota.id);
+        textos.current.set(nota.id, nota.content);
+        setCuerpos((previos) => ({ ...previos, [nota.id]: nota.content }));
+        return nota.id;
+      })
+      .catch(() => {
+        setFallo('No se pudo crear la entrada del diario.');
+        return null;
+      })
+      .finally(() => diarioCreando.current.delete(fecha));
+    diarioCreando.current.set(fecha, creacion);
+    return creacion;
+  }, []);
+
+  /** Escribe el día: si la entrada ya existe, va por el mismo guardado con retardo
+   *  que las notas; si no, primero se crea y luego se guarda lo escrito. */
+  const escribirDiario = useCallback(
+    (fecha: string, contenido: string) => {
+      diarioTexto.current.set(fecha, contenido);
+      setDiarioTextos((previos) => ({ ...previos, [fecha]: contenido }));
+      const id = diarioIds.current.get(fecha);
+      if (id) {
+        escribir(id, contenido);
+        return;
+      }
+      // Un día en blanco no crea nota: no ensucia el diario con días vacíos.
+      if (!contenido) return;
+      void asegurarDiario(fecha).then((nuevo) => {
+        if (nuevo) escribir(nuevo, diarioTexto.current.get(fecha) ?? '');
+      });
+    },
+    [escribir, asegurarDiario],
+  );
+
+  const confirmarDiario = useCallback(
+    (fecha: string) => {
+      const id = diarioIds.current.get(fecha);
+      if (id) confirmar(id);
+    },
+    [confirmar],
+  );
+
+  const diario = useMemo<AccesoDiario>(
+    () => ({
+      textoDe: (fecha) => diarioTextos[fecha] ?? '',
+      escribir: escribirDiario,
+      confirmar: confirmarDiario,
+    }),
+    [diarioTextos, escribirDiario, confirmarDiario],
+  );
 
   const renombrar = useCallback((id: string, titulo: string) => {
     const limpio = titulo.trim() || TITULO_NOTA;
@@ -212,6 +305,7 @@ export function usarNotas(): Notas {
   }, []);
 
   return {
+    diario,
     lista,
     cuerpos,
     cargando,

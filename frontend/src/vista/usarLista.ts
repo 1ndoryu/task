@@ -28,7 +28,7 @@ import type { CambiosFila, Editando, Estado } from './tiposLista';
 import { usarEscritura } from './usarEscritura';
 import { usarFilas } from './usarFilas';
 import { usarGrupos } from './usarGrupos';
-import { usarNotas } from './usarNotas';
+import { usarNotas, type AccesoDiario } from './usarNotas';
 import { usarCarga } from './usarCarga';
 import { usarOrdenCajas, usarPaneles } from './usarPaneles';
 
@@ -72,6 +72,8 @@ export interface Lista {
   recuperarNota: (id: string) => void;
   /** Cuerpo y escritura de una nota, por su id de panel. */
   nota: (panel: string) => { texto: string; escribir: (contenido: string) => void; confirmar: () => void } | null;
+  /** Entradas del diario por día: la caja «Diario» las lee y escribe por fecha. */
+  diario: AccesoDiario;
   /** Ajustes de lectura: privacidad, fuente, altura y separador. */
   preferencias: Preferencias;
   /** Filas que están saliendo de la lista tras completarse. */
@@ -279,6 +281,7 @@ export function usarLista(): Lista {
         confirmar: () => notas.confirmar(id),
       };
     },
+    diario: notas.diario,
     preferencias: ajustes,
     saliendo,
     ajustesAbiertos,

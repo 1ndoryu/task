@@ -15,7 +15,7 @@ import type { ResumenNota } from './notas';
 import { PESTANA_COMPLETADOS, type Grupo } from './orden';
 
 /** Qué pinta un panel. Cada tipo trae su propia vista y sus propias acciones. */
-export type TipoPanel = 'tareas' | 'habitos' | 'completados' | 'nota' | 'aplazados';
+export type TipoPanel = 'tareas' | 'habitos' | 'completados' | 'nota' | 'aplazados' | 'diario';
 
 /** Prefijo del id de los paneles que no son grupos: así un grupo no puede
  *  llamarse igual que una nota y el orden guardado no se confunde. */
@@ -26,6 +26,8 @@ export const PANEL_HABITOS = 'sistema:habitos';
 /** Panel de lo aplazado. No es una pestaña de nada: recoge los hábitos de
  *  todos los grupos cuya vuelta aún no ha llegado. */
 export const PANEL_APLAZADOS = 'sistema:aplazados';
+/** Panel del diario: una caja con una entrada por día, movida con ← y →. */
+export const PANEL_DIARIO = 'sistema:diario';
 
 export interface Panel {
   /** Id estable: `''` (Tareas), el nombre del grupo, `completados`, `nota:<id>`. */
@@ -76,6 +78,8 @@ export function panelesDe(
   /** La caja «Completados» se puede esconder: apagada no es un panel, y su
    *  pestaña desaparece con ella. */
   mostrarCompletados = true,
+  /** La caja «Diario» se puede esconder, igual que «Completados». */
+  mostrarDiario = false,
 ): Panel[] {
   const grupos = new Set<string>(gruposConocidos);
   for (const grupo of gruposDeFilas) if (grupo) grupos.add(grupo);
@@ -113,6 +117,9 @@ export function panelesDe(
             grupo: null,
           },
         ]
+      : []),
+    ...(mostrarDiario
+      ? [{ id: PANEL_DIARIO, tipo: 'diario' as const, etiqueta: 'Diario', fija: true, mueve: true, grupo: null }]
       : []),
   ];
   for (const panel of sistema) porId.set(panel.id, panel);

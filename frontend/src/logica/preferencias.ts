@@ -75,6 +75,9 @@ export interface Preferencias {
   /** Pintar el panel «Archivados» al final de la vista. Apagado, nada se borra:
    *  para recuperar algo hay que volver a encenderlo. */
   mostrarArchivados: boolean;
+  /** Pintar la caja «Diario». Apagada, lo escrito cada día sigue guardado: solo
+   *  no tiene caja donde verse. */
+  mostrarDiario: boolean;
   /** Talla del texto de las filas, en píxeles. */
   fuente: number;
   /** Talla del texto de las notas, en píxeles. Va aparte de la de las filas:
@@ -196,6 +199,7 @@ const POR_DEFECTO: Preferencias = {
   mostrarAplazados: true,
   mostrarCompletados: true,
   mostrarArchivados: true,
+  mostrarDiario: true,
   fuente: FUENTE_POR_DEFECTO,
   fuenteNota: FUENTE_NOTA_POR_DEFECTO,
   interlineadoNota: 'normal',
@@ -254,6 +258,7 @@ export function leerPreferencias(): Preferencias {
           : POR_DEFECTO.mostrarCompletados,
       mostrarArchivados:
         typeof guardado.mostrarArchivados === 'boolean' ? guardado.mostrarArchivados : POR_DEFECTO.mostrarArchivados,
+      mostrarDiario: typeof guardado.mostrarDiario === 'boolean' ? guardado.mostrarDiario : POR_DEFECTO.mostrarDiario,
       fuente: leerFuente(guardado.fuente, FUENTES_VIEJAS, POR_DEFECTO.fuente, FUENTE_MINIMA, FUENTE_MAXIMA),
       fuenteNota: leerFuente(
         guardado.fuenteNota,

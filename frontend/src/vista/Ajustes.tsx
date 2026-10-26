@@ -197,6 +197,12 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
                     onCambiar={(visible) => onCambiar({ mostrarArchivados: visible })}
                     nota="Apagada desaparece el panel «Archivados», con sus grupos y sus notas. Nada se borra: para recuperar algo, vuelve a encenderla."
                   />
+                  <CajaVisible
+                    nombre="Diario"
+                    visible={preferencias.mostrarDiario}
+                    onCambiar={(visible) => onCambiar({ mostrarDiario: visible })}
+                    nota="Apagada desaparece la caja «Diario» y su pestaña. Lo escrito en cada día sigue guardado: vuelve al encenderla."
+                  />
                 </ul>
               </div>
             )}

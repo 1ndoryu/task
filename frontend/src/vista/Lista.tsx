@@ -160,6 +160,7 @@ export function Lista() {
       hoy={lista.hoy}
       saliendo={lista.saliendo}
       nota={lista.nota}
+      diario={lista.diario}
       titulo={vista.titulo}
       contextoDe={vista.contextoDe}
       menuAbierto={vista.menuAbierto}
