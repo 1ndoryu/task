@@ -3,6 +3,7 @@
  * arrastre. La pieza real se queda de hueco, una copia sigue al puntero, el
  * orden se avisa en vivo y la copia vuela al hueco al soltar. */
 import { useCallback, useEffect, type MutableRefObject, type RefObject } from 'react';
+import { destinoPorCruce, type Candidata } from '../../logica/destinoArrastre';
 import { DURACION, type Gesto } from './tipos';
 
 /** Píxeles que hay que mover para que un clic se convierta en arrastre. */
@@ -59,24 +60,20 @@ export function usarArrastre({
   /** Id del panel de una pieza; `''` en la de «Tareas» (su atributo va vacío). */
   const idDe = (pieza: HTMLElement | null) => pieza?.dataset.panel ?? null;
 
-  /** Pieza cuyo centro queda más cerca de una x del contenido, mirando solo las
-   *  movibles. `null` si no hay ninguna donde soltar. */
+  /** Id de la pieza con la que la arrastrada cambia de sitio, o `null` si se
+   *  queda: solo cuenta cruzar el centro de una vecina movible (ver
+   *  `destinoPorCruce`). Las fijas no admiten soltar encima. */
   const destinoEn = useCallback(
-    (xCliente: number): HTMLElement | null => {
+    (xCliente: number, movida: string): string | null => {
       const nodo = pista.current;
       if (!nodo) return null;
       const x = xCliente - nodo.getBoundingClientRect().left + nodo.scrollLeft;
-      let elegida: HTMLElement | null = null;
-      let menor = Infinity;
+      const candidatas: Candidata[] = [];
       for (const pieza of piezas()) {
-        if (esFija.current?.(pieza)) continue;
-        const distancia = Math.abs(centro(pieza) - x);
-        if (distancia < menor) {
-          menor = distancia;
-          elegida = pieza;
-        }
+        const id = idDe(pieza);
+        if (id !== null && !esFija.current?.(pieza)) candidatas.push({ id, centro: centro(pieza) });
       }
-      return elegida;
+      return destinoPorCruce(candidatas, movida, x);
     },
     [pista, piezas, centro, esFija],
   );
@@ -192,10 +189,9 @@ export function usarArrastre({
       const actual = gesto.current;
       colocar(actual, evento.clientX, evento.clientY);
       empujarBorde(evento.clientX);
-      const destino = destinoEn(evento.clientX);
-      const hasta = idDe(destino);
-      // La copia ya está sobre su hueco: no hay nada que reordenar y animar el
-      // orden otra vez devolvería la pieza a su sitio.
+      // Sin cruce no hay nada que reordenar: animar el orden otra vez
+      // devolvería la pieza a su sitio.
+      const hasta = destinoEn(evento.clientX, actual.id);
       if (hasta !== null && hasta !== actual.id) alMover.current?.(actual.id, hasta);
     };
 

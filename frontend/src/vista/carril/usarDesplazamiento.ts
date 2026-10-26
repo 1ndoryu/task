@@ -56,13 +56,11 @@ export function usarDesplazamiento({
       );
     }
     sitios.current = actuales;
-    // Al reordenar en pleno arrastre, la pieza cae en otro sitio: se centra la
-    // arrastrada (para que no se escape del carril) y la copia se recoloca con
-    // su nuevo ancho, sin saltar bajo el puntero.
-    if (actual && pista.current) {
-      centrarRef.current(piezas().indexOf(actual.pieza), false);
-      colocarRef.current?.(actual, actual.x, actual.y);
-    }
+    // Al reordenar en pleno arrastre, la copia se recoloca con el ancho del
+    // hueco nuevo, sin saltar bajo el puntero. El carril NO se recentra: hacerlo
+    // movía el desplazamiento en cada cambio de sitio, las vecinas se escapaban
+    // de debajo de la mano y la caja acababa al final sin que nadie la llevara.
+    if (actual && pista.current) colocarRef.current?.(actual, actual.x, actual.y);
   });
 
   // Pieza centrada desde fuera (por ejemplo, la pestaña que se acaba de abrir).
