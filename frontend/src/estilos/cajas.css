@@ -504,6 +504,21 @@
 /* --- Nota: texto libre en lugar de una lista. El campo ocupa el alto de la
  * caja —su scroll es el de la caja— y se lee con la misma tinta y el mismo
  * ritmo que una fila; el rótulo es la única marca de que no es una lista. --- */
+/* La barra de scroll de una nota va pegada al borde de la caja: sin el aire
+ * derecho de la caja ni el del scroll. La cabecera conserva la vertical de sus
+ * iconos (0.5rem de la caja + 0.75rem de la barra) y el texto su aire propio. */
+.caja--nota {
+  padding-right: 0;
+}
+
+.caja--nota .barra {
+  padding-right: 1.25rem;
+}
+
+.caja--nota .scroll {
+  padding-right: 0;
+}
+
 .nota {
   display: flex;
   flex-direction: column;
