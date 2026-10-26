@@ -361,6 +361,16 @@ button.fila__marca:hover {
   --texto-campo-nota: 1rem;
 }
 
+/* El interlineado de las notas es un multiplicador de su talla: así se mantiene
+ * proporcional al tamaño elegido. Sin clase, la nota usa el normal (1.5). */
+.caja--nota-interlineado-ajustado {
+  --interlineado-nota: 1.3;
+}
+
+.caja--nota-interlineado-amplio {
+  --interlineado-nota: 1.8;
+}
+
 .caja--altura-compacta .fila {
   padding: 0.3rem 0;
 }
@@ -803,7 +813,7 @@ button.fila__marca:hover {
   color: var(--tinta);
   font-family: inherit;
   font-size: var(--texto-campo-nota);
-  line-height: var(--ritmo);
+  line-height: var(--interlineado-nota, 1.5);
   resize: none;
   outline: none;
   overflow-wrap: anywhere;

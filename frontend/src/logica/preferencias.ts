@@ -15,6 +15,8 @@ const MODOS_GRUPO_VIEJOS = ['ninguno', 'proyecto', 'prioridad', 'urgencia'];
 export type Fuente = 'pequena' | 'normal' | 'grande';
 /** Aire vertical de cada fila. */
 export type Altura = 'compacta' | 'normal' | 'amplia';
+/** Aire entre líneas de una nota: un multiplicador de su talla, no una medida fija. */
+export type Interlineado = 'ajustado' | 'normal' | 'amplio';
 /** Con privacidad activa: se aclara solo la fila del ratón o toda la lista. */
 export type AlcancePrivacidad = 'una' | 'todas';
 /** Luz de la vista: papel claro o tinta sobre negro cálido. */
@@ -36,6 +38,8 @@ export interface Preferencias {
   /** Talla del texto de las notas. Va aparte de la de las filas: una nota se
    *  lee de corrido y pide otro tamaño que una lista de líneas cortas. */
   fuenteNota: Fuente;
+  /** Aire entre líneas de las notas; las filas no lo usan. */
+  interlineadoNota: Interlineado;
   altura: Altura;
   /** Filete entre filas. */
   separador: boolean;
@@ -98,6 +102,7 @@ const POR_DEFECTO: Preferencias = {
   privacidadAlcance: 'una',
   fuente: 'normal',
   fuenteNota: 'normal',
+  interlineadoNota: 'normal',
   altura: 'normal',
   separador: true,
   separarGrupos: false,
@@ -123,6 +128,7 @@ export function leerPreferencias(): Preferencias {
       texto('orden', MODOS) ?? (ordenViejo && MODOS.includes(ordenViejo) ? ordenViejo : POR_DEFECTO.orden);
     const fuente = texto('fuente', ['pequena', 'normal', 'grande']);
     const fuenteNota = texto('fuenteNota', ['pequena', 'normal', 'grande']);
+    const interlineadoNota = texto('interlineadoNota', ['ajustado', 'normal', 'amplio']);
     const altura = texto('altura', ['compacta', 'normal', 'amplia']);
     const tema = texto('tema', ['claro', 'oscuro']);
     return {
@@ -144,6 +150,7 @@ export function leerPreferencias(): Preferencias {
       privacidadAlcance: texto('privacidadAlcance', ['una', 'todas']) as AlcancePrivacidad ?? POR_DEFECTO.privacidadAlcance,
       fuente: (fuente as Fuente) ?? POR_DEFECTO.fuente,
       fuenteNota: (fuenteNota as Fuente) ?? POR_DEFECTO.fuenteNota,
+      interlineadoNota: (interlineadoNota as Interlineado) ?? POR_DEFECTO.interlineadoNota,
       altura: (altura as Altura) ?? POR_DEFECTO.altura,
       separador: typeof guardado.separador === 'boolean' ? guardado.separador : POR_DEFECTO.separador,
       separarGrupos:

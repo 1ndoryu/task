@@ -58,6 +58,8 @@ export function CajaNota({
         preferencias.fuente === 'grande' && 'caja--fuente-grande',
         preferencias.fuenteNota === 'pequena' && 'caja--nota-fuente-pequena',
         preferencias.fuenteNota === 'grande' && 'caja--nota-fuente-grande',
+        preferencias.interlineadoNota === 'ajustado' && 'caja--nota-interlineado-ajustado',
+        preferencias.interlineadoNota === 'amplio' && 'caja--nota-interlineado-amplio',
         preferencias.altura === 'compacta' && 'caja--altura-compacta',
         preferencias.altura === 'amplia' && 'caja--altura-amplia',
       ]

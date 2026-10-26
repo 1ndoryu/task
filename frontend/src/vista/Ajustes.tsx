@@ -8,6 +8,7 @@ import {
   type Altura,
   type AlcancePrivacidad,
   type Fuente,
+  type Interlineado,
   type Preferencias,
   type Tema,
 } from '../logica/preferencias';
@@ -65,6 +66,12 @@ const ALTURAS: { id: Altura; etiqueta: string }[] = [
   { id: 'amplia', etiqueta: 'Amplia' },
 ];
 
+const INTERLINEADOS: { id: Interlineado; etiqueta: string }[] = [
+  { id: 'ajustado', etiqueta: 'Ajustado' },
+  { id: 'normal', etiqueta: 'Normal' },
+  { id: 'amplio', etiqueta: 'Amplio' },
+];
+
 const ALCANCES: { id: AlcancePrivacidad; etiqueta: string }[] = [
   { id: 'una', etiqueta: 'Solo la del ratón' },
   { id: 'todas', etiqueta: 'Todas' },
@@ -75,13 +82,15 @@ const TEMAS: { id: Tema; etiqueta: string }[] = [
   { id: 'oscuro', etiqueta: 'Oscuro' },
 ];
 
-/** Los tres bloques del panel: cómo se ve la lista, qué se esconde y los
+/** Los cuatro bloques del panel: la lista, las notas, qué se esconde y los
  * colores. Cada uno cabe en una pantalla, así que no hay que recorrer una
- * tira larga para llegar al último ajuste. */
-type Pestana = 'vista' | 'privacidad' | 'colores';
+ * tira larga para llegar al último ajuste. Las notas tienen bloque propio
+ * porque su texto se lee de corrido y no comparte talla ni aire con las filas. */
+type Pestana = 'vista' | 'notas' | 'privacidad' | 'colores';
 
 const TABS: { id: Pestana; etiqueta: string }[] = [
   { id: 'vista', etiqueta: 'Vista' },
+  { id: 'notas', etiqueta: 'Notas' },
   { id: 'privacidad', etiqueta: 'Privacidad' },
   { id: 'colores', etiqueta: 'Colores' },
 ];
@@ -154,20 +163,22 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
             aria-labelledby={`${idPanel}-${indicePestana}`}
             tabIndex={-1}
           >
+            {/* Primero el aspecto general, luego las filas y por último cómo se
+                parten las cajas: de lo más global a lo más concreto. */}
             {pestana === 'vista' && (
               <>
                 <Campo
-                  titulo="Tamaño de la fuente"
+                  titulo="Tema"
+                  valor={preferencias.tema}
+                  opciones={TEMAS}
+                  onElegir={(tema) => onCambiar({ tema })}
+                  nota="Lo mismo de noche: el oscuro es el claro con otra luz, no su negativo."
+                />
+                <Campo
+                  titulo="Tamaño de la fuente de las filas"
                   valor={preferencias.fuente}
                   opciones={FUENTES}
                   onElegir={(fuente) => onCambiar({ fuente })}
-                />
-                <Campo
-                  titulo="Tamaño del texto de las notas"
-                  valor={preferencias.fuenteNota}
-                  opciones={FUENTES}
-                  onElegir={(fuenteNota) => onCambiar({ fuenteNota })}
-                  nota="Solo el texto de las notas: se lee de corrido y no tiene por qué seguir la talla de las filas."
                 />
                 <Campo
                   titulo="Altura de las filas"
@@ -195,12 +206,24 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
                   onElegir={(valor) => onCambiar({ separarGrupos: valor === 'si' })}
                   nota="Cada grupo pasa a su propia caja, en fila, con movimiento lateral. El grupo sigue siendo el mismo: cambia dónde se pinta."
                 />
+              </>
+            )}
+
+            {pestana === 'notas' && (
+              <>
                 <Campo
-                  titulo="Tema"
-                  valor={preferencias.tema}
-                  opciones={TEMAS}
-                  onElegir={(tema) => onCambiar({ tema })}
-                  nota="Lo mismo de noche: el oscuro es el claro con otra luz, no su negativo."
+                  titulo="Tamaño del texto de las notas"
+                  valor={preferencias.fuenteNota}
+                  opciones={FUENTES}
+                  onElegir={(fuenteNota) => onCambiar({ fuenteNota })}
+                  nota="Solo el texto de las notas: se lee de corrido y no tiene por qué seguir la talla de las filas."
+                />
+                <Campo
+                  titulo="Interlineado de las notas"
+                  valor={preferencias.interlineadoNota}
+                  opciones={INTERLINEADOS}
+                  onElegir={(interlineadoNota) => onCambiar({ interlineadoNota })}
+                  nota="El aire entre líneas se mide con la talla elegida, así que crece o se aprieta con ella. Las filas no lo usan."
                 />
               </>
             )}
