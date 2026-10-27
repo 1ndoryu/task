@@ -34,7 +34,8 @@ test('si quedaron varios de antes, solo cuenta el primero del día', () => {
   assert.equal(aplicarMomentos(300, ['temprano', 'tarde'], 'tarde'), 300);
 });
 
-test('un peso base no positivo no se duplica, ni siquiera en su momento', () => {
-  assert.equal(aplicarMomentos(0, ['tarde'], 'tarde'), 0);
-  assert.equal(aplicarMomentos(-200, ['tarde'], 'tarde'), -200);
+test('un peso base no positivo no se duplica: en su momento recibe el bono fijo', () => {
+  assert.equal(aplicarMomentos(0, ['tarde'], 'tarde'), 100);
+  assert.equal(aplicarMomentos(-200, ['tarde'], 'tarde'), -100);
+  assert.equal(aplicarMomentos(-200, ['tarde'], 'noche'), -200);
 });

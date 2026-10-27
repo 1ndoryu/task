@@ -13,6 +13,9 @@ export const MOMENTOS: { id: Momento; etiqueta: string }[] = [
 
 /** Cuánto se multiplica el peso base de una tarea o hábito que toca ahora. */
 export const MULTIPLICADOR_EN_SU_MOMENTO = 2;
+/* Con peso base no positivo (p. ej. hábito en racha, «chill» = −200) no hay nada que
+ * multiplicar: se suma un bono fijo, para que lo que toca ahora vaya antes. */
+export const BONO_EN_SU_MOMENTO = 100;
 
 /** Momento del día de una hora: temprano de 5 a 12, tarde de 12 a 19, noche el resto. */
 export function momentoDe(ahora: Date): Momento {
@@ -35,10 +38,11 @@ export function elegirMomento(actual: Momento | undefined, id: Momento): Momento
   return actual === id ? [] : [id];
 }
 
-/** Peso final en el orden inteligente: si la hora actual es su momento y el peso
- *  base es positivo, se duplica; si no, queda igual. Un peso base negativo no se
- *  duplica, para que estar en su momento nunca empeore nada. Sin momento no cambia. */
+/** Peso final en el orden inteligente: si la hora actual es su momento, un peso base
+ *  positivo se duplica y uno no positivo recibe el bono fijo; si no, queda igual.
+ *  Sin momento no cambia. Estar en su momento nunca empeora el peso. */
 export function aplicarMomentos(pesoBase: number, momentos: readonly Momento[] | undefined, ahora: Momento): number {
   const [momento] = leerMomentos(momentos);
-  return momento === ahora && pesoBase > 0 ? pesoBase * MULTIPLICADOR_EN_SU_MOMENTO : pesoBase;
+  if (momento !== ahora) return pesoBase;
+  return pesoBase > 0 ? pesoBase * MULTIPLICADOR_EN_SU_MOMENTO : pesoBase + BONO_EN_SU_MOMENTO;
 }
