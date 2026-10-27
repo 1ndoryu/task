@@ -144,7 +144,8 @@ body {
    * El tope del `clamp` también es el de fábrica: una caja nunca es más alta
    * que la de siempre, aunque el número guardado venga de una pantalla mayor. */
   height: clamp(6rem, var(--alto-caja-usuario, var(--alto-caja)), var(--alto-caja));
-  padding: 0.75rem 0.5rem 0.5rem 1.25rem;
+  /* Sin aire a la derecha: la barra de scroll de cada caja va pegada a su borde. */
+  padding: 0.75rem 0 0.5rem 1.25rem;
   border: 1px solid var(--linea);
   border-radius: var(--redondo);
   background: var(--panel);
@@ -155,9 +156,10 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  /* Mismo aire derecho que el scroll de la lista: así los iconos de la cabecera
-   * caen en la misma vertical que los del alta y los de la fila. */
-  padding: 0 0.75rem 0.5rem 0;
+  /* Mismo aire derecho que el texto de la lista (1.25rem desde el borde, como
+   * antes con el aire de la caja y el del scroll): los iconos caen en la misma
+   * vertical que los del alta y los de la fila. */
+  padding: 0 1.25rem 0.5rem 0;
 }
 
 /* La cabecera al costado: los paneles arriba y los iconos abajo, pegados a la
