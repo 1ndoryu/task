@@ -16,6 +16,7 @@ import { CajaDiario } from './CajaDiario';
 import { CajaNota } from './CajaNota';
 import { NuevaFila, type NuevaFila as DatosNuevaFila } from './NuevaFila';
 import type { AccesoDiario } from './usarNotas';
+import { valorDe } from './usarLista';
 import type { ContextoPanel, TituloPanel } from './usarVista';
 
 interface Props {
@@ -188,6 +189,13 @@ export function ContenidoPanel({
       onTamano={redimensionable ? (tamano) => onTamano(panel.id, tamano) : undefined}
       minimizada={minimizada}
       progreso={tipo === 'habitos' ? progresoHabitos(datos, panel.grupo ?? null, hoy) : undefined}
+      // Solo se reordena a mano lo que está en orden manual; completados y
+      // aplazados tienen su propio orden (por fecha) y no se tocan.
+      onReordenar={
+        ordenDe(panel.id) === 'manual' && tipo !== 'completados' && tipo !== 'aplazados'
+          ? (nuevas) => acciones.reordenar(nuevas.map(valorDe))
+          : undefined
+      }
       // El menú del panel también nace de la caja: en cajas es la única vía
       // (no hay pestañas) y en la caja única es el mismo gesto de la pestaña.
       onContexto={conMenu}

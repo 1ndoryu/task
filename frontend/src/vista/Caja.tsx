@@ -11,6 +11,8 @@ import { Fila } from './Fila';
 import { altoUsuario, anchoUsuario } from './tamano';
 import type { AccionesFila } from './accionesFila';
 import { claveFila, valorDe } from './usarLista';
+import { usarArrastreFilas } from './usarArrastreFilas';
+import { mover } from '../logica/reordenar';
 
 interface Props {
   /** Texto accesible: qué grupo muestra esta caja. */
@@ -46,6 +48,9 @@ interface Props {
   minimizada?: boolean;
   /** Progreso del día (hábitos hechos de los que tocan): barra al pie de la caja. */
   progreso?: { hechos: number; total: number };
+  /** Con esto las filas se arrastran para ordenarlas: solo en orden manual.
+   *  Recibe las filas raíz ya en su orden nuevo. */
+  onReordenar?: (filas: FilaDatos[]) => void;
 }
 
 /** Una fila suelta dentro de la lista, con su clave y su menú. Va aparte porque
@@ -127,8 +132,13 @@ export function Caja({
   onTamano,
   minimizada,
   progreso,
+  onReordenar,
 }: Props) {
   const nodo = useRef<HTMLElement>(null);
+  const listaRef = useRef<HTMLUListElement>(null);
+  // La lista solo existe con filas: sin ellas no hay nada que enganchar.
+  const ordenable = !!onReordenar && filas.length > 0;
+  usarArrastreFilas(listaRef, ordenable, (desde, hasta) => onReordenar?.(mover(filas, desde, hasta)));
   return (
     <section
       ref={nodo}
@@ -188,7 +198,7 @@ export function Caja({
         {filas.length === 0 ? (
           <p className="aviso aviso--vacio">{completados ? 'Nada completado.' : 'Nada pendiente.'}</p>
         ) : (
-          <ul className={`lista${completados ? ' lista--completados' : ''}`}>
+          <ul ref={listaRef} className={`lista${completados ? ' lista--completados' : ''}${ordenable ? ' lista--ordenable' : ''}`}>
             {filas.map((fila, indice) => {
               const clave = claveFila(valorDe(fila));
               // La clave lleva el panel: plegar en una caja no pliega la misma

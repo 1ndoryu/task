@@ -65,6 +65,7 @@ export function accionesDeLista(lista: Lista): AccionesDeLista {
     },
     mover: lista.moverGrupo,
     aplazar: lista.aplazar,
+    reordenar: lista.reordenar,
   };
 
   return { acciones, guardarCambios };

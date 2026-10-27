@@ -105,6 +105,8 @@ export interface Lista {
   moverGrupo: (fila: NonNullable<Editando>, grupo: string | null) => void;
   /** Aplaza un hábito hasta `hasta`; `null` le quita el aplazo. */
   aplazar: (fila: NonNullable<Editando>, hasta: string | null) => void;
+  /** Orden manual: recibe las filas de una caja ya en su orden nuevo. */
+  reordenar: (filas: NonNullable<Editando>[]) => void;
   /** Da de alta una tarea o un hábito desde el campo de la lista. */
   crear: (fila: NuevaFila) => void;
   crearGrupo: (nombre: string) => void;
@@ -173,7 +175,7 @@ export function usarLista(): Lista {
 
   // Las mutaciones de fila (alta, completar, mover, aplazar) viven en
   // `usarFilas`: comparten las mismas dependencias y no tocan los paneles.
-  const { anotarGrupo, moverGrupo, crear, completar, aplazar } = usarFilas({
+  const { anotarGrupo, moverGrupo, crear, completar, aplazar, reordenar } = usarFilas({
     datosRef,
     pendientesRef,
     setEstado,
@@ -359,6 +361,7 @@ export function usarLista(): Lista {
     },
     moverGrupo,
     aplazar,
+    reordenar,
     crear,
     crearGrupo,
     renombrarGrupo,

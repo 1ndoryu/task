@@ -5,6 +5,7 @@
 import { useCallback, type Dispatch, type SetStateAction } from 'react';
 import { fechaLocal } from '../logica/fechas';
 import { anotarGrupos } from '../logica/grupos';
+import { ordenesNuevos } from '../logica/reordenar';
 import { desmarcarHabito, editarHabito, guardarHabito, marcarHabito } from '../logica/habitos';
 import { importanciaDeHabito } from '../logica/importancia';
 import { hechoHoy } from '../logica/seleccion';
@@ -196,5 +197,25 @@ export function usarFilas(d: Dependencias) {
     },
     [escribirHabito, hoy],
   );
-  return { anotarGrupo, moverGrupo, crear, completar, aplazar };
+
+  /** Orden manual: `filas` ya viene en su orden nuevo. Reparte entre ellas los
+   * mismos números de `orden` que tenían (tareas y hábitos comparten espacio) y
+   * solo escribe a las que cambian de número. */
+  const reordenar = useCallback(
+    (filas: NonNullable<Editando>[]) => {
+      const propias = filas.flatMap((f) => (f.tipo === 'tarea' || f.tipo === 'habito' ? [f] : []));
+      const { tareas, habitos } = datosRef.current;
+      const actuales = propias.map((f) =>
+        f.tipo === 'tarea' ? (tareas.find((t) => t.id === f.tarea.id)?.orden ?? 0) : (habitos.find((h) => h.id === f.habito.id)?.orden ?? 0),
+      );
+      const nuevos = ordenesNuevos(actuales);
+      propias.forEach((f, i) => {
+        if (nuevos[i] === actuales[i]) return;
+        if (f.tipo === 'tarea') void escribirTarea(f.tarea.id, (t) => ({ ...t, orden: nuevos[i] }));
+        else void escribirHabito(f.habito.id, (h) => ({ ...h, orden: nuevos[i] }));
+      });
+    },
+    [escribirTarea, escribirHabito],
+  );
+  return { anotarGrupo, moverGrupo, crear, completar, aplazar, reordenar };
 }

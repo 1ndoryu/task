@@ -16,6 +16,8 @@ export interface AccionesFila {
   mover: (fila: NonNullable<Editando>, grupo: string | null) => void;
   /** Aplaza un hábito: `hasta` es la fecha de vuelta, `null` para quitarlo. */
   aplazar: (fila: NonNullable<Editando>, hasta: string | null) => void;
+  /** Orden manual: las filas de una caja, ya en su orden nuevo. */
+  reordenar: (filas: NonNullable<Editando>[]) => void;
 }
 
 /** Nivel de la fila en el id común: la tarea ya lo trae y la importancia del
