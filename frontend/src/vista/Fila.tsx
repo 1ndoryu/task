@@ -100,7 +100,7 @@ export function Fila({
       <button
         type="button"
         className="fila__marca"
-        // Atributo y no clase: la hoja agranda el círculo y pinta el icono solo si hay momento.
+        // Atributo y no clase: la hoja quita el relleno y pinta el icono solo si hay momento.
         data-momento={momento}
         aria-label={`Completar ${texto}`}
         title="Completar"

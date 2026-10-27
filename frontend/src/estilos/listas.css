@@ -233,8 +233,8 @@ body {
 }
 
 .fila--sub .fila__marca {
-  width: 0.375rem;
-  height: 0.375rem;
+  width: calc(0.375rem + 1px);
+  height: calc(0.375rem + 1px);
 }
 
 .fila--sub .fila__texto {
@@ -289,28 +289,34 @@ body {
   }
 }
 
+/* Centrado en la línea: sin `translateY`, que lo subía por encima del texto. El
+ * +1px es el tamaño nuevo del círculo; el icono de momento lo ocupa por dentro. */
 .fila__marca {
   position: relative;
   flex: none;
-  width: 0.5rem;
-  height: 0.5rem;
+  align-self: center;
+  width: calc(0.5rem + 1px);
+  height: calc(0.5rem + 1px);
   padding: 0;
   border: 1px solid var(--tinta-tenue);
   border-radius: var(--redondoPunto);
   background: none;
-  transform: translateY(-0.1em);
 }
 
-/* Cuándo es mejor hacer: con un momento el círculo crece y lleva su icono. El
- * color del nivel no cambia; sin momento sigue siendo el círculo liso. El icono
- * va en tinta oscura porque el fondo del nivel es pastel en los dos temas. */
-.fila__marca[data-momento] {
+/* Cuándo es mejor hacer: el icono ocupa el círculo por dentro, sin relleno, y va
+ * en el color de su nivel (`color` en cada `.fila--nivel-*`). Sin momento sigue
+ * siendo el círculo liso. Se repite la clase para ganar a la del nivel y a la de
+ * hecho, que pintan el fondo. */
+.fila .fila__marca[data-momento] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1rem;
-  height: 1rem;
-  color: var(--tinta-sobre-nivel);
+  background: none;
+}
+
+.fila .fila__marca[data-momento] svg {
+  width: 100%;
+  height: 100%;
 }
 
 .fila button.fila__marca[data-momento]:hover {
@@ -335,41 +341,44 @@ button.fila__marca:hover {
 
 /* El punto lleva el color de su nivel. Los cinco niveles tienen su variable
  * (la paleta la pone la vista desde las preferencias) y una por defecto por si
- * la lista se pinta fuera de la caja: escala pastel que acaba en rojo. */
+ * la lista se pinta fuera de la caja: escala pastel que acaba en rojo. El
+ * `color` es el del icono de momento; el círculo liso solo usa el borde y el fondo. */
 :root {
   --nivel-muy_baja: #dbe6f0;
   --nivel-baja: #dcebdc;
   --nivel-media: #f6eecb;
   --nivel-alta: #f6d9bd;
   --nivel-muy_alta: #e8a09b;
-  /* Tinta para lo que va sobre el color del nivel: esos pastel son claros en
-   * los dos temas, así que no sirve la tinta del tema oscuro. */
-  --tinta-sobre-nivel: #1b1b19;
 }
 
 .fila--nivel-muy_baja .fila__marca {
   border-color: var(--nivel-muy_baja);
   background: var(--nivel-muy_baja);
+  color: var(--nivel-muy_baja);
 }
 
 .fila--nivel-baja .fila__marca {
   border-color: var(--nivel-baja);
   background: var(--nivel-baja);
+  color: var(--nivel-baja);
 }
 
 .fila--nivel-media .fila__marca {
   border-color: var(--nivel-media);
   background: var(--nivel-media);
+  color: var(--nivel-media);
 }
 
 .fila--nivel-alta .fila__marca {
   border-color: var(--nivel-alta);
   background: var(--nivel-alta);
+  color: var(--nivel-alta);
 }
 
 .fila--nivel-muy_alta .fila__marca {
   border-color: var(--nivel-muy_alta);
   background: var(--nivel-muy_alta);
+  color: var(--nivel-muy_alta);
 }
 
 /* El texto es el disparador de la configuración: se ve como texto, no como botón. */
