@@ -440,7 +440,8 @@
     grid-area: acciones;
   }
 
-  .marco__unica > .caja {
+  /* El archivado no es la caja de tareas: va apilado debajo, sin ocupar su celda. */
+  .marco__unica > .caja:not(.caja--archivados) {
     grid-area: caja;
     width: min(var(--ancho-usuario, var(--ancho)), 100%);
     justify-self: center;
