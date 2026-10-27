@@ -2,6 +2,7 @@
  * `localStorage`. Se guardan aparte de los datos: aquí no hay contratos del
  * backend, solo cómo mira la usuaria su lista. */
 
+import { ALGORITMO_DEFECTO, leerAlgoritmo, type Algoritmo } from './algoritmo';
 import type { NivelPrioridad } from './importancia';
 import { leerApiladas } from './columnas';
 import { leerMinimizadas } from './minimizadas';
@@ -87,6 +88,8 @@ export interface Preferencias {
   /** Nivel de estricto del orden inteligente: cuántos días sin hacer un hábito
    *  lo suben de urgencia. */
   tolerancia: Tolerancia;
+  /** Pesos del orden inteligente y horas de cada momento del día. */
+  algoritmo: Algoritmo;
   /** Día (AAAA-MM-DD) en que se reinició la valoración de urgencia; `''` si
    *  nunca. Desde ese día cuenta la inactividad de los hábitos. */
   reinicioUrgencia: string;
@@ -218,6 +221,7 @@ const POR_DEFECTO: Preferencias = {
   mostrarArchivados: true,
   mostrarDiario: true,
   tolerancia: 'moderado',
+  algoritmo: { ...ALGORITMO_DEFECTO },
   reinicioUrgencia: '',
   fuente: FUENTE_POR_DEFECTO,
   fuenteNota: FUENTE_NOTA_POR_DEFECTO,
@@ -281,6 +285,7 @@ export function leerPreferencias(): Preferencias {
         typeof guardado.mostrarArchivados === 'boolean' ? guardado.mostrarArchivados : POR_DEFECTO.mostrarArchivados,
       mostrarDiario: typeof guardado.mostrarDiario === 'boolean' ? guardado.mostrarDiario : POR_DEFECTO.mostrarDiario,
       tolerancia: (texto('tolerancia', Object.keys(UMBRALES)) as Tolerancia | undefined) ?? POR_DEFECTO.tolerancia,
+      algoritmo: leerAlgoritmo(guardado.algoritmo),
       reinicioUrgencia: leerFecha(guardado.reinicioUrgencia),
       fuente: leerFuente(guardado.fuente, FUENTES_VIEJAS, POR_DEFECTO.fuente, FUENTE_MINIMA, FUENTE_MAXIMA),
       fuenteNota: leerFuente(

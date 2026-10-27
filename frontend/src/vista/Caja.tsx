@@ -228,7 +228,7 @@ export function Caja({
         )}
       </div>
       {/* Fuera del scroll: la barra se queda al pie aunque la lista ruede. */}
-      {progreso && progreso.total > 0 && <BarraMomento />}
+      {progreso && progreso.total > 0 && <BarraMomento algoritmo={preferencias.algoritmo} />}
       {progreso && progreso.total > 0 && (
         <div
           className="progreso"

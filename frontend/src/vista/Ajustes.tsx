@@ -22,6 +22,7 @@ import type { Tolerancia } from '../logica/orden';
 import { CajaVisible, Campo } from './AjustesCampos';
 import { CampoTamano } from './CampoTamano';
 import { ColoresNivel } from './ColoresNivel';
+import { PanelAlgoritmo } from './PanelAlgoritmo';
 import { PestanasLaterales } from './PestanasLaterales';
 
 const ALTURAS: { id: Altura; etiqueta: string }[] = [
@@ -50,13 +51,14 @@ const TEMAS: { id: Tema; etiqueta: string }[] = [
  * qué se esconde y los colores. Cada uno cabe en una pantalla, así que no hay que
  * recorrer una tira larga para llegar al último ajuste. Las notas tienen bloque
  * propio porque su texto se lee de corrido y no comparte talla ni aire con las filas. */
-type Pestana = 'vista' | 'notas' | 'cajas' | 'inteligente' | 'privacidad' | 'colores';
+type Pestana = 'vista' | 'notas' | 'cajas' | 'inteligente' | 'algoritmo' | 'privacidad' | 'colores';
 
 const TABS: { id: Pestana; etiqueta: string }[] = [
   { id: 'vista', etiqueta: 'Vista' },
   { id: 'notas', etiqueta: 'Notas' },
   { id: 'cajas', etiqueta: 'Cajas' },
   { id: 'inteligente', etiqueta: 'Inteligente' },
+  { id: 'algoritmo', etiqueta: 'Algoritmo' },
   { id: 'privacidad', etiqueta: 'Privacidad' },
   { id: 'colores', etiqueta: 'Colores' },
 ];
@@ -265,6 +267,9 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
                   </p>
                 </div>
               </>
+            )}
+            {pestana === 'algoritmo' && (
+              <PanelAlgoritmo algoritmo={preferencias.algoritmo} onCambiar={(algoritmo) => onCambiar({ algoritmo })} />
             )}
             {pestana === 'privacidad' && (
               <>

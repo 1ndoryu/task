@@ -1,6 +1,7 @@
 /* Qué se pinta: tareas y hábitos en una sola lista, ordenados por el mismo
  * criterio (como el panel de ejecución del front original) y filtrados por la
  * pestaña activa. Lógica pura. */
+import type { Algoritmo } from './algoritmo';
 import { aplazadoHasta } from './aplazos';
 import { fechaLocal } from './fechas';
 import { tocaHoy, type ConFrecuencia } from './frecuencia';
@@ -92,6 +93,8 @@ export function seleccionar(
     ocultarHabitos?: boolean;
     /** Nivel de estricto y reinicio de la urgencia de los hábitos (ajustes). */
     valoracion?: ValoracionUrgencia;
+    /** Pesos y horas del orden inteligente (ajustes); sin él, los de fábrica. */
+    algoritmo?: Algoritmo;
     /** Solo una clase de fila: el panel de hábitos de la vista separada. Sin
      *  él, tareas y hábitos comparten lista como siempre. */
     solo?: 'tareas' | 'habitos';
@@ -160,7 +163,7 @@ export function seleccionar(
   ];
 
   // El comparador guarda los pesos calculados: se crea una sola vez.
-  const comparar = comparador(opciones.orden, hoy);
+  const comparar = comparador(opciones.orden, hoy, opciones.algoritmo);
   pares.sort((a, b) => comparar(a.entrada, b.entrada));
 
   return { filas: pares.map((par) => par.fila), completados, aplazados };

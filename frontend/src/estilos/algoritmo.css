@@ -1,0 +1,57 @@
+/* --- Pestaña «Algoritmo» de los ajustes: una fila por número, con la etiqueta
+ * a la izquierda y el campo pegado a la derecha. Lo que difiere de fábrica va
+ * en negrita y en tinta plena. --- */
+.algoritmo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.algoritmo__fila {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.algoritmo__etiqueta {
+  flex: 1;
+  min-width: 0;
+  color: var(--tinta);
+  font-size: var(--texto-menu);
+}
+
+.algoritmo__entrada {
+  width: 4.5rem;
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoChico);
+  background: var(--panel);
+  color: var(--tinta-tenue);
+  font: inherit;
+  font-size: var(--texto-menu);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.algoritmo__entrada[data-cambiado='true'] {
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+.algoritmo__entrada:focus-visible {
+  border-color: var(--tinta);
+  outline: none;
+}
+
+.algoritmo__unidad {
+  width: 1.4rem;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+}
+
+.algoritmo__aviso {
+  color: var(--sangre);
+}

@@ -132,6 +132,7 @@ export function ContenidoPanel({
     completados: tipo === 'completados',
     ocultarHabitos: preferencias.ocultarHabitos,
     valoracion: { umbrales: UMBRALES[preferencias.tolerancia], reinicio: preferencias.reinicioUrgencia },
+    algoritmo: preferencias.algoritmo,
     solo,
     hoy,
     saliendo,

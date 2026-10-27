@@ -3,6 +3,7 @@
  * prioridad, inactividad → urgencia) y todo pasa por el mismo selector
  * (`frontend-legacy/src/app/hooks/useOrdenarTareas.ts` +
  * `useHabitosComoTareas.ts`). Aquí se conservan los mismos pesos y umbrales. */
+import { ALGORITMO_DEFECTO, type Algoritmo, type ClaveAlgoritmo } from './algoritmo';
 import { diferenciaDias, fechaLocal } from './fechas';
 import { rachaDe, ultimoHecho } from './frecuencia';
 import { nivelDe } from './importancia';
@@ -47,23 +48,25 @@ export function limpiarGrupo(crudo: unknown): Grupo {
   return nombre && nombre.toLowerCase() !== PESTANA_COMPLETADOS ? nombre : null;
 }
 
-const PESO_URGENCIA: Record<string, number> = {
-  bloqueante: 1000,
-  urgente: 500,
-  normal: 0,
-  chill: -200,
+/* Qué parámetro de `Algoritmo` pesa cada urgencia y cada importancia. */
+const CLAVE_URGENCIA: Record<string, ClaveAlgoritmo> = {
+  bloqueante: 'urgBloqueante',
+  urgente: 'urgUrgente',
+  normal: 'urgNormal',
+  chill: 'urgChill',
 };
 
-const PESO_PRIORIDAD: Record<string, number> = {
-  muy_alta: 500,
-  alta: 300,
-  media: 100,
-  baja: 0,
-  muy_baja: -100,
+const CLAVE_PRIORIDAD: Record<string, ClaveAlgoritmo> = {
+  muy_alta: 'priMuyAlta',
+  alta: 'priAlta',
+  media: 'priMedia',
+  baja: 'priBaja',
+  muy_baja: 'priMuyBaja',
 };
 
-/* Cada día de retraso suma 50: lo olvidado sube poco a poco. */
-const PESO_POR_DIA_RETRASO = 50;
+/* Una urgencia desconocida pesa como «normal»; una importancia desconocida, como «media». */
+const pesoUrgencia = (a: Algoritmo, urgencia: string): number => a[CLAVE_URGENCIA[urgencia] ?? 'urgNormal'];
+const pesoPrioridad = (a: Algoritmo, prioridad: string): number => a[CLAVE_PRIORIDAD[prioridad] ?? 'priMedia'];
 
 /* Niveles de estricto, como en el legacy: días sin hacerlo para pasar a cada
  * urgencia. `normal` es el primer día que cuenta como pendiente. */
@@ -142,26 +145,27 @@ export function entradaDeHabito(
   };
 }
 
-/** Vencida +400, hoy +300, mañana +200, esta semana +100, resto 0. */
-function pesoFecha(fecha: string | undefined, hoy: string): number {
+/** Vencida, hoy, mañana, esta semana (hasta 7 días); más lejos, 0. */
+function pesoFecha(fecha: string | undefined, hoy: string, a: Algoritmo): number {
   if (!fecha) return 0;
   const dias = diferenciaDias(hoy, fecha);
-  if (dias < 0) return 400;
-  if (dias === 0) return 300;
-  if (dias === 1) return 200;
-  if (dias <= 7) return 100;
+  if (dias < 0) return a.fecVencida;
+  if (dias === 0) return a.fecHoy;
+  if (dias === 1) return a.fecManana;
+  if (dias <= 7) return a.fecSemana;
   return 0;
 }
 
-/* Los momentos van al final: duplican el peso base si toca ahora (ver `aplicarMomentos`). */
-function pesoTotal(entrada: EntradaOrdenable, hoy: string, momento: Momento): number {
+/* Los momentos van al final: multiplican el peso base si toca ahora (ver `aplicarMomentos`). */
+function pesoTotal(entrada: EntradaOrdenable, hoy: string, momento: Momento, a: Algoritmo): number {
+  // Cada día de retraso suma: lo olvidado sube poco a poco.
   const retraso = entrada.fechaMaxima ? Math.max(0, -diferenciaDias(hoy, entrada.fechaMaxima)) : 0;
   const base =
-    (PESO_URGENCIA[entrada.urgencia] ?? 0) +
-    (PESO_PRIORIDAD[entrada.prioridad] ?? 100) +
-    pesoFecha(entrada.fechaMaxima, hoy) +
-    retraso * PESO_POR_DIA_RETRASO;
-  return aplicarMomentos(base, entrada.momentos, momento);
+    pesoUrgencia(a, entrada.urgencia) +
+    pesoPrioridad(a, entrada.prioridad) +
+    pesoFecha(entrada.fechaMaxima, hoy, a) +
+    retraso * a.retrasoDia;
+  return aplicarMomentos(base, entrada.momentos, momento, a);
 }
 
 const porFecha = (a: EntradaOrdenable, b: EntradaOrdenable): number => {
@@ -171,18 +175,21 @@ const porFecha = (a: EntradaOrdenable, b: EntradaOrdenable): number => {
   return a.fechaMaxima.localeCompare(b.fechaMaxima);
 };
 
-const porPrioridad = (a: EntradaOrdenable, b: EntradaOrdenable): number => {
-  const p = (PESO_PRIORIDAD[b.prioridad] ?? 100) - (PESO_PRIORIDAD[a.prioridad] ?? 100);
-  if (p !== 0) return p;
-  const u = (PESO_URGENCIA[b.urgencia] ?? 0) - (PESO_URGENCIA[a.urgencia] ?? 0);
-  return u !== 0 ? u : a.orden - b.orden;
-};
+const porPrioridad =
+  (algoritmo: Algoritmo) =>
+  (a: EntradaOrdenable, b: EntradaOrdenable): number => {
+    const p = pesoPrioridad(algoritmo, b.prioridad) - pesoPrioridad(algoritmo, a.prioridad);
+    if (p !== 0) return p;
+    const u = pesoUrgencia(algoritmo, b.urgencia) - pesoUrgencia(algoritmo, a.urgencia);
+    return u !== 0 ? u : a.orden - b.orden;
+  };
 
 /** Comparador del modo elegido, listo para `Array.sort` sobre entradas. */
 export function comparador(
   modo: ModoOrden,
   hoy = fechaLocal(),
-  momento: Momento = momentoDe(new Date()),
+  algoritmo: Algoritmo = ALGORITMO_DEFECTO,
+  momento: Momento = momentoDe(new Date(), algoritmo),
 ): (a: EntradaOrdenable, b: EntradaOrdenable) => number {
   switch (modo) {
     case 'manual':
@@ -190,13 +197,13 @@ export function comparador(
     case 'fecha':
       return porFecha;
     case 'prioridad':
-      return porPrioridad;
+      return porPrioridad(algoritmo);
     case 'inteligente': {
       // El peso se calcula una vez por elemento: comparar es O(n log n).
       const pesos = new WeakMap<EntradaOrdenable, number>();
       return (a, b) => {
-        const pa = pesos.get(a) ?? pesoTotal(a, hoy, momento);
-        const pb = pesos.get(b) ?? pesoTotal(b, hoy, momento);
+        const pa = pesos.get(a) ?? pesoTotal(a, hoy, momento, algoritmo);
+        const pb = pesos.get(b) ?? pesoTotal(b, hoy, momento, algoritmo);
         pesos.set(a, pa);
         pesos.set(b, pb);
         return pb - pa || porFecha(a, b);
