@@ -6,6 +6,7 @@ import { Fragment, useRef, type CSSProperties, type ReactNode } from 'react';
 import type { ColoresNivel, Preferencias, TamanoCaja } from '../logica/preferencias';
 import type { Fila as FilaDatos } from '../logica/seleccion';
 import { AsaTamano } from './AsaTamano';
+import { BarraMomento } from './BarraMomento';
 import { Fila } from './Fila';
 import { altoUsuario, anchoUsuario } from './tamano';
 import type { AccionesFila } from './accionesFila';
@@ -227,6 +228,7 @@ export function Caja({
         )}
       </div>
       {/* Fuera del scroll: la barra se queda al pie aunque la lista ruede. */}
+      {progreso && progreso.total > 0 && <BarraMomento />}
       {progreso && progreso.total > 0 && (
         <div
           className="progreso"

@@ -26,6 +26,66 @@
   min-width: 100%;
 }
 
+/* Momento del día sobre el progreso: tres tramos en proporción a su duración,
+ * el actual a plena luz y los otros atenuados, y una marca en la hora. */
+.momento {
+  --momento-alto: 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: none;
+  padding: 0.55rem 0.9rem 0;
+}
+
+.momento__pista {
+  position: relative;
+  display: flex;
+  flex: 1;
+  gap: 0.15rem;
+  height: var(--momento-alto);
+}
+
+.momento__tramo {
+  flex: var(--horas) 1 0;
+  border-radius: calc(var(--momento-alto) / 2);
+  opacity: 0.35;
+  transition: opacity 0.25s ease;
+}
+
+.momento__tramo[data-activo='true'] {
+  opacity: 1;
+}
+
+.momento__tramo--temprano {
+  background: var(--momento-temprano);
+}
+
+.momento__tramo--tarde {
+  background: var(--momento-tarde);
+}
+
+.momento__tramo--noche {
+  background: var(--momento-noche);
+}
+
+/* Palito que sobresale de la pista: se ve sobre cualquiera de los tres colores. */
+.momento__marca {
+  position: absolute;
+  left: var(--posicion, 0%);
+  top: -0.2rem;
+  bottom: -0.2rem;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: var(--redondoMarca);
+  background: var(--tinta);
+}
+
+.momento__nombre {
+  font-size: var(--texto-etiqueta);
+  letter-spacing: 0.08em;
+  color: var(--tinta-tenue);
+}
+
 /* Progreso del día al pie de la caja de hábitos: pista fina con el relleno en
  * tinta y la cuenta a un lado. El ancho llega como variable desde la vista. */
 .progreso {

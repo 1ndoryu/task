@@ -19,6 +19,10 @@
   --linea: #e6e3dd;
   --hecho: #a8a49c;
   --sangre: #9c3d2e;
+  /* Los tres momentos del día, en la barra de la caja de hábitos. */
+  --momento-temprano: #e8a15a;
+  --momento-tarde: #e3c34a;
+  --momento-noche: #5a6bb8;
   --fuente: 'Departure Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
   --texto-base: 0.875rem;
   --texto-fila: 0.8125rem;
