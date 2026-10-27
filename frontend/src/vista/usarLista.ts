@@ -215,7 +215,7 @@ export function usarLista(): Lista {
   });
   const { ordenDe, cambiarOrdenCaja } = usarOrdenCajas(ajustes, setAjustes, orden);
 
-  const { crearGrupo, renombrarGrupo, borrarGrupo, archivarGrupo: archivarGrupoBase } = usarGrupos({
+  const { crearGrupo, renombrarGrupo, borrarGrupo: borrarGrupoBase, archivarGrupo: archivarGrupoBase } = usarGrupos({
     datosRef,
     setGruposConocidos,
     setOrdenPestanas,
@@ -227,13 +227,24 @@ export function usarLista(): Lista {
     grupoActivo: paneles.grupoActivo,
   });
 
-  /** Archivar un grupo también se ve en la lista de archivados de aquí. */
+  /** Archivar un grupo también se ve en la lista de archivados de aquí. Su caja
+   *  sale del carril: las pilas se rehacen sin ella (ver `olvidarPanel`). */
   const archivarGrupo = useCallback(
     (nombre: string) => {
       archivarGrupoBase(nombre);
       setGruposArchivados(leerGruposArchivados());
+      paneles.olvidarPanel(nombre);
     },
-    [archivarGrupoBase],
+    [archivarGrupoBase, paneles],
+  );
+
+  /** Borrar un grupo también retira su caja de las pilas. */
+  const borrarGrupo = useCallback(
+    (nombre: string, conFilas: boolean) => {
+      borrarGrupoBase(nombre, conFilas);
+      paneles.olvidarPanel(nombre);
+    },
+    [borrarGrupoBase, paneles],
   );
 
   /** Desarchivar no toca las filas: el grupo vuelve a tener panel, al final. */

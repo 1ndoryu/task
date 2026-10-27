@@ -1,7 +1,7 @@
 /* Columnas del carril: orden plano + marcador de apiladas, y las tres operaciones. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { aplanar, apilar, columnasDe, leerApiladas, separar } from '../src/logica/columnas.ts';
+import { aplanar, apilar, columnasDe, leerApiladas, separar, sin } from '../src/logica/columnas.ts';
 
 test('lo guardado se lee tolerante: solo cadenas, sin repetir, el vacío vale', () => {
   assert.deepEqual(leerApiladas(['b', 3, 'b', '', null, 'c']), ['b', '', 'c']);
@@ -58,4 +58,9 @@ test('separar con una referencia desconocida, o la propia caja, no toca nada', (
   const base = [['a', 'b'], ['c']];
   assert.deepEqual(separar(base, 'a', 'x', true), base);
   assert.deepEqual(separar(base, 'c', 'c', true), base);
+});
+
+test('quitar la caja de arriba de una pila deja la de abajo como cabeza de su columna, sin pegarla a la vecina', () => {
+  const { orden, apiladas } = aplanar(sin([['a'], ['b', 'c'], ['d']], 'b'));
+  assert.deepEqual(columnasDe(orden, apiladas), [['a'], ['c'], ['d']]);
 });

@@ -32,7 +32,7 @@ export function aplanar(columnas: Columnas): { orden: string[]; apiladas: string
 }
 
 /** Las columnas sin `id`; una que se queda vacía desaparece. */
-const sin = (columnas: Columnas, id: string): Columnas =>
+export const sin = (columnas: Columnas, id: string): Columnas =>
   columnas.map((columna) => columna.filter((otro) => otro !== id)).filter((columna) => columna.length > 0);
 
 /** Mete `movida` en la columna de `objetivo`, justo encima o debajo de él. */

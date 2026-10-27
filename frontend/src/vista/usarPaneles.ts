@@ -4,7 +4,7 @@
  * `localStorage`. Vive aparte para que `usarLista` se lea como lo que hace
  * —cargar y escribir— y no como la suma de las dos cosas. */
 import { useCallback, useMemo, type Dispatch, type SetStateAction } from 'react';
-import { aplanar, apilar, columnasDe, separar, type Columnas } from '../logica/columnas';
+import { aplanar, apilar, columnasDe, separar, sin, type Columnas } from '../logica/columnas';
 import type { Movimiento } from '../logica/destinoArrastre';
 import { guardarOrdenPaneles } from '../logica/grupos';
 import type { ModoOrden } from '../logica/orden';
@@ -168,12 +168,18 @@ export function usarPaneles(d: Dependencias): Disposicion {
       const resto = ordenPestanas.filter((guardado) => guardado !== panel);
       d.setOrdenPestanas(resto);
       guardarOrdenPaneles(resto);
+      // Las pilas se rehacen sin la caja: si era la de arriba, la de debajo pasa a
+      // ser cabeza de su columna; con su marca de apilada intacta, `columnasDe` la
+      // subiría a la columna de al lado.
+      const { apiladas } = aplanar(sin(columnas, panel));
+      d.setAjustes((previas) => ({ ...previas, apiladas }));
+      guardarPreferencias({ apiladas });
       if (grupoActivo === panel) {
         d.setGrupo('');
         guardarPreferencias({ grupo: '' });
       }
     },
-    [ordenPestanas, grupoActivo, d],
+    [ordenPestanas, grupoActivo, columnas, d],
   );
 
   return {
