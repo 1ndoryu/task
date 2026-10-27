@@ -76,8 +76,6 @@ export function seleccionar(
     orden: ModoOrden;
     /** Pestaña activa; `null` es la de «Tareas» (sin grupo). */
     grupo?: Grupo;
-    /** Pestaña de un proyecto: sus tareas, de cualquier grupo; sin hábitos. */
-    proyectoId?: number | null;
     /** Pinta la pestaña de completados. Va aparte de `grupo` porque esa
      *  pestaña recoge lo hecho de todos los grupos y su panel no lleva
      *  ninguno: si dependiera de `grupo`, nunca se activaría. */
@@ -96,7 +94,6 @@ export function seleccionar(
   const hoy = opciones.hoy ?? fechaLocal();
   const completados = opciones.completados ?? opciones.grupo === PESTANA_COMPLETADOS;
   const grupo = completados ? null : (opciones.grupo ?? null);
-  const proyecto = completados ? null : (opciones.proyectoId ?? null);
   const saliendo = (id: number) => opciones.saliendo?.has(`tarea${id}`) ?? false;
 
   // La pestaña de completados es de sistema: recoge lo hecho de todos los
@@ -105,10 +102,7 @@ export function seleccionar(
   const tareas = datos.tareas.filter(
     (t) =>
       (completados ? t.completado : !t.completado || saliendo(t.id)) &&
-      (completados ||
-        (proyecto !== null
-          ? t.proyectoId === proyecto
-          : enGrupo(t.grupoEjecucion, grupo) && (grupo !== null || t.proyectoId == null))),
+      (completados || (enGrupo(t.grupoEjecucion, grupo) && (grupo !== null || t.proyectoId == null))),
   );
   // El legado anidaba un solo nivel: una tarea con padre no es fila propia, se
   // pinta debajo de él. Si el padre no está en esta vista (otra pestaña, otro
@@ -125,8 +119,7 @@ export function seleccionar(
   // Aplazado es un estado propio: el hábito no toca y no se queda en su pestaña
   // (allí parecería pendiente); vive en la caja «Aplazado» hasta que vuelve.
   const aplazadosDe = (h: Habito) => aplazadoHasta(h, hoy) !== null;
-  // Los hábitos no tienen proyecto: la pestaña de un proyecto no los recoge.
-  const habitos = (completados ? datos.habitos.filter((h) => hechoHoy(h, hoy)) : proyecto !== null ? [] : datos.habitos.filter((h) => enGrupo(h.grupoEjecucion, grupo))).filter(
+  const habitos = (completados ? datos.habitos.filter((h) => hechoHoy(h, hoy)) : datos.habitos.filter((h) => enGrupo(h.grupoEjecucion, grupo))).filter(
     (h) => completados || (!aplazadosDe(h) && !ocultarCompletado(h, hoy, opciones.ocultarHabitos ?? false)),
   );
   // La caja «Aplazado» recoge los de todas las pestañas: lo que se pospone sale

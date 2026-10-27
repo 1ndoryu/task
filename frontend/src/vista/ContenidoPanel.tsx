@@ -128,7 +128,6 @@ export function ContenidoPanel({
   const vista = seleccionar(datos, {
     orden: ordenDe(panel.id),
     grupo: panel.grupo,
-    proyectoId: panel.proyectoId ?? null,
     // La pestaña de completados la dice el tipo del panel, no su grupo.
     completados: tipo === 'completados',
     ocultarHabitos: preferencias.ocultarHabitos,

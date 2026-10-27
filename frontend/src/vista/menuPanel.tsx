@@ -26,8 +26,7 @@ export interface OpcionPanel {
 /** Las acciones de un panel, en el orden en que se leen. Vacío en los de
  *  sistema: sin filas, no hay menú que pintar. */
 export function opcionesPanel(panel: Panel): OpcionPanel[] {
-  // Un proyecto tiene pestaña, no grupo: no se renombra ni se archiva desde aquí.
-  if (panel.fija || panel.proyectoId !== undefined) return [];
+  if (panel.fija) return [];
   return [
     { id: 'renombrar', etiqueta: 'Cambiar el nombre', icono: <IconoRenombrar />, accion: true },
     // Archivar conserva la nota y las filas del grupo: es la salida prudente,
