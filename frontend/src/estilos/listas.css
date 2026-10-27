@@ -311,15 +311,15 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: calc(0.5rem + 2px);
-  height: calc(0.5rem + 2px);
+  width: calc(0.5rem + 3px);
+  height: calc(0.5rem + 3px);
   border: 0;
   background: none;
 }
 
 .fila--sub .fila__marca[data-momento] {
-  width: calc(0.375rem + 2px);
-  height: calc(0.375rem + 2px);
+  width: calc(0.375rem + 3px);
+  height: calc(0.375rem + 3px);
 }
 
 .fila .fila__marca[data-momento] svg {
