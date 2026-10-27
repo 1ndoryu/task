@@ -6,11 +6,10 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Siguiente bloque
 
-- `21AS-1`.
+- Ninguno.
 
 ## Pendientes
 
-- [ ] `21AS-1` — **El icono de «Cuándo es mejor hacer» tiene el tamaño del círculo y va centrado en el texto.** Pedido 2026-10-26: el icono va en el color del nivel, sin relleno, del mismo tamaño que el círculo (subido 1px), y círculo e icono centrados respecto al texto. Hecho cuando se ve así en la app de escritorio, con gate limpio y `Arranque cierre` en verde.
 - [ ] `21AC-1` — **Mostrar las tareas con proyecto en una vista por proyecto.** Hoy 228 pendientes con proyecto no
   aparecen en ninguna pestaña. Decidido 2026-10-25: una pestaña por proyecto. Hecho cuando ninguna tarea con proyecto
   queda fuera de todas las pestañas, verificado en la 89.
