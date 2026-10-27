@@ -3,6 +3,7 @@
  * pestaña activa. Lógica pura. */
 import type { Algoritmo } from './algoritmo';
 import { aplazadoHasta } from './aplazos';
+import { masRecienteHecho } from './completados';
 import { fechaLocal } from './fechas';
 import { tocaHoy, type ConFrecuencia } from './frecuencia';
 import { contarProgreso } from './progreso';
@@ -152,6 +153,7 @@ export function seleccionar(
       : raices.map((tarea) => ({
           fila: { tipo: 'tarea', tarea, hijos: hijasDe.get(tarea.id) } as Fila,
           entrada: entradaDeTarea(tarea),
+          hecho: tarea.configuracion?.fechaCompletado ?? '',
         }))),
     ...(opciones.solo === 'tareas'
       ? []
@@ -159,12 +161,16 @@ export function seleccionar(
           // En completados no se esconde nada: los hijos van tal cual, como el padre.
           fila: { tipo: 'habito', habito, hijos: subfilas(habito, hoy, completados ? false : (opciones.ocultarHabitos ?? false)) } as Fila,
           entrada: entradaDeHabito(habito, hoy, opciones.valoracion),
+          // Un hábito de la caja de completados está hecho hoy, por definición.
+          hecho: hoy,
         }))),
   ];
 
+  // Completados tiene un solo orden, lo último hecho arriba; el modo elegido no
+  // cuenta. `sort` es estable: dentro de un mismo día queda el orden de llegada.
   // El comparador guarda los pesos calculados: se crea una sola vez.
   const comparar = comparador(opciones.orden, hoy, opciones.algoritmo);
-  pares.sort((a, b) => comparar(a.entrada, b.entrada));
+  pares.sort(completados ? masRecienteHecho : (a, b) => comparar(a.entrada, b.entrada));
 
   return { filas: pares.map((par) => par.fila), completados, aplazados };
 }
