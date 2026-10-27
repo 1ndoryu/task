@@ -32,20 +32,6 @@
   white-space: nowrap;
 }
 
-/* En el modo sin separar, a la derecha de Tareas y con su altura natural: como
- * los paneles, cuelga del costado de la caja y no baja a alto completo debajo.
- * El ancho es el del costado de paneles, para que las dos columnas cuadren. */
-@media (min-width: 50.01rem) {
-  .marco__unica > .caja--archivados {
-    position: absolute;
-    top: 0;
-    left: calc(100% + 1rem);
-    width: 8rem;
-    height: auto;
-    max-height: 100%;
-  }
-}
-
 /* El foco de teclado se ve: el botón de recuperar no tiene más marca que el texto. */
 .archivado .barra__boton:focus-visible {
   outline: 2px solid var(--tinta);

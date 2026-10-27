@@ -28,6 +28,9 @@ export const PANEL_HABITOS = 'sistema:habitos';
 export const PANEL_APLAZADOS = 'sistema:aplazados';
 /** Panel del diario: una caja con una entrada por día, movida con ← y →. */
 export const PANEL_DIARIO = 'sistema:diario';
+/** Pestaña «Archivados» del modo sin separar: no es un panel de la lista, sino la
+ *  vista de lo archivado. Sin prefijo de nota ni de grupo, y con prefijo de sistema. */
+export const PANEL_ARCHIVADOS = 'sistema:archivados';
 
 export interface Panel {
   /** Id estable: `''` (Tareas), el nombre del grupo, `completados`, `nota:<id>`. */

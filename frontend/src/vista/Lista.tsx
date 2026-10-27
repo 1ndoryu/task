@@ -11,7 +11,7 @@
  * `usarVista`, y la barra, los modales y el menú de caja en sus componentes. */
 import { useEffect } from 'react';
 import { alternarMinimizada } from '../logica/minimizadas';
-import type { Panel } from '../logica/paneles';
+import { PANEL_ARCHIVADOS, type Panel } from '../logica/paneles';
 import { accionesDeLista } from './accionesDeLista';
 import { AccionesBarra } from './AccionesBarra';
 import { Archivados } from './Archivados';
@@ -237,7 +237,25 @@ export function Lista() {
     );
   }
 
+  // Archivados es una pestaña más de la lista (sin separar): no es un panel, así
+  // que ocupa la caja sin tener menú, arrastre ni grupo propio.
+  const verArchivados = preferencias.mostrarArchivados && lista.grupo === PANEL_ARCHIVADOS;
   const activo = lista.paneles.find((p) => p.id === lista.grupo) ?? lista.paneles[0];
+  const pestanasPaneles = lista.paneles.map((panel) => ({
+    id: panel.id,
+    etiqueta: (
+      <span className={`pestana__cuerpo pestana__cuerpo--${panel.tipo}`}>
+        {iconoDePanel(panel)}
+        {vista.titulo(panel, 'pestana__titulo', 'doble')}
+      </span>
+    ),
+  }));
+  if (preferencias.mostrarArchivados) {
+    pestanasPaneles.push({
+      id: PANEL_ARCHIVADOS,
+      etiqueta: <span className="pestana__cuerpo">Archivados</span>,
+    });
+  }
 
   return (
     <main className={`marco${escritorio ? ' marco--escritorio' : ''}`} data-tauri-drag-region>
@@ -253,15 +271,7 @@ export function Lista() {
             titulo="Panel de la lista"
             valor={lista.grupo}
             orientacion="costado"
-            opciones={lista.paneles.map((panel) => ({
-              id: panel.id,
-              etiqueta: (
-                <span className={`pestana__cuerpo pestana__cuerpo--${panel.tipo}`}>
-                  {iconoDePanel(panel)}
-                  {vista.titulo(panel, 'pestana__titulo', 'doble')}
-                </span>
-              ),
-            }))}
+            opciones={pestanasPaneles}
             onElegir={lista.cambiarGrupo}
             onMover={lista.moverPestana}
             esFija={(id) => !lista.paneles.find((p) => p.id === id)?.mueve}
@@ -276,8 +286,16 @@ export function Lista() {
             }}
           />
         </header>
-        {contenido(activo)}
-        {archivados}
+        {verArchivados ? (
+          <Archivados
+            grupos={lista.gruposArchivados}
+            notas={lista.notasArchivadas}
+            onDesarchivarGrupo={lista.desarchivarGrupo}
+            onRecuperarNota={lista.recuperarNota}
+          />
+        ) : (
+          contenido(activo)
+        )}
         {/* El menú de la caja única: en las pestañas va dentro de su lista; en
             la caja, aquí, porque su `section` no es envoltorio del menú. */}
         <MenuCaja

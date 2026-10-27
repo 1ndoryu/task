@@ -8,7 +8,7 @@ import { aplanar, apilar, columnasDe, separar, type Columnas } from '../logica/c
 import type { Movimiento } from '../logica/destinoArrastre';
 import { guardarOrdenPaneles } from '../logica/grupos';
 import type { ModoOrden } from '../logica/orden';
-import { moverA, panelesDe, type Panel } from '../logica/paneles';
+import { moverA, PANEL_ARCHIVADOS, panelesDe, type Panel } from '../logica/paneles';
 import { guardarPreferencias, type Preferencias } from '../logica/preferencias';
 import type { ResumenNota } from '../logica/notas';
 import type { Estado } from './tiposLista';
@@ -87,8 +87,9 @@ export function usarPaneles(d: Dependencias): Disposicion {
   const grupos = useMemo(() => paneles.filter((p) => p.tipo === 'tareas' && !p.fija).map((p) => p.id), [paneles]);
 
   // Una pestaña recordada que ya no existe (grupo renombrado, nota borrada)
-  // dejaría la lista en blanco: se cae a «Tareas».
-  const grupoActivo = paneles.some((p) => p.id === grupo) ? grupo : '';
+  // dejaría la lista en blanco: se cae a «Tareas». «Archivados» no es panel y se
+  // acepta siempre; si está apagado en Ajustes, la vista ya cae a la primera.
+  const grupoActivo = grupo === PANEL_ARCHIVADOS || paneles.some((p) => p.id === grupo) ? grupo : '';
 
   /** Grupos de ejecución que existen: los nombres del orden guardado, los de las
    *  filas que llegan y los recordados. Es la fuente para saber si un renombrado
