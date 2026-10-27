@@ -155,11 +155,14 @@ export function ContenidoPanel({
                 de la identidad (no se renombra ni se borra), no del orden. Con
                 la condición de antes, al separar hábitos y tareas las dos cajas
                 resultantes se quedaban sin la elección. */}
-            <MenuOrdenCaja
-              panel={panel}
-              orden={ordenDe(panel.id)}
-              onElegir={(modo: ModoOrden) => cambiarOrdenCaja(panel.id, modo)}
-            />
+            {/* Salvo Completados, que tiene un solo orden: por fecha de completado. */}
+            {tipo !== 'completados' && (
+              <MenuOrdenCaja
+                panel={panel}
+                orden={ordenDe(panel.id)}
+                onElegir={(modo: ModoOrden) => cambiarOrdenCaja(panel.id, modo)}
+              />
+            )}
             {botonMinimizar}
           </div>
         </header>
