@@ -65,22 +65,47 @@ const PESO_PRIORIDAD: Record<string, number> = {
 /* Cada día de retraso suma 50: lo olvidado sube poco a poco. */
 const PESO_POR_DIA_RETRASO = 50;
 
-/* Umbrales de inactividad del legacy: días sin hacerlo y sube de urgencia. */
-const UMBRAL = { normal: 1, urgente: 3, bloqueante: 5 };
+/* Niveles de estricto, como en el legacy: días sin hacerlo para pasar a cada
+ * urgencia. `normal` es el primer día que cuenta como pendiente. */
+export type Tolerancia = 'muyEstricto' | 'estricto' | 'moderado' | 'relajado' | 'libre';
+export interface Umbrales {
+  normal: number;
+  urgente: number;
+  bloqueante: number;
+}
+export const UMBRALES: Record<Tolerancia, Umbrales> = {
+  muyEstricto: { normal: 1, urgente: 1, bloqueante: 2 },
+  estricto: { normal: 1, urgente: 2, bloqueante: 4 },
+  moderado: { normal: 1, urgente: 3, bloqueante: 5 },
+  relajado: { normal: 3, urgente: 7, bloqueante: 14 },
+  // Infinito: ningún número de días llega, así que los días sin hacer no suben
+  // la urgencia. El resto del orden (racha, prioridad, fechas) sigue igual.
+  libre: { normal: Infinity, urgente: Infinity, bloqueante: Infinity },
+};
+
+/* Cómo valora la urgencia un hábito: el nivel de estricto y el día en que se
+ * reinició la valoración (`''` si nunca). Lo hecho antes de ese día no cuenta. */
+export interface ValoracionUrgencia {
+  umbrales: Umbrales;
+  reinicio: string;
+}
+export const VALORACION_DEFECTO: ValoracionUrgencia = { umbrales: UMBRALES.moderado, reinicio: '' };
 
 /* La inactividad se cuenta del historial: `diasInactividad` y `racha` vinieron
  * congelados del front legacy y aquí nadie los recalcula. */
-function inactividadDeHabito(habito: Habito, hoy: string): number {
+function inactividadDeHabito(habito: Habito, hoy: string, reinicio: string): number {
   const ultimo = ultimoHecho(habito);
-  return ultimo === null ? 0 : Math.max(0, diferenciaDias(ultimo, hoy));
+  // Reiniciar la valoración cuenta desde ese día: lo anterior deja de contar.
+  const desde = reinicio && (ultimo === null || reinicio > ultimo) ? reinicio : ultimo;
+  return desde === null ? 0 : Math.max(0, diferenciaDias(desde, hoy));
 }
 
-function urgenciaDeHabito(habito: Habito, hoy: string): string {
-  const dias = inactividadDeHabito(habito, hoy);
-  if (rachaDe(habito, hoy) > 0 && dias < UMBRAL.normal) return 'chill';
-  if (dias >= UMBRAL.bloqueante) return 'bloqueante';
-  if (dias >= UMBRAL.urgente) return 'urgente';
-  if (dias >= UMBRAL.normal) return 'normal';
+function urgenciaDeHabito(habito: Habito, hoy: string, { umbrales, reinicio }: ValoracionUrgencia): string {
+  const dias = inactividadDeHabito(habito, hoy, reinicio);
+  if (rachaDe(habito, hoy) > 0 && dias < umbrales.normal) return 'chill';
+  if (dias >= umbrales.bloqueante) return 'bloqueante';
+  if (dias >= umbrales.urgente) return 'urgente';
+  if (dias >= umbrales.normal) return 'normal';
   return 'chill';
 }
 
@@ -104,11 +129,15 @@ export function entradaDeTarea(tarea: Tarea): EntradaOrdenable {
   };
 }
 
-export function entradaDeHabito(habito: Habito, hoy: string): EntradaOrdenable {
+export function entradaDeHabito(
+  habito: Habito,
+  hoy: string,
+  valoracion: ValoracionUrgencia = VALORACION_DEFECTO,
+): EntradaOrdenable {
   return {
     orden: habito.orden ?? 0,
     prioridad: nivelDe(habito.importancia),
-    urgencia: urgenciaDeHabito(habito, hoy),
+    urgencia: urgenciaDeHabito(habito, hoy, valoracion),
     momentos: leerMomentos(habito.momentos),
   };
 }

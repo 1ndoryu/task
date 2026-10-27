@@ -5,7 +5,7 @@
 import type { NivelPrioridad } from './importancia';
 import { leerApiladas } from './columnas';
 import { leerMinimizadas } from './minimizadas';
-import { CLAVES_VISTA, MODOS_ORDEN } from './orden';
+import { CLAVES_VISTA, MODOS_ORDEN, UMBRALES, type Tolerancia } from './orden';
 import { respaldar } from './preferenciasRemotas';
 
 const CLAVE = CLAVES_VISTA.preferencias;
@@ -84,6 +84,12 @@ export interface Preferencias {
   /** Pintar la caja «Diario». Apagada, lo escrito cada día sigue guardado: solo
    *  no tiene caja donde verse. */
   mostrarDiario: boolean;
+  /** Nivel de estricto del orden inteligente: cuántos días sin hacer un hábito
+   *  lo suben de urgencia. */
+  tolerancia: Tolerancia;
+  /** Día (AAAA-MM-DD) en que se reinició la valoración de urgencia; `''` si
+   *  nunca. Desde ese día cuenta la inactividad de los hábitos. */
+  reinicioUrgencia: string;
   /** Talla del texto de las filas, en píxeles. */
   fuente: number;
   /** Talla del texto de las notas, en píxeles: se leen de corrido y piden otra
@@ -132,6 +138,11 @@ function leerColores(valor: unknown): ColoresNivel {
     if (typeof color === 'string' && COLOR.test(color)) colores[nivel] = color.toLowerCase();
   }
   return colores;
+}
+
+/** Una fecha AAAA-MM-DD guardada; cualquier otra cosa cuenta como nunca (`''`). */
+function leerFecha(valor: unknown): string {
+  return typeof valor === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(valor) ? valor : '';
 }
 
 /** Claves de filas plegadas guardadas: solo cadenas no vacías. Una fila que ya
@@ -206,6 +217,8 @@ const POR_DEFECTO: Preferencias = {
   mostrarCompletados: true,
   mostrarArchivados: true,
   mostrarDiario: true,
+  tolerancia: 'moderado',
+  reinicioUrgencia: '',
   fuente: FUENTE_POR_DEFECTO,
   fuenteNota: FUENTE_NOTA_POR_DEFECTO,
   interlineadoNota: 'normal',
@@ -267,6 +280,8 @@ export function leerPreferencias(): Preferencias {
       mostrarArchivados:
         typeof guardado.mostrarArchivados === 'boolean' ? guardado.mostrarArchivados : POR_DEFECTO.mostrarArchivados,
       mostrarDiario: typeof guardado.mostrarDiario === 'boolean' ? guardado.mostrarDiario : POR_DEFECTO.mostrarDiario,
+      tolerancia: (texto('tolerancia', Object.keys(UMBRALES)) as Tolerancia | undefined) ?? POR_DEFECTO.tolerancia,
+      reinicioUrgencia: leerFecha(guardado.reinicioUrgencia),
       fuente: leerFuente(guardado.fuente, FUENTES_VIEJAS, POR_DEFECTO.fuente, FUENTE_MINIMA, FUENTE_MAXIMA),
       fuenteNota: leerFuente(
         guardado.fuenteNota,

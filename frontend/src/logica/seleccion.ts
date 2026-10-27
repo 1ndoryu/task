@@ -5,7 +5,15 @@ import { aplazadoHasta } from './aplazos';
 import { fechaLocal } from './fechas';
 import { tocaHoy, type ConFrecuencia } from './frecuencia';
 import { contarProgreso } from './progreso';
-import { comparador, entradaDeHabito, entradaDeTarea, PESTANA_COMPLETADOS, type Grupo, type ModoOrden } from './orden';
+import {
+  comparador,
+  entradaDeHabito,
+  entradaDeTarea,
+  PESTANA_COMPLETADOS,
+  type Grupo,
+  type ModoOrden,
+  type ValoracionUrgencia,
+} from './orden';
 import type { Dashboard, Habito, SubHabito, Tarea } from './tipos';
 
 export { fechaLocal };
@@ -82,6 +90,8 @@ export function seleccionar(
     completados?: boolean;
     /** Esconder los hábitos ya cumplidos según su frecuencia (ajuste). */
     ocultarHabitos?: boolean;
+    /** Nivel de estricto y reinicio de la urgencia de los hábitos (ajustes). */
+    valoracion?: ValoracionUrgencia;
     /** Solo una clase de fila: el panel de hábitos de la vista separada. Sin
      *  él, tareas y hábitos comparten lista como siempre. */
     solo?: 'tareas' | 'habitos';
@@ -145,7 +155,7 @@ export function seleccionar(
       : habitos.map((habito) => ({
           // En completados no se esconde nada: los hijos van tal cual, como el padre.
           fila: { tipo: 'habito', habito, hijos: subfilas(habito, hoy, completados ? false : (opciones.ocultarHabitos ?? false)) } as Fila,
-          entrada: entradaDeHabito(habito, hoy),
+          entrada: entradaDeHabito(habito, hoy, opciones.valoracion),
         }))),
   ];
 

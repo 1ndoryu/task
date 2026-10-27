@@ -5,7 +5,7 @@
 import type { ReactNode } from 'react';
 import type { Dashboard } from '../logica/tipos';
 import type { Preferencias, TamanoCaja } from '../logica/preferencias';
-import type { ModoOrden } from '../logica/orden';
+import { UMBRALES, type ModoOrden } from '../logica/orden';
 import type { Panel } from '../logica/paneles';
 import { progresoHabitos, seleccionar, type Fila as FilaDatos } from '../logica/seleccion';
 import type { AccionesFila } from './accionesFila';
@@ -131,6 +131,7 @@ export function ContenidoPanel({
     // La pestaña de completados la dice el tipo del panel, no su grupo.
     completados: tipo === 'completados',
     ocultarHabitos: preferencias.ocultarHabitos,
+    valoracion: { umbrales: UMBRALES[preferencias.tolerancia], reinicio: preferencias.reinicioUrgencia },
     solo,
     hoy,
     saliendo,

@@ -17,6 +17,8 @@ import {
   type Preferencias,
   type Tema,
 } from '../logica/preferencias';
+import { fechaLocal } from '../logica/fechas';
+import type { Tolerancia } from '../logica/orden';
 import { CajaVisible, Campo } from './AjustesCampos';
 import { CampoTamano } from './CampoTamano';
 import { ColoresNivel } from './ColoresNivel';
@@ -48,14 +50,24 @@ const TEMAS: { id: Tema; etiqueta: string }[] = [
  * qué se esconde y los colores. Cada uno cabe en una pantalla, así que no hay que
  * recorrer una tira larga para llegar al último ajuste. Las notas tienen bloque
  * propio porque su texto se lee de corrido y no comparte talla ni aire con las filas. */
-type Pestana = 'vista' | 'notas' | 'cajas' | 'privacidad' | 'colores';
+type Pestana = 'vista' | 'notas' | 'cajas' | 'inteligente' | 'privacidad' | 'colores';
 
 const TABS: { id: Pestana; etiqueta: string }[] = [
   { id: 'vista', etiqueta: 'Vista' },
   { id: 'notas', etiqueta: 'Notas' },
   { id: 'cajas', etiqueta: 'Cajas' },
+  { id: 'inteligente', etiqueta: 'Inteligente' },
   { id: 'privacidad', etiqueta: 'Privacidad' },
   { id: 'colores', etiqueta: 'Colores' },
+];
+
+/* Los cuatro niveles del legacy, más «Libre», que no sube la urgencia por días. */
+const TOLERANCIAS: { id: Tolerancia; etiqueta: string }[] = [
+  { id: 'muyEstricto', etiqueta: 'Muy estricto' },
+  { id: 'estricto', etiqueta: 'Estricto' },
+  { id: 'moderado', etiqueta: 'Moderado' },
+  { id: 'relajado', etiqueta: 'Relajado' },
+  { id: 'libre', etiqueta: 'Libre' },
 ];
 
 const SI_NO = [
@@ -229,6 +241,31 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
               </>
             )}
 
+            {pestana === 'inteligente' && (
+              <>
+                <Campo
+                  titulo="Nivel de estricto"
+                  valor={preferencias.tolerancia}
+                  opciones={TOLERANCIAS}
+                  onElegir={(tolerancia) => onCambiar({ tolerancia })}
+                  nota="Cuántos días sin hacer un hábito lo suben a urgente y a bloqueante. «Libre» no lo sube nunca."
+                />
+                {/* Reiniciar no borra nada: solo fija desde hoy el conteo de la inactividad. */}
+                <div className="campo">
+                  <p className="campo__titulo">Valoración de la urgencia</p>
+                  <button
+                    type="button"
+                    className="boton"
+                    onClick={() => onCambiar({ reinicioUrgencia: fechaLocal() })}
+                  >
+                    Reiniciar la valoración
+                  </button>
+                  <p className="campo__nota">
+                    Los hábitos cuentan su inactividad desde hoy. El historial no cambia.
+                  </p>
+                </div>
+              </>
+            )}
             {pestana === 'privacidad' && (
               <>
                 <Campo
