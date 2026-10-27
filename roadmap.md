@@ -6,7 +6,7 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Siguiente bloque
 
-- [ ] `21AS-2` — **Los archivados, en el modo sin separar, van en su caja aparte a la derecha de Tareas, con su altura natural.** Hoy van debajo, a alto completo, y quedan fuera de pantalla. Decidido 2026-10-26. Hecho cuando se ven junto a la caja, sin desplazar la página, y en móvil siguen apilados sin solaparse con Tareas.
+- Ninguno.
 
 ## Pendientes
 
