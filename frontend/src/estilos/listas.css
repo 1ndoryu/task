@@ -304,15 +304,15 @@ body {
 }
 
 /* Cuándo es mejor hacer: con momento solo se ve el icono, sin círculo ni relleno,
- * en el color de su nivel (`color` en cada `.fila--nivel-*`). Es 1px mayor que el
- * círculo liso. Sin momento sigue siendo el círculo. Se repite la clase para ganar
- * a la del nivel y a la de hecho, que pintan el borde y el fondo. */
+ * en el color de su nivel (`color` en cada `.fila--nivel-*`). Es 4px mayor que el
+ * círculo liso (0.5rem + 1px). Sin momento sigue siendo el círculo. Se repite la clase
+ * para ganar a la del nivel y a la de hecho, que pintan el borde y el fondo. */
 .fila .fila__marca[data-momento] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: calc(0.5rem + 3px);
-  height: calc(0.5rem + 3px);
+  width: calc(0.5rem + 5px);
+  height: calc(0.5rem + 5px);
   border: 0;
   background: none;
 }
