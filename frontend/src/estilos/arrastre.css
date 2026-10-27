@@ -40,14 +40,8 @@
   z-index: 1000;
   pointer-events: none;
   background: var(--panel);
-  border-radius: var(--redondoChico);
-  box-shadow: 0 0.4rem 1.4rem rgb(27 27 25 / 0.18), 0 0 0 1px var(--tinta-tenue);
   cursor: grabbing;
   will-change: transform;
-}
-
-:root[data-tema='oscuro'] .fila-copia {
-  box-shadow: 0 0.4rem 1.6rem rgb(0 0 0 / 0.7), 0 0 0 1px var(--tinta-tenue);
 }
 
 /* Mientras dura el gesto el cursor es el de agarrar en todas partes, y nada se selecciona. */
