@@ -38,11 +38,19 @@ export function elegirMomento(actual: Momento | undefined, id: Momento): Momento
   return actual === id ? [] : [id];
 }
 
+/* Lo que tocaba antes en el día y sigue pendiente pesa algo más que lo que aún no
+ * toca: de tarde, un hábito de temprano va antes que uno de noche. */
+export const BONO_MOMENTO_PASADO = 50;
+
 /** Peso final en el orden inteligente: si la hora actual es su momento, un peso base
- *  positivo se duplica y uno no positivo recibe el bono fijo; si no, queda igual.
- *  Sin momento no cambia. Estar en su momento nunca empeora el peso. */
+ *  positivo se duplica y uno no positivo recibe el bono fijo; si su momento ya pasó hoy,
+ *  suma el bono menor; si aún no llega, queda igual. Sin momento no cambia. */
 export function aplicarMomentos(pesoBase: number, momentos: readonly Momento[] | undefined, ahora: Momento): number {
   const [momento] = leerMomentos(momentos);
-  if (momento !== ahora) return pesoBase;
+  if (!momento) return pesoBase;
+  if (momento !== ahora) {
+    const pasado = MOMENTOS.findIndex((m) => m.id === momento) < MOMENTOS.findIndex((m) => m.id === ahora);
+    return pasado ? pesoBase + BONO_MOMENTO_PASADO : pesoBase;
+  }
   return pesoBase > 0 ? pesoBase * MULTIPLICADOR_EN_SU_MOMENTO : pesoBase + BONO_EN_SU_MOMENTO;
 }

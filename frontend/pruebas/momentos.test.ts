@@ -22,20 +22,27 @@ test('elegir cambia el momento; pulsar el activo lo quita', () => {
   assert.deepEqual(elegirMomento(undefined, 'tarde'), ['tarde']);
 });
 
-test('en su momento duplica el peso base; si no, lo deja igual', () => {
+test('en su momento duplica el peso base; si ya pasó suma poco; si no llega, igual', () => {
   assert.equal(aplicarMomentos(300, ['tarde'], 'tarde'), 600);
-  assert.equal(aplicarMomentos(300, ['tarde'], 'noche'), 300);
+  assert.equal(aplicarMomentos(300, ['tarde'], 'noche'), 350);
+  assert.equal(aplicarMomentos(300, ['tarde'], 'temprano'), 300);
   assert.equal(aplicarMomentos(300, [], 'tarde'), 300);
   assert.equal(aplicarMomentos(300, undefined, 'tarde'), 300);
 });
 
 test('si quedaron varios de antes, solo cuenta el primero del día', () => {
   assert.equal(aplicarMomentos(300, ['temprano', 'tarde'], 'temprano'), 600);
-  assert.equal(aplicarMomentos(300, ['temprano', 'tarde'], 'tarde'), 300);
+  assert.equal(aplicarMomentos(300, ['temprano', 'tarde'], 'tarde'), 350);
 });
 
 test('un peso base no positivo no se duplica: en su momento recibe el bono fijo', () => {
   assert.equal(aplicarMomentos(0, ['tarde'], 'tarde'), 100);
   assert.equal(aplicarMomentos(-200, ['tarde'], 'tarde'), -100);
-  assert.equal(aplicarMomentos(-200, ['tarde'], 'noche'), -200);
+  assert.equal(aplicarMomentos(-200, ['tarde'], 'temprano'), -200);
+});
+
+test('de tarde, temprano va antes que noche y tarde antes que ambos', () => {
+  const peso = (m: 'temprano' | 'tarde' | 'noche') => aplicarMomentos(-200, [m], 'tarde');
+  assert.ok(peso('tarde') > peso('temprano'));
+  assert.ok(peso('temprano') > peso('noche'));
 });
