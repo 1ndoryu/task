@@ -13,6 +13,7 @@
  * Lógica pura: sin React y sin tocar el `localStorage`. */
 import type { ResumenNota } from './notas';
 import { PESTANA_COMPLETADOS, type Grupo } from './orden';
+import type { Proyecto } from './tipos';
 
 /** Qué pinta un panel. Cada tipo trae su propia vista y sus propias acciones. */
 export type TipoPanel = 'tareas' | 'habitos' | 'completados' | 'nota' | 'aplazados' | 'diario';
@@ -47,12 +48,18 @@ export interface Panel {
   mueve: boolean;
   /** Grupo de ejecución que filtra la caja; `null` donde no filtra. */
   grupo: Grupo;
+  /** Proyecto que filtra la caja: sus tareas, de cualquier grupo. Ausente en el resto. */
+  proyectoId?: number;
 }
 
 /** Un panel de nota tal como lo ve esta capa: lo justo para nombrarlo. */
 export type NotaResumen = ResumenNota;
 
+/** Prefijo del id de la pestaña de un proyecto (21AC-1): una pestaña por proyecto. */
+export const PREFIJO_PROYECTO = 'proyecto:';
+
 export const panelDeNota = (id: string) => `${PREFIJO_NOTA}${id}`;
+export const panelDeProyecto = (id: number) => `${PREFIJO_PROYECTO}${id}`;
 
 /** Id de nota de un panel, o `null` si no es una nota. */
 export function idDeNota(panel: Panel): string | null {
@@ -83,6 +90,8 @@ export function panelesDe(
   mostrarCompletados = true,
   /** La caja «Diario» se puede esconder, igual que «Completados». */
   mostrarDiario = false,
+  /** Proyectos con pestaña propia: sus tareas salen ahí y no en «Tareas». */
+  proyectos: Iterable<Proyecto> = [],
 ): Panel[] {
   const grupos = new Set<string>(gruposConocidos);
   for (const grupo of gruposDeFilas) if (grupo) grupos.add(grupo);
@@ -96,6 +105,10 @@ export function panelesDe(
   }
   for (const [id, titulo] of listaNotas) {
     porId.set(id, { id, tipo: 'nota', etiqueta: titulo, fija: false, mueve: true, grupo: null });
+  }
+  for (const proyecto of proyectos) {
+    const id = panelDeProyecto(proyecto.id);
+    porId.set(id, { id, tipo: 'tareas', etiqueta: proyecto.nombre, fija: false, mueve: true, grupo: null, proyectoId: proyecto.id });
   }
   // Los de sistema aparte: sin orden guardado van delante, en este orden de
   // fábrica, y los grupos y notas detrás, alfabéticos.

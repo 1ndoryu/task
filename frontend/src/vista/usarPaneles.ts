@@ -60,6 +60,7 @@ export function usarPaneles(d: Dependencias): Disposicion {
       estado.fase === 'listo'
         ? [...estado.datos.tareas, ...estado.datos.habitos].map((f) => f.grupoEjecucion ?? null)
         : [];
+    const proyectos = estado.fase === 'listo' ? estado.datos.proyectos : [];
     return panelesDe(
       presentes,
       gruposConocidos,
@@ -70,6 +71,7 @@ export function usarPaneles(d: Dependencias): Disposicion {
       hayAplazados,
       ajustes.mostrarCompletados,
       ajustes.mostrarDiario,
+      proyectos,
     );
   }, [
     estado,
@@ -83,8 +85,11 @@ export function usarPaneles(d: Dependencias): Disposicion {
     ajustes.mostrarDiario,
   ]);
 
-  // Solo los grupos: los menús de la fila y el alta no admiten una nota.
-  const grupos = useMemo(() => paneles.filter((p) => p.tipo === 'tareas' && !p.fija).map((p) => p.id), [paneles]);
+  // Solo los grupos: los menús de la fila y el alta no admiten una nota ni un proyecto.
+  const grupos = useMemo(
+    () => paneles.filter((p) => p.tipo === 'tareas' && !p.fija && p.proyectoId === undefined).map((p) => p.id),
+    [paneles],
+  );
 
   // Una pestaña recordada que ya no existe (grupo renombrado, nota borrada)
   // dejaría la lista en blanco: se cae a «Tareas». «Archivados» no es panel y se
