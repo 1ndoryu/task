@@ -14,6 +14,7 @@ import './estilos/listas.css';
 import './estilos/cajas.css';
 import './estilos/columnas.css';
 import './estilos/algoritmo.css';
+import './estilos/arrastre.css';
 import './estilos/archivados.css';
 import './estilos/ventana.css';
 

@@ -1,0 +1,66 @@
+/* Orden manual: arrastrar filas. El gesto es propio (`usarArrastreFilas`): la
+ * fila agarrada sale como una copia que sigue al puntero, su sitio queda de
+ * hueco y las vecinas ceden con una transición. Nada de arrastre nativo. */
+
+/* Con el orden manual la fila entera se agarra; las marcas y flechas conservan su clic. */
+/* sentinel-disable-next-line claseHuerfana — falso positivo: `Caja.tsx` la compone en una plantilla condicional del `className`. */
+.lista--ordenable > .fila:not(.fila--sub) {
+  cursor: grab;
+  user-select: none;
+  /* Con el dedo el gesto nace de una pulsación larga: sin menú ni lupa del sistema. */
+  -webkit-touch-callout: none;
+}
+
+.lista--ordenable .fila__marca,
+.lista--ordenable .fila__plegar {
+  cursor: pointer;
+}
+
+/* Las vecinas se deslizan al ceder; el mismo tiempo y curva que el vuelo al soltar. */
+/* sentinel-disable-next-line claseHuerfana — falso positivo: la añade `usarArrastreFilas` con `classList`. */
+.fila--cede,
+.fila--hueco {
+  transition: transform 220ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+
+/* El sitio de la fila agarrada: un rastro tenue que marca dónde va a caer. */
+/* sentinel-disable-next-line claseHuerfana — falso positivo: la añade `usarArrastreFilas` con `classList`. */
+.fila--hueco {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* La copia que sigue al puntero: flota sobre todo, sin recibir eventos. */
+/* sentinel-disable-next-line claseHuerfana — falso positivo: la crea `usarArrastreFilas` con `className`. */
+.fila-copia {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  pointer-events: none;
+  background: var(--panel);
+  border-radius: var(--redondoChico);
+  box-shadow: 0 0.4rem 1.4rem rgb(27 27 25 / 0.18), 0 0 0 1px var(--tinta-tenue);
+  cursor: grabbing;
+  will-change: transform;
+}
+
+:root[data-tema='oscuro'] .fila-copia {
+  box-shadow: 0 0.4rem 1.6rem rgb(0 0 0 / 0.7), 0 0 0 1px var(--tinta-tenue);
+}
+
+/* Mientras dura el gesto el cursor es el de agarrar en todas partes, y nada se selecciona. */
+/* sentinel-disable-next-line claseHuerfana — falso positivo: la añade `usarArrastreFilas` al `body`. */
+body.arrastrando-filas,
+body.arrastrando-filas * {
+  cursor: grabbing;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fila--cede,
+  .fila--hueco {
+    transition: none;
+  }
+}
