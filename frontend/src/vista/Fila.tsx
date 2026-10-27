@@ -4,7 +4,6 @@
  * tenga una sola responsabilidad. */
 import { aplazadoHasta, fechaAplazo } from '../logica/aplazos';
 import { diaCorto, proximaRepeticion, rachaDe, type ConFrecuencia } from '../logica/frecuencia';
-import { nivelDeUrgencia } from '../logica/importancia';
 import type { ColoresNivel } from '../logica/preferencias';
 import { leerMomentos } from '../logica/momentos';
 import { hechoHoy } from '../logica/seleccion';
@@ -64,8 +63,7 @@ export function Fila({
   const habito: ConFrecuencia | null = fila.tipo === 'habito' ? fila.habito : esSub ? fila.subhabito : null;
   // El aplazo solo existe en el padre: el subhábito no trae `pospuestoHasta`.
   const conAplazo: Habito | null = fila.tipo === 'habito' ? fila.habito : null;
-  // El punto de una tarea sigue a su urgencia (21AB-2); el de un hábito, a su importancia.
-  const nivel = fila.tipo === 'tarea' ? nivelDeUrgencia(fila.tarea.urgencia) : prioridadDe(fila);
+  const nivel = prioridadDe(fila);
   // El momento configurado va como icono dentro del círculo; sin él, el círculo liso.
   const momentosGuardados = fila.tipo === 'tarea' ? fila.tarea.configuracion?.momentos : fila.tipo === 'habito' ? fila.habito.momentos : undefined;
   const [momento] = leerMomentos(momentosGuardados);

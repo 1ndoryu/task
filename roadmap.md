@@ -13,6 +13,10 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 - [ ] `21AC-1` — **Mostrar las tareas con proyecto en una vista por proyecto.** Hoy 228 pendientes con proyecto no
   aparecen en ninguna pestaña. Decidido 2026-10-25: una pestaña por proyecto. Hecho cuando ninguna tarea con proyecto
   queda fuera de todas las pestañas, verificado en la 89.
+- [ ] `21AB-2` — **El punto de color de una tarea sigue a su urgencia.** (Tras `21AB-1`.) Hoy el punto muestra la
+  prioridad mientras el orden pesa la urgencia. Decidido 2026-10-25: urgencia como regla, prioridad solo como
+  desempate. Hecho cuando una tarea urgente no sale arriba con punto frío; confirmar si el hábito mantiene su
+  importancia.
 
 ## Bloqueos
 

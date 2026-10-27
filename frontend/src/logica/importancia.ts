@@ -23,20 +23,6 @@ export function nivelDe(valor: string | null | undefined): NivelPrioridad {
   return (NIVELES as readonly string[]).includes(id) ? (id as NivelPrioridad) : 'media';
 }
 
-/* Las cuatro urgencias de la tarea, en la escala de cinco niveles del color.
- * La urgencia manda sobre el punto: una tarea urgente no sale con color frío. */
-const NIVEL_DE_URGENCIA: Record<string, NivelPrioridad> = {
-  bloqueante: 'muy_alta',
-  urgente: 'alta',
-  normal: 'media',
-  chill: 'baja',
-};
-
-/** Nivel del punto de una tarea a partir de su urgencia (`normal` por defecto). */
-export function nivelDeUrgencia(urgencia: string | null | undefined): NivelPrioridad {
-  return NIVEL_DE_URGENCIA[(urgencia ?? 'normal').trim().toLowerCase()] ?? 'media';
-}
-
 /** El texto del hábito a partir del id que usa el formulario. */
 export function importanciaDeHabito(valor: string | null | undefined): string {
   return IMPORTANCIA_HABITO[nivelDe(valor)];
