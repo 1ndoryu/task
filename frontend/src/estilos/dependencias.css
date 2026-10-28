@@ -22,7 +22,7 @@
 }
 
 /* El aviso mientras se tira del hilo y el de lo que falta antes de completar:
- * abajo y centrado, sin tapar las filas. */
+ * abajo, sin tapar las filas. */
 .enlace__ayuda,
 .toast {
   position: fixed;
@@ -38,4 +38,11 @@
   font-size: var(--texto-nota);
   transform: translateX(-50%);
   pointer-events: none;
+}
+
+/* El toast va abajo a la derecha: el centro lo ocupa el aviso del hilo. */
+.toast {
+  left: auto;
+  right: 16px;
+  transform: none;
 }
