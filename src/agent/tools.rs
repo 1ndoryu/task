@@ -121,9 +121,10 @@ impl AgentTool for ToolTarea {
             parent_id: argumentos.get("parentId").and_then(Value::as_i64),
             orden: 0,
             payload: json!({}),
+            // Sin versión a propósito: el agente no ve la fila; la fusión va en la transacción de `upsert_task_agente`.
             expected_updated_at: None,
         };
-        let respuesta = ProductivityService::upsert_task(&d.pool, ctx.user_id, legacy_id, request)
+        let respuesta = ProductivityService::upsert_task_agente(&d.pool, ctx.user_id, legacy_id, request)
             .await
             .map_err(harness_de_app)?;
         Ok(AgentToolResult::ok(
@@ -193,7 +194,7 @@ impl AgentTool for ToolHabito {
             payload,
             expected_updated_at: None,
         };
-        let respuesta = ProductivityService::upsert_habit(&d.pool, ctx.user_id, legacy_id, request)
+        let respuesta = ProductivityService::upsert_habit_agente(&d.pool, ctx.user_id, legacy_id, request)
             .await
             .map_err(harness_de_app)?;
         Ok(AgentToolResult::ok(

@@ -3,8 +3,8 @@ use uuid::Uuid;
 
 use crate::errors::AppError;
 use crate::models::productivity::{
-    BulkReorderRequest, BulkReorderResponse, ProductivityWriteResponse, ProjectTasksResponse,
-    UpsertHabitRequest, UpsertProjectRequest, UpsertTaskRequest,
+    fusionar_payload, BulkReorderRequest, BulkReorderResponse, ProductivityWriteResponse,
+    ProjectTasksResponse, UpsertHabitRequest, UpsertProjectRequest, UpsertTaskRequest,
 };
 use crate::repositories::{
     BulkReorderOutcome, ProductivityRepository, ProductivityWriteRow, TaskUpsertOutcome,
@@ -31,15 +31,9 @@ impl ProductivityService {
         legacy_id: i64,
         request: UpsertTaskRequest,
     ) -> Result<ProductivityWriteResponse, AppError> {
-        match ProductivityRepository::upsert_task(pool, user_id, legacy_id, &request).await? {
-            TaskUpsertOutcome::Written(row) => Ok(response(row)),
-            TaskUpsertOutcome::Conflict => {
-                Err(AppError::Conflict("La tarea cambió; vuelve a cargarla".into()))
-            }
-            TaskUpsertOutcome::InvalidParent => Err(AppError::Validation(
-                "La tarea padre debe existir, pertenecer al usuario y ser principal; una tarea con subtareas no puede convertirse en hija".into(),
-            )),
-        }
+        registrar_sin_version("tarea", legacy_id, request.expected_updated_at.is_none());
+        let outcome = ProductivityRepository::upsert_task(pool, user_id, legacy_id, &request).await?;
+        respuesta_tarea(outcome)
     }
 
     pub async fn upsert_habit(
@@ -48,9 +42,52 @@ impl ProductivityService {
         legacy_id: i64,
         request: UpsertHabitRequest,
     ) -> Result<ProductivityWriteResponse, AppError> {
+        registrar_sin_version("hábito", legacy_id, request.expected_updated_at.is_none());
         let row = ProductivityRepository::upsert_habit(pool, user_id, legacy_id, &request)
             .await?
             .ok_or_else(|| AppError::Conflict("El hábito cambió; vuelve a cargarlo".into()))?;
+        Ok(response(row))
+    }
+
+    /// [28AA-1] Escritura del agente: fusiona el payload guardado con el que
+    /// llega, todo en una transacción con la fila bloqueada. Así no se borran
+    /// los campos que el agente no conoce (subhábitos, etc.).
+    pub async fn upsert_task_agente(
+        pool: &PgPool,
+        user_id: Uuid,
+        legacy_id: i64,
+        mut request: UpsertTaskRequest,
+    ) -> Result<ProductivityWriteResponse, AppError> {
+        let mut transaction = pool.begin().await?;
+        if let Some(previo) =
+            ProductivityRepository::payload_tarea_bloqueado(&mut transaction, user_id, legacy_id).await?
+        {
+            request.payload = fusionar_payload(previo, request.payload);
+        }
+        let outcome =
+            ProductivityRepository::upsert_task_in(&mut transaction, user_id, legacy_id, &request).await?;
+        let respuesta = respuesta_tarea(outcome)?;
+        transaction.commit().await?;
+        Ok(respuesta)
+    }
+
+    /// [28AA-1] Igual que `upsert_task_agente`, para hábitos.
+    pub async fn upsert_habit_agente(
+        pool: &PgPool,
+        user_id: Uuid,
+        legacy_id: i64,
+        mut request: UpsertHabitRequest,
+    ) -> Result<ProductivityWriteResponse, AppError> {
+        let mut transaction = pool.begin().await?;
+        if let Some(previo) =
+            ProductivityRepository::payload_habito_bloqueado(&mut transaction, user_id, legacy_id).await?
+        {
+            request.payload = fusionar_payload(previo, request.payload);
+        }
+        let row = ProductivityRepository::upsert_habit(&mut *transaction, user_id, legacy_id, &request)
+            .await?
+            .ok_or_else(|| AppError::Conflict("El hábito cambió; vuelve a cargarlo".into()))?;
+        transaction.commit().await?;
         Ok(response(row))
     }
 
@@ -139,5 +176,24 @@ fn response(row: ProductivityWriteRow) -> ProductivityWriteResponse {
         id: row.legacy_id,
         item: row.payload,
         updated_at: row.updated_at,
+    }
+}
+
+fn respuesta_tarea(outcome: TaskUpsertOutcome) -> Result<ProductivityWriteResponse, AppError> {
+    match outcome {
+        TaskUpsertOutcome::Written(row) => Ok(response(row)),
+        TaskUpsertOutcome::Conflict => Err(AppError::Conflict("La tarea cambió; vuelve a cargarla".into())),
+        TaskUpsertOutcome::InvalidParent => Err(AppError::Validation(
+            "La tarea padre debe existir, pertenecer al usuario y ser principal; una tarea con subtareas no puede convertirse en hija".into(),
+        )),
+    }
+}
+
+/// [28AA-1] Log TEMPORAL (una semana): cuenta las escrituras sin `expectedUpdatedAt`
+/// para confirmar que no queda ningún cliente sin versión antes de hacerla obligatoria.
+/// Quitar tras esa semana de logs.
+fn registrar_sin_version(entidad: &str, legacy_id: i64, sin_version: bool) {
+    if sin_version {
+        tracing::warn!(entidad, legacy_id, "escritura sin expectedUpdatedAt (28AA-1 F5)");
     }
 }

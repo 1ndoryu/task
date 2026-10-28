@@ -84,6 +84,41 @@ impl ProductivityRepository {
         Ok(outcome)
     }
 
+    /// [28AA-1] Payload guardado de una tarea, con la fila bloqueada hasta el
+    /// commit: el agente lee, fusiona y escribe sin que otro escritor se cuele.
+    pub async fn payload_tarea_bloqueado(
+        transaction: &mut PgTransaction<'_>,
+        user_id: Uuid,
+        legacy_id: i64,
+    ) -> Result<Option<Value>, sqlx::Error> {
+        sqlx::query_scalar::<_, Value>(
+            "SELECT payload FROM dashboard_tasks
+             WHERE user_id = $1 AND legacy_id = $2
+             FOR UPDATE",
+        )
+        .bind(user_id)
+        .bind(legacy_id)
+        .fetch_optional(&mut **transaction)
+        .await
+    }
+
+    /// [28AA-1] Igual que `payload_tarea_bloqueado`, para hábitos.
+    pub async fn payload_habito_bloqueado(
+        transaction: &mut PgTransaction<'_>,
+        user_id: Uuid,
+        legacy_id: i64,
+    ) -> Result<Option<Value>, sqlx::Error> {
+        sqlx::query_scalar::<_, Value>(
+            "SELECT payload FROM dashboard_habits
+             WHERE user_id = $1 AND legacy_id = $2
+             FOR UPDATE",
+        )
+        .bind(user_id)
+        .bind(legacy_id)
+        .fetch_optional(&mut **transaction)
+        .await
+    }
+
     /// Variante tx-aware de `upsert_task` para orquestaciones atómicas (p. ej.
     /// restore de backups): corre locks + validación + upsert dentro de una
     /// transacción ajena sin commit propio; quien abrió la transacción decide

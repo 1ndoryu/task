@@ -238,6 +238,20 @@ fn default_frequency() -> String {
     "diario".to_owned()
 }
 
+/// [28AA-1] Agente: las claves que el agente no envía (p. ej. `subhabitos`) se
+/// conservan del payload guardado; las que sí envía sobrescriben. Sin esto, un
+/// payload `{}` borraba los subhábitos de la fila.
+#[must_use]
+pub fn fusionar_payload(previo: Value, nuevo: Value) -> Value {
+    match (previo, nuevo) {
+        (Value::Object(mut base), Value::Object(cambios)) => {
+            base.extend(cambios);
+            Value::Object(base)
+        }
+        (_, nuevo) => nuevo,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{BulkReorderRequest, ReordenarMovimiento, UpsertProjectRequest, UpsertTaskRequest};
@@ -293,6 +307,15 @@ mod tests {
         .expect("bulk válido");
         assert!(request.validate().is_ok());
         assert_eq!(request.movimientos[0].proyecto_id, Some(7));
+    }
+
+    #[test]
+    fn fusionar_payload_conserva_subhabitos_y_sobrescribe_lo_enviado() {
+        let previo = json!({"texto": "vieja", "subhabitos": [{"id": 1}]});
+        let fusionado = super::fusionar_payload(previo, json!({"texto": "nueva"}));
+        assert_eq!(fusionado["texto"], json!("nueva"));
+        assert_eq!(fusionado["subhabitos"], json!([{"id": 1}]));
+        assert_eq!(super::fusionar_payload(json!("x"), json!({"a": 1})), json!({"a": 1}));
     }
 
     #[test]
