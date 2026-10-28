@@ -6,6 +6,8 @@
 export interface AccesoDiario {
   /** Capítulos de un día, en orden. Siempre incluye el 1, aunque esté vacío. */
   capitulos: (fecha: string) => number[];
+  /** Días con algún capítulo escrito; el calendario del diario los marca. */
+  diasEscritos: () => ReadonlySet<string>;
   /** Texto de un capítulo; vacío si todavía no se ha escrito nada. */
   textoDe: (fecha: string, capitulo: number) => string;
   escribir: (fecha: string, capitulo: number, contenido: string) => void;

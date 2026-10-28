@@ -48,6 +48,12 @@
   text-transform: uppercase;
 }
 
+/* Sin sitio debajo del botón (barra pegada al borde inferior): se abre hacia arriba. */
+.menu__panel--arriba {
+  top: auto;
+  bottom: calc(100% + 0.3rem);
+}
+
 /* Abierto con clic derecho: cuelga del punto pulsado, no del botón. */
 .menu__panel--punto {
   position: fixed;

@@ -236,6 +236,8 @@ export function usarNotas(): Notas {
   const diario = useMemo<AccesoDiario>(
     () => ({
       capitulos: (fecha) => diarioCaps[fecha] ?? [1],
+      // La clave es `fecha#cap`: basta la fecha de las que tienen texto.
+      diasEscritos: () => new Set(Object.keys(diarioTextos).filter((c) => diarioTextos[c].trim()).map((c) => c.split('#')[0])),
       textoDe: (fecha, capitulo) => diarioTextos[claveCapitulo(fecha, capitulo)] ?? '',
       escribir: escribirDiario,
       confirmar: confirmarDiario,

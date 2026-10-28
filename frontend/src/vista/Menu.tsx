@@ -5,6 +5,7 @@
  * menú del front original, para que las categorías no alarguen la lista.
  * La posición se escribe en el nodo (no con `style={{}}`) porque depende de
  * medidas en vivo: dónde acaba el panel y cuánto mide la ventana. */
+import { usarCierreFuera } from './usarCierreFuera';
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 
 export interface OpcionMenu {
@@ -129,29 +130,28 @@ export function Menu({ etiqueta, items, onElegir, titulo, claseBoton, abierto, o
     if (!abiertoAhora) setSub(null);
   }, [abiertoAhora]);
 
-  useEffect(() => {
-    if (!abiertoAhora) return;
-    const cerrar = (evento: Event) => {
-      if (!contenedor.current?.contains(evento.target as Node)) poner(false);
-    };
-    const conEscape = (evento: KeyboardEvent) => {
-      if (evento.key !== 'Escape') return;
-      // Escape cierra primero el submenú; el segundo, el menú entero.
-      if (sub) setSub(null);
-      else poner(false);
-    };
-    document.addEventListener('pointerdown', cerrar);
-    document.addEventListener('keydown', conEscape);
-    return () => {
-      document.removeEventListener('pointerdown', cerrar);
-      document.removeEventListener('keydown', conEscape);
-    };
-  }, [abiertoAhora, sub, onAbierto]);
+  // Escape cierra primero el submenú; el segundo, el menú entero.
+  usarCierreFuera({
+    activo: abiertoAhora,
+    dentro: [contenedor],
+    alFuera: () => poner(false),
+    alEscape: () => (sub ? setSub(null) : poner(false)),
+  });
 
   /** Coloca el panel principal: en el punto del clic derecho o bajo el botón. */
   const colocarPanel = () => {
     const nodo = panel.current;
-    if (!nodo || !enPunto) return;
+    if (!nodo) return;
+    if (!enPunto) {
+      // Bajo el botón; si no cabe abajo y arriba hay más sitio, se abre hacia arriba.
+      const boton = contenedor.current?.getBoundingClientRect();
+      const alto = nodo.getBoundingClientRect().height;
+      const sube = !!boton && boton.bottom + alto + MARGEN > window.innerHeight && boton.top > window.innerHeight - boton.bottom;
+      nodo.classList.toggle('menu__panel--arriba', sube);
+      // Con poco sitio en cualquiera de los dos lados, el panel se encoge y hace scroll.
+      nodo.style.maxHeight = boton ? `${Math.max(120, (sube ? boton.top : window.innerHeight - boton.bottom) - 2 * MARGEN)}px` : '';
+      return;
+    }
     const { width, height } = nodo.getBoundingClientRect();
     nodo.style.top = `${Math.max(MARGEN, Math.min(enPunto.y, window.innerHeight - height - MARGEN))}px`;
     nodo.style.left = `${Math.max(MARGEN, Math.min(enPunto.x, window.innerWidth - width - MARGEN))}px`;

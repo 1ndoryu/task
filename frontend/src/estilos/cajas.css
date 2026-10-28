@@ -42,17 +42,24 @@
   /* Colgada del borde inferior de la pieza centrada: el aire de su relleno
    * queda entre la caja y los iconos. */
   top: calc(
-    (var(--alto-carril, 100%) + var(--alto-pieza-carril, var(--alto-cajas))) / 2
+    (var(--alto-carril, 100%) + var(--alto-pieza-carril, var(--alto-cajas))) / 2 + 0.75rem
   );
   left: 50%;
   z-index: 5;
-  width: min(var(--ancho-pieza-carril, var(--ancho)), calc(100% - 2.5rem));
+  width: fit-content;
+  max-width: calc(100% - 2.5rem);
   transform: translateX(-50%);
   /* En el carril los iconos van centrados sobre la caja: la barra se mueve con
    * la pieza centrada, así que el centro de la pantalla es su centro, y el ojo
    * los encuentra sin buscarlos en una esquina. */
   justify-content: center;
-  padding: 0.5rem 0 0;
+  /* Una pastilla de alto fijo, con el fondo y el borde de las cajas. */
+  box-sizing: border-box;
+  height: 2.25rem;
+  padding: 0 1rem;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondo);
+  background: var(--panel);
 }
 
 /* Nombre del grupo, con la talla y el aire de una pestaña. */

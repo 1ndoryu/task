@@ -88,6 +88,7 @@ export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTaman
               texto={titulo}
               fecha={fecha}
               hoy={hoy}
+              marcados={acceso.diasEscritos()}
               onElegir={(dia) => {
                 setFecha(dia);
                 setCapitulo(1);

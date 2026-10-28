@@ -9,10 +9,12 @@ interface Props {
   texto: string;
   fecha: string;
   hoy: string;
+  /** Días con entrada, para marcarlos en el calendario. */
+  marcados?: ReadonlySet<string>;
   onElegir: (fecha: string) => void;
 }
 
-export function SelectorDia({ texto, fecha, hoy, onElegir }: Props) {
+export function SelectorDia({ texto, fecha, hoy, marcados, onElegir }: Props) {
   const [abierto, setAbierto] = useState(false);
   return (
     <>
@@ -31,6 +33,7 @@ export function SelectorDia({ texto, fecha, hoy, onElegir }: Props) {
           valor={fecha}
           hoy={hoy}
           max={hoy}
+          marcados={marcados}
           onElegir={(dia) => {
             onElegir(dia);
             setAbierto(false);
