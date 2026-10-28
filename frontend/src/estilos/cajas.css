@@ -689,16 +689,11 @@
   white-space: nowrap;
 }
 
-/* Calendario: panel centrado con la rejilla de un mes. El día elegido va en
- * tinta plena, hoy con borde y los días con algo dentro llevan un punto. */
-.menu__panel.calendario__panel {
-  position: fixed;
-  top: 50%;
-  right: auto;
-  left: 50%;
-  z-index: 40;
-  width: min(18rem, calc(100vw - 2rem));
-  transform: translate(-50%, -50%);
+/* Calendario: un diálogo modal (ver `Dialogo`) con la rejilla de un mes. El
+ * día elegido va en tinta plena, hoy con borde y los días con algo dentro
+ * llevan un punto. */
+.modal--calendario {
+  max-width: min(18rem, calc(100vw - 2rem));
 }
 
 .calendario__titulo {

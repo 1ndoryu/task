@@ -2,7 +2,7 @@
  * qué se esconde. Sin cabecera ni botón de cerrar: cada control se guarda al
  * tocarlo y el modal se va con Escape o con un clic fuera. El modal y el
  * formulario son recetas compartidas (`estilos/modal.css`). */
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import {
   COLORES_NIVEL,
   FUENTE_MAXIMA,
@@ -20,6 +20,7 @@ import {
 import { hoyLogico } from '../logica/fechas';
 import type { Tolerancia } from '../logica/orden';
 import { CajaVisible, Campo } from './AjustesCampos';
+import { Dialogo } from './Dialogo';
 import { CampoTamano } from './CampoTamano';
 import { ColoresNivel } from './ColoresNivel';
 import { PanelAlgoritmo } from './PanelAlgoritmo';
@@ -88,7 +89,6 @@ interface Props {
 
 /** `<dialog>` nativo: el foco, el fondo inerte y Escape los pone el navegador. */
 export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
-  const dialogo = useRef<HTMLDialogElement>(null);
   // La pestaña es del panel, no de la sesión: al abrirlo se entra por «Vista».
   const [pestana, setPestana] = useState<Pestana>('vista');
   const idPanel = useId();
@@ -98,32 +98,8 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
     if (abierto) setPestana('vista');
   }, [abierto]);
 
-  useEffect(() => {
-    const nodo = dialogo.current;
-    if (!nodo) return;
-    if (abierto && !nodo.open) nodo.showModal();
-    if (!abierto && nodo.open) nodo.close();
-  }, [abierto]);
-
-  // Escape llega aquí; el estado vive en `usarLista`.
-  useEffect(() => {
-    const nodo = dialogo.current;
-    if (!nodo) return;
-    const alCerrar = () => onCerrar();
-    nodo.addEventListener('close', alCerrar);
-    return () => nodo.removeEventListener('close', alCerrar);
-  }, [onCerrar]);
-
   return (
-    <dialog
-      className="modal"
-      ref={dialogo}
-      aria-label="Ajustes de la lista"
-      onClick={(evento) => {
-        // El clic fuera del contenido solo alcanza al propio `<dialog>`.
-        if (evento.target === dialogo.current) onCerrar();
-      }}
-    >
+    <Dialogo etiqueta="Ajustes de la lista" abierto={abierto} onCerrar={onCerrar}>
       <div className="modal__caja">
         <div className="modal__pestanas">
           <PestanasLaterales
@@ -320,6 +296,6 @@ export function Ajustes({ abierto, preferencias, onCambiar, onCerrar }: Props) {
           </div>
         </div>
       </div>
-    </dialog>
+    </Dialogo>
   );
 }

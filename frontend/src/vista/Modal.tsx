@@ -3,7 +3,8 @@
  * configuración) no lo necesitan; este es para los que piden decidir antes de
  * aplicar algo, como borrar un grupo. Escape y el clic fuera cierran como
  * siempre: `<dialog>` nativo. */
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
+import { Dialogo } from './Dialogo';
 
 export interface BotonModal {
   id: string;
@@ -28,36 +29,10 @@ interface Props {
 }
 
 export function Modal({ abierto, titulo, etiqueta, children, botones, onElegir, onCerrar }: Props) {
-  const dialogo = useRef<HTMLDialogElement>(null);
   const idTitulo = useId();
 
-  useEffect(() => {
-    const nodo = dialogo.current;
-    if (!nodo) return;
-    if (abierto && !nodo.open) nodo.showModal();
-    if (!abierto && nodo.open) nodo.close();
-  }, [abierto]);
-
-  // Escape llega aquí; el estado que abre el modal vive fuera.
-  useEffect(() => {
-    const nodo = dialogo.current;
-    if (!nodo) return;
-    const alCerrar = () => onCerrar();
-    nodo.addEventListener('close', alCerrar);
-    return () => nodo.removeEventListener('close', alCerrar);
-  }, [onCerrar]);
-
   return (
-    <dialog
-      className="modal modal--acciones"
-      ref={dialogo}
-      aria-label={!titulo ? etiqueta : undefined}
-      aria-labelledby={titulo ? idTitulo : undefined}
-      onClick={(evento) => {
-        // El clic fuera del contenido solo alcanza al propio `<dialog>`.
-        if (evento.target === dialogo.current) onCerrar();
-      }}
-    >
+    <Dialogo clase="modal--acciones" etiqueta={!titulo ? etiqueta : undefined} nombradoPor={titulo ? idTitulo : undefined} abierto={abierto} onCerrar={onCerrar}>
       <div className="modal__caja">
         <div className={`modal__cuerpo${titulo ? '' : ' modal__cuerpo--sin-titulo'}`}>
           {titulo && (
@@ -88,6 +63,6 @@ export function Modal({ abierto, titulo, etiqueta, children, botones, onElegir, 
           </div>
         )}
       </div>
-    </dialog>
+    </Dialogo>
   );
 }
