@@ -71,11 +71,3 @@ export function editarTarea(
   };
 }
 
-/** Invierte `completado`; al completar, anota el día en la configuración. */
-export function alternarCompletado(tarea: Tarea, hoy: string): Tarea {
-  const completado = !tarea.completado;
-  const configuracion = { ...tarea.configuracion };
-  if (completado) configuracion.fechaCompletado = hoy;
-  else delete configuracion.fechaCompletado;
-  return { ...tarea, completado, configuracion };
-}

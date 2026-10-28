@@ -7,12 +7,13 @@ import { hoyLogico } from '../logica/fechas';
 import { anotarGrupos } from '../logica/grupos';
 import { ordenesNuevos } from '../logica/reordenar';
 import { desmarcarHabito, editarHabito, guardarHabito, marcarHabito } from '../logica/habitos';
+import { fijarCompletado, fijarMarcaSubhabito } from '../logica/marcas';
 import { importanciaDeHabito } from '../logica/importancia';
 import { hechoHoy } from '../logica/seleccion';
 import { mensajeFalta } from '../logica/dependencias';
 import { faltaAntes } from './requisitos';
 import type { Pendientes } from '../logica/store';
-import { alternarCompletado, editarTarea, guardarTarea } from '../logica/tareas';
+import { editarTarea, guardarTarea } from '../logica/tareas';
 import type { Dashboard, Habito, RefDependencia, Tarea } from '../logica/tipos';
 import type { NuevaFila } from './NuevaFila';
 import { claveFila, idNuevo, type Editando, type Estado } from './tiposLista';
@@ -124,19 +125,13 @@ export function usarFilas(d: Dependencias) {
       // que es donde vive, con un solo PUT.
       if (fila.tipo === 'subhabito') {
         const { id: idSub } = fila.subhabito;
-        // El historial sale del subhábito vivo, no de la foto de la fila: dos
-        // marcas seguidas no deben pisarse.
-        void escribirHabito(fila.padre.id, (h) => {
-          const subhabitos = (h.subhabitos ?? []).map((s) => {
-            if (s.id !== idSub) return s;
-            const historial = new Set(s.historialCompletados ?? []);
-            if (historial.has(hoy)) historial.delete(hoy);
-            else historial.add(hoy);
-            const fechas = [...historial].sort();
-            return { ...s, historialCompletados: fechas, ultimoCompletado: fechas.at(-1) ?? null };
-          });
-          return { ...h, subhabitos };
-        });
+        // El estado destino sale de lo que se ve al clic: reaplicarlo tras un 409
+        // no desmarca lo que otra pestaña ya marcó (`vista/colaEscritura.ts`).
+        const quedaHecho = !(fila.subhabito.historialCompletados ?? []).includes(hoy);
+        void escribirHabito(fila.padre.id, (h) => ({
+          ...h,
+          subhabitos: (h.subhabitos ?? []).map((s) => (s.id === idSub ? fijarMarcaSubhabito(s, quedaHecho, hoy) : s)),
+        }));
         return;
       }
       const quedaHecha = fila.tipo === 'tarea' ? !fila.tarea.completado : !hechoHoy(fila.habito, hoy);
@@ -161,7 +156,7 @@ export function usarFilas(d: Dependencias) {
         }, 320);
       }
       if (fila.tipo === 'tarea') {
-        void escribirTarea(fila.tarea.id, (t) => alternarCompletado(t, hoy));
+        void escribirTarea(fila.tarea.id, (t) => fijarCompletado(t, quedaHecha, hoy));
         return;
       }
       // El hábito marca el día de hoy en su historial, no el campo `completado`.
