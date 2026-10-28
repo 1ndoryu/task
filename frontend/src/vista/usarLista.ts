@@ -24,7 +24,7 @@ import { guardarPreferencias, leerPreferencias, type Preferencias } from '../log
 import { subirTodo } from '../logica/preferenciasRemotas';
 import type { Pendientes } from '../logica/store';
 import { editarTarea } from '../logica/tareas';
-import type { Dashboard } from '../logica/tipos';
+import type { Dashboard, RefDependencia } from '../logica/tipos';
 import type { NuevaFila } from './NuevaFila';
 import type { CambiosFila, Editando, Estado } from './tiposLista';
 import { usarEscritura } from './usarEscritura';
@@ -109,6 +109,8 @@ export interface Lista {
   aplazar: (fila: NonNullable<Editando>, hasta: string | null) => void;
   /** Orden manual: recibe las filas de una caja ya en su orden nuevo. */
   reordenar: (filas: NonNullable<Editando>[]) => void;
+  /** Fija lo que debe hacerse antes de una fila; lista vacía las quita. */
+  dependencias: (objetivo: RefDependencia, lista: RefDependencia[]) => void;
   /** Da de alta una tarea o un hábito desde el campo de la lista. */
   crear: (fila: NuevaFila) => void;
   crearGrupo: (nombre: string) => void;
@@ -181,15 +183,13 @@ export function usarLista(): Lista {
 
   // Las mutaciones de fila (alta, completar, mover, aplazar) viven en
   // `usarFilas`: comparten las mismas dependencias y no tocan los paneles.
-  const { anotarGrupo, moverGrupo, crear, completar, aplazar, reordenar } = usarFilas({
-    datosRef,
-    pendientesRef,
+  const { anotarGrupo, moverGrupo, crear, completar, aplazar, reordenar, dependencias } = usarFilas({
+    datosRef, pendientesRef,
     setEstado,
     setGruposConocidos,
     setSaliendo,
     anotar,
-    escribirTarea,
-    escribirHabito,
+    escribirTarea, escribirHabito,
     hoy,
   });
 
@@ -380,6 +380,7 @@ export function usarLista(): Lista {
     moverGrupo,
     aplazar,
     reordenar,
+    dependencias,
     crear,
     crearGrupo,
     renombrarGrupo,

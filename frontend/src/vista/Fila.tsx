@@ -2,7 +2,7 @@
  * la configuración y racha. El menú de acciones se abre con el clic derecho en
  * la fila; no hay botón visible. Vive aparte de `Lista` para que cada archivo
  * tenga una sola responsabilidad. */
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { aplazadoHasta, fechaAplazo } from '../logica/aplazos';
 import { sumarDias } from '../logica/fechas';
 import { diaCorto, proximaRepeticion, rachaDe, type ConFrecuencia } from '../logica/frecuencia';
@@ -11,10 +11,12 @@ import { leerMomentos } from '../logica/momentos';
 import { hechoHoy } from '../logica/seleccion';
 import type { Habito } from '../logica/tipos';
 import { Calendario } from './Calendario';
+import { ContextoRequisitos } from './HilosDependencias';
 import { IconoDesplegar, IconoPlegar } from './Iconos';
 import { IconoMomento } from './IconosMomento';
 import { Menu } from './Menu';
 import { opcionesFila, prioridadDe, type AccionesFila } from './accionesFila';
+import { claveFila } from './tiposLista';
 import type { Editando } from './usarLista';
 
 interface Props {
@@ -60,6 +62,8 @@ export function Fila({
   onPlegar,
 }: Props) {
   const [calendario, setCalendario] = useState<'aplazo' | 'limite' | null>(null);
+  // Lo que debe hacerse antes y aún no está: la fila espera y lo dice.
+  const antes = useContext(ContextoRequisitos).get(claveFila(fila));
   const esTarea = fila.tipo === 'tarea';
   const esSub = fila.tipo === 'subhabito';
   // El subhábito se lee como un hábito: mismo punto de nivel, misma racha.
@@ -97,6 +101,8 @@ export function Fila({
       ]
         .filter(Boolean)
         .join(' ')}
+      // Los hilos de dependencias buscan la marca de la fila por esta clave.
+      data-fila={claveFila(fila)}
       // Clic derecho: el menú de acciones, en el punto pulsado.
       onContextMenu={(evento) => {
         evento.preventDefault();
@@ -131,6 +137,7 @@ export function Fila({
       {limite && !hecho && (
         <span className={`fila__nota${limite < hoy ? ' fila__nota--vencida' : ''}`}>vence el {diaCorto(limite)}</span>
       )}
+      {antes && !hecho && <span className="fila__nota fila__nota--antes">antes: {antes.join(', ')}</span>}
       {racha > 1 && <span className="fila__nota">{racha} días</span>}
       {/* La flecha es del padre: dice cuántos hijos hay y los pliega. Va a la
           derecha, después de las notas, para no moverse con ellas. */}
@@ -159,6 +166,7 @@ export function Fila({
         onElegir={(id) => {
           if (id === 'editar') acciones.editar(fila);
           else if (id === 'borrar') acciones.borrar(fila);
+          else if (id === 'dependencias') acciones.dependencias(fila);
           else if (id === 'aplazar-quitar') acciones.aplazar(fila, null);
           else if (id === 'aplazar-fecha') setCalendario('aplazo');
           else if (id === 'fecha-elegir') setCalendario('limite');

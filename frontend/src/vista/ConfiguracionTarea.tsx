@@ -50,6 +50,12 @@ function borradorDe(fila: NonNullable<Editando>): CambiosFilaForm {
   };
 }
 
+/** Cuántas filas deben ir antes de esta: lo que dice el botón de dependencias. */
+function cuentaDependencias(fila: NonNullable<Editando>): number {
+  if (fila.tipo === 'tarea') return fila.tarea.dependencias?.length ?? 0;
+  return fila.tipo === 'habito' ? (fila.habito.dependencias?.length ?? 0) : 0;
+}
+
 interface Props {
   /** Fila a editar; `null` cierra el modal. */
   fila: Editando;
@@ -59,10 +65,12 @@ interface Props {
   /** Paleta de importancia: cada opción lleva su punto de color. */
   colores: ColoresNivel;
   onGuardar: (fila: NonNullable<Editando>, cambios: CambiosFilaForm) => void;
+  /** Abre el selector de lo que debe hacerse antes de la fila. */
+  onDependencias: (fila: NonNullable<Editando>) => void;
   onCerrar: () => void;
 }
 
-export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar, onCerrar }: Props) {
+export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar, onDependencias, onCerrar }: Props) {
   const dialogo = useRef<HTMLDialogElement>(null);
   const [borrador, setBorrador] = useState<CambiosFilaForm | null>(fila ? borradorDe(fila) : null);
   // El nombre se edita en un `input` controlado: sin él, el cursor salta al
@@ -169,6 +177,15 @@ export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar
                 onCrear={(nombre) => aplicar({ grupoEjecucion: nombre })}
               />
             </div>
+
+            {(fila.tipo === 'tarea' || fila.tipo === 'habito') && (
+              <div className="campo">
+                <p className="campo__titulo">Antes de esto</p>
+                <button type="button" className="selector__disparador" onClick={() => onDependencias(fila)}>
+                  {cuentaDependencias(fila) > 0 ? `${cuentaDependencias(fila)} por hacer antes` : 'Nada: se puede hacer ya'}
+                </button>
+              </div>
+            )}
 
             {fila.tipo === 'tarea' ? (
               <>

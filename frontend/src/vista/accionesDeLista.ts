@@ -5,6 +5,7 @@
 import { importanciaDeHabito } from '../logica/importancia';
 import { grupoDe, prioridadDe, type AccionesFila } from './accionesFila';
 import type { CambiosFilaForm } from './opcionesFila';
+import type { RefDependencia } from '../logica/tipos';
 import type { Editando, Lista } from './usarLista';
 
 export interface AccionesDeLista {
@@ -13,7 +14,7 @@ export interface AccionesDeLista {
   guardarCambios: (fila: NonNullable<Editando>, cambios: CambiosFilaForm) => void;
 }
 
-export function accionesDeLista(lista: Lista): AccionesDeLista {
+export function accionesDeLista(lista: Lista, abrirDependencias: (objetivo: RefDependencia) => void): AccionesDeLista {
   /** Guarda el modal en el tipo que corresponda. */
   const guardarCambios = (fila: NonNullable<Editando>, cambios: CambiosFilaForm): void => {
     // El subhábito no tiene formulario: sus ajustes son los del padre.
@@ -75,6 +76,10 @@ export function accionesDeLista(lista: Lista): AccionesDeLista {
         fechaMaxima: fecha ?? '',
         grupoEjecucion: grupoDe(fila) ?? '',
       });
+    },
+    dependencias: (fila) => {
+      if (fila.tipo === 'tarea') abrirDependencias({ tipo: 'tarea', id: fila.tarea.id });
+      else if (fila.tipo === 'habito') abrirDependencias({ tipo: 'habito', id: fila.habito.id });
     },
     reordenar: lista.reordenar,
   };

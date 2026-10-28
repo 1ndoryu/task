@@ -22,7 +22,9 @@ import { Carril } from './Carril';
 import { ColumnasCarril } from './ColumnasCarril';
 import { ContenidoPanel } from './ContenidoPanel';
 import { MenuCaja } from './MenuCaja';
+import { ContextoRequisitos, HilosDependencias } from './HilosDependencias';
 import { Modales } from './Modales';
+import { calcularRequisitos } from './requisitos';
 import { iconoDePanel } from './Paneles';
 import { Pestanas } from './Pestanas';
 import { usarLista } from './usarLista';
@@ -98,7 +100,9 @@ export function Lista() {
   }
   // Dos formas de la misma lista: por turnos (una caja) o todas al lado.
   const enCajas = preferencias.separarGrupos;
-  const { acciones, guardarCambios } = accionesDeLista(lista);
+  const { acciones, guardarCambios } = accionesDeLista(lista, vista.setDependenciasDe);
+  // Lo que espera a otra cosa: los hilos lo dibujan y cada fila lo dice con su nota.
+  const requisitos = calcularRequisitos(datos, lista.hoy);
 
   /** Crear una nota: en cajas, el carril la centra; en pestañas, se abre. Es
    *  lo mismo desde el botón de la barra en las dos formas de la vista. */
@@ -155,12 +159,17 @@ export function Lista() {
       colores={preferencias.colores}
       onGuardar={guardarCambios}
       onCerrarEdicion={() => lista.abrirEdicion(null)}
+      dependenciasDe={vista.dependenciasDe}
+      datos={datos}
+      onAbrirDependencias={vista.setDependenciasDe}
+      onDependencias={lista.dependencias}
       borrando={vista.borrando}
       onBorrarNota={() => vista.borrando && lista.borrarNota(vista.borrando.panel.id)}
       onBorrarPanelGrupo={(conFilas) => vista.borrando && lista.borrarGrupo(vista.borrando.panel.id, conFilas)}
       onCerrarBorrado={() => vista.setBorrando(null)}
     />
   );
+  const hilos = <HilosDependencias hilos={requisitos.hilos} />;
 
   /** Lo que va dentro de una caja, según su tipo. Cada panel lo pinta
    *  `ContenidoPanel`; aquí solo se le pasan los datos y los ayudantes. */
@@ -216,6 +225,7 @@ export function Lista() {
     // El carril centra columnas, no cajas: la nota nueva es la de su columna.
     const indiceNueva = vista.notaNueva ? lista.columnas.findIndex((c) => c.includes(vista.notaNueva ?? '')) : -1;
     return (
+      <ContextoRequisitos.Provider value={requisitos.pendientes}>
       <main className={`marco marco--cajas${escritorio ? ' marco--escritorio' : ''}`} data-tauri-drag-region>
         <BarraVentana />
         <div className="barra barra--carril">{accionesBarra}</div>
@@ -248,7 +258,9 @@ export function Lista() {
           onAccion={(panel, accion) => vista.accionPanel(panel, accion, cuenta)}
         />
         {modales}
+        {hilos}
       </main>
+      </ContextoRequisitos.Provider>
     );
   }
 
@@ -273,6 +285,7 @@ export function Lista() {
   }
 
   return (
+    <ContextoRequisitos.Provider value={requisitos.pendientes}>
     <main className={`marco${escritorio ? ' marco--escritorio' : ''}`} data-tauri-drag-region>
       <BarraVentana />
       <section className="marco__unica" aria-label="Tareas y hábitos">
@@ -320,6 +333,8 @@ export function Lista() {
         />
       </section>
       {modales}
+      {hilos}
     </main>
+    </ContextoRequisitos.Provider>
   );
 }

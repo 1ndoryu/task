@@ -92,6 +92,17 @@ export function IconoFecha() {
   );
 }
 
+/** Dos nodos unidos por un hilo: lo que va antes de otra cosa. */
+export function IconoDependencias() {
+  return (
+    <Trazo>
+      <circle cx="6" cy="6" r="2.5" />
+      <circle cx="18" cy="18" r="2.5" />
+      <path d="M8 7.5c6 0 2 9 8 9" />
+    </Trazo>
+  );
+}
+
 /** Barras de nivel: ordenar por prioridad. */
 export function IconoPrioridad() {
   return (

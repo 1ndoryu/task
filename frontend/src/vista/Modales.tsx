@@ -2,11 +2,12 @@
  * su prop `abierto` (o el `null` del borrado y de la fila) quien los pinta.
  * Están juntos porque se abren desde sitios distintos —la barra, el menú del
  * panel y la propia fila— y así la vista no los reparte por sus ramas. */
-import type { Proyecto } from '../logica/tipos';
+import type { Dashboard, Proyecto, RefDependencia } from '../logica/tipos';
 import type { ColoresNivel, Preferencias } from '../logica/preferencias';
 import { Ajustes } from './Ajustes';
 import { ConfiguracionTarea } from './ConfiguracionTarea';
 import { ConfirmarPanel, type Borrado } from './ConfirmarPanel';
+import { ModalDependencias } from './ModalDependencias';
 import type { CambiosFilaForm } from './opcionesFila';
 import { PanelGrupos } from './PanelGrupos';
 import type { Editando } from './usarLista';
@@ -28,6 +29,11 @@ interface Props {
   colores: ColoresNivel;
   onGuardar: (fila: NonNullable<Editando>, cambios: CambiosFilaForm) => void;
   onCerrarEdicion: () => void;
+  /** Fila cuyas dependencias se eligen (`null`: cerrado) y cómo se guardan. */
+  dependenciasDe: RefDependencia | null;
+  datos: Dashboard;
+  onAbrirDependencias: (objetivo: RefDependencia | null) => void;
+  onDependencias: (objetivo: RefDependencia, lista: RefDependencia[]) => void;
   borrando: Borrado | null;
   onBorrarNota: () => void;
   onBorrarPanelGrupo: (conFilas: boolean) => void;
@@ -51,6 +57,10 @@ export function Modales({
   colores,
   onGuardar,
   onCerrarEdicion,
+  dependenciasDe,
+  datos,
+  onAbrirDependencias,
+  onDependencias,
   borrando,
   onBorrarNota,
   onBorrarPanelGrupo,
@@ -81,7 +91,18 @@ export function Modales({
         grupos={grupos}
         colores={colores}
         onGuardar={onGuardar}
+        onDependencias={(fila) => {
+          if (fila.tipo === 'tarea') onAbrirDependencias({ tipo: 'tarea', id: fila.tarea.id });
+          else if (fila.tipo === 'habito') onAbrirDependencias({ tipo: 'habito', id: fila.habito.id });
+        }}
         onCerrar={onCerrarEdicion}
+      />
+
+      <ModalDependencias
+        objetivo={dependenciasDe}
+        datos={datos}
+        onCambiar={onDependencias}
+        onCerrar={() => onAbrirDependencias(null)}
       />
 
       <ConfirmarPanel

@@ -11,7 +11,7 @@ import { importanciaDeHabito } from '../logica/importancia';
 import { hechoHoy } from '../logica/seleccion';
 import type { Pendientes } from '../logica/store';
 import { alternarCompletado, editarTarea, guardarTarea } from '../logica/tareas';
-import type { Dashboard, Habito, Tarea } from '../logica/tipos';
+import type { Dashboard, Habito, RefDependencia, Tarea } from '../logica/tipos';
 import type { NuevaFila } from './NuevaFila';
 import { claveFila, idNuevo, type Editando, type Estado } from './tiposLista';
 
@@ -217,5 +217,18 @@ export function usarFilas(d: Dependencias) {
     },
     [escribirTarea, escribirHabito],
   );
-  return { anotarGrupo, moverGrupo, crear, completar, aplazar, reordenar };
+  /** Lo que debe hacerse antes de una fila: va en su payload, así que viaja con
+   * el mismo PUT que cualquier cambio. Vacío borra el campo, no lo deja en `[]`. */
+  const dependencias = useCallback(
+    (objetivo: RefDependencia, lista: RefDependencia[]) => {
+      const poner = <T extends { dependencias?: RefDependencia[] }>(fila: T): T => {
+        const { dependencias: _previas, ...resto } = fila;
+        return (lista.length ? { ...resto, dependencias: lista } : resto) as T;
+      };
+      if (objetivo.tipo === 'tarea') void escribirTarea(objetivo.id, poner);
+      else void escribirHabito(objetivo.id, poner);
+    },
+    [escribirTarea, escribirHabito],
+  );
+  return { anotarGrupo, moverGrupo, crear, completar, aplazar, reordenar, dependencias };
 }

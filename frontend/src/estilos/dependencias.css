@@ -1,0 +1,96 @@
+/* Dependencias: el hilo rojo entre lo que espera y lo que va antes, la nota
+ * «antes: …» de la fila y la lista del selector. */
+
+/* Capa fija sobre toda la vista: así el hilo cruza de una caja a otra. No coge
+ * clics: las filas de debajo siguen siendo suyas. */
+.hilos {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 35;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.hilos__cuerda {
+  fill: none;
+  stroke: var(--sangre);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.85;
+}
+
+.hilos__extremo {
+  fill: var(--sangre);
+}
+
+/* La nota de lo que falta va en el rojo del hilo, para atar los dos. */
+.fila__nota--antes {
+  color: var(--sangre);
+}
+
+.dependencias__elegidas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dependencias__lista {
+  max-height: 40vh;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.dependencias__opcion {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--redondoChico);
+  background: transparent;
+  color: var(--tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dependencias__opcion:hover:not(:disabled),
+.dependencias__opcion:focus-visible {
+  background: var(--panel);
+}
+
+/* Marcada: el aro rojo la une al hilo que dibuja. */
+.dependencias__opcion[aria-pressed='true'] {
+  box-shadow: inset 0 0 0 1px var(--sangre);
+}
+
+.dependencias__opcion:disabled {
+  color: var(--tinta-tenue);
+  cursor: not-allowed;
+}
+
+.dependencias__tipo {
+  flex: none;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-nota);
+}
+
+.dependencias__nombre {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dependencias__vacio {
+  padding: 6px 8px;
+  color: var(--tinta-tenue);
+}

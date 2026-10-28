@@ -16,6 +16,7 @@ import './estilos/columnas.css';
 import './estilos/algoritmo.css';
 import './estilos/arrastre.css';
 import './estilos/archivados.css';
+import './estilos/dependencias.css';
 import './estilos/ventana.css';
 
 const raiz = document.getElementById('raiz');

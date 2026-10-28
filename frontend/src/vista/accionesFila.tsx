@@ -5,7 +5,7 @@ import { nivelDe, type NivelPrioridad } from '../logica/importancia';
 import type { ColoresNivel } from '../logica/preferencias';
 import { IconoCarpeta } from './Iconos';
 import type { OpcionMenu } from './Menu';
-import { aplazosMenu, gruposMenu, IconoAplazar, IconoBorrar, IconoEditar, IconoFecha, prioridadesMenu } from './MenuOpciones';
+import { aplazosMenu, gruposMenu, IconoAplazar, IconoBorrar, IconoDependencias, IconoEditar, IconoFecha, prioridadesMenu } from './MenuOpciones';
 import type { Editando } from './usarLista';
 
 export interface AccionesFila {
@@ -18,6 +18,8 @@ export interface AccionesFila {
   aplazar: (fila: NonNullable<Editando>, hasta: string | null) => void;
   /** Fecha límite de una tarea (`YYYY-MM-DD`); `null` la quita. */
   fechaLimite: (fila: NonNullable<Editando>, fecha: string | null) => void;
+  /** Abre el selector de lo que debe hacerse antes de la fila. */
+  dependencias: (fila: NonNullable<Editando>) => void;
   /** Orden manual: las filas de una caja, ya en su orden nuevo. */
   reordenar: (filas: NonNullable<Editando>[]) => void;
 }
@@ -87,6 +89,7 @@ export function opcionesFila(
           },
         ]
       : []),
+    { id: 'dependencias', etiqueta: 'Dependencias…', accion: true, icono: <IconoDependencias /> },
     { id: 'grupo', etiqueta: 'Grupo', icono: <IconoCarpeta />, hijos: gruposMenu(grupos, grupoDe(fila)) },
     {
       id: 'prioridad',

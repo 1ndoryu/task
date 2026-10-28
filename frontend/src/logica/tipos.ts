@@ -14,6 +14,12 @@ export interface ConfiguracionTarea {
   [clave: string]: unknown;
 }
 
+/** Lo que debe estar hecho antes que una fila (otra tarea u otro hábito). */
+export interface RefDependencia {
+  tipo: "tarea" | "habito";
+  id: number;
+}
+
 export interface Tarea {
   id: number;
   texto: string;
@@ -25,6 +31,8 @@ export interface Tarea {
   proyectoId?: number | null;
   fechaCreacion?: string;
   configuracion?: ConfiguracionTarea;
+  /** Requisitos: lo que debe hacerse antes (en el payload, como el legacy). */
+  dependencias?: RefDependencia[];
   /** Grupo de ejecución: la pestaña en la que aparece (null = «Tareas»). */
   grupoEjecucion?: string | null;
 }
@@ -71,6 +79,8 @@ export interface Habito {
   /** Subhábitos: viven dentro del payload del padre (un solo nivel), como en
    *  el legacy; no tienen grupo ni fila propia en el backend. */
   subhabitos?: SubHabito[];
+  /** Requisitos: lo que debe hacerse antes. */
+  dependencias?: RefDependencia[];
 }
 
 /** Un hábito hijo: mismo contrato que el padre en pequeño. Lo que comparte

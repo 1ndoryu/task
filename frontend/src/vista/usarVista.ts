@@ -3,6 +3,7 @@
  * paneles; las acciones de la lista entran por parámetro, así el hook no sabe
  * de la API ni de los datos, solo de lo que hay que abrir. */
 import { createElement, useState, type ReactNode } from 'react';
+import type { RefDependencia } from '../logica/tipos';
 import type { Panel } from '../logica/paneles';
 import type { Preferencias } from '../logica/preferencias';
 import type { Borrado } from './ConfirmarPanel';
@@ -57,6 +58,8 @@ export function usarVista({
   // sesiones como cualquier ajuste: quien pliega una tarea larga espera
   // encontrarla plegada al volver.
   const [plegadas, setPlegadas] = useState<ReadonlySet<string>>(() => new Set(plegadasGuardadas));
+  // Fila cuyas dependencias se están eligiendo: se abre desde el menú o la configuración.
+  const [dependenciasDe, setDependenciasDe] = useState<RefDependencia | null>(null);
 
   /** Pliega o despliega los hijos de una fila y lo deja guardado. El guardado
    *  va fuera del actualizador: React puede llamarlo dos veces y el efecto no
@@ -128,6 +131,8 @@ export function usarVista({
     menuPanel,
     setMenuPanel,
     plegadas,
+    dependenciasDe,
+    setDependenciasDe,
     alternarPlegada,
     abrirMenuPanel,
     contextoDe,
