@@ -165,6 +165,7 @@ export function aplazosMenu(opciones: { id: string; etiqueta: string }[], aplaza
     etiqueta: opcion.etiqueta,
     icono: <IconoAplazar />,
   }));
+  lista.push({ id: 'aplazar-fecha', etiqueta: 'Elegir fecha…', icono: <IconoAplazar /> });
   if (aplazado) {
     lista.push({ id: 'aplazar-quitar', etiqueta: 'Quitar el aplazo', accion: true, icono: <IconoAplazar /> });
   }

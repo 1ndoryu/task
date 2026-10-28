@@ -7,6 +7,7 @@
 import { useState, type ReactNode } from 'react';
 import { fechaEnPalabras, sumarDias } from '../logica/fechas';
 import type { Preferencias, TamanoCaja } from '../logica/preferencias';
+import { SelectorDia } from './SelectorDia';
 import { CajaNota } from './CajaNota';
 import { IconoAnterior, IconoSiguiente } from './IconosDiario';
 import type { AccesoDiario } from './usarNotas';
@@ -83,7 +84,15 @@ export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTaman
             >
               <IconoAnterior />
             </button>
-            <span className="barra__titulo barra__titulo--centrado">{titulo}</span>
+            <SelectorDia
+              texto={titulo}
+              fecha={fecha}
+              hoy={hoy}
+              onElegir={(dia) => {
+                setFecha(dia);
+                setCapitulo(1);
+              }}
+            />
             <button
               type="button"
               className="barra__boton barra__icono"

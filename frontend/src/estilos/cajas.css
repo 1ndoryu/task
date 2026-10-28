@@ -249,6 +249,12 @@
 
 .diario__dias > .barra__titulo--centrado {
   min-width: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -679,4 +685,97 @@
   font-size: var(--texto-etiqueta);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Calendario: panel centrado con la rejilla de un mes. El día elegido va en
+ * tinta plena, hoy con borde y los días con algo dentro llevan un punto. */
+.menu__panel.calendario__panel {
+  position: fixed;
+  top: 50%;
+  right: auto;
+  left: 50%;
+  z-index: 40;
+  width: min(18rem, calc(100vw - 2rem));
+  transform: translate(-50%, -50%);
+}
+
+.calendario__titulo {
+  margin: 0 0 0.4rem;
+  padding: 0 0.4rem;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.calendario__mes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+}
+
+.calendario__nombre {
+  display: inline-block;
+}
+
+.calendario__nombre::first-letter {
+  text-transform: uppercase;
+}
+
+.calendario__rejilla {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.15rem;
+}
+
+.calendario__cabecera {
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+  text-align: center;
+}
+
+.calendario__dia {
+  position: relative;
+  aspect-ratio: 1;
+  color: var(--tinta);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--redondoChico);
+  cursor: pointer;
+}
+
+.calendario__dia:hover:not(:disabled),
+.calendario__dia:focus-visible {
+  background: var(--fondo);
+}
+
+.calendario__dia:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.calendario__dia--fuera {
+  color: var(--tinta-tenue);
+}
+
+.calendario__dia--hoy {
+  border-color: var(--linea);
+}
+
+.calendario__dia--elegido {
+  color: var(--panel);
+  background: var(--tinta);
+}
+
+.calendario__dia--marcado::after {
+  position: absolute;
+  bottom: 0.2rem;
+  left: 50%;
+  width: 0.25rem;
+  height: 0.25rem;
+  background: currentcolor;
+  border-radius: var(--redondoPunto);
+  content: '';
+  transform: translateX(-50%);
 }

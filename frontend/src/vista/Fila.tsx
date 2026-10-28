@@ -2,12 +2,15 @@
  * la configuración y racha. El menú de acciones se abre con el clic derecho en
  * la fila; no hay botón visible. Vive aparte de `Lista` para que cada archivo
  * tenga una sola responsabilidad. */
+import { useState } from 'react';
 import { aplazadoHasta, fechaAplazo } from '../logica/aplazos';
+import { sumarDias } from '../logica/fechas';
 import { diaCorto, proximaRepeticion, rachaDe, type ConFrecuencia } from '../logica/frecuencia';
 import type { ColoresNivel } from '../logica/preferencias';
 import { leerMomentos } from '../logica/momentos';
 import { hechoHoy } from '../logica/seleccion';
 import type { Habito } from '../logica/tipos';
+import { Calendario } from './Calendario';
 import { IconoDesplegar, IconoPlegar } from './Iconos';
 import { IconoMomento } from './IconosMomento';
 import { Menu } from './Menu';
@@ -56,6 +59,7 @@ export function Fila({
   desplegada = true,
   onPlegar,
 }: Props) {
+  const [calendario, setCalendario] = useState(false);
   const esTarea = fila.tipo === 'tarea';
   const esSub = fila.tipo === 'subhabito';
   // El subhábito se lee como un hábito: mismo punto de nivel, misma racha.
@@ -151,12 +155,26 @@ export function Fila({
           if (id === 'editar') acciones.editar(fila);
           else if (id === 'borrar') acciones.borrar(fila);
           else if (id === 'aplazar-quitar') acciones.aplazar(fila, null);
+          else if (id === 'aplazar-fecha') setCalendario(true);
           else if (id.startsWith('aplazar-')) acciones.aplazar(fila, fechaAplazo(hoy, id.slice('aplazar-'.length)));
           else if (id === 'grupo-') acciones.mover(fila, null);
           else if (id.startsWith('grupo-')) acciones.mover(fila, id.slice('grupo-'.length));
           else acciones.prioridad(fila, id.replace('prioridad-', ''));
         }}
       />
+      {calendario && (
+        <Calendario
+          titulo={`Aplazar ${texto}`}
+          valor={aplazado}
+          hoy={hoy}
+          min={sumarDias(hoy, 1)}
+          onElegir={(dia) => {
+            acciones.aplazar(fila, dia);
+            setCalendario(false);
+          }}
+          onCerrar={() => setCalendario(false)}
+        />
+      )}
     </li>
   );
 }
