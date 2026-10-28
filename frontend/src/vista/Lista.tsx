@@ -13,7 +13,7 @@ import { useEffect } from 'react';
 import { alternarMinimizada } from '../logica/minimizadas';
 import { limpiarGrupo } from '../logica/orden';
 import { PANEL_ARCHIVADOS, panelDeNota, type Panel } from '../logica/paneles';
-import { ALTO_CAJA_MINIMO, ANCHO_CAJA_MINIMO } from '../logica/preferencias';
+import { ALTO_CAJA_MINIMO, ANCHO_CAJA_MINIMO, type TamanoCaja } from '../logica/preferencias';
 import { accionesDeLista } from './accionesDeLista';
 import { AccionesBarra } from './AccionesBarra';
 import { Archivados } from './Archivados';

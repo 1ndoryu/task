@@ -5,10 +5,9 @@
 import { Fragment, useRef, type CSSProperties, type ReactNode } from 'react';
 import type { ColoresNivel, Preferencias, TamanoCaja } from '../logica/preferencias';
 import type { Fila as FilaDatos } from '../logica/seleccion';
-import { AsaTamano } from './AsaTamano';
+import { CarcasaCaja } from './CarcasaCaja';
 import { BarraMomento } from './BarraMomento';
 import { Fila } from './Fila';
-import { altoUsuario, anchoUsuario } from './tamano';
 import type { AccionesFila } from './accionesFila';
 import { claveFila, valorDe } from './usarLista';
 import { usarArrastreFilas } from './usarArrastreFilas';
@@ -134,50 +133,39 @@ export function Caja({
   progreso,
   onReordenar,
 }: Props) {
-  const nodo = useRef<HTMLElement>(null);
   const listaRef = useRef<HTMLUListElement>(null);
   // La lista solo existe con filas: sin ellas no hay nada que enganchar.
   const ordenable = !!onReordenar && filas.length > 0;
   usarArrastreFilas(listaRef, ordenable, (desde, hasta) => onReordenar?.(mover(filas, desde, hasta)));
   return (
-    <section
-      ref={nodo}
-      // Los modificadores se escriben enteros, junto al `className`: la hoja y
-      // el índice de clases casan el nombre literal, no un valor compuesto en
-      // otro archivo. «Normal» no lleva modificador: es como se pinta la caja.
-      className={[
-        'caja',
+    <CarcasaCaja
+      clases={[
         preferencias.privacidad && 'caja--privacidad',
         preferencias.altura === 'compacta' && 'caja--altura-compacta',
         preferencias.altura === 'amplia' && 'caja--altura-amplia',
         !preferencias.separador && 'caja--sin-separador',
         preferencias.privacidadAlcance === 'todas' && 'caja--privacidad-todas',
         preferencias.primeraVisible && 'caja--primera-visible',
-        tamano?.crecido && 'caja--crecida',
-        minimizada && 'caja--minimizada',
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      ]}
       // La paleta de importancia entra como tokens: es un literal cuyas claves
       // son todas `--*`, así que el nodo solo define variables (el patrón de
       // `Menu`). Definida aquí y no en una variable aparte: así se lee como
       // definición de token.
-      style={
-        {
-          '--nivel-muy_baja': colores.muy_baja,
-          '--nivel-baja': colores.baja,
-          '--nivel-media': colores.media,
-          '--nivel-alta': colores.alta,
-          '--nivel-muy_alta': colores.muy_alta,
-          // Las tallas llegan como número de píxeles; la hoja solo las usa.
-          '--texto-fila': `${preferencias.fuente}px`,
-          '--ancho-usuario': anchoUsuario(tamano),
-          '--alto-caja-usuario': altoUsuario(tamano),
-        } as CSSProperties
-      }
-      aria-label={etiqueta}
+      estilo={{
+        '--nivel-muy_baja': colores.muy_baja,
+        '--nivel-baja': colores.baja,
+        '--nivel-media': colores.media,
+        '--nivel-alta': colores.alta,
+        '--nivel-muy_alta': colores.muy_alta,
+        // Las tallas llegan como número de píxeles; la hoja solo las usa.
+        '--texto-fila': `${preferencias.fuente}px`,
+      } as CSSProperties}
+      etiqueta={etiqueta}
       // El carril identifica la pieza por este atributo, sin saber su clase.
-      data-panel={idPanel}
+      idPanel={idPanel}
+      tamano={tamano}
+      onTamano={onTamano}
+      minimizada={minimizada}
       // Las filas ya gastan el clic derecho en su propio menú; aquí solo llega
       // el que nace fuera de ellas (la cabecera, el aire de la caja).
       onContextMenu={(evento) => {
@@ -186,10 +174,8 @@ export function Caja({
         evento.preventDefault();
         onContexto({ x: evento.clientX, y: evento.clientY });
       }}
+      cabecera={cabecera}
     >
-      {cabecera}
-      {onTamano && !minimizada && <AsaTamano caja={nodo} onTamano={onTamano} />}
-
       {/* El alta va dentro del scroll: es la primera fila, no una franja fija;
           así sube con la lista y deja sitio a lo que se está leyendo. */}
       {/* `data-rueda-propia`: la rueda llena esta lista antes de mover el carril. */}
@@ -256,6 +242,6 @@ export function Caja({
           </span>
         </div>
       )}
-    </section>
+    </CarcasaCaja>
   );
 }

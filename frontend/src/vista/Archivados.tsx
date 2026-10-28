@@ -3,23 +3,35 @@
  * tiene menú de panel y no cuenta como pestaña. Archivar nunca borra, así que
  * desde aquí todo vuelve tal cual estaba. */
 import type { ReactNode } from 'react';
+import type { TamanoCaja } from '../logica/preferencias';
+import { CarcasaCaja } from './CarcasaCaja';
 
 interface Props {
   grupos: string[];
   notas: { id: string; titulo: string }[];
   onDesarchivarGrupo: (nombre: string) => void;
   onRecuperarNota: (id: string) => void;
+  /** Tamaño propio de la caja y su asa: como cualquier otra caja del carril. */
+  tamano?: TamanoCaja;
+  onTamano?: (tamano: TamanoCaja | undefined) => void;
 }
 
-export function Archivados({ grupos, notas, onDesarchivarGrupo, onRecuperarNota }: Props): ReactNode {
+export function Archivados({ grupos, notas, onDesarchivarGrupo, onRecuperarNota, tamano, onTamano }: Props): ReactNode {
   const vacio = grupos.length === 0 && notas.length === 0;
   return (
-    <section className="caja caja--archivados" aria-labelledby="archivados-titulo">
-      <header className="barra">
-        <h2 className="barra__titulo" id="archivados-titulo">
-          Archivados
-        </h2>
-      </header>
+    <CarcasaCaja
+      clases={['caja--archivados']}
+      nombradaPor="archivados-titulo"
+      tamano={tamano}
+      onTamano={onTamano}
+      cabecera={
+        <header className="barra">
+          <h2 className="barra__titulo" id="archivados-titulo">
+            Archivados
+          </h2>
+        </header>
+      }
+    >
       {vacio ? (
         <p className="aviso aviso--vacio">Nada archivado.</p>
       ) : (
@@ -67,6 +79,6 @@ export function Archivados({ grupos, notas, onDesarchivarGrupo, onRecuperarNota 
           )}
         </div>
       )}
-    </section>
+    </CarcasaCaja>
   );
 }

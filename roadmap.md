@@ -9,6 +9,7 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Pendientes
 
+- [ ] `27AA-10` — **Auditoría SOLID del frontend y caja de Archivados redimensionable.** Hecho cuando Archivados tenga asa y tamaño persistente y el informe de auditoría enumere los hallazgos por principio.
 - [ ] `27AA-8` — **Recuperar la contraseña por correo.** Hecho cuando «Olvidé mi contraseña» envíe un enlace de un solo uso y permita fijar la nueva; pide un proveedor de correo y su credencial (reservado a la usuaria).
 
 

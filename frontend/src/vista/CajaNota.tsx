@@ -9,8 +9,7 @@
  * de la nota. */
 import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import type { Preferencias, TamanoCaja } from '../logica/preferencias';
-import { AsaTamano } from './AsaTamano';
-import { altoUsuario, anchoUsuario } from './tamano';
+import { CarcasaCaja } from './CarcasaCaja';
 
 interface Props {
   preferencias: Preferencias;
@@ -51,7 +50,6 @@ export function CajaNota({
   minimizada,
 }: Props) {
   const campo = useRef<HTMLTextAreaElement>(null);
-  const nodo = useRef<HTMLElement>(null);
   // La confirmación se lee por referencia: desmontar no debe avisar con una
   // versión vieja del guardado.
   const confirmar = useRef(onConfirmar);
@@ -64,42 +62,32 @@ export function CajaNota({
   useEffect(() => () => confirmar.current(), []);
 
   return (
-    <section
-      ref={nodo}
-      className={[
-        'caja',
+    <CarcasaCaja
+      clases={[
         'caja--nota',
         preferencias.privacidad && 'caja--privacidad',
         preferencias.interlineadoNota === 'ajustado' && 'caja--nota-interlineado-ajustado',
         preferencias.interlineadoNota === 'amplio' && 'caja--nota-interlineado-amplio',
         preferencias.altura === 'compacta' && 'caja--altura-compacta',
         preferencias.altura === 'amplia' && 'caja--altura-amplia',
-        tamano?.crecido && 'caja--crecida',
-        minimizada && 'caja--minimizada',
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      ]}
       // La nota lleva su propia talla: cambia el texto del campo, no el de las
       // filas de las otras cajas.
-      style={
-        {
-          '--texto-campo-nota': `${preferencias.fuenteNota}px`,
-          '--ancho-usuario': anchoUsuario(tamano),
-          '--alto-caja-usuario': altoUsuario(tamano),
-        } as CSSProperties
-      }
-      aria-label={titulo}
+      estilo={{ '--texto-campo-nota': `${preferencias.fuenteNota}px` } as CSSProperties}
+      etiqueta={titulo}
       // Mismo gancho que la caja de lista: el carril agarra por aquí.
-      data-panel={idPanel}
+      idPanel={idPanel}
+      tamano={tamano}
+      onTamano={onTamano}
+      minimizada={minimizada}
       onContextMenu={(evento) => {
         if (!onContexto) return;
         if ((evento.target as HTMLElement).closest('textarea, input, [role="menu"]')) return;
         evento.preventDefault();
         onContexto({ x: evento.clientX, y: evento.clientY });
       }}
+      cabecera={cabecera}
     >
-      {cabecera}
-      {onTamano && !minimizada && <AsaTamano caja={nodo} onTamano={onTamano} />}
       {/* `data-rueda-propia`: la nota se lee con la rueda sin mover el carril. */}
       <div className="scroll" data-rueda-propia>
         <label className="nota">
@@ -116,6 +104,6 @@ export function CajaNota({
         </label>
       </div>
       {pie}
-    </section>
+    </CarcasaCaja>
   );
 }
