@@ -1,6 +1,6 @@
 /* Selector propio con búsqueda: el valor vigente en un botón y, al abrirlo,
  * una caja con un campo para filtrar y la lista de opciones, agrupada por
- * bloques (los meses, en una fecha). Sustituye al `<select>` nativo y al
+ * bloques. Sustituye al `<select>` nativo y al
  * `<datalist>` de la configuración: el navegador no deja filtrar sus listas ni
  * darles el tamaño del diseño.
  * La caja se pinta `fixed` porque el cuerpo del modal tiene scroll propio y un
@@ -13,7 +13,6 @@ import {
   useState,
   type KeyboardEvent as TeclaReact,
 } from 'react';
-import { fechaLocal, hoyLogico } from '../logica/fechas';
 
 export interface OpcionSelector {
   id: string;
@@ -285,70 +284,4 @@ export function Selector({ valor, opciones, onElegir, vacio, etiqueta, onCrear }
       )}
     </div>
   );
-}
-
-/* --- Fechas: los días que vienen, agrupados por mes, más «Sin fecha». Se
- * buscan por número, por mes y por la fecha del contrato (`YYYY-MM-DD`). --- */
-
-const MESES = [
-  'enero',
-  'febrero',
-  'marzo',
-  'abril',
-  'mayo',
-  'junio',
-  'julio',
-  'agosto',
-  'septiembre',
-  'octubre',
-  'noviembre',
-  'diciembre',
-];
-
-const CORTO = new Intl.DateTimeFormat('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
-const LARGO = new Intl.DateTimeFormat('es-ES', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric',
-});
-
-/** Días ofrecidos hacia delante: cuatro meses bastan para una fecha límite. */
-const DIAS = 120;
-
-export function opcionesFecha(elegida: string): OpcionSelector[] {
-  const hoy = hoyLogico();
-  const base = new Date(`${hoy}T00:00:00`);
-  const opciones: OpcionSelector[] = [{ id: '', etiqueta: 'Sin fecha' }];
-  const generadas = new Set<string>();
-
-  for (let paso = 0; paso < DIAS; paso++) {
-    const dia = new Date(base);
-    dia.setDate(base.getDate() + paso);
-    const iso = fechaLocal(dia);
-    const corto = CORTO.format(dia).replace(',', '');
-    const etiqueta = paso === 0 ? `Hoy · ${corto}` : paso === 1 ? `Mañana · ${corto}` : corto;
-    // El mes y el año ya van en el bloque; basta con nombrarlos una vez.
-    const mes = MESES[dia.getMonth()];
-    generadas.add(iso);
-    opciones.push({
-      id: iso,
-      etiqueta,
-      buscar: `${iso} ${dia.getDate()}/${dia.getMonth() + 1} ${mes} ${LARGO.format(dia)}`,
-      grupo: mes.charAt(0).toUpperCase() + mes.slice(1) + ' de ' + dia.getFullYear(),
-    });
-  }
-
-  // Una fecha guardada fuera del tramo (vencida o muy lejana) sigue a la vista.
-  if (elegida && !generadas.has(elegida)) {
-    const dia = new Date(`${elegida}T00:00:00`);
-    opciones.splice(1, 0, {
-      id: elegida,
-      etiqueta: CORTO.format(dia).replace(',', ''),
-      buscar: `${elegida} ${LARGO.format(dia)}`,
-      grupo: 'Elegida',
-    });
-  }
-
-  return opciones;
 }

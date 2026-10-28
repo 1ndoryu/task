@@ -6,11 +6,10 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Siguiente bloque
 
-- [ ] `27AA-5` — **Fecha límite de tareas.** En configuración y menú contextual, con el calendario.
+- [ ] `27AA-6` — **Dependencias con hilo rojo.** Tareas y hábitos, múltiples, entre cajas, con gravedad.
 
 ## Pendientes
 
-- [ ] `27AA-6` — **Dependencias con hilo rojo.** Tareas y hábitos, múltiples, entre cajas, con gravedad.
 - [ ] `27AA-7` — **Perfil, login y modo invitado local.** Respaldo verificado antes; sin tocar la sesión actual.
 
 ## Bloqueos

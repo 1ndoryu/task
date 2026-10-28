@@ -618,3 +618,13 @@
   border-radius: var(--redondoPunto);
   background: var(--color-nivel);
 }
+
+/* Fecha límite: el botón con el día y «Quitar» a su lado. */
+.campo__fecha {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.campo__fecha > .selector__disparador {
+  flex: 1;
+}

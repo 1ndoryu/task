@@ -420,6 +420,11 @@ button.fila__marca:hover {
   font-variant-numeric: tabular-nums;
 }
 
+/* Fecha límite pasada: la nota sube a tinta plena para no perderse. */
+.fila__nota--vencida {
+  color: var(--tinta);
+}
+
 /* sentinel-disable-next-line claseHuerfana — falso positivo del scanner: la clase se compone en un array condicional de `Fila.tsx`; el scanner solo ve literales className completos. */
 .fila--hecho .fila__texto {
   color: var(--hecho);

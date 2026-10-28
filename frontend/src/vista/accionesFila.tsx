@@ -5,7 +5,7 @@ import { nivelDe, type NivelPrioridad } from '../logica/importancia';
 import type { ColoresNivel } from '../logica/preferencias';
 import { IconoCarpeta } from './Iconos';
 import type { OpcionMenu } from './Menu';
-import { aplazosMenu, gruposMenu, IconoAplazar, IconoBorrar, IconoEditar, prioridadesMenu } from './MenuOpciones';
+import { aplazosMenu, gruposMenu, IconoAplazar, IconoBorrar, IconoEditar, IconoFecha, prioridadesMenu } from './MenuOpciones';
 import type { Editando } from './usarLista';
 
 export interface AccionesFila {
@@ -16,6 +16,8 @@ export interface AccionesFila {
   mover: (fila: NonNullable<Editando>, grupo: string | null) => void;
   /** Aplaza un hábito: `hasta` es la fecha de vuelta, `null` para quitarlo. */
   aplazar: (fila: NonNullable<Editando>, hasta: string | null) => void;
+  /** Fecha límite de una tarea (`YYYY-MM-DD`); `null` la quita. */
+  fechaLimite: (fila: NonNullable<Editando>, fecha: string | null) => void;
   /** Orden manual: las filas de una caja, ya en su orden nuevo. */
   reordenar: (filas: NonNullable<Editando>[]) => void;
 }
@@ -69,6 +71,22 @@ export function opcionesFila(
             hijos: aplazosMenu(APLAZOS, aplazado),
           },
         ]),
+    // Solo la tarea tiene fecha límite; el hábito se rige por su frecuencia.
+    ...(fila.tipo === 'tarea'
+      ? [
+          {
+            id: 'fecha',
+            etiqueta: 'Fecha límite',
+            icono: <IconoFecha />,
+            hijos: [
+              { id: 'fecha-elegir', etiqueta: 'Elegir fecha…', icono: <IconoFecha /> },
+              ...(fila.tarea.configuracion?.fechaMaxima
+                ? [{ id: 'fecha-quitar', etiqueta: 'Quitar la fecha', accion: true, icono: <IconoFecha /> }]
+                : []),
+            ],
+          },
+        ]
+      : []),
     { id: 'grupo', etiqueta: 'Grupo', icono: <IconoCarpeta />, hijos: gruposMenu(grupos, grupoDe(fila)) },
     {
       id: 'prioridad',

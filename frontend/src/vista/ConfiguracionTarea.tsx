@@ -15,7 +15,8 @@ import { MomentosCampo } from './MomentosCampo';
 import { Opciones } from './Opciones';
 import { SubHabitos } from './SubHabitos';
 import { PRIORIDADES, URGENCIAS, type CambiosFilaForm } from './opcionesFila';
-import { opcionesFecha, Selector } from './Selector';
+import { CampoFechaLimite } from './CampoFechaLimite';
+import { Selector } from './Selector';
 import type { Editando } from './usarLista';
 
 /** Borrador inicial de la fila abierta, en los campos que entiende el modal. */
@@ -184,15 +185,7 @@ export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar
 
                 <div className="campo">
                   <p className="campo__titulo">Fecha límite</p>
-                  {/* Días hacia delante agrupados por mes; la fecha guardada,
-                      aunque esté fuera del tramo, sigue en la lista. */}
-                  <Selector
-                    etiqueta="Fecha límite de la tarea"
-                    valor={borrador.fechaMaxima}
-                    opciones={opcionesFecha(borrador.fechaMaxima)}
-                    vacio="Sin fecha"
-                    onElegir={(id) => aplicar({ fechaMaxima: id })}
-                  />
+                  <CampoFechaLimite valor={borrador.fechaMaxima} onElegir={(fecha) => aplicar({ fechaMaxima: fecha })} />
                 </div>
               </>
             ) : (

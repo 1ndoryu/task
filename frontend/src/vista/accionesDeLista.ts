@@ -3,7 +3,7 @@
  * no depende de ninguna rama de la vista, así que no tiene por qué vivir en
  * ella. Se arma una vez por render con la lista como única entrada. */
 import { importanciaDeHabito } from '../logica/importancia';
-import { grupoDe, type AccionesFila } from './accionesFila';
+import { grupoDe, prioridadDe, type AccionesFila } from './accionesFila';
 import type { CambiosFilaForm } from './opcionesFila';
 import type { Editando, Lista } from './usarLista';
 
@@ -65,6 +65,17 @@ export function accionesDeLista(lista: Lista): AccionesDeLista {
     },
     mover: lista.moverGrupo,
     aplazar: lista.aplazar,
+    fechaLimite: (fila, fecha) => {
+      if (fila.tipo !== 'tarea') return;
+      guardarCambios(fila, {
+        texto: fila.tarea.texto,
+        prioridad: prioridadDe(fila),
+        urgencia: fila.tarea.urgencia ?? 'normal',
+        proyectoId: fila.tarea.proyectoId ?? null,
+        fechaMaxima: fecha ?? '',
+        grupoEjecucion: grupoDe(fila) ?? '',
+      });
+    },
     reordenar: lista.reordenar,
   };
 

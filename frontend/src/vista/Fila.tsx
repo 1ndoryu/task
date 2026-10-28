@@ -59,7 +59,7 @@ export function Fila({
   desplegada = true,
   onPlegar,
 }: Props) {
-  const [calendario, setCalendario] = useState(false);
+  const [calendario, setCalendario] = useState<'aplazo' | 'limite' | null>(null);
   const esTarea = fila.tipo === 'tarea';
   const esSub = fila.tipo === 'subhabito';
   // El subhábito se lee como un hábito: mismo punto de nivel, misma racha.
@@ -80,6 +80,8 @@ export function Fila({
   // no se aplaza por separado: hereda la vuelta de su padre, así que no dice nada.
   const vuelve = habito !== null && esSub === false && hecho ? proximaRepeticion(habito, hoy) : null;
   // Aplazado: lo que la fila dice en vez de «vuelve el …», que es lo mismo.
+  // Fecha límite: solo la tarea la tiene.
+  const limite = fila.tipo === 'tarea' ? (fila.tarea.configuracion?.fechaMaxima ?? null) : null;
   const aplazado = conAplazo !== null ? aplazadoHasta(conAplazo, hoy) : null;
 
   return (
@@ -126,6 +128,9 @@ export function Fila({
       ) : (
         vuelve !== null && vuelve !== hoy && <span className="fila__nota">vuelve el {diaCorto(vuelve)}</span>
       )}
+      {limite && !hecho && (
+        <span className={`fila__nota${limite < hoy ? ' fila__nota--vencida' : ''}`}>vence el {diaCorto(limite)}</span>
+      )}
       {racha > 1 && <span className="fila__nota">{racha} días</span>}
       {/* La flecha es del padre: dice cuántos hijos hay y los pliega. Va a la
           derecha, después de las notas, para no moverse con ellas. */}
@@ -155,14 +160,16 @@ export function Fila({
           if (id === 'editar') acciones.editar(fila);
           else if (id === 'borrar') acciones.borrar(fila);
           else if (id === 'aplazar-quitar') acciones.aplazar(fila, null);
-          else if (id === 'aplazar-fecha') setCalendario(true);
+          else if (id === 'aplazar-fecha') setCalendario('aplazo');
+          else if (id === 'fecha-elegir') setCalendario('limite');
+          else if (id === 'fecha-quitar') acciones.fechaLimite(fila, null);
           else if (id.startsWith('aplazar-')) acciones.aplazar(fila, fechaAplazo(hoy, id.slice('aplazar-'.length)));
           else if (id === 'grupo-') acciones.mover(fila, null);
           else if (id.startsWith('grupo-')) acciones.mover(fila, id.slice('grupo-'.length));
           else acciones.prioridad(fila, id.replace('prioridad-', ''));
         }}
       />
-      {calendario && (
+      {calendario === 'aplazo' && (
         <Calendario
           titulo={`Aplazar ${texto}`}
           valor={aplazado}
@@ -170,9 +177,21 @@ export function Fila({
           min={sumarDias(hoy, 1)}
           onElegir={(dia) => {
             acciones.aplazar(fila, dia);
-            setCalendario(false);
+            setCalendario(null);
           }}
-          onCerrar={() => setCalendario(false)}
+          onCerrar={() => setCalendario(null)}
+        />
+      )}
+      {calendario === 'limite' && (
+        <Calendario
+          titulo={`Fecha límite de ${texto}`}
+          valor={limite}
+          hoy={hoy}
+          onElegir={(dia) => {
+            acciones.fechaLimite(fila, dia);
+            setCalendario(null);
+          }}
+          onCerrar={() => setCalendario(null)}
         />
       )}
     </li>
