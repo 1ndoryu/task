@@ -8,7 +8,7 @@ import type { ReactNode } from 'react';
 import type { Panel, TipoPanel } from '../logica/paneles';
 import { IconoHabito, IconoNota, IconoTarea } from './Iconos';
 import { IconoDiario } from './IconosDiario';
-import { IconoAplazar } from './MenuOpciones';
+import { IconoAplazar, IconoArchivar } from './MenuOpciones';
 
 /** Lo propio de cada tipo de panel; uno nuevo se añade aquí y los consumidores
  * (icono, borrado) no cambian. Los tipos de lista comparten el valor por defecto. */
@@ -17,6 +17,7 @@ const TIPOS: Partial<Record<TipoPanel, { icono: () => ReactNode; seBorra?: boole
   diario: { icono: () => <IconoDiario tam={10} /> },
   habitos: { icono: () => <IconoHabito tam={10} /> },
   aplazados: { icono: () => <IconoAplazar /> },
+  archivados: { icono: () => <IconoArchivar /> },
 };
 
 /** El icono de la pestaña, para distinguir un tipo de otro sin leer. */

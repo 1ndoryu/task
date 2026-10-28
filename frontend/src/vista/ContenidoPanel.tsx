@@ -11,6 +11,7 @@ import { progresoHabitos, seleccionar, type Fila as FilaDatos } from '../logica/
 import type { AccionesFila } from './accionesFila';
 import { MenuOrdenCaja } from './AccionesBarra';
 import { BotonMinimizar } from './BotonMinimizar';
+import { Archivados, type DatosArchivados } from './Archivados';
 import { Caja } from './Caja';
 import { CajaDiario } from './CajaDiario';
 import { CajaNota } from './CajaNota';
@@ -34,6 +35,8 @@ interface Props {
   nota: (panel: string) => { texto: string; escribir: (contenido: string) => void; confirmar: () => void } | null;
   /** Entradas del diario por día, para la caja «Diario». */
   diario: AccesoDiario;
+  /** Grupos y notas archivados, para la caja «Archivados». */
+  archivados: DatosArchivados;
   titulo: TituloPanel;
   contextoDe: ContextoPanel;
   /** Menú de fila abierto con clic derecho; lo comparte toda la vista. */
@@ -62,6 +65,7 @@ export function ContenidoPanel({
   saliendo,
   nota,
   diario,
+  archivados,
   titulo,
   contextoDe,
   menuAbierto,
@@ -91,6 +95,18 @@ export function ContenidoPanel({
         hoy={hoy}
         preferencias={preferencias}
         acceso={diario}
+        {...medida}
+        minimizada={minimizada}
+        botonMinimizar={botonMinimizar}
+      />
+    );
+  }
+  // Archivados: la caja de lo archivado. Lleva asa y minimizar como las demás.
+  if (tipo === 'archivados') {
+    return (
+      <Archivados
+        idPanel={panel.id}
+        {...archivados}
         {...medida}
         minimizada={minimizada}
         botonMinimizar={botonMinimizar}

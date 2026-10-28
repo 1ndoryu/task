@@ -12,11 +12,10 @@
 import { useEffect } from 'react';
 import { alternarMinimizada } from '../logica/minimizadas';
 import { limpiarGrupo } from '../logica/orden';
-import { PANEL_ARCHIVADOS, panelDeNota, type Panel } from '../logica/paneles';
+import { panelDeNota, type Panel } from '../logica/paneles';
 import { ALTO_CAJA_MINIMO, ANCHO_CAJA_MINIMO, type TamanoCaja } from '../logica/preferencias';
 import { accionesDeLista } from './accionesDeLista';
 import { AccionesBarra } from './AccionesBarra';
-import { Archivados } from './Archivados';
 import { BarraVentana } from './BarraVentana';
 import { Carril } from './Carril';
 import { ColumnasCarril } from './ColumnasCarril';
@@ -27,6 +26,7 @@ import { Modales } from './Modales';
 import { calcularRequisitos } from './requisitos';
 import { iconoDePanel } from './Paneles';
 import { Pestanas } from './Pestanas';
+
 import { usarLista } from './usarLista';
 import { usarVista } from './usarVista';
 
@@ -197,6 +197,12 @@ export function Lista() {
       saliendo={lista.saliendo}
       nota={lista.nota}
       diario={lista.diario}
+      archivados={{
+        grupos: lista.gruposArchivados,
+        notas: lista.notasArchivadas,
+        onDesarchivarGrupo: lista.desarchivarGrupo,
+        onRecuperarNota: lista.recuperarNota,
+      }}
       titulo={vista.titulo}
       contextoDe={vista.contextoDe}
       menuAbierto={vista.menuAbierto}
@@ -210,19 +216,6 @@ export function Lista() {
       onMinimizar={enCajas ? (id) => lista.cambiarPreferencias({ minimizadas: alternarMinimizada(preferencias.minimizadas, id) }) : undefined}
     />
   );
-
-  /** El panel de archivados va al final de las dos formas de la vista; apagado
-   *  en Ajustes, no se monta: no hay nada que mirar ni que recuperar aquí. */
-  const archivados = preferencias.mostrarArchivados ? (
-    <Archivados
-      grupos={lista.gruposArchivados}
-      notas={lista.notasArchivadas}
-      onDesarchivarGrupo={lista.desarchivarGrupo}
-      onRecuperarNota={lista.recuperarNota}
-      tamano={preferencias.tamanos[PANEL_ARCHIVADOS]}
-      onTamano={(tamano) => cambiarTamano(PANEL_ARCHIVADOS, tamano)}
-    />
-  ) : null;
 
   // Modo cajas: una por panel, en fila. Cada una se pinta con su propio grupo o
   // su propio texto, así que la que se esté mirando no depende de la activa.
@@ -250,9 +243,6 @@ export function Lista() {
           {/* Cada panel pinta su propia `section.caja`, la pieza que se arrastra;
               el carril mide las columnas que las agrupan. */}
           <ColumnasCarril columnas={lista.columnas} paneles={lista.paneles} contenido={contenido} />
-          {/* Al final del carril y sin arrastre (no lleva `data-panel`): es donde
-              se recupera lo archivado, no un panel más. */}
-          {archivados}
         </Carril>
         {/* El menú de la caja se pinta aquí, fuera de su `section`: es la
             pieza que el carril arrastra y nada más. */}
@@ -267,9 +257,6 @@ export function Lista() {
     );
   }
 
-  // Archivados es una pestaña más de la lista (sin separar): no es un panel, así
-  // que ocupa la caja sin tener menú, arrastre ni grupo propio.
-  const verArchivados = preferencias.mostrarArchivados && lista.grupo === PANEL_ARCHIVADOS;
   const activo = lista.paneles.find((p) => p.id === lista.grupo) ?? lista.paneles[0];
   const pestanasPaneles = lista.paneles.map((panel) => ({
     id: panel.id,
@@ -280,12 +267,6 @@ export function Lista() {
       </span>
     ),
   }));
-  if (preferencias.mostrarArchivados) {
-    pestanasPaneles.push({
-      id: PANEL_ARCHIVADOS,
-      etiqueta: <span className="pestana__cuerpo">Archivados</span>,
-    });
-  }
 
   return (
     <main className={`marco${escritorio ? ' marco--escritorio' : ''}`} data-tauri-drag-region>
@@ -316,16 +297,7 @@ export function Lista() {
             }}
           />
         </header>
-        {verArchivados ? (
-          <Archivados
-            grupos={lista.gruposArchivados}
-            notas={lista.notasArchivadas}
-            onDesarchivarGrupo={lista.desarchivarGrupo}
-            onRecuperarNota={lista.recuperarNota}
-          />
-        ) : (
-          contenido(activo)
-        )}
+        {contenido(activo)}
         {/* El menú de la caja única: en las pestañas va dentro de su lista; en
             la caja, aquí, porque su `section` no es envoltorio del menú. */}
         <MenuCaja

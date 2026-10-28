@@ -15,7 +15,7 @@ import type { ResumenNota } from './notas';
 import { PESTANA_COMPLETADOS, type Grupo } from './orden';
 
 /** Qué pinta un panel. Cada tipo trae su propia vista y sus propias acciones. */
-export type TipoPanel = 'tareas' | 'habitos' | 'completados' | 'nota' | 'aplazados' | 'diario';
+export type TipoPanel = 'tareas' | 'habitos' | 'completados' | 'nota' | 'aplazados' | 'diario' | 'archivados';
 
 /** Prefijo del id de los paneles que no son grupos: así un grupo no puede
  *  llamarse igual que una nota y el orden guardado no se confunde. */
@@ -28,8 +28,8 @@ export const PANEL_HABITOS = 'sistema:habitos';
 export const PANEL_APLAZADOS = 'sistema:aplazados';
 /** Panel del diario: una caja con una entrada por día, movida con ← y →. */
 export const PANEL_DIARIO = 'sistema:diario';
-/** Pestaña «Archivados» del modo sin separar: no es un panel de la lista, sino la
- *  vista de lo archivado. Sin prefijo de nota ni de grupo, y con prefijo de sistema. */
+/** Caja «Archivados»: la vista de lo archivado. Es de sistema como las demás, así
+ *  que se arrastra y se redimensiona igual; el prefijo la separa de cualquier grupo. */
 export const PANEL_ARCHIVADOS = 'sistema:archivados';
 
 export interface Panel {
@@ -83,6 +83,8 @@ export function panelesDe(
   mostrarCompletados = true,
   /** La caja «Diario» se puede esconder, igual que «Completados». */
   mostrarDiario = false,
+  /** La caja «Archivados» también: apagada no es un panel. */
+  mostrarArchivados = false,
 ): Panel[] {
   const grupos = new Set<string>(gruposConocidos);
   for (const grupo of gruposDeFilas) if (grupo) grupos.add(grupo);
@@ -123,6 +125,9 @@ export function panelesDe(
       : []),
     ...(mostrarDiario
       ? [{ id: PANEL_DIARIO, tipo: 'diario' as const, etiqueta: 'Diario', fija: true, mueve: true, grupo: null }]
+      : []),
+    ...(mostrarArchivados
+      ? [{ id: PANEL_ARCHIVADOS, tipo: 'archivados' as const, etiqueta: 'Archivados', fija: true, mueve: true, grupo: null }]
       : []),
   ];
   for (const panel of sistema) porId.set(panel.id, panel);

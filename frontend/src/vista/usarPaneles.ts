@@ -8,7 +8,7 @@ import { aplanar, apilar, columnasDe, separar, sin, type Columnas } from '../log
 import type { Movimiento } from '../logica/destinoArrastre';
 import { guardarOrdenPaneles } from '../logica/grupos';
 import type { ModoOrden } from '../logica/orden';
-import { moverA, PANEL_ARCHIVADOS, panelesDe, type Panel } from '../logica/paneles';
+import { moverA, panelesDe, type Panel } from '../logica/paneles';
 import { guardarPreferencias, type Preferencias } from '../logica/preferencias';
 import type { ResumenNota } from '../logica/notas';
 import type { Estado } from './tiposLista';
@@ -70,7 +70,8 @@ export function usarPaneles(d: Dependencias): Disposicion {
       gruposArchivados,
       ajustes.separarHabitos,
       hayAplazados,
-      // Completados y Diario se piden siempre: apagados siguen en el explorador.
+      // Completados, Diario y Archivados se piden siempre: apagados siguen en el explorador.
+      true,
       true,
       true,
     );
@@ -84,7 +85,7 @@ export function usarPaneles(d: Dependencias): Disposicion {
     hayAplazados,
   ]);
 
-  // Lo que se pinta: fuera lo apagado en el explorador y, en los dos de sistema
+  // Lo que se pinta: fuera lo apagado en el explorador y, en los tres de sistema
   // con ajuste propio, lo que esté apagado en Ajustes.
   const paneles = useMemo(
     () =>
@@ -92,18 +93,18 @@ export function usarPaneles(d: Dependencias): Disposicion {
         (p) =>
           !ajustes.ocultas.includes(p.id) &&
           (p.tipo !== 'completados' || ajustes.mostrarCompletados) &&
-          (p.tipo !== 'diario' || ajustes.mostrarDiario),
+          (p.tipo !== 'diario' || ajustes.mostrarDiario) &&
+          (p.tipo !== 'archivados' || ajustes.mostrarArchivados),
       ),
-    [todos, ajustes.ocultas, ajustes.mostrarCompletados, ajustes.mostrarDiario],
+    [todos, ajustes.ocultas, ajustes.mostrarCompletados, ajustes.mostrarDiario, ajustes.mostrarArchivados],
   );
 
   // Solo los grupos: los menús de la fila y el alta no admiten una nota.
   const grupos = useMemo(() => paneles.filter((p) => p.tipo === 'tareas' && !p.fija).map((p) => p.id), [paneles]);
 
-  // Una pestaña recordada que ya no existe (grupo renombrado, nota borrada)
-  // dejaría la lista en blanco: se cae a «Tareas». «Archivados» no es panel y se
-  // acepta siempre; si está apagado en Ajustes, la vista ya cae a la primera.
-  const grupoActivo = grupo === PANEL_ARCHIVADOS || paneles.some((p) => p.id === grupo) ? grupo : '';
+  // Una pestaña recordada que ya no existe (grupo renombrado, nota borrada, caja
+  // apagada) dejaría la lista en blanco: se cae a la primera.
+  const grupoActivo = paneles.some((p) => p.id === grupo) ? grupo : '';
 
   /** Grupos de ejecución que existen: los nombres del orden guardado, los de las
    *  filas que llegan y los recordados. Es la fuente para saber si un renombrado
