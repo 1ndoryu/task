@@ -65,12 +65,15 @@ interface Props {
   /** Paleta de importancia: cada opción lleva su punto de color. */
   colores: ColoresNivel;
   onGuardar: (fila: NonNullable<Editando>, cambios: CambiosFilaForm) => void;
+  /** Día de hoy y marca de un subhábito: el panel de subhábitos los usa. */
+  hoy: string;
+  onCompletar: (fila: NonNullable<Editando>) => void;
   /** Abre el selector de lo que debe hacerse antes de la fila. */
   onDependencias: (fila: NonNullable<Editando>) => void;
   onCerrar: () => void;
 }
 
-export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar, onDependencias, onCerrar }: Props) {
+export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar, hoy, onCompletar, onDependencias, onCerrar }: Props) {
   const dialogo = useRef<HTMLDialogElement>(null);
   const [borrador, setBorrador] = useState<CambiosFilaForm | null>(fila ? borradorDe(fila) : null);
   // El nombre se edita en un `input` controlado: sin él, el cursor salta al
@@ -240,10 +243,14 @@ export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar
             <MomentosCampo momentos={borrador.momentos ?? []} onCambiar={(momentos) => aplicar({ momentos })} />
 
             {/* Los subhábitos se gestionan desde el padre: no tienen modal
-                propio. El modal los lee del hábito vivo, no del borrador, para
-                que un cambio se vea al instante. */}
+                propio. `fila` llega ya con el hábito vivo (ver `filaViva`). */}
             {fila.tipo === 'habito' && (
-              <SubHabitos subhabitos={fila.habito.subhabitos ?? []} onCambiar={(subhabitos) => onGuardar(fila, { ...borradorDe(fila), ...borrador, subhabitos } as CambiosFilaForm)} />
+              <SubHabitos
+                subhabitos={fila.habito.subhabitos ?? []}
+                hoy={hoy}
+                onCambiar={(subhabitos) => aplicar({ subhabitos })}
+                onCompletar={(subhabito) => onCompletar({ tipo: 'subhabito', subhabito, padre: fila.habito })}
+              />
             )}
           </div>
         </div>

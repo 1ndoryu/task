@@ -124,14 +124,17 @@ export function usarFilas(d: Dependencias) {
       // que es donde vive, con un solo PUT.
       if (fila.tipo === 'subhabito') {
         const { id: idSub } = fila.subhabito;
+        // El historial sale del subhábito vivo, no de la foto de la fila: dos
+        // marcas seguidas no deben pisarse.
         void escribirHabito(fila.padre.id, (h) => {
-          const historial = new Set(fila.subhabito.historialCompletados ?? []);
-          if (historial.has(hoy)) historial.delete(hoy);
-          else historial.add(hoy);
-          const fechas = [...historial].sort();
-          const subhabitos = (h.subhabitos ?? []).map((s) =>
-            s.id === idSub ? { ...s, historialCompletados: fechas, ultimoCompletado: fechas.at(-1) ?? null } : s,
-          );
+          const subhabitos = (h.subhabitos ?? []).map((s) => {
+            if (s.id !== idSub) return s;
+            const historial = new Set(s.historialCompletados ?? []);
+            if (historial.has(hoy)) historial.delete(hoy);
+            else historial.add(hoy);
+            const fechas = [...historial].sort();
+            return { ...s, historialCompletados: fechas, ultimoCompletado: fechas.at(-1) ?? null };
+          });
           return { ...h, subhabitos };
         });
         return;

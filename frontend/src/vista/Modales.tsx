@@ -2,6 +2,7 @@
  * su prop `abierto` (o el `null` del borrado y de la fila) quien los pinta.
  * Están juntos porque se abren desde sitios distintos —la barra, el menú del
  * panel y la propia fila— y así la vista no los reparte por sus ramas. */
+import { useMemo } from 'react';
 import type { Dashboard, Proyecto, RefDependencia } from '../logica/tipos';
 import type { ColoresNivel, Preferencias } from '../logica/preferencias';
 import { Ajustes } from './Ajustes';
@@ -10,6 +11,7 @@ import { ConfirmarPanel, type Borrado } from './ConfirmarPanel';
 import { EnlaceDependencia } from './EnlaceDependencia';
 import type { CambiosFilaForm } from './opcionesFila';
 import { PanelGrupos } from './PanelGrupos';
+import { filaViva } from './tiposLista';
 import type { Editando } from './usarLista';
 
 interface Props {
@@ -28,6 +30,9 @@ interface Props {
   proyectos: Proyecto[];
   colores: ColoresNivel;
   onGuardar: (fila: NonNullable<Editando>, cambios: CambiosFilaForm) => void;
+  /** Marca un subhábito de hoy; `hoy` decide cuál es «hecho». */
+  hoy: string;
+  onCompletar: (fila: NonNullable<Editando>) => void;
   onCerrarEdicion: () => void;
   /** Fila de la que sale el hilo de una dependencia (`null`: no se enlaza) y cómo se guarda. */
   dependenciasDe: RefDependencia | null;
@@ -56,6 +61,8 @@ export function Modales({
   proyectos,
   colores,
   onGuardar,
+  hoy,
+  onCompletar,
   onCerrarEdicion,
   dependenciasDe,
   datos,
@@ -66,6 +73,8 @@ export function Modales({
   onBorrarPanelGrupo,
   onCerrarBorrado,
 }: Props) {
+  // Copia viva de la fila abierta: cambia cuando cambian sus datos, no en cada render.
+  const filaAbierta = useMemo(() => filaViva(editando, datos), [editando, datos]);
   return (
     <>
       <Ajustes
@@ -86,11 +95,13 @@ export function Modales({
       />
 
       <ConfiguracionTarea
-        fila={editando}
+        fila={filaAbierta}
         proyectos={proyectos}
         grupos={grupos}
         colores={colores}
         onGuardar={onGuardar}
+        hoy={hoy}
+        onCompletar={onCompletar}
         onDependencias={(fila) => {
           if (fila.tipo === 'tarea') onAbrirDependencias({ tipo: 'tarea', id: fila.tarea.id });
           else if (fila.tipo === 'habito') onAbrirDependencias({ tipo: 'habito', id: fila.habito.id });

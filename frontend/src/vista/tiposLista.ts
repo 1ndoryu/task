@@ -52,6 +52,21 @@ export function valorDe(fila: FilaDatos): NonNullable<Editando> {
   return { tipo: 'subhabito', subhabito: fila.subhabito, padre: fila.padre };
 }
 
+/** La fila abierta con la copia viva de sus datos. El modal se abre con una
+ * foto de la fila: sin esto no ve los cambios que se hacen desde él mismo
+ * (altas y ediciones de subhábitos, marcas de hoy). */
+export function filaViva(fila: Editando, datos: Dashboard): Editando {
+  if (fila?.tipo === 'habito') {
+    const habito = datos.habitos.find((h) => h.id === fila.habito.id);
+    return habito ? { tipo: 'habito', habito } : fila;
+  }
+  if (fila?.tipo === 'tarea') {
+    const tarea = datos.tareas.find((t) => t.id === fila.tarea.id);
+    return tarea ? { tipo: 'tarea', tarea } : fila;
+  }
+  return fila;
+}
+
 /** Id de una fila nueva. El contrato usa `legacy_id` positivo como clave, así
  * que el id es la marca de tiempo en milisegundos (por mil) más un contador:
  * no colisiona con los ids migrados (bajos) ni con dos altas en el mismo ms. */

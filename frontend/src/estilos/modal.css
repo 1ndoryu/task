@@ -35,10 +35,13 @@
   margin: 0;
 }
 
+/* `contain`: al llegar al final del cuerpo, el scroll del touchpad no pasa al
+ * fondo (la página de debajo sigue quieta mientras el modal está abierto). */
 .modal__cuerpo {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 0.5rem 1.1rem 1rem;
 }
 /* Sin título, el primer control queda pegado al borde: recupera el aire de
@@ -497,6 +500,28 @@
 .subhabitos__fila .entrada {
   flex: 1;
   min-width: 0;
+}
+
+/* La marca de hoy: un círculo que se llena al completarlo; lo hecho se tacha. */
+.subhabitos__marca {
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  padding: 0;
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoPunto);
+  background: none;
+  cursor: pointer;
+}
+
+.subhabitos__marca[aria-pressed='true'] {
+  background: var(--sangre);
+  border-color: var(--sangre);
+}
+
+.subhabitos__fila--hecho .entrada {
+  text-decoration: line-through;
+  color: var(--tinta-tenue);
 }
 
 .subhabitos__quitar {

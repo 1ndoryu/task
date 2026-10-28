@@ -165,6 +165,8 @@ export function Lista() {
       proyectos={proyectos}
       colores={preferencias.colores}
       onGuardar={guardarCambios}
+      hoy={lista.hoy}
+      onCompletar={lista.completar}
       onCerrarEdicion={() => lista.abrirEdicion(null)}
       dependenciasDe={vista.dependenciasDe}
       datos={datos}
