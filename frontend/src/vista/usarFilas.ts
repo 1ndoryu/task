@@ -6,14 +6,13 @@ import { useCallback, type Dispatch, type SetStateAction } from 'react';
 import { hoyLogico } from '../logica/fechas';
 import { anotarGrupos } from '../logica/grupos';
 import { ordenesNuevos } from '../logica/reordenar';
-import { desmarcarHabito, editarHabito, guardarHabito, marcarHabito } from '../logica/habitos';
+import { desmarcarHabito, editarHabito, marcarHabito } from '../logica/habitos';
 import { fijarCompletado, fijarMarcaSubhabito } from '../logica/marcas';
 import { importanciaDeHabito } from '../logica/importancia';
 import { hechoHoy } from '../logica/seleccion';
 import { mensajeFalta } from '../logica/dependencias';
 import { faltaAntes } from './requisitos';
-import type { Pendientes } from '../logica/store';
-import { editarTarea, guardarTarea } from '../logica/tareas';
+import { editarTarea } from '../logica/tareas';
 import type { Dashboard, Habito, RefDependencia, Tarea } from '../logica/tipos';
 import type { NuevaFila } from './NuevaFila';
 import { claveFila, idNuevo, type Editando, type Estado } from './tiposLista';
@@ -21,13 +20,10 @@ import { claveFila, idNuevo, type Editando, type Estado } from './tiposLista';
 interface Dependencias {
   /** Última foto de los datos: una acción tarde no trabaja sobre una copia vieja. */
   datosRef: { current: Dashboard };
-  /** Cambios sin confirmar: lo que no llegó al servidor. */
-  pendientesRef: { current: Pendientes };
   setEstado: Dispatch<SetStateAction<Estado>>;
   setGruposConocidos: Dispatch<SetStateAction<string[]>>;
   /** Filas saliendo tras completarse, para la animación de salida. */
   setSaliendo: Dispatch<SetStateAction<ReadonlySet<string>>>;
-  anotar: (cambios: Partial<Pendientes>) => void;
   escribirTarea: (id: number, cambiar: (tarea: Tarea) => Tarea) => Promise<void>;
   escribirHabito: (id: number, cambiar: (habito: Habito) => Habito) => Promise<void>;
   /** Aviso al usuario: aquí, lo que falta antes de poder completar una fila. */
@@ -37,7 +33,7 @@ interface Dependencias {
 
 /** Las acciones que cambian una fila, ya atadas a sus dependencias. */
 export function usarFilas(d: Dependencias) {
-  const { datosRef, pendientesRef, setEstado, setGruposConocidos, setSaliendo, anotar, escribirTarea, escribirHabito, avisar, hoy } = d;
+  const { datosRef, setEstado, setGruposConocidos, setSaliendo, escribirTarea, escribirHabito, avisar, hoy } = d;
 
   /** Recuerda el grupo de una fila, para que la pestaña no desaparezca al mover
    * la última fila. */
@@ -89,10 +85,8 @@ export function usarFilas(d: Dependencias) {
           previo.fase === 'listo' ? { fase: 'listo', datos: { ...previo.datos, tareas: [...previo.datos.tareas, tarea] } } : previo,
         );
         datosRef.current = { ...previas, tareas: [...previas.tareas, tarea] };
-        anotar({ tareas: { ...pendientesRef.current.tareas, [id]: tarea } });
-        void guardarTarea(tarea).catch(() => {
-          /* Queda pendiente en el navegador y se reenvía al recargar. */
-        });
+        // Un alta va por la cola como cualquier cambio: sin versión, el servidor la crea o la acepta.
+        void escribirTarea(id, (t) => t);
         return;
       }
       const habito: Habito = {
@@ -109,12 +103,9 @@ export function usarFilas(d: Dependencias) {
         previo.fase === 'listo' ? { fase: 'listo', datos: { ...previo.datos, habitos: [...previo.datos.habitos, habito] } } : previo,
       );
       datosRef.current = { ...previas, habitos: [...previas.habitos, habito] };
-      anotar({ habitos: { ...pendientesRef.current.habitos, [id]: habito } });
-      void guardarHabito(habito).catch(() => {
-        /* Queda pendiente en el navegador y se reenvía al recargar. */
-      });
+      void escribirHabito(id, (h) => h);
     },
-    [anotar, anotarGrupo],
+    [escribirTarea, escribirHabito, anotarGrupo],
   );
 
   const completar = useCallback(

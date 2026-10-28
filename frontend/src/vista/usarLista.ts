@@ -22,7 +22,7 @@ import type { Dashboard, RefDependencia, SubHabito } from '../logica/tipos';
 import type { NuevaFila } from './NuevaFila';
 import type { CambiosFila, Editando, Estado } from './tiposLista';
 import { usarAccionesPaneles } from './usarAccionesPaneles';
-import { usarEscritura } from './usarEscritura';
+import { usarEscritura, type Escritura } from './usarEscritura';
 import { usarFilas } from './usarFilas';
 import { usarGrupos } from './usarGrupos';
 import { usarNotas, type AccesoDiario } from './usarNotas';
@@ -142,7 +142,7 @@ export function usarLista(avisar: (texto: string) => void): Lista {
   // La carga necesita `abrirCuenta`, que nace en `usarEscritura`, y esta recibe
   // el estado que crea aquella: el ref rompe el círculo. La carga ocurre en un
   // efecto, ya tras el primer render, así que para entonces está puesto.
-  const abrirCuentaRef = useRef<((correo: string) => Pendientes) | null>(null);
+  const abrirCuentaRef = useRef<Escritura['abrirCuenta'] | null>(null);
   // Siembra del respaldo: en el primer arranque tras actualizar, el servidor
   // todavía no tiene copia de esta vista. Se sube una vez lo que ya está en el
   // equipo para que, si el webview se vacía, haya de dónde volver. Los valores
@@ -150,7 +150,11 @@ export function usarLista(avisar: (texto: string) => void): Lista {
   // leen una sola vez, antes de esta carga.
   const sembrado = useRef(false);
   const [estado, setEstado] = usarCarga(
-    useCallback((correo: string) => abrirCuentaRef.current?.(correo) ?? { tareas: {}, habitos: {} }, []),
+    useCallback(
+      (correo: string, servidor: Dashboard) =>
+        abrirCuentaRef.current?.(correo, servidor) ?? { tareas: servidor.tareas, habitos: servidor.habitos },
+      [],
+    ),
     useCallback(() => {
       if (sembrado.current) return;
       sembrado.current = true;
@@ -169,7 +173,7 @@ export function usarLista(avisar: (texto: string) => void): Lista {
       });
     }, []),
   );
-  const { anotar, abrirCuenta, escribirTarea, escribirHabito, quitarTarea, quitarHabito } = usarEscritura(
+  const { abrirCuenta, escribirTarea, escribirHabito, quitarTarea, quitarHabito } = usarEscritura(
     estado,
     setEstado,
     datosRef,
@@ -181,11 +185,10 @@ export function usarLista(avisar: (texto: string) => void): Lista {
   // Las mutaciones de fila (alta, completar, mover, aplazar) viven en
   // `usarFilas`: comparten las mismas dependencias y no tocan los paneles.
   const { anotarGrupo, moverGrupo, crear, completar, aplazar, reordenar, dependencias } = usarFilas({
-    datosRef, pendientesRef,
+    datosRef,
     setEstado,
     setGruposConocidos,
     setSaliendo,
-    anotar,
     escribirTarea, escribirHabito, avisar,
     hoy,
   });

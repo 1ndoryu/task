@@ -7,11 +7,11 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { leerDashboard } from '../logica/dashboard';
 import { asegurarSesionLocal } from '../logica/sesion';
-import { fusionarPendientes, type Pendientes } from '../logica/store';
+import type { Dashboard, Habito, Tarea } from '../logica/tipos';
 import type { Estado } from './tiposLista';
 
 export function usarCarga(
-  abrirCuenta: (correo: string) => Pendientes,
+  abrirCuenta: (correo: string, servidor: Dashboard) => { tareas: Tarea[]; habitos: Habito[] },
   /** Se llama una vez, ya con sesión y datos: entonces el respaldo del servidor
    *  se puede leer y sembrar sin que nadie le escriba antes de tiempo. */
   alCargar?: () => void,
@@ -32,9 +32,9 @@ export function usarCarga(
         const datos = await leerDashboard();
         alCargarRef.current?.();
         if (!vigente) return;
-        const guardados = abrirRef.current(correo);
-        const fusionado = fusionarPendientes(datos.tareas, datos.habitos, guardados);
-        setEstado({ fase: 'listo', datos: { ...datos, ...fusionado } });
+        // Lo pendiente se cruza con el servidor dentro de `abrirCuenta`: aquí solo se pinta.
+        const filas = abrirRef.current(correo, datos);
+        setEstado({ fase: 'listo', datos: { ...datos, ...filas } });
       } catch (error) {
         const mensaje = error instanceof Error ? error.message : 'No se pudo leer el dashboard';
         if (vigente) setEstado({ fase: 'error', mensaje });

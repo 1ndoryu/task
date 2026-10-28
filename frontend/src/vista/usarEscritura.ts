@@ -1,13 +1,14 @@
 /* Única vía de escritura de una fila. Aplica el cambio en memoria al momento y
  * lo manda por la cola de su fila (`colaEscritura.ts`): una a una, cada una con
  * la versión que dejó la anterior. Lo que no tiene respuesta queda anotado como
- * pendiente y se reenvía al recargar la lista.
+ * pendiente, con la versión sobre la que se hizo, y al cargar se reenvía solo si
+ * el servidor sigue en esa versión (`fusionarFilas`).
  * Vive aparte de `usarLista` porque leer, ordenar y pintar no necesitan saber
  * cómo se escribe: aquí solo está lo que toca los datos y el servidor. */
 import { useCallback, useMemo, useRef, type Dispatch, type MutableRefObject, type SetStateAction } from 'react';
 import { leerDashboard } from '../logica/dashboard';
 import { borrarHabito, guardarHabito } from '../logica/habitos';
-import { guardarPendientes, leerPendientes, type Pendientes } from '../logica/store';
+import { fusionarFilas, guardarPendientes, leerPendientes, type Pendiente, type Pendientes } from '../logica/store';
 import { borrarTarea, guardarTarea } from '../logica/tareas';
 import type { Dashboard, Habito, Tarea } from '../logica/tipos';
 import {
@@ -30,15 +31,23 @@ export interface Escritura {
   /** Borrado optimista: desaparece y, si el servidor falla, vuelve al recargar. */
   quitarTarea: (id: number) => void;
   quitarHabito: (id: number) => void;
-  /** Anota cambios sin confirmar; lo usan también las altas. */
-  anotar: (cambios: Partial<Pendientes>) => void;
-  /** Lo pendiente de una cuenta, ya fijada como la vigente, para fusionarlo. */
-  abrirCuenta: (correo: string) => Pendientes;
+  /** Fija la cuenta, cruza sus pendientes con el dashboard que llega, reenvía los vigentes y devuelve las filas a mostrar. */
+  abrirCuenta: (correo: string, servidor: Dashboard) => { tareas: Tarea[]; habitos: Habito[] };
 }
 
 /** La lista con la fila cambiada; sin `dato`, la fila sale de la lista. */
 function enLista<T extends Versionada>(lista: T[], id: number, dato: T | undefined): T[] {
   return dato ? lista.map((fila) => (fila.id === id ? dato : fila)) : lista.filter((fila) => fila.id !== id);
+}
+
+/** Reenvía cada copia vigente por su cola, con la versión con la que se guardó. */
+function reenviar<T extends Versionada>(mapa: Map<number, Cola<T>>, vigentes: Record<number, Pendiente<T>>, ad: Adaptador<T>): void {
+  for (const [clave, { copia }] of Object.entries(vigentes)) {
+    const id = Number(clave);
+    // Si el servidor cambió justo después de comprobarlo, la copia cede ante la fila nueva.
+    const mantener: Cambio<T> = (dato) => (dato.updatedAt === copia.updatedAt ? copia : dato);
+    void encolarCambio(colaDe(mapa, id), id, copia, mantener, ad);
+  }
 }
 
 export function usarEscritura(
@@ -66,17 +75,9 @@ export function usarEscritura(
     [pendientesRef],
   );
 
-  const abrirCuenta = useCallback(
-    (correo: string): Pendientes => {
-      correoRef.current = correo;
-      pendientesRef.current = leerPendientes(correo);
-      return pendientesRef.current;
-    },
-    [pendientesRef],
-  );
-
   // Pintar y anotar pendientes: la fila vigente va al estado y, si queda algo sin
-  // respuesta, a la copia de pendientes (sin ella, un recargo la perdería).
+  // respuesta, a la copia de pendientes (sin ella, un recargo la perdería). La
+  // versión de la copia es la de su base: los cambios conservan el `updatedAt`.
   const adaptadorTareas = useMemo<Adaptador<Tarea>>(
     () => ({
       enviar: guardarTarea,
@@ -86,7 +87,7 @@ export function usarEscritura(
           previo.fase === 'listo' ? { fase: 'listo', datos: { ...previo.datos, tareas: enLista(previo.datos.tareas, id, dato) } } : previo,
         );
         const resto = { ...pendientesRef.current.tareas };
-        if (dato && pendiente) resto[id] = dato;
+        if (dato && pendiente) resto[id] = { copia: dato, baseUpdatedAt: dato.updatedAt };
         else delete resto[id];
         anotar({ tareas: resto });
       },
@@ -104,13 +105,32 @@ export function usarEscritura(
           previo.fase === 'listo' ? { fase: 'listo', datos: { ...previo.datos, habitos: enLista(previo.datos.habitos, id, dato) } } : previo,
         );
         const resto = { ...pendientesRef.current.habitos };
-        if (dato && pendiente) resto[id] = dato;
+        if (dato && pendiente) resto[id] = { copia: dato, baseUpdatedAt: dato.updatedAt };
         else delete resto[id];
         anotar({ habitos: resto });
       },
       avisar,
     }),
     [anotar, avisar, pendientesRef, setEstado],
+  );
+
+  /** Al cargar: solo las copias de la versión vigente sobreviven; el resto se avisa y se descarta. */
+  const abrirCuenta = useCallback(
+    (correo: string, servidor: Dashboard) => {
+      correoRef.current = correo;
+      const guardados = leerPendientes(correo);
+      const tareas = fusionarFilas(servidor.tareas, guardados.tareas);
+      const habitos = fusionarFilas(servidor.habitos, guardados.habitos);
+      pendientesRef.current = { tareas: tareas.vigentes, habitos: habitos.vigentes };
+      guardarPendientes(correo, pendientesRef.current);
+      const descartados = tareas.descartados + habitos.descartados;
+      if (descartados === 1) avisar('Un cambio pendiente no se guardó: la fila cambió en otro sitio.');
+      else if (descartados > 1) avisar(`${descartados} cambios pendientes no se guardaron: las filas cambiaron en otro sitio.`);
+      reenviar(colasTareas.current, tareas.vigentes, adaptadorTareas);
+      reenviar(colasHabitos.current, habitos.vigentes, adaptadorHabitos);
+      return { tareas: tareas.filas, habitos: habitos.filas };
+    },
+    [adaptadorHabitos, adaptadorTareas, avisar, pendientesRef],
   );
 
   const escribirTarea = useCallback(
@@ -154,5 +174,5 @@ export function usarEscritura(
     [adaptadorHabitos],
   );
 
-  return { escribirTarea, escribirHabito, quitarTarea, quitarHabito, anotar, abrirCuenta };
+  return { escribirTarea, escribirHabito, quitarTarea, quitarHabito, abrirCuenta };
 }
