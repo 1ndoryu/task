@@ -28,6 +28,7 @@ import { usarGrupos } from './usarGrupos';
 import { usarNotas, type AccesoDiario } from './usarNotas';
 import { usarCarga } from './usarCarga';
 import { usarOrdenCajas, usarPaneles } from './usarPaneles';
+import { usarSincronia } from './usarSincronia';
 
 export type { CambiosFila, Editando } from './tiposLista';
 export { claveFila, valorDe } from './tiposLista';
@@ -173,7 +174,7 @@ export function usarLista(avisar: (texto: string) => void): Lista {
       });
     }, []),
   );
-  const { abrirCuenta, escribirTarea, escribirHabito, quitarTarea, quitarHabito } = usarEscritura(
+  const { abrirCuenta, escribirTarea, escribirHabito, quitarTarea, quitarHabito, sincronizar } = usarEscritura(
     estado,
     setEstado,
     datosRef,
@@ -181,6 +182,8 @@ export function usarLista(avisar: (texto: string) => void): Lista {
     avisar,
   );
   abrirCuentaRef.current = abrirCuenta;
+  // Al volver a la pestaña o con un aviso de otra: relectura que no pisa lo en curso.
+  usarSincronia(setEstado, sincronizar);
 
   // Las mutaciones de fila (alta, completar, mover, aplazar) viven en
   // `usarFilas`: comparten las mismas dependencias y no tocan los paneles.

@@ -20,7 +20,9 @@ import {
   type Cola,
   type Versionada,
 } from './colaEscritura';
+import { avisarOtrasPestanas } from './usarSincronia';
 import type { Estado } from './tiposLista';
+import { sustituirFilas } from '../logica/sincronia';
 
 /** Escritor de una fila: cambia el dato y lo manda. */
 export type Escribir<T> = (id: number, cambiar: (dato: T) => T) => Promise<void>;
@@ -33,6 +35,23 @@ export interface Escritura {
   quitarHabito: (id: number) => void;
   /** Fija la cuenta, cruza sus pendientes con el dashboard que llega, reenvía los vigentes y devuelve las filas a mostrar. */
   abrirCuenta: (correo: string, servidor: Dashboard) => { tareas: Tarea[]; habitos: Habito[] };
+  /** Relectura del servidor: sustituye las filas que no están en curso y devuelve las de la lista. */
+  sincronizar: (previos: Dashboard, servidor: Dashboard) => { tareas: Tarea[]; habitos: Habito[] };
+}
+
+/** Hay trabajo de envío en la fila: algo en vuelo o cambios sin respuesta. */
+function ocupadaCola<T>(mapa: Map<number, Cola<T>>, id: number): boolean {
+  const cola = mapa.get(id);
+  return !!cola && (cola.trabajo !== undefined || cola.cambios.length > 0);
+}
+
+/** Tras una relectura, las colas sin trabajo toman la fila nueva como base: así un cambio
+ *  posterior no se calcula sobre una copia que otra pestaña ya cambió. */
+function tomarBases<T extends Versionada>(mapa: Map<number, Cola<T>>, filas: T[]): void {
+  for (const fila of filas) {
+    const cola = mapa.get(fila.id);
+    if (cola && !ocupadaCola(mapa, fila.id)) cola.base = fila;
+  }
 }
 
 /** La lista con la fila cambiada; sin `dato`, la fila sale de la lista. */
@@ -90,6 +109,8 @@ export function usarEscritura(
         if (dato && pendiente) resto[id] = { copia: dato, baseUpdatedAt: dato.updatedAt };
         else delete resto[id];
         anotar({ tareas: resto });
+        // Sin pendiente, el servidor ya tiene el cambio: las demás pestañas lo relen.
+        if (!pendiente) avisarOtrasPestanas();
       },
       avisar,
     }),
@@ -108,6 +129,7 @@ export function usarEscritura(
         if (dato && pendiente) resto[id] = { copia: dato, baseUpdatedAt: dato.updatedAt };
         else delete resto[id];
         anotar({ habitos: resto });
+        if (!pendiente) avisarOtrasPestanas();
       },
       avisar,
     }),
@@ -131,6 +153,26 @@ export function usarEscritura(
       return { tareas: tareas.filas, habitos: habitos.filas };
     },
     [adaptadorHabitos, adaptadorTareas, avisar, pendientesRef],
+  );
+
+  /** Una fila en curso o con un cambio sin confirmar nunca se sustituye por la relectura. */
+  const sincronizar = useCallback(
+    (previos: Dashboard, servidor: Dashboard) => {
+      const tareas = sustituirFilas(
+        previos.tareas,
+        servidor.tareas,
+        (id) => ocupadaCola(colasTareas.current, id) || pendientesRef.current.tareas[id] !== undefined,
+      );
+      const habitos = sustituirFilas(
+        previos.habitos,
+        servidor.habitos,
+        (id) => ocupadaCola(colasHabitos.current, id) || pendientesRef.current.habitos[id] !== undefined,
+      );
+      tomarBases(colasTareas.current, servidor.tareas);
+      tomarBases(colasHabitos.current, servidor.habitos);
+      return { tareas, habitos };
+    },
+    [pendientesRef],
   );
 
   const escribirTarea = useCallback(
@@ -174,5 +216,5 @@ export function usarEscritura(
     [adaptadorHabitos],
   );
 
-  return { escribirTarea, escribirHabito, quitarTarea, quitarHabito, abrirCuenta };
+  return { escribirTarea, escribirHabito, quitarTarea, quitarHabito, abrirCuenta, sincronizar };
 }
