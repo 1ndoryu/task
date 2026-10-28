@@ -7,6 +7,7 @@
  * El icono de la izquierda dice qué se va a crear: una tarea no lleva la
  * flecha de frecuencia, y el hábito, sí. */
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { usarCierreFuera } from './usarCierreFuera';
 import { FRECUENCIAS, frecuenciaDe } from '../logica/frecuencia';
 import type { NivelPrioridad } from '../logica/importancia';
 import type { ColoresNivel } from '../logica/preferencias';
@@ -159,21 +160,7 @@ function Panel({
   const idPanel = useId();
   const boton = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    if (!abierto) return;
-    const fuera = (evento: Event) => {
-      if (!contenedor.current?.contains(evento.target as Node)) onAbrir(false);
-    };
-    const conEscape = (evento: KeyboardEvent) => {
-      if (evento.key === 'Escape') onAbrir(false);
-    };
-    document.addEventListener('pointerdown', fuera);
-    document.addEventListener('keydown', conEscape);
-    return () => {
-      document.removeEventListener('pointerdown', fuera);
-      document.removeEventListener('keydown', conEscape);
-    };
-  }, [abierto, onAbrir]);
+  usarCierreFuera({ activo: abierto, dentro: [contenedor], alFuera: () => onAbrir(false) });
 
   // El panel se ancla al borde derecho del botón, no del contenedor: así su
   // borde derecho cae en la misma vertical que los iconos de la cabecera.

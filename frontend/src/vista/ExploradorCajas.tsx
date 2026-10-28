@@ -1,13 +1,14 @@
 /* Explorador de cajas: un panel centrado, sin fondo que bloquee, que lista todas
  * las cajas con su icono y su nombre. Pulsar una la enciende o la apaga; la
  * apagada se ve con el icono atenuado. Se cierra con Escape o al pulsar fuera. */
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { alternarCaja, cajaActiva } from '../logica/cajasActivas';
 import type { Panel } from '../logica/paneles';
 import type { Preferencias } from '../logica/preferencias';
 import { IconoCajas } from './Iconos';
 import { iconoDePanel } from './Paneles';
+import { usarCierreFuera } from './usarCierreFuera';
 
 interface Props {
   todos: Panel[];
@@ -22,20 +23,7 @@ export function ExploradorCajas({ todos, preferencias, onCambiar }: Props) {
 
   // Fuera del conjunto botón + panel, o Escape, lo cierran. El panel va a `body`
   // (portal): la barra del carril lleva `transform` y haría de ancla del `fixed`.
-  useEffect(() => {
-    if (!abierto) return;
-    const fuera = (e: PointerEvent) => {
-      const destino = e.target as Node;
-      if (!raiz.current?.contains(destino) && !panel.current?.contains(destino)) setAbierto(false);
-    };
-    const tecla = (e: KeyboardEvent) => e.key === 'Escape' && setAbierto(false);
-    document.addEventListener('pointerdown', fuera);
-    document.addEventListener('keydown', tecla);
-    return () => {
-      document.removeEventListener('pointerdown', fuera);
-      document.removeEventListener('keydown', tecla);
-    };
-  }, [abierto]);
+  usarCierreFuera({ activo: abierto, dentro: [raiz, panel], alFuera: () => setAbierto(false) });
 
   return (
     <div ref={raiz} className="explorador">

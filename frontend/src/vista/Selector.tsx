@@ -13,6 +13,7 @@ import {
   useState,
   type KeyboardEvent as TeclaReact,
 } from 'react';
+import { usarCierreFuera } from './usarCierreFuera';
 
 export interface OpcionSelector {
   id: string;
@@ -135,34 +136,28 @@ export function Selector({ valor, opciones, onElegir, vacio, etiqueta, onCrear }
     if (abierto) filtroRef.current?.focus();
   }, [abierto]);
 
-  // Fuera del selector cierra; desplazar también, porque la caja no acompaña al
-  // contenido que se mueve por debajo.
-  useEffect(() => {
-    if (!abierto) return;
-    const alPulsar = (evento: PointerEvent) => {
-      if (!contenedor.current?.contains(evento.target as Node)) setAbierto(false);
-    };
-    const alDesplazar = (evento: Event) => {
-      // La propia lista también desplaza; solo se cierra si se mueve lo de fuera.
-      if (contenedor.current?.contains(evento.target as Node)) return;
-      setAbierto(false);
-    };
-    const alTeclear = (evento: KeyboardEvent) => {
-      if (evento.key !== 'Escape') return;
-      // Escape cierra el selector, no el modal que lo contiene.
-      evento.preventDefault();
-      evento.stopPropagation();
+  // Fuera del selector o Escape lo cierran (Escape en captura: no cierra también
+  // al modal que lo contiene) y devuelven el foco al botón.
+  usarCierreFuera({
+    activo: abierto,
+    dentro: [contenedor],
+    alFuera: () => setAbierto(false),
+    alEscape: () => {
       setAbierto(false);
       disparador.current?.focus();
+    },
+    capturaEscape: true,
+  });
+
+  // Desplazar también lo cierra, porque la caja no acompaña al contenido que se
+  // mueve por debajo; la propia lista desplaza y no cuenta.
+  useEffect(() => {
+    if (!abierto) return;
+    const alDesplazar = (evento: Event) => {
+      if (!contenedor.current?.contains(evento.target as Node)) setAbierto(false);
     };
-    document.addEventListener('pointerdown', alPulsar);
     window.addEventListener('scroll', alDesplazar, true);
-    window.addEventListener('keydown', alTeclear, true);
-    return () => {
-      document.removeEventListener('pointerdown', alPulsar);
-      window.removeEventListener('scroll', alDesplazar, true);
-      window.removeEventListener('keydown', alTeclear, true);
-    };
+    return () => window.removeEventListener('scroll', alDesplazar, true);
   }, [abierto]);
 
   // La opción activa por teclado se mantiene a la vista.
