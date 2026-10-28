@@ -3,7 +3,7 @@
  * y no tocan paneles ni preferencias; viven aparte para que `usarLista` quede
  * como lo que es: el pegamento entre la carga, la disposición y estas acciones. */
 import { useCallback, type Dispatch, type SetStateAction } from 'react';
-import { fechaLocal } from '../logica/fechas';
+import { hoyLogico } from '../logica/fechas';
 import { anotarGrupos } from '../logica/grupos';
 import { ordenesNuevos } from '../logica/reordenar';
 import { desmarcarHabito, editarHabito, guardarHabito, marcarHabito } from '../logica/habitos';
@@ -67,7 +67,7 @@ export function usarFilas(d: Dependencias) {
       const previas = datosRef.current;
       // Va al final del grupo: el orden manual no se reescribe al dar de alta.
       const ordenAlta = Math.max(-1, ...previas.tareas.map((t) => t.orden ?? 0), ...previas.habitos.map((h) => h.orden ?? 0)) + 1;
-      const fecha = fechaLocal();
+      const fecha = hoyLogico();
       if (nueva.tipo === 'tarea') {
         const tarea: Tarea = {
           id,

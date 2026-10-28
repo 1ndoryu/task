@@ -13,7 +13,7 @@ import {
   useState,
   type KeyboardEvent as TeclaReact,
 } from 'react';
-import { fechaLocal } from '../logica/fechas';
+import { fechaLocal, hoyLogico } from '../logica/fechas';
 
 export interface OpcionSelector {
   id: string;
@@ -317,7 +317,7 @@ const LARGO = new Intl.DateTimeFormat('es-ES', {
 const DIAS = 120;
 
 export function opcionesFecha(elegida: string): OpcionSelector[] {
-  const hoy = fechaLocal();
+  const hoy = hoyLogico();
   const base = new Date(`${hoy}T00:00:00`);
   const opciones: OpcionSelector[] = [{ id: '', etiqueta: 'Sin fecha' }];
   const generadas = new Set<string>();

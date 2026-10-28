@@ -7,6 +7,7 @@ import type { NivelPrioridad } from './importancia';
 import { leerApiladas } from './columnas';
 import { leerMinimizadas } from './minimizadas';
 import { CLAVES_VISTA, MODOS_ORDEN, UMBRALES, type Tolerancia } from './orden';
+import { fijarFinDia } from './fechas';
 import { respaldar } from './preferenciasRemotas';
 
 const CLAVE = CLAVES_VISTA.preferencias;
@@ -93,6 +94,8 @@ export interface Preferencias {
   /** Día (AAAA-MM-DD) en que se reinició la valoración de urgencia; `''` si
    *  nunca. Desde ese día cuenta la inactividad de los hábitos. */
   reinicioUrgencia: string;
+  /** Hora (0–23) en que acaba el día; no mueve los momentos temprano/tarde/noche. */
+  finDia: number;
   /** Talla del texto de las filas, en píxeles. */
   fuente: number;
   /** Talla del texto de las notas, en píxeles: se leen de corrido y piden otra
@@ -223,6 +226,7 @@ const POR_DEFECTO: Preferencias = {
   tolerancia: 'moderado',
   algoritmo: { ...ALGORITMO_DEFECTO },
   reinicioUrgencia: '',
+  finDia: 0,
   fuente: FUENTE_POR_DEFECTO,
   fuenteNota: FUENTE_NOTA_POR_DEFECTO,
   interlineadoNota: 'normal',
@@ -287,6 +291,10 @@ export function leerPreferencias(): Preferencias {
       tolerancia: (texto('tolerancia', Object.keys(UMBRALES)) as Tolerancia | undefined) ?? POR_DEFECTO.tolerancia,
       algoritmo: leerAlgoritmo(guardado.algoritmo),
       reinicioUrgencia: leerFecha(guardado.reinicioUrgencia),
+      finDia:
+        Number.isInteger(guardado.finDia) && (guardado.finDia as number) >= 0 && (guardado.finDia as number) <= 23
+          ? (guardado.finDia as number)
+          : POR_DEFECTO.finDia,
       fuente: leerFuente(guardado.fuente, FUENTES_VIEJAS, POR_DEFECTO.fuente, FUENTE_MINIMA, FUENTE_MAXIMA),
       fuenteNota: leerFuente(
         guardado.fuenteNota,
@@ -313,6 +321,7 @@ export function leerPreferencias(): Preferencias {
 
 export function guardarPreferencias(cambios: Partial<Preferencias>): void {
   const actuales = leerPreferencias();
+  if (cambios.finDia !== undefined) fijarFinDia(cambios.finDia);
   localStorage.setItem(CLAVE, JSON.stringify({ ...actuales, ...cambios }));
   // Cada ajuste deja copia en el servidor: el `localStorage` del webview se
   // vacía con una reinstalación, y la vista no debe volver a la de fábrica.

@@ -4,7 +4,7 @@
 import type { Algoritmo } from './algoritmo';
 import { aplazadoHasta } from './aplazos';
 import { masRecienteHecho } from './completados';
-import { fechaLocal } from './fechas';
+import { fechaLocal, hoyLogico } from './fechas';
 import { tocaHoy, type ConFrecuencia } from './frecuencia';
 import { contarProgreso } from './progreso';
 import {
@@ -105,7 +105,7 @@ export function seleccionar(
     saliendo?: ReadonlySet<string>;
   },
 ): Vista {
-  const hoy = opciones.hoy ?? fechaLocal();
+  const hoy = opciones.hoy ?? hoyLogico();
   const completados = opciones.completados ?? opciones.grupo === PESTANA_COMPLETADOS;
   const grupo = completados ? null : (opciones.grupo ?? null);
   const saliendo = (id: number) => opciones.saliendo?.has(`tarea${id}`) ?? false;

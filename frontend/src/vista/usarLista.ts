@@ -8,7 +8,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { aplazadoHasta } from '../logica/aplazos';
 import type { Columnas } from '../logica/columnas';
 import type { Movimiento } from '../logica/destinoArrastre';
-import { fechaLocal } from '../logica/fechas';
+import { fijarFinDia, hoyLogico } from '../logica/fechas';
 import { editarHabito } from '../logica/habitos';
 import { importanciaDeHabito } from '../logica/importancia';
 import {
@@ -121,7 +121,11 @@ export function usarLista(): Lista {
   const [ajustes, setAjustes] = useState<Preferencias>(preferencias);
   const [ajustesAbiertos, setAjustesAbiertos] = useState(false);
   const [editando, setEditando] = useState<Editando>(null);
-  const [hoy] = useState(() => fechaLocal());
+  // «Hoy» sigue la hora de fin de día: cambiarla en ajustes lo recalcula.
+  const hoy = useMemo(() => {
+    fijarFinDia(ajustes.finDia);
+    return hoyLogico();
+  }, [ajustes.finDia]);
   const [gruposConocidos, setGruposConocidos] = useState<string[]>(leerGruposConocidos);
   // Grupos archivados: nombres que no son paneles pero siguen en sus filas.
   const [gruposArchivados, setGruposArchivados] = useState<string[]>(leerGruposArchivados);

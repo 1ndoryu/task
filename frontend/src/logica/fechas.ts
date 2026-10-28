@@ -8,6 +8,20 @@ export function fechaLocal(ahora: Date = new Date()): string {
   return `${ahora.getFullYear()}-${mes}-${dia}`;
 }
 
+/** Hora (0–23) en que termina el día de la usuaria: con 3, a las 02:59 aún es
+ *  «ayer». Es estado de módulo porque «hoy» se calcula en muchos sitios y todos
+ *  deben coincidir; la fija la preferencia al cargar y al cambiarla. */
+let horaFinDia = 0;
+
+export function fijarFinDia(hora: number): void {
+  horaFinDia = Number.isInteger(hora) && hora >= 0 && hora <= 23 ? hora : 0;
+}
+
+/** El «hoy» de la usuaria: el día natural retrasado `hora` horas. */
+export function hoyLogico(ahora: Date = new Date(), hora: number = horaFinDia): string {
+  return fechaLocal(new Date(ahora.getTime() - hora * 3_600_000));
+}
+
 /** Suma días a una fecha `YYYY-MM-DD` en el calendario local. Se construye con
  *  componentes y no con texto para que el cambio de mes y de año salgan solos. */
 export function sumarDias(fecha: string, dias: number): string {

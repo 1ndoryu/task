@@ -4,7 +4,7 @@
  * (`frontend-legacy/src/app/hooks/useOrdenarTareas.ts` +
  * `useHabitosComoTareas.ts`). Aquí se conservan los mismos pesos y umbrales. */
 import { ALGORITMO_DEFECTO, type Algoritmo, type ClaveAlgoritmo } from './algoritmo';
-import { diferenciaDias, fechaLocal } from './fechas';
+import { diferenciaDias, hoyLogico } from './fechas';
 import { rachaDe, ultimoHecho } from './frecuencia';
 import { nivelDe } from './importancia';
 import { aplicarMomentos, leerMomentos, momentoDe, type Momento } from './momentos';
@@ -187,7 +187,7 @@ const porPrioridad =
 /** Comparador del modo elegido, listo para `Array.sort` sobre entradas. */
 export function comparador(
   modo: ModoOrden,
-  hoy = fechaLocal(),
+  hoy = hoyLogico(),
   algoritmo: Algoritmo = ALGORITMO_DEFECTO,
   momento: Momento = momentoDe(new Date(), algoritmo),
 ): (a: EntradaOrdenable, b: EntradaOrdenable) => number {
