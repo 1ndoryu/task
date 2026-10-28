@@ -32,8 +32,6 @@ export interface CambiosFila {
   grupoEjecucion?: string | null;
   /** Solo hábitos: frecuencia completa; el `tipo` va a la columna del backend. */
   frecuencia?: FrecuenciaDetalle;
-  /** Solo hábitos: la lista entera de subhábitos, dentro del payload. */
-  subhabitos?: SubHabito[];
 }
 
 /** Clave de una fila en el conjunto de salidas: tareas y hábitos comparten id. */

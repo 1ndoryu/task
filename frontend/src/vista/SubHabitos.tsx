@@ -1,7 +1,7 @@
 /* Subhábitos dentro del modal del padre: listar, añadir, renombrar y quitar.
  * No tienen formulario propio —heredan importancia y frecuencia del padre—,
- * igual que el legacy (`ListaSubHabitos`). Viven en el payload del padre, así
- * que cada cambio es un `PUT /api/habits/:id` con la lista entera. */
+ * igual que el legacy (`ListaSubHabitos`). Viven en el payload del padre: cada
+ * cambio es un `PUT /api/habits/:id`, y el padre lo aplica sobre su copia viva. */
 import { useState } from 'react';
 import { hechoHoy } from '../logica/seleccion';
 import type { SubHabito } from '../logica/tipos';
@@ -12,19 +12,21 @@ interface Props {
   subhabitos: SubHabito[];
   /** Día de hoy: decide qué subhábito sale marcado. */
   hoy: string;
-  /** Recibe la lista completa, ya con el cambio aplicado. */
-  onCambiar: (subhabitos: SubHabito[]) => void;
+  /** Opera sobre la lista viva del padre; no recibe una copia que pueda ir atrasada. */
+  onOperar: (operar: (lista: SubHabito[]) => SubHabito[]) => void;
   /** Marca o desmarca el subhábito de hoy (lo escribe el padre). */
   onCompletar: (subhabito: SubHabito) => void;
 }
 
-export function SubHabitos({ subhabitos, hoy, onCambiar, onCompletar }: Props) {
+export function SubHabitos({ subhabitos, hoy, onOperar, onCompletar }: Props) {
   const [nuevo, setNuevo] = useState('');
 
   const agregar = () => {
     const nombre = nuevo.trim();
     if (!nombre) return;
-    onCambiar([...subhabitos, { id: idNuevo(), nombre }]);
+    // El id se fija fuera: si la escritura se reaplica tras un 409, no cambia.
+    const id = idNuevo();
+    onOperar((lista) => [...lista, { id, nombre }]);
     setNuevo('');
   };
 
@@ -32,7 +34,7 @@ export function SubHabitos({ subhabitos, hoy, onCambiar, onCompletar }: Props) {
     const limpio = nombre.trim();
     // Un subhábito sin nombre se pinta como fantasma: se conserva el anterior.
     if (!limpio) return;
-    onCambiar(subhabitos.map((s) => (s.id === id ? { ...s, nombre: limpio } : s)));
+    onOperar((lista) => lista.map((s) => (s.id === id ? { ...s, nombre: limpio } : s)));
   };
 
   return (
@@ -69,7 +71,7 @@ export function SubHabitos({ subhabitos, hoy, onCambiar, onCompletar }: Props) {
                   className="subhabitos__quitar"
                   aria-label={`Quitar ${sub.nombre}`}
                   title="Quitar"
-                  onClick={() => onCambiar(subhabitos.filter((s) => s.id !== sub.id))}
+                  onClick={() => onOperar((lista) => lista.filter((s) => s.id !== sub.id))}
                 >
                   <IconoBorrar />
                 </button>

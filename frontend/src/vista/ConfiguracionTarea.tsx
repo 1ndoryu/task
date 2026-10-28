@@ -8,7 +8,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { frecuenciaDe } from '../logica/frecuencia';
 import { leerMomentos } from '../logica/momentos';
 import type { ColoresNivel } from '../logica/preferencias';
-import type { Proyecto } from '../logica/tipos';
+import type { Proyecto, SubHabito } from '../logica/tipos';
 import { grupoDe, prioridadDe } from './accionesFila';
 import { FrecuenciaCampos } from './FrecuenciaCampos';
 import { MomentosCampo } from './MomentosCampo';
@@ -68,12 +68,25 @@ interface Props {
   /** Día de hoy y marca de un subhábito: el panel de subhábitos los usa. */
   hoy: string;
   onCompletar: (fila: NonNullable<Editando>) => void;
+  /** Cambia los subhábitos del padre con una operación sobre su copia viva. */
+  onOperarSubhabitos: (padreId: number, operar: (lista: SubHabito[]) => SubHabito[]) => void;
   /** Abre el selector de lo que debe hacerse antes de la fila. */
   onDependencias: (fila: NonNullable<Editando>) => void;
   onCerrar: () => void;
 }
 
-export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar, hoy, onCompletar, onDependencias, onCerrar }: Props) {
+export function ConfiguracionTarea({
+  fila,
+  proyectos,
+  grupos,
+  colores,
+  onGuardar,
+  hoy,
+  onCompletar,
+  onOperarSubhabitos,
+  onDependencias,
+  onCerrar,
+}: Props) {
   const dialogo = useRef<HTMLDialogElement>(null);
   const [borrador, setBorrador] = useState<CambiosFilaForm | null>(fila ? borradorDe(fila) : null);
   // El nombre se edita en un `input` controlado: sin él, el cursor salta al
@@ -248,7 +261,7 @@ export function ConfiguracionTarea({ fila, proyectos, grupos, colores, onGuardar
               <SubHabitos
                 subhabitos={fila.habito.subhabitos ?? []}
                 hoy={hoy}
-                onCambiar={(subhabitos) => aplicar({ subhabitos })}
+                onOperar={(operar) => onOperarSubhabitos(fila.habito.id, operar)}
                 onCompletar={(subhabito) => onCompletar({ tipo: 'subhabito', subhabito, padre: fila.habito })}
               />
             )}

@@ -167,6 +167,7 @@ export function Lista() {
       onGuardar={guardarCambios}
       hoy={lista.hoy}
       onCompletar={lista.completar}
+      onOperarSubhabitos={lista.operarSubhabitos}
       onCerrarEdicion={() => lista.abrirEdicion(null)}
       dependenciasDe={vista.dependenciasDe}
       datos={datos}

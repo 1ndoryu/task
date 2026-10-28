@@ -18,7 +18,7 @@ import { guardarPreferencias, leerPreferencias, type Preferencias } from '../log
 import { subirTodo } from '../logica/preferenciasRemotas';
 import type { Pendientes } from '../logica/store';
 import { editarTarea } from '../logica/tareas';
-import type { Dashboard, RefDependencia } from '../logica/tipos';
+import type { Dashboard, RefDependencia, SubHabito } from '../logica/tipos';
 import type { NuevaFila } from './NuevaFila';
 import type { CambiosFila, Editando, Estado } from './tiposLista';
 import { usarAccionesPaneles } from './usarAccionesPaneles';
@@ -96,8 +96,8 @@ export interface Lista {
   editarHabito: (id: number, cambios: CambiosFila) => void;
   borrarTarea: (id: number) => void;
   borrarHabito: (id: number) => void;
-  /** Quita un subhábito del payload de su padre. */
-  borrarSubhabito: (padreId: number, subId: number) => void;
+  /** Cambia la lista de subhábitos del padre con una operación sobre la copia viva. */
+  operarSubhabitos: (padreId: number, operar: (lista: SubHabito[]) => SubHabito[]) => void;
   /** Mueve una fila de grupo desde el menú de la fila. */
   moverGrupo: (fila: NonNullable<Editando>, grupo: string | null) => void;
   /** Aplaza un hábito hasta `hasta`; `null` le quita el aplazo. */
@@ -305,17 +305,16 @@ export function usarLista(avisar: (texto: string) => void): Lista {
           grupoEjecucion: cambios.grupoEjecucion,
           momentos: cambios.momentos,
           frecuencia: cambios.frecuencia,
-          subhabitos: cambios.subhabitos,
         }),
       );
     },
     borrarTarea: quitarTarea,
     borrarHabito: quitarHabito,
-    // El subhábito solo existe dentro del payload del padre: borrarlo es un
-    // PUT de ese padre con la lista sin él. No hay borrado optimista: el
-    // estado lo aplica la propia escritura al momento.
-    borrarSubhabito: (padreId, subId) => {
-      void escribirHabito(padreId, (h) => ({ ...h, subhabitos: (h.subhabitos ?? []).filter((s) => s.id !== subId) }));
+    // El subhábito solo existe dentro del payload del padre: cada cambio es un
+    // PUT de ese padre. La operación se aplica sobre el hábito vivo y no sobre
+    // una copia del modal, así no pisa lo que otra pestaña ya marcó.
+    operarSubhabitos: (padreId, operar) => {
+      void escribirHabito(padreId, (h) => ({ ...h, subhabitos: operar(h.subhabitos ?? []) }));
     },
     moverGrupo,
     aplazar,

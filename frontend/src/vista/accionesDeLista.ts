@@ -37,7 +37,6 @@ export function accionesDeLista(lista: Lista, abrirDependencias: (objetivo: RefD
         grupoEjecucion: grupo,
         momentos: cambios.momentos,
         frecuencia: cambios.frecuencia,
-        subhabitos: cambios.subhabitos,
       });
     }
   };
@@ -48,7 +47,7 @@ export function accionesDeLista(lista: Lista, abrirDependencias: (objetivo: RefD
     borrar: (fila) => {
       if (fila.tipo === 'tarea') lista.borrarTarea(fila.tarea.id);
       else if (fila.tipo === 'habito') lista.borrarHabito(fila.habito.id);
-      else lista.borrarSubhabito(fila.padre.id, fila.subhabito.id);
+      else lista.operarSubhabitos(fila.padre.id, (subs) => subs.filter((s) => s.id !== fila.subhabito.id));
     },
     prioridad: (fila, prioridad) => {
       // El subhábito hereda el nivel: se cambia en el padre, no aquí.

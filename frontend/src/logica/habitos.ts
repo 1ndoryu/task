@@ -6,7 +6,7 @@ import { pedir } from './cliente';
 import { frecuenciaDe } from './frecuencia';
 import { importanciaDeHabito } from './importancia';
 import { leerMomentos, type Momento } from './momentos';
-import type { FrecuenciaDetalle, Habito, RespuestaEscritura, SubHabito } from './tipos';
+import type { FrecuenciaDetalle, Habito, RespuestaEscritura } from './tipos';
 
 /** Cuerpo que espera `UpsertHabitRequest` en Rust (camelCase). */
 function habitoARequest(habito: Habito): Record<string, unknown> {
@@ -59,8 +59,6 @@ export function editarHabito(
     frecuencia?: FrecuenciaDetalle;
     /** Si falta, los momentos se quedan como estaban; vacío los quita. */
     momentos?: Momento[];
-    /** Si falta, los subhábitos se quedan como estaban: son del payload. */
-    subhabitos?: SubHabito[];
   },
 ): Habito {
   const editado: Habito = {
@@ -74,7 +72,6 @@ export function editarHabito(
       cambios.frecuencia === undefined
         ? habito.frecuencia
         : { ...(typeof habito.frecuencia === 'object' && habito.frecuencia !== null ? habito.frecuencia : {}), ...cambios.frecuencia },
-    subhabitos: cambios.subhabitos ?? habito.subhabitos,
   };
   // Vacío no se guarda: sin momentos el hábito no tiene preferencia.
   const momentos = cambios.momentos === undefined ? habito.momentos : leerMomentos(cambios.momentos);

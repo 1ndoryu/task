@@ -3,7 +3,7 @@
  * Están juntos porque se abren desde sitios distintos —la barra, el menú del
  * panel y la propia fila— y así la vista no los reparte por sus ramas. */
 import { useMemo } from 'react';
-import type { Dashboard, Proyecto, RefDependencia } from '../logica/tipos';
+import type { Dashboard, Proyecto, RefDependencia, SubHabito } from '../logica/tipos';
 import type { ColoresNivel, Preferencias } from '../logica/preferencias';
 import { Ajustes } from './Ajustes';
 import { ConfiguracionTarea } from './ConfiguracionTarea';
@@ -33,6 +33,7 @@ interface Props {
   /** Marca un subhábito de hoy; `hoy` decide cuál es «hecho». */
   hoy: string;
   onCompletar: (fila: NonNullable<Editando>) => void;
+  onOperarSubhabitos: (padreId: number, operar: (lista: SubHabito[]) => SubHabito[]) => void;
   onCerrarEdicion: () => void;
   /** Fila de la que sale el hilo de una dependencia (`null`: no se enlaza) y cómo se guarda. */
   dependenciasDe: RefDependencia | null;
@@ -63,6 +64,7 @@ export function Modales({
   onGuardar,
   hoy,
   onCompletar,
+  onOperarSubhabitos,
   onCerrarEdicion,
   dependenciasDe,
   datos,
@@ -102,6 +104,7 @@ export function Modales({
         onGuardar={onGuardar}
         hoy={hoy}
         onCompletar={onCompletar}
+        onOperarSubhabitos={onOperarSubhabitos}
         onDependencias={(fila) => {
           if (fila.tipo === 'tarea') onAbrirDependencias({ tipo: 'tarea', id: fila.tarea.id });
           else if (fila.tipo === 'habito') onAbrirDependencias({ tipo: 'habito', id: fila.habito.id });
