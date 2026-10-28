@@ -7,7 +7,7 @@ import type { ColoresNivel, Preferencias } from '../logica/preferencias';
 import { Ajustes } from './Ajustes';
 import { ConfiguracionTarea } from './ConfiguracionTarea';
 import { ConfirmarPanel, type Borrado } from './ConfirmarPanel';
-import { ModalDependencias } from './ModalDependencias';
+import { EnlaceDependencia } from './EnlaceDependencia';
 import type { CambiosFilaForm } from './opcionesFila';
 import { PanelGrupos } from './PanelGrupos';
 import type { Editando } from './usarLista';
@@ -29,7 +29,7 @@ interface Props {
   colores: ColoresNivel;
   onGuardar: (fila: NonNullable<Editando>, cambios: CambiosFilaForm) => void;
   onCerrarEdicion: () => void;
-  /** Fila cuyas dependencias se eligen (`null`: cerrado) y cómo se guardan. */
+  /** Fila de la que sale el hilo de una dependencia (`null`: no se enlaza) y cómo se guarda. */
   dependenciasDe: RefDependencia | null;
   datos: Dashboard;
   onAbrirDependencias: (objetivo: RefDependencia | null) => void;
@@ -94,12 +94,14 @@ export function Modales({
         onDependencias={(fila) => {
           if (fila.tipo === 'tarea') onAbrirDependencias({ tipo: 'tarea', id: fila.tarea.id });
           else if (fila.tipo === 'habito') onAbrirDependencias({ tipo: 'habito', id: fila.habito.id });
+          // El hilo se tira sobre la lista: la configuración no puede tapar las filas.
+          onCerrarEdicion();
         }}
         onCerrar={onCerrarEdicion}
       />
 
-      <ModalDependencias
-        objetivo={dependenciasDe}
+      <EnlaceDependencia
+        origen={dependenciasDe}
         datos={datos}
         onCambiar={onDependencias}
         onCerrar={() => onAbrirDependencias(null)}

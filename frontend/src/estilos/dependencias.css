@@ -30,67 +30,19 @@
   color: var(--sangre);
 }
 
-.dependencias__elegidas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+/* El aviso mientras se tira del hilo: abajo y centrado, sin tapar las filas. */
+.enlace__ayuda {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  z-index: 36;
   margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.dependencias__lista {
-  max-height: 40vh;
-  margin: 0;
-  padding: 0;
-  overflow-y: auto;
-  list-style: none;
-}
-
-.dependencias__opcion {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  width: 100%;
-  padding: 6px 8px;
-  border: 0;
-  border-radius: var(--redondoChico);
-  background: transparent;
-  color: var(--tinta);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.dependencias__opcion:hover:not(:disabled),
-.dependencias__opcion:focus-visible {
+  padding: 6px 12px;
+  border: 1px solid var(--sangre);
+  border-radius: var(--redondo);
   background: var(--panel);
-}
-
-/* Marcada: el aro rojo la une al hilo que dibuja. */
-.dependencias__opcion[aria-pressed='true'] {
-  box-shadow: inset 0 0 0 1px var(--sangre);
-}
-
-.dependencias__opcion:disabled {
-  color: var(--tinta-tenue);
-  cursor: not-allowed;
-}
-
-.dependencias__tipo {
-  flex: none;
-  color: var(--tinta-tenue);
+  color: var(--tinta);
   font-size: var(--texto-nota);
-}
-
-.dependencias__nombre {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.dependencias__vacio {
-  padding: 6px 8px;
-  color: var(--tinta-tenue);
+  transform: translateX(-50%);
+  pointer-events: none;
 }

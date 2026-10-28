@@ -21,7 +21,7 @@ const CAIDA_BASE = 28;
 const CAIDA_POR_PX = 0.3;
 
 /** Centro de la marca de una fila, o `null` si no se ve entera dentro de su caja. */
-function puntoDe(clave: string): { x: number; y: number } | null {
+export function puntoDe(clave: string): { x: number; y: number } | null {
   const marca = document.querySelector<HTMLElement>(`[data-fila="${clave}"] .fila__marca`);
   if (!marca || marca.offsetParent === null) return null;
   const r = marca.getBoundingClientRect();

@@ -89,7 +89,7 @@ export function opcionesFila(
           },
         ]
       : []),
-    { id: 'dependencias', etiqueta: 'Dependencias…', accion: true, icono: <IconoDependencias /> },
+    { id: 'dependencias', etiqueta: 'Enlazar con otra fila…', accion: true, icono: <IconoDependencias /> },
     { id: 'grupo', etiqueta: 'Grupo', icono: <IconoCarpeta />, hijos: gruposMenu(grupos, grupoDe(fila)) },
     {
       id: 'prioridad',
