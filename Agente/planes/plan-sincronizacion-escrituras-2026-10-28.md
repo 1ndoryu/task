@@ -35,6 +35,8 @@ Orden: F1 → F2 → F3 → F4 → F6 → F5 → F7 (F6 tras F1 para no volver a
 - Refresco al enfocar, no tiempo real: basta para una persona con varias pestañas.
 - Las pendientes viejas se descartan con aviso en vez de reenviarse a ciegas: perder un cambio offline avisado es mejor que borrar datos nuevos sin aviso.
 - Endurecer el servidor (versión obligatoria) solo cuando no quede cliente sin versión.
+- F6 (decidido por la usuaria): no reescribir los subhábitos de MN INMOBILIARIA. Los respaldos `task-20261028-0533.dump` y `89-glory.dump` no los contienen; solo tienen los de «Proyecto Ikarus» (6) y «Proyecto Wan» (3), con su historial intacto.
+- F5 (decidido por la usuaria): darle versión al legacy de 14190, no retirarlo. Pendiente: `frontend-legacy` manda `expectedUpdatedAt: null` y el payload completo; y las herramientas del agente (`src/agent/tools.rs`) mandan `payload: {}` al actualizar, lo que borra los subhábitos del payload. Eso se corrige con lectura-merge-escritura en transacción.
 
 ## Riesgos
 
