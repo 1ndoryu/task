@@ -118,7 +118,8 @@ export interface Lista {
   borrarGrupo: (nombre: string, conFilas: boolean) => void;
 }
 
-export function usarLista(): Lista {
+/** `avisar` lo pone la vista (su aviso breve): aquí solo llega a las filas. */
+export function usarLista(avisar: (texto: string) => void): Lista {
   const preferencias = useMemo(leerPreferencias, []);
   const [orden, setOrden] = useState(preferencias.orden as ModoOrden);
   const [grupo, setGrupo] = useState(preferencias.grupo);
@@ -189,7 +190,7 @@ export function usarLista(): Lista {
     setGruposConocidos,
     setSaliendo,
     anotar,
-    escribirTarea, escribirHabito,
+    escribirTarea, escribirHabito, avisar,
     hoy,
   });
 

@@ -21,8 +21,10 @@
   opacity: 0.85;
 }
 
-/* El aviso mientras se tira del hilo: abajo y centrado, sin tapar las filas. */
-.enlace__ayuda {
+/* El aviso mientras se tira del hilo y el de lo que falta antes de completar:
+ * abajo y centrado, sin tapar las filas. */
+.enlace__ayuda,
+.toast {
   position: fixed;
   bottom: 16px;
   left: 50%;

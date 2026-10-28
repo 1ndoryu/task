@@ -82,3 +82,15 @@ export function requisitosPendientes(
 ): RefDependencia[] {
   return dependenciasDe(datos, ref).filter((r) => hecho(r) === false);
 }
+
+/** Texto de una fila por su referencia, o `''` si ya no existe. */
+export function textoDeFila(datos: Dashboard, ref: RefDependencia): string {
+  if (ref.tipo === 'tarea') return datos.tareas.find((t) => t.id === ref.id)?.texto ?? '';
+  return datos.habitos.find((h) => h.id === ref.id)?.nombre ?? '';
+}
+
+/** Lo que el aviso dice al bloquear: «Antes hay que hacer: «a», «b».». */
+export function mensajeFalta(datos: Dashboard, faltan: RefDependencia[]): string {
+  const nombres = faltan.map((r) => `«${textoDeFila(datos, r)}»`).join(', ');
+  return `Antes hay que hacer: ${nombres}.`;
+}

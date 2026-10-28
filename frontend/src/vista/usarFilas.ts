@@ -9,6 +9,7 @@ import { ordenesNuevos } from '../logica/reordenar';
 import { desmarcarHabito, editarHabito, guardarHabito, marcarHabito } from '../logica/habitos';
 import { importanciaDeHabito } from '../logica/importancia';
 import { hechoHoy } from '../logica/seleccion';
+import { mensajeFalta } from '../logica/dependencias';
 import { faltaAntes } from './requisitos';
 import type { Pendientes } from '../logica/store';
 import { alternarCompletado, editarTarea, guardarTarea } from '../logica/tareas';
@@ -28,12 +29,14 @@ interface Dependencias {
   anotar: (cambios: Partial<Pendientes>) => void;
   escribirTarea: (id: number, cambiar: (tarea: Tarea) => Tarea) => Promise<void>;
   escribirHabito: (id: number, cambiar: (habito: Habito) => Habito) => Promise<void>;
+  /** Aviso al usuario: aquí, lo que falta antes de poder completar una fila. */
+  avisar: (texto: string) => void;
   hoy: string;
 }
 
 /** Las acciones que cambian una fila, ya atadas a sus dependencias. */
 export function usarFilas(d: Dependencias) {
-  const { datosRef, pendientesRef, setEstado, setGruposConocidos, setSaliendo, anotar, escribirTarea, escribirHabito, hoy } = d;
+  const { datosRef, pendientesRef, setEstado, setGruposConocidos, setSaliendo, anotar, escribirTarea, escribirHabito, avisar, hoy } = d;
 
   /** Recuerda el grupo de una fila, para que la pestaña no desaparezca al mover
    * la última fila. */
@@ -136,7 +139,11 @@ export function usarFilas(d: Dependencias) {
       const quedaHecha = fila.tipo === 'tarea' ? !fila.tarea.completado : !hechoHoy(fila.habito, hoy);
       // Un requisito sin hacer impide completar; desmarcar siempre se puede. La fila ya muestra el «antes: …».
       const ref: RefDependencia = fila.tipo === 'tarea' ? { tipo: 'tarea', id: fila.tarea.id } : { tipo: 'habito', id: fila.habito.id };
-      if (quedaHecha && faltaAntes(datosRef.current, ref, hoy).length) return;
+      const faltan = quedaHecha ? faltaAntes(datosRef.current, ref, hoy) : [];
+      if (faltan.length) {
+        avisar(mensajeFalta(datosRef.current, faltan));
+        return;
+      }
       // Solo sale de la lista la tarea: el hábito se queda todo el día, tachado,
       // así que animarle la salida sería un parpadeo sin efecto.
       if (quedaHecha && fila.tipo === 'tarea') {
@@ -171,7 +178,7 @@ export function usarFilas(d: Dependencias) {
         /* Queda en memoria: la próxima carga lo trae del servidor. */
       });
     },
-    [escribirTarea, escribirHabito, hoy],
+    [escribirTarea, escribirHabito, avisar, hoy],
   );
 
   /** Aplazar escribe las dos mitades que el legacy dejó: la fecha de vuelta en

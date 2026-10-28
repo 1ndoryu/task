@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { alternarDependencia, cierraCiclo, hilosPendientes, leerDependencias, requisitosPendientes } from '../src/logica/dependencias.ts';
+import { alternarDependencia, cierraCiclo, hilosPendientes, leerDependencias, mensajeFalta, requisitosPendientes } from '../src/logica/dependencias.ts';
 import type { Dashboard } from '../src/logica/tipos.ts';
 
 const datos = {
@@ -51,4 +51,9 @@ test('requisitosPendientes devuelve solo lo que aún no está hecho', () => {
   assert.deepEqual(requisitosPendientes(datos, { tipo: 'tarea', id: 1 }, () => undefined), []);
   // Fila inexistente: nada que esperar.
   assert.deepEqual(requisitosPendientes(datos, { tipo: 'tarea', id: 99 }, () => false), []);
+});
+
+test('mensajeFalta nombra lo que falta con su texto o su nombre', () => {
+  assert.equal(mensajeFalta(datos, [{ tipo: 'tarea', id: 2 }]), 'Antes hay que hacer: «b».');
+  assert.equal(mensajeFalta(datos, [{ tipo: 'tarea', id: 2 }, { tipo: 'habito', id: 7 }]), 'Antes hay que hacer: «b», «h».');
 });

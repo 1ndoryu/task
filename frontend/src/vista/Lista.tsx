@@ -31,11 +31,13 @@ import { usarLista } from './usarLista';
 import { VIDRIO_INICIAL } from './ConfigVidrio';
 import { Cristal } from './Cristal';
 import { usarVista } from './usarVista';
+import { usarAviso } from './usarAviso';
 
 export function Lista() {
   // Parámetros del cristal de la barra y del panel de Cajas (ver Cristal.tsx).
   const vidrio = VIDRIO_INICIAL;
-  const lista = usarLista();
+  const [aviso, avisar] = usarAviso();
+  const lista = usarLista(avisar);
   // Lo que no es dato de la lista: qué menú, modal o renombrado está abierto.
   const vista = usarVista({
     renombrarPanel: lista.renombrarPanel,
@@ -175,6 +177,8 @@ export function Lista() {
     />
   );
   const hilos = <HilosDependencias hilos={requisitos.hilos} />;
+  // Aviso de lo que falta antes de completar: abajo, sin tapar la lista.
+  const toast = aviso && <p className="toast" role="status" aria-live="polite">{aviso}</p>;
 
   /** Lo que va dentro de una caja, según su tipo. Cada panel lo pinta
    *  `ContenidoPanel`; aquí solo se le pasan los datos y los ayudantes. */
@@ -262,6 +266,7 @@ export function Lista() {
         />
         {modales}
         {hilos}
+        {toast}
       </main>
     );
   }
@@ -317,6 +322,7 @@ export function Lista() {
       </section>
       {modales}
       {hilos}
+      {toast}
     </main>
   );
 }
