@@ -291,3 +291,26 @@ export function IconoRestaurar({ tam = 10 }: PropsIcono) {
     </svg>
   );
 }
+
+/** Cajas: cuatro baldosas, el explorador de todas las cajas. */
+export function IconoCajas({ tam = 12 }: PropsIcono) {
+  return (
+    <svg
+      width={tam}
+      height={tam}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+      <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
+      <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+      <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+    </svg>
+  );
+}

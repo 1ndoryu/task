@@ -184,7 +184,7 @@ body {
 .barra--superior {
   position: absolute;
   right: 0;
-  bottom: calc(100% + 0.4rem);
+  top: calc(100% + 0.4rem);
   justify-content: flex-end;
   padding: 0;
 }

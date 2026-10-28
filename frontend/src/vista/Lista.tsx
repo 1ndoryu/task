@@ -133,6 +133,7 @@ export function Lista() {
       onCambiar={lista.cambiarPreferencias}
       ajustesAbiertos={lista.ajustesAbiertos}
       onAbrirAjustes={lista.abrirAjustes}
+      todosPaneles={lista.todosPaneles}
     />
   );
 

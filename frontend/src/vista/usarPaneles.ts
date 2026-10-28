@@ -15,6 +15,8 @@ import type { Estado } from './tiposLista';
 
 export interface Disposicion {
   paneles: Panel[];
+  /** Todas las cajas que existen, también las apagadas: es lo que lista el explorador. */
+  todos: Panel[];
   /** Solo los grupos, por su nombre: para menús que no admiten notas. */
   grupos: string[];
   /** Pestaña activa, ya saneada: una que no existe cae a «Tareas». */
@@ -55,7 +57,7 @@ export function usarPaneles(d: Dependencias): Disposicion {
   // Los paneles incluyen los grupos que hoy solo existen en memoria (guardados),
   // los que aparecen en los datos y las notas, en una sola lista ordenada: para
   // la vista no hay diferencia entre una fuente de paneles y otra.
-  const paneles = useMemo(() => {
+  const todos = useMemo(() => {
     const presentes =
       estado.fase === 'listo'
         ? [...estado.datos.tareas, ...estado.datos.habitos].map((f) => f.grupoEjecucion ?? null)
@@ -68,8 +70,9 @@ export function usarPaneles(d: Dependencias): Disposicion {
       gruposArchivados,
       ajustes.separarHabitos,
       hayAplazados,
-      ajustes.mostrarCompletados,
-      ajustes.mostrarDiario,
+      // Completados y Diario se piden siempre: apagados siguen en el explorador.
+      true,
+      true,
     );
   }, [
     estado,
@@ -79,9 +82,20 @@ export function usarPaneles(d: Dependencias): Disposicion {
     gruposArchivados,
     ajustes.separarHabitos,
     hayAplazados,
-    ajustes.mostrarCompletados,
-    ajustes.mostrarDiario,
   ]);
+
+  // Lo que se pinta: fuera lo apagado en el explorador y, en los dos de sistema
+  // con ajuste propio, lo que esté apagado en Ajustes.
+  const paneles = useMemo(
+    () =>
+      todos.filter(
+        (p) =>
+          !ajustes.ocultas.includes(p.id) &&
+          (p.tipo !== 'completados' || ajustes.mostrarCompletados) &&
+          (p.tipo !== 'diario' || ajustes.mostrarDiario),
+      ),
+    [todos, ajustes.ocultas, ajustes.mostrarCompletados, ajustes.mostrarDiario],
+  );
 
   // Solo los grupos: los menús de la fila y el alta no admiten una nota.
   const grupos = useMemo(() => paneles.filter((p) => p.tipo === 'tareas' && !p.fija).map((p) => p.id), [paneles]);
@@ -184,6 +198,7 @@ export function usarPaneles(d: Dependencias): Disposicion {
 
   return {
     paneles,
+    todos,
     grupos,
     grupoActivo,
     nombresConocidos,

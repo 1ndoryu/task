@@ -39,21 +39,20 @@
  * centrada y escribe `--alto-barra-carril`; si no llega, cae a 1.9rem. */
 .barra--carril {
   position: absolute;
-  /* Apoyada sobre el borde superior de la pieza, sin saber cuánto mide ella:
-   * se ancla por abajo y sube entera. Así un cambio de alto o de fuente no la
-   * descoloca, y el aire de su relleno queda entre los iconos y la caja. */
+  /* Colgada del borde inferior de la pieza centrada: el aire de su relleno
+   * queda entre la caja y los iconos. */
   top: calc(
-    (var(--alto-carril, 100%) - var(--alto-pieza-carril, var(--alto-cajas))) / 2
+    (var(--alto-carril, 100%) + var(--alto-pieza-carril, var(--alto-cajas))) / 2
   );
   left: 50%;
   z-index: 5;
   width: min(var(--ancho-pieza-carril, var(--ancho)), calc(100% - 2.5rem));
-  transform: translate(-50%, -100%);
+  transform: translateX(-50%);
   /* En el carril los iconos van centrados sobre la caja: la barra se mueve con
    * la pieza centrada, así que el centro de la pantalla es su centro, y el ojo
    * los encuentra sin buscarlos en una esquina. */
   justify-content: center;
-  padding: 0 0 0.5rem;
+  padding: 0.5rem 0 0;
 }
 
 /* Nombre del grupo, con la talla y el aire de una pestaña. */
@@ -606,4 +605,78 @@
     left: 0;
     width: min(15rem, calc(100vw - 2rem));
   }
+}
+
+/* Explorador de cajas: panel centrado en la ventana, sin fondo que tape: se
+ * puede seguir tocando la lista con él abierto. La caja apagada atenúa su
+ * icono y su nombre. */
+.explorador {
+  display: inline-flex;
+}
+
+.menu__panel.explorador__panel {
+  position: fixed;
+  top: 50%;
+  right: auto;
+  left: 50%;
+  z-index: 40;
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: min(26rem, calc(100vh - 4rem));
+  overflow-y: auto;
+  transform: translate(-50%, -50%);
+}
+
+.explorador__titulo {
+  margin: 0 0 0.4rem;
+  padding: 0 0.4rem;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-etiqueta);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.explorador__lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.explorador__caja {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.6rem 0.3rem;
+  color: var(--tinta);
+  background: transparent;
+  border: 0;
+  border-radius: var(--redondoChico);
+  cursor: pointer;
+}
+
+.explorador__caja:hover,
+.explorador__caja:focus-visible {
+  background: var(--fondo);
+}
+
+.explorador__caja--apagada .explorador__icono,
+.explorador__caja--apagada .explorador__nombre {
+  opacity: 0.35;
+}
+
+.explorador__icono svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.explorador__nombre {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: var(--texto-etiqueta);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

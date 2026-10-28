@@ -49,6 +49,8 @@ export interface Lista {
   /** Paneles de la vista: «Tareas», grupos y notas en el orden guardado, y
    *  «Completados». Es lo único que la vista recorre. */
   paneles: Panel[];
+  /** Todas las cajas, también las apagadas (explorador de cajas). */
+  todosPaneles: Panel[];
   /** Solo los grupos, por su nombre: para menús que no admiten notas. */
   grupos: string[];
   /** Las cajas en columnas (una pila = varias en la misma columna). */
@@ -276,6 +278,7 @@ export function usarLista(): Lista {
     cambiarOrdenCaja,
     grupo: paneles.grupoActivo,
     paneles: paneles.paneles,
+    todosPaneles: paneles.todos,
     grupos: paneles.grupos,
     columnas: paneles.columnas,
     moverPanel: paneles.moverPanel,

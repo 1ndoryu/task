@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import type { Panel } from '../logica/paneles';
 import { MODOS_ORDEN, type ModoOrden } from '../logica/orden';
 import type { Preferencias } from '../logica/preferencias';
+import { ExploradorCajas } from './ExploradorCajas';
 import { IconoAjustes, IconoCarpeta, IconoNota, IconoOrden, IconoPrivacidad, IconoTema } from './Iconos';
 import { Menu } from './Menu';
 import { IconoFecha, IconoOrdenInteligente, IconoOrdenManual, IconoPrioridad } from './MenuOpciones';
@@ -30,6 +31,8 @@ interface Props {
   onCambiar: (cambios: Partial<Preferencias>) => void;
   ajustesAbiertos: boolean;
   onAbrirAjustes: (abiertos: boolean) => void;
+  /** Todas las cajas, también las apagadas, para el explorador. */
+  todosPaneles: Panel[];
 }
 
 export function AccionesBarra({
@@ -43,13 +46,14 @@ export function AccionesBarra({
   onCambiar,
   ajustesAbiertos,
   onAbrirAjustes,
+  todosPaneles,
 }: Props) {
   const { tema, privacidad } = preferencias;
   return (
     <div className="barra__acciones">
       {!enCajas && (
         <Menu
-          etiqueta={<IconoOrden />}
+          etiqueta={<IconoOrden tam={13} />}
           titulo={`Ordenar la lista: ${MODOS_ORDEN.find((m) => m.id === orden)?.etiqueta ?? ''}`}
           items={MODOS_ORDEN.map((modo) => ({
             id: modo.id,
@@ -68,7 +72,7 @@ export function AccionesBarra({
         title="Nueva nota"
         onClick={onNota}
       >
-        <IconoNota />
+        <IconoNota tam={13} />
       </button>
       <button
         type="button"
@@ -79,8 +83,9 @@ export function AccionesBarra({
         title="Grupos"
         onClick={onAbrirGrupos}
       >
-        <IconoCarpeta />
+        <IconoCarpeta tam={13} />
       </button>
+      <ExploradorCajas todos={todosPaneles} preferencias={preferencias} onCambiar={onCambiar} />
       <button
         type="button"
         className="barra__boton barra__icono"
@@ -89,7 +94,7 @@ export function AccionesBarra({
         title={privacidad ? 'Privacidad: activa' : 'Modo privacidad'}
         onClick={() => onCambiar({ privacidad: !privacidad })}
       >
-        <IconoPrivacidad oculto={privacidad} />
+        <IconoPrivacidad tam={13} oculto={privacidad} />
       </button>
       <button
         type="button"
@@ -99,7 +104,7 @@ export function AccionesBarra({
         title={tema === 'oscuro' ? 'Vista clara' : 'Modo oscuro'}
         onClick={() => onCambiar({ tema: tema === 'oscuro' ? 'claro' : 'oscuro' })}
       >
-        <IconoTema oscuro={tema === 'oscuro'} />
+        <IconoTema tam={13} oscuro={tema === 'oscuro'} />
       </button>
       <button
         type="button"
@@ -110,7 +115,7 @@ export function AccionesBarra({
         title="Ajustes"
         onClick={() => onAbrirAjustes(true)}
       >
-        <IconoAjustes />
+        <IconoAjustes tam={13} />
       </button>
     </div>
   );
@@ -129,7 +134,7 @@ export function MenuOrdenCaja({
 }) {
   return (
     <Menu
-      etiqueta={<IconoOrden />}
+      etiqueta={<IconoOrden tam={13} />}
       titulo={`Ordenar «${panel.etiqueta}»: ${MODOS_ORDEN.find((m) => m.id === orden)?.etiqueta ?? ''}`}
       items={MODOS_ORDEN.map((opcion) => ({
         id: opcion.id,

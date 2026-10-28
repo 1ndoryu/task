@@ -72,6 +72,8 @@ export interface Preferencias {
   plegadas: string[];
   /** Cajas minimizadas (solo se ve su título), por id de panel; `''` es «Tareas». */
   minimizadas: string[];
+  /** Cajas apagadas desde el explorador de cajas: no se pintan, pero no se borran. */
+  ocultas: string[];
   /** Cajas que van debajo de la anterior en vez de abrir columna (ver `columnas`). */
   apiladas: string[];
   /** Pintar la caja «Aplazado». Apagada, los aplazados existen igual —lo que
@@ -218,6 +220,7 @@ const POR_DEFECTO: Preferencias = {
   primeraVisible: false,
   plegadas: [],
   minimizadas: [],
+  ocultas: [],
   apiladas: [],
   mostrarAplazados: true,
   mostrarCompletados: true,
@@ -278,6 +281,7 @@ export function leerPreferencias(): Preferencias {
         typeof guardado.primeraVisible === 'boolean' ? guardado.primeraVisible : POR_DEFECTO.primeraVisible,
       plegadas: leerPlegadas(guardado.plegadas),
       minimizadas: leerMinimizadas(guardado.minimizadas),
+      ocultas: leerMinimizadas(guardado.ocultas),
       apiladas: leerApiladas(guardado.apiladas),
       mostrarAplazados:
         typeof guardado.mostrarAplazados === 'boolean' ? guardado.mostrarAplazados : POR_DEFECTO.mostrarAplazados,
