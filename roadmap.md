@@ -9,6 +9,7 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Pendientes
 
+- [ ] `28AA-1` — **Impedir que una escritura vieja pise datos nuevos (hábitos y tareas).** Hecho cuando el cliente envíe `expectedUpdatedAt` y reaplique tras un 409, las pendientes lleven versión, las pestañas se refresquen al enfocar y A añadiendo subhábitos + B (copia vieja) editando otra cosa deje los subhábitos intactos en el build de la 89, con gate limpio. Plan: `Agente/planes/plan-sincronizacion-escrituras-2026-10-28.md`.
 - [ ] `27AA-12` — **Terminar la deuda SOLID restante.** Hecho cuando `cajasActivas`, `menuPanel` y `usarVista` lean el registro de tipos en vez de `panel.tipo`; `Modales`, `Caja`, `ContenidoPanel` y `Fila` reciban contextos en vez de 14–24 props; y los archivos grandes (`usarLista`, `usarNotas`, `preferencias`, `Iconos`, `Ajustes`, `usarArrastreFilas`) queden partidos, con gate limpio. Informe: `Agente/documentacion/arquitectura/auditoria-solid-2026-10-28.md`.
 - [ ] `27AA-8` — **Recuperar la contraseña por correo.** Hecho cuando «Olvidé mi contraseña» envíe un enlace de un solo uso y permita fijar la nueva; pide un proveedor de correo y su credencial (reservado a la usuaria).
 
@@ -20,3 +21,4 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 ## Planes activos
 
 - `Agente/planes/plan-mejoras-task-2026-10-27.md` — `27AA-1`…`27AA-7` — mejoras una a una con aprobación en navegador.
+- `Agente/planes/plan-sincronizacion-escrituras-2026-10-28.md` — `28AA-1` — escrituras con versión, pendientes seguros y pestañas sincronizadas.
