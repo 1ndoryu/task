@@ -6,10 +6,12 @@ import { pedir } from './cliente';
 import { frecuenciaDe } from './frecuencia';
 import { importanciaDeHabito } from './importancia';
 import { leerMomentos, type Momento } from './momentos';
-import type { FrecuenciaDetalle, Habito, SubHabito } from './tipos';
+import type { FrecuenciaDetalle, Habito, RespuestaEscritura, SubHabito } from './tipos';
 
 /** Cuerpo que espera `UpsertHabitRequest` en Rust (camelCase). */
 function habitoARequest(habito: Habito): Record<string, unknown> {
+  // La versión viaja aparte: el `payload` guarda el hábito tal como lo leyó el front.
+  const { updatedAt: version, ...payload } = habito;
   return {
     nombre: habito.nombre,
     // `importancia` y `frecuencia` son textos del contrato; si no hay, aplica
@@ -18,13 +20,16 @@ function habitoARequest(habito: Habito): Record<string, unknown> {
     importancia: importanciaDeHabito(habito.importancia),
     frecuencia: frecuenciaDe(habito).tipo,
     orden: habito.orden ?? 0,
-    payload: habito,
-    expectedUpdatedAt: null,
+    payload,
+    expectedUpdatedAt: version ?? null,
   };
 }
 
-export async function guardarHabito(habito: Habito): Promise<void> {
-  await pedir(`/habits/${habito.id}`, { method: 'PUT', body: JSON.stringify(habitoARequest(habito)) });
+export async function guardarHabito(habito: Habito): Promise<RespuestaEscritura> {
+  return pedir<RespuestaEscritura>(`/habits/${habito.id}`, {
+    method: 'PUT',
+    body: JSON.stringify(habitoARequest(habito)),
+  });
 }
 
 /** Borrado lógico; no hay cuerpo en la respuesta (204). */

@@ -11,13 +11,7 @@ import type { Movimiento } from '../logica/destinoArrastre';
 import { fijarFinDia, hoyLogico } from '../logica/fechas';
 import { editarHabito } from '../logica/habitos';
 import { importanciaDeHabito } from '../logica/importancia';
-import {
-  anotarGrupos,
-  archivarGrupoGuardado,
-  leerGruposArchivados,
-  leerGruposConocidos,
-  leerOrdenPestanas,
-} from '../logica/grupos';
+import { leerGruposArchivados, leerGruposConocidos, leerOrdenPestanas } from '../logica/grupos';
 import { CLAVES_VISTA, type ModoOrden } from '../logica/orden';
 import { idDeNota, type Panel } from '../logica/paneles';
 import { guardarPreferencias, leerPreferencias, type Preferencias } from '../logica/preferencias';
@@ -27,6 +21,7 @@ import { editarTarea } from '../logica/tareas';
 import type { Dashboard, RefDependencia } from '../logica/tipos';
 import type { NuevaFila } from './NuevaFila';
 import type { CambiosFila, Editando, Estado } from './tiposLista';
+import { usarAccionesPaneles } from './usarAccionesPaneles';
 import { usarEscritura } from './usarEscritura';
 import { usarFilas } from './usarFilas';
 import { usarGrupos } from './usarGrupos';
@@ -179,6 +174,7 @@ export function usarLista(avisar: (texto: string) => void): Lista {
     setEstado,
     datosRef,
     pendientesRef,
+    avisar,
   );
   abrirCuentaRef.current = abrirCuenta;
 
@@ -222,7 +218,7 @@ export function usarLista(avisar: (texto: string) => void): Lista {
   });
   const { ordenDe, cambiarOrdenCaja } = usarOrdenCajas(ajustes, setAjustes, orden);
 
-  const { crearGrupo, renombrarGrupo, borrarGrupo: borrarGrupoBase, archivarGrupo: archivarGrupoBase } = usarGrupos({
+  const grupos = usarGrupos({
     datosRef,
     setGruposConocidos,
     setOrdenPestanas,
@@ -234,43 +230,15 @@ export function usarLista(avisar: (texto: string) => void): Lista {
     grupoActivo: paneles.grupoActivo,
   });
 
-  /** Archivar un grupo también se ve en la lista de archivados de aquí. Su caja
-   *  sale del carril: las pilas se rehacen sin ella (ver `olvidarPanel`). */
-  const archivarGrupo = useCallback(
-    (nombre: string) => {
-      archivarGrupoBase(nombre);
-      setGruposArchivados(leerGruposArchivados());
-      paneles.olvidarPanel(nombre);
-    },
-    [archivarGrupoBase, paneles],
-  );
-
-  /** Borrar un grupo también retira su caja de las pilas. */
-  const borrarGrupo = useCallback(
-    (nombre: string, conFilas: boolean) => {
-      borrarGrupoBase(nombre, conFilas);
-      paneles.olvidarPanel(nombre);
-    },
-    [borrarGrupoBase, paneles],
-  );
-
-  /** Desarchivar no toca las filas: el grupo vuelve a tener panel, al final. */
-  const desarchivarGrupo = useCallback((nombre: string) => {
-    archivarGrupoGuardado(nombre, false);
-    setGruposArchivados(leerGruposArchivados());
-  }, []);
-
-  /** Borrar una nota es borrar su panel: el orden guardado se limpia con él
-   *  para que el id no quede vivo esperando a otra nota con el mismo uuid. */
-  const borrarNota = useCallback(
-    (panel: string) => {
-      const id = idDeNota({ id: panel } as Panel);
-      if (!id) return;
-      notas.borrar(id);
-      paneles.olvidarPanel(panel);
-    },
-    [notas, paneles],
-  );
+  const { crearGrupo, renombrarGrupo } = grupos;
+  const acciones = usarAccionesPaneles({
+    notas,
+    paneles,
+    grupos,
+    ordenPestanas,
+    setGruposConocidos,
+    setGruposArchivados,
+  });
 
   return {
     estado,
@@ -285,17 +253,7 @@ export function usarLista(avisar: (texto: string) => void): Lista {
     moverPanel: paneles.moverPanel,
     soltarPanel: paneles.soltarPanel,
     crearNota: notas.crear,
-    borrarNota,
-    /** Archivar una nota es sacarla de los paneles, igual que borrarla: su
-     *  orden guardado también se retira y la pestaña abierta vuelve a «Tareas». */
-    archivarNota: (panel: string) => {
-      const id = idDeNota({ id: panel } as Panel);
-      if (!id) return;
-      notas.archivar(id);
-      paneles.olvidarPanel(panel);
-    },
-    archivarGrupo,
-    desarchivarGrupo,
+    ...acciones,
     gruposArchivados,
     notasArchivadas: notas.archivadas,
     recuperarNota: notas.recuperar,
@@ -322,25 +280,6 @@ export function usarLista(avisar: (texto: string) => void): Lista {
       guardarPreferencias({ grupo: nuevo });
     },
     moverPestana: paneles.moverPestana,
-    /** Renombrar un panel: el grupo muda sus filas y su orden guardado; una
-     *  nota solo cambia su título. Un grupo que no existe en los datos ni en el
-     *  orden no es más que una nota (`usarGrupos` lo ignoraría sin avisar). */
-    renombrarPanel: (panel: Panel, titulo: string) => {
-      const id = idDeNota(panel);
-      if (id) {
-        notas.renombrar(id, titulo);
-        return;
-      }
-      if (panel.fija) return;
-      const renombrable = paneles.nombresConocidos.has(panel.id) || ordenPestanas.includes(panel.id);
-      if (renombrable) {
-        renombrarGrupo(panel.id, titulo);
-        return;
-      }
-      if (!titulo || titulo === panel.id) return;
-      setGruposConocidos((previos) => (previos.includes(titulo) ? previos : [...previos, titulo]));
-      anotarGrupos([titulo]);
-    },
     // Un solo punto de escritura: el estado local y el `localStorage` no se separan.
     cambiarPreferencias: (cambios) => {
       setAjustes((previas) => ({ ...previas, ...cambios }));
@@ -385,6 +324,5 @@ export function usarLista(avisar: (texto: string) => void): Lista {
     crear,
     crearGrupo,
     renombrarGrupo,
-    borrarGrupo,
   };
 }

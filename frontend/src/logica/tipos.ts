@@ -35,6 +35,8 @@ export interface Tarea {
   dependencias?: RefDependencia[];
   /** Grupo de ejecución: la pestaña en la que aparece (null = «Tareas»). */
   grupoEjecucion?: string | null;
+  /** Versión de la fila en el servidor: la escritura la envía como `expectedUpdatedAt`. */
+  updatedAt?: string;
 }
 
 export interface Proyecto {
@@ -81,6 +83,8 @@ export interface Habito {
   subhabitos?: SubHabito[];
   /** Requisitos: lo que debe hacerse antes. */
   dependencias?: RefDependencia[];
+  /** Versión de la fila en el servidor: la escritura la envía como `expectedUpdatedAt`. */
+  updatedAt?: string;
 }
 
 /** Un hábito hijo: mismo contrato que el padre en pequeño. Lo que comparte
@@ -101,4 +105,9 @@ export interface Dashboard {
   tareas: Tarea[];
   habitos: Habito[];
   proyectos: Proyecto[];
+}
+
+/** Lo que devuelve un `PUT` de fila: la versión nueva que el cliente debe guardar. */
+export interface RespuestaEscritura {
+  updatedAt?: string;
 }

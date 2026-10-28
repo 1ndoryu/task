@@ -2,17 +2,16 @@
  * El backend no tiene un endpoint de «completar»: se manda la tarea entera con
  * `texto`, `completado`, etc. arriba y el resto del payload en `payload`, igual
  * que hacía el front original (`frontend-legacy/src/app/utils/mappersContrato.ts`).
- * `expectedUpdatedAt` va a null: sin conflictos de versión, la última escritura manda. */
+ * `expectedUpdatedAt` es la versión que tenía la copia: si otro cliente escribió
+ * después, el servidor responde 409 y la cola de `vista/colaEscritura.ts` rebasa. */
 import { pedir } from './cliente';
 import { leerMomentos, type Momento } from './momentos';
-import type { Tarea } from './tipos';
-
-export interface RespuestaEscritura {
-  updatedAt?: string;
-}
+import type { RespuestaEscritura, Tarea } from './tipos';
 
 /** Cuerpo que espera `UpsertTaskRequest` en Rust. */
 function tareaARequest(tarea: Tarea): Record<string, unknown> {
+  // La versión viaja aparte: el `payload` guarda la tarea tal como la leyó el front.
+  const { updatedAt: version, ...payload } = tarea;
   return {
     texto: tarea.texto,
     completado: tarea.completado,
@@ -21,13 +20,13 @@ function tareaARequest(tarea: Tarea): Record<string, unknown> {
     proyectoId: tarea.proyectoId ?? null,
     parentId: tarea.parentId ?? null,
     orden: tarea.orden ?? 0,
-    payload: tarea,
-    expectedUpdatedAt: null,
+    payload,
+    expectedUpdatedAt: version ?? null,
   };
 }
 
-export async function guardarTarea(tarea: Tarea): Promise<void> {
-  await pedir<RespuestaEscritura>(`/tasks/${tarea.id}`, {
+export async function guardarTarea(tarea: Tarea): Promise<RespuestaEscritura> {
+  return pedir<RespuestaEscritura>(`/tasks/${tarea.id}`, {
     method: 'PUT',
     body: JSON.stringify(tareaARequest(tarea)),
   });
