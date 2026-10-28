@@ -6,11 +6,10 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Siguiente bloque
 
-- [ ] `27AA-2` — **Caja nueva con tamaño mínimo.** Toda caja nueva nace al mínimo; aprobado en navegador.
+- [ ] `27AA-3` — **Botones de acciones abajo y explorador de cajas.** Iconos +1 px al pie; panel centrado no modal para activar o desactivar cajas.
 
 ## Pendientes
 
-- [ ] `27AA-3` — **Botones de acciones abajo y explorador de cajas.** Iconos +1 px al pie; panel centrado no modal para activar o desactivar cajas.
 - [ ] `27AA-4` — **Componente calendario.** Reutilizable en aplazar y en el día de las entradas del diario.
 - [ ] `27AA-5` — **Fecha límite de tareas.** En configuración y menú contextual, con el calendario.
 - [ ] `27AA-6` — **Dependencias con hilo rojo.** Tareas y hábitos, múltiples, entre cajas, con gravedad.

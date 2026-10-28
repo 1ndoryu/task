@@ -11,7 +11,9 @@
  * `usarVista`, y la barra, los modales y el menú de caja en sus componentes. */
 import { useEffect } from 'react';
 import { alternarMinimizada } from '../logica/minimizadas';
-import { PANEL_ARCHIVADOS, type Panel } from '../logica/paneles';
+import { limpiarGrupo } from '../logica/orden';
+import { PANEL_ARCHIVADOS, panelDeNota, type Panel } from '../logica/paneles';
+import { ALTO_CAJA_MINIMO, ANCHO_CAJA_MINIMO } from '../logica/preferencias';
 import { accionesDeLista } from './accionesDeLista';
 import { AccionesBarra } from './AccionesBarra';
 import { Archivados } from './Archivados';
@@ -100,9 +102,21 @@ export function Lista() {
 
   /** Crear una nota: en cajas, el carril la centra; en pestañas, se abre. Es
    *  lo mismo desde el botón de la barra en las dos formas de la vista. */
+  /** Una caja recién creada nace al tamaño mínimo (en pestañas no hay tamaño: se ignora). */
+  const alMinimo = (id: string) =>
+    lista.cambiarPreferencias({
+      tamanos: { ...preferencias.tamanos, [id]: { ancho: ANCHO_CAJA_MINIMO, alto: ALTO_CAJA_MINIMO } },
+    });
+  const agregarGrupo = (nombre: string) => {
+    const limpio = limpiarGrupo(nombre);
+    // Solo si es de verdad nuevo: volver a «crear» uno existente no lo encoge.
+    if (limpio && !lista.paneles.some((p) => p.id === limpio)) alMinimo(limpio);
+    lista.crearGrupo(nombre);
+  };
   const agregarNota = async () => {
     const id = await lista.crearNota();
     if (!id) return;
+    alMinimo(panelDeNota(id));
     vista.setNotaNueva(id);
     if (!enCajas) lista.cambiarGrupo(id);
   };
@@ -131,7 +145,7 @@ export function Lista() {
       gruposAbiertos={vista.gruposAbiertos}
       grupos={grupos}
       cuenta={cuenta}
-      onCrearGrupo={lista.crearGrupo}
+      onCrearGrupo={agregarGrupo}
       onRenombrarGrupo={lista.renombrarGrupo}
       onBorrarGrupo={lista.borrarGrupo}
       onCerrarGrupos={() => vista.setGruposAbiertos(false)}
