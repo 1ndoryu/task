@@ -17,6 +17,7 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 ## Bloqueos
 
 - Ninguno. Ver `Agente/documentacion/bloqueos-task-2026-10-26.md`.
+- `28AA-1` (F7): falta la prueba visual en dos pestañas del navegador (el contrato 409 ya pasa en la base de pruebas de la 89). Estado: `Agente/documentacion/arquitectura/sincronizacion-escrituras-2026-10-28.md`.
 
 ## Planes activos
 
