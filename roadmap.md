@@ -6,9 +6,10 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Siguiente bloque
 
-- [ ] `27AA-7` — **Perfil, login y modo invitado local.** Respaldo verificado antes; sin tocar la sesión actual.
 
 ## Pendientes
+
+- [ ] `27AA-8` — **Recuperar la contraseña por correo.** Hecho cuando «Olvidé mi contraseña» envíe un enlace de un solo uso y permita fijar la nueva; pide un proveedor de correo y su credencial (reservado a la usuaria).
 
 
 ## Bloqueos
