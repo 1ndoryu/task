@@ -4,6 +4,8 @@
  * exige en las mutaciones (`X-CSRF-Token`, espejo de la cookie `csrf_token`).
  * Origen: copiado de `frontend-legacy/src/app/utils/apiClient.ts`. */
 
+import { esInvitado, pedirInvitado } from './invitado';
+
 export function obtenerTokenCsrf(): string {
   const coincidencia = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
   return coincidencia ? decodeURIComponent(coincidencia[1]) : '';
@@ -21,6 +23,8 @@ export class ErrorApi extends Error {
 
 export async function pedir<T>(ruta: string, opciones: RequestInit = {}): Promise<T> {
   const metodo = (opciones.method ?? 'GET').toUpperCase();
+  // Invitado: los datos son de este equipo y no hay servidor al que preguntar.
+  if (esInvitado()) return pedirInvitado<T>(ruta, metodo, opciones.body as string | undefined);
   const llevaCuerpo = metodo !== 'GET' && metodo !== 'HEAD';
   const cabeceras: Record<string, string> = {
     'Content-Type': 'application/json',
