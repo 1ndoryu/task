@@ -1,6 +1,6 @@
 # Sincronización de escrituras (28AA-1) — estado de despliegue y verificación
 
-Plan: `Agente/planes/plan-sincronizacion-escrituras-2026-10-28.md`. Esta nota recoge lo desplegado y lo que falta para cerrar `28AA-1`.
+Plan (cerrado): `Agente/planes/completados/plan-sincronizacion-escrituras-2026-10-28.md`. Esta nota recoge lo desplegado y lo que queda abierto tras cerrar `28AA-1` (seguimiento en `28AA-2`).
 
 ## Qué está en código
 
@@ -21,7 +21,9 @@ Plan: `Agente/planes/plan-sincronizacion-escrituras-2026-10-28.md`. Esta nota re
 
 - Decisión de la usuaria: correrla en la base de pruebas de la 89 (`glory_backend_local` vía túnel 14190), no en la app local del portátil.
 - Ejecutado a nivel de contrato (`scratchpad/f7-dos-pestanas.mjs`, fuera del repo): A crea un hábito de prueba y añade 3 subhábitos; B, con la versión vieja, edita el nombre → **409**; los 3 subhábitos y el nombre siguen; B recarga, reaplica y sigue sin perderlos; el hábito de prueba se borra al final. **Resultado: todo en OK.**
-- **No ejecutado en el navegador:** la sincronía visual entre pestañas (canal `tareas-nuevo:v1:sincronia`, refresco al enfocar) está cubierta por `sincronia.test.ts`, pero no se ha visto en dos pestañas reales.
+- Navegador (dos pestañas, `127.0.0.1:14190`, build de la 89): la pestaña A creó el hábito con 3 subhábitos y después añadió un cuarto; la pestaña B, con la copia de antes, marcó un subhábito como hecho: la consola mostró un **409** de una escritura y B recargó la copia del servidor; la marca quedó en el historial de hoy y los 4 subhábitos siguieron en la base. El hábito de prueba se borró (204, 0 restos).
+- Sincronía en vivo: en la pestaña de fondo, el cambio de A no apareció en B en 7 s; B lo vio tras recargar. Queda sin verificar el refresco al enfocar y el canal `tareas-nuevo:v1:sincronia` en pestañas visibles (cubierto por `sincronia.test.ts`).
+- El aviso de descarte del legacy (`frontend-legacy`) no se ve en 14190: esa build sirve el frontend principal. Sin verificar.
 - Gate `--cierre`: 0 nuevos, base 13 (sin cambios). El gate solo cubre el repo; `frontend-legacy` queda fuera.
 - Nota: la base de la 89 se usa como base de pruebas según `tareas-local-y-cuenta-unica`; la línea anterior de este documento que la llamaba «la de la usuaria» queda corregida.
 
