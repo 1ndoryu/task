@@ -251,7 +251,9 @@
   min-width: 0;
   padding: 0;
   color: inherit;
-  font: inherit;
+  /* Solo familia y peso: el tamaño es el de `.barra__titulo`, como el resto de títulos. */
+  font-family: inherit;
+  font-weight: inherit;
   background: transparent;
   border: 0;
   cursor: pointer;
