@@ -2,7 +2,7 @@
  * la configuración y racha. El menú de acciones se abre con el clic derecho en
  * la fila; no hay botón visible. Vive aparte de `Lista` para que cada archivo
  * tenga una sola responsabilidad. */
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { aplazadoHasta, fechaAplazo } from '../logica/aplazos';
 import { sumarDias } from '../logica/fechas';
 import { diaCorto, proximaRepeticion, rachaDe, type ConFrecuencia } from '../logica/frecuencia';
@@ -11,7 +11,6 @@ import { leerMomentos } from '../logica/momentos';
 import { hechoHoy } from '../logica/seleccion';
 import type { Habito } from '../logica/tipos';
 import { Calendario } from './Calendario';
-import { ContextoRequisitos } from './HilosDependencias';
 import { IconoDesplegar, IconoPlegar } from './Iconos';
 import { IconoMomento } from './IconosMomento';
 import { Menu } from './Menu';
@@ -62,8 +61,6 @@ export function Fila({
   onPlegar,
 }: Props) {
   const [calendario, setCalendario] = useState<'aplazo' | 'limite' | null>(null);
-  // Lo que debe hacerse antes y aún no está: la fila espera y lo dice.
-  const antes = useContext(ContextoRequisitos).get(claveFila(fila));
   const esTarea = fila.tipo === 'tarea';
   const esSub = fila.tipo === 'subhabito';
   // El subhábito se lee como un hábito: mismo punto de nivel, misma racha.
@@ -137,7 +134,6 @@ export function Fila({
       {limite && !hecho && (
         <span className={`fila__nota${limite < hoy ? ' fila__nota--vencida' : ''}`}>vence el {diaCorto(limite)}</span>
       )}
-      {antes && !hecho && <span className="fila__nota fila__nota--antes">antes: {antes.join(', ')}</span>}
       {racha > 1 && <span className="fila__nota">{racha} días</span>}
       {/* La flecha es del padre: dice cuántos hijos hay y los pliega. Va a la
           derecha, después de las notas, para no moverse con ellas. */}

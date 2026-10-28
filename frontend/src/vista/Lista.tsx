@@ -22,7 +22,7 @@ import { Carril } from './Carril';
 import { ColumnasCarril } from './ColumnasCarril';
 import { ContenidoPanel } from './ContenidoPanel';
 import { MenuCaja } from './MenuCaja';
-import { ContextoRequisitos, HilosDependencias } from './HilosDependencias';
+import { HilosDependencias } from './HilosDependencias';
 import { Modales } from './Modales';
 import { calcularRequisitos } from './requisitos';
 import { iconoDePanel } from './Paneles';
@@ -101,7 +101,7 @@ export function Lista() {
   // Dos formas de la misma lista: por turnos (una caja) o todas al lado.
   const enCajas = preferencias.separarGrupos;
   const { acciones, guardarCambios } = accionesDeLista(lista, vista.setDependenciasDe);
-  // Lo que espera a otra cosa: los hilos lo dibujan y cada fila lo dice con su nota.
+  // Lo que espera a otra cosa: los hilos lo dibujan.
   const requisitos = calcularRequisitos(datos, lista.hoy);
 
   /** Crear una nota: en cajas, el carril la centra; en pestañas, se abre. Es
@@ -173,6 +173,16 @@ export function Lista() {
 
   /** Lo que va dentro de una caja, según su tipo. Cada panel lo pinta
    *  `ContenidoPanel`; aquí solo se le pasan los datos y los ayudantes. */
+  // Un tamaño igual al de fábrica sale de las preferencias: así la caja sigue
+  // al tamaño de siempre si la ventana cambia. Lo usan todas las cajas, también
+  // la de archivados.
+  const cambiarTamano = (id: string, tamano: TamanoCaja | undefined) => {
+    const tamanos = { ...preferencias.tamanos };
+    if (tamano) tamanos[id] = tamano;
+    else delete tamanos[id];
+    lista.cambiarPreferencias({ tamanos });
+  };
+
   const contenido = (panel: Panel) => (
     <ContenidoPanel
       panel={panel}
@@ -196,14 +206,7 @@ export function Lista() {
       // Solo en el carril: es donde las cajas se ven de una en una y tienen
       // sitio para crecer. En la caja única el ancho lo manda la pantalla.
       redimensionable={enCajas}
-      onTamano={(id, tamano) => {
-        // Un tamaño igual al de fábrica sale de las preferencias: así la caja
-        // sigue al tamaño de siempre si la ventana cambia.
-        const tamanos = { ...preferencias.tamanos };
-        if (tamano) tamanos[id] = tamano;
-        else delete tamanos[id];
-        lista.cambiarPreferencias({ tamanos });
-      }}
+      onTamano={cambiarTamano}
       onMinimizar={enCajas ? (id) => lista.cambiarPreferencias({ minimizadas: alternarMinimizada(preferencias.minimizadas, id) }) : undefined}
     />
   );
@@ -216,6 +219,8 @@ export function Lista() {
       notas={lista.notasArchivadas}
       onDesarchivarGrupo={lista.desarchivarGrupo}
       onRecuperarNota={lista.recuperarNota}
+      tamano={preferencias.tamanos[PANEL_ARCHIVADOS]}
+      onTamano={(tamano) => cambiarTamano(PANEL_ARCHIVADOS, tamano)}
     />
   ) : null;
 
@@ -225,7 +230,6 @@ export function Lista() {
     // El carril centra columnas, no cajas: la nota nueva es la de su columna.
     const indiceNueva = vista.notaNueva ? lista.columnas.findIndex((c) => c.includes(vista.notaNueva ?? '')) : -1;
     return (
-      <ContextoRequisitos.Provider value={requisitos.pendientes}>
       <main className={`marco marco--cajas${escritorio ? ' marco--escritorio' : ''}`} data-tauri-drag-region>
         <BarraVentana />
         <div className="barra barra--carril">{accionesBarra}</div>
@@ -260,7 +264,6 @@ export function Lista() {
         {modales}
         {hilos}
       </main>
-      </ContextoRequisitos.Provider>
     );
   }
 
@@ -285,7 +288,6 @@ export function Lista() {
   }
 
   return (
-    <ContextoRequisitos.Provider value={requisitos.pendientes}>
     <main className={`marco${escritorio ? ' marco--escritorio' : ''}`} data-tauri-drag-region>
       <BarraVentana />
       <section className="marco__unica" aria-label="Tareas y hábitos">
@@ -335,6 +337,5 @@ export function Lista() {
       {modales}
       {hilos}
     </main>
-    </ContextoRequisitos.Provider>
   );
 }

@@ -4,10 +4,7 @@
  * muelle amortiguado lleva el punto de control hacia donde caería la cuerda.
  * Es una capa fija sobre toda la vista, así cruza de una caja a otra. Las
  * filas que no se ven (otra pestaña, plegadas, fuera del scroll) no pintan. */
-import { createContext, useEffect, useRef } from 'react';
-
-/** Nombres de lo que debe ir antes de cada fila; lo lee `Fila` para su nota. */
-export const ContextoRequisitos = createContext<ReadonlyMap<string, string[]>>(new Map());
+import { useEffect, useRef } from 'react';
 
 interface Props {
   hilos: { desde: string; hasta: string }[];

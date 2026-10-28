@@ -1,5 +1,5 @@
-/* Dependencias: el hilo rojo entre lo que espera y lo que va antes, la nota
- * «antes: …» de la fila y la lista del selector. */
+/* Dependencias: el hilo rojo entre lo que espera y lo que va antes y el aviso
+ * al enlazar. */
 
 /* Capa fija sobre toda la vista: así el hilo cruza de una caja a otra. No coge
  * clics: las filas de debajo siguen siendo suyas. */
@@ -23,11 +23,6 @@
 
 .hilos__extremo {
   fill: var(--sangre);
-}
-
-/* La nota de lo que falta va en el rojo del hilo, para atar los dos. */
-.fila__nota--antes {
-  color: var(--sangre);
 }
 
 /* El aviso mientras se tira del hilo: abajo y centrado, sin tapar las filas. */
