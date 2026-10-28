@@ -1,0 +1,78 @@
+/* Acceso y perfil: la pantalla de entrada, la cara de la barra y el modal de perfil. */
+.acceso {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 16px;
+}
+
+.acceso__caja {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(360px, 100%);
+}
+
+.acceso__titulo {
+  margin: 0 0 4px;
+  font-size: var(--texto-base);
+  font-weight: bold;
+}
+
+.acceso__nota,
+.perfil__nota {
+  margin: 0;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-nota);
+}
+
+.acceso__error,
+.perfil__error {
+  margin: 0;
+  color: var(--sangre);
+}
+
+.acceso__enlaces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.acceso__enlace {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--tinta-tenue);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.avatar {
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--redondo);
+  background: var(--panel);
+  color: var(--tinta);
+  font-size: var(--texto-nota);
+  place-items: center;
+  object-fit: cover;
+}
+
+.avatar--grande {
+  width: 72px;
+  height: 72px;
+  font-size: calc(var(--texto-base) * 2);
+}
+
+.perfil {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.perfil__acciones {
+  display: flex;
+  gap: 8px;
+}

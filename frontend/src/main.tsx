@@ -2,9 +2,12 @@
  * La lógica está en `logica/` y no importa nada de React; la vista, en `vista/`. */
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { cargarInvitado, esInvitado } from './logica/invitado';
 import { restaurar } from './logica/preferenciasRemotas';
 import { asegurarSesionLocal } from './logica/sesion';
+import { Acceso } from './vista/Acceso';
 import { Lista } from './vista/Lista';
+import './estilos/acceso.css';
 import './estilos/button.css';
 import './estilos/dropdownPanel.css';
 import './estilos/modal.css';
@@ -32,10 +35,14 @@ if (!raiz) throw new Error('Falta el nodo #raiz en index.html');
 const ESPERA_RESPALDO = 2500;
 
 async function arrancar(destino: HTMLElement): Promise<void> {
+  // Solo se muestra el acceso si el servidor dijo que no hay sesión: un backend
+  // lento o caído no echa a nadie de la app.
+  let sinSesion = false;
   await Promise.race([
     (async () => {
       try {
-        await asegurarSesionLocal();
+        if (esInvitado()) await cargarInvitado();
+        else sinSesion = (await asegurarSesionLocal()) === null;
         await restaurar();
       } catch {
         /* Sin sesión o sin red: la carga de la lista ya contará lo que pase. */
@@ -45,7 +52,7 @@ async function arrancar(destino: HTMLElement): Promise<void> {
   ]);
   createRoot(destino).render(
     <StrictMode>
-      <Lista />
+      {sinSesion ? <Acceso /> : <Lista />}
     </StrictMode>,
   );
 }

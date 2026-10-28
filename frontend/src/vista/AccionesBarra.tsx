@@ -8,6 +8,7 @@ import { MODOS_ORDEN, type ModoOrden } from '../logica/orden';
 import type { Preferencias } from '../logica/preferencias';
 import { ExploradorCajas } from './ExploradorCajas';
 import { IconoAjustes, IconoCarpeta, IconoNota, IconoOrden, IconoPrivacidad, IconoTema } from './Iconos';
+import { BotonPerfil } from './BotonPerfil';
 import { Menu } from './Menu';
 import { IconoFecha, IconoOrdenInteligente, IconoOrdenManual, IconoPrioridad } from './MenuOpciones';
 
@@ -117,6 +118,7 @@ export function AccionesBarra({
       >
         <IconoAjustes tam={13} />
       </button>
+      <BotonPerfil />
     </div>
   );
 }
