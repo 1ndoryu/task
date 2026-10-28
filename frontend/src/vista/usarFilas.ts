@@ -9,6 +9,7 @@ import { ordenesNuevos } from '../logica/reordenar';
 import { desmarcarHabito, editarHabito, guardarHabito, marcarHabito } from '../logica/habitos';
 import { importanciaDeHabito } from '../logica/importancia';
 import { hechoHoy } from '../logica/seleccion';
+import { faltaAntes } from './requisitos';
 import type { Pendientes } from '../logica/store';
 import { alternarCompletado, editarTarea, guardarTarea } from '../logica/tareas';
 import type { Dashboard, Habito, RefDependencia, Tarea } from '../logica/tipos';
@@ -133,6 +134,9 @@ export function usarFilas(d: Dependencias) {
         return;
       }
       const quedaHecha = fila.tipo === 'tarea' ? !fila.tarea.completado : !hechoHoy(fila.habito, hoy);
+      // Un requisito sin hacer impide completar; desmarcar siempre se puede. La fila ya muestra el «antes: …».
+      const ref: RefDependencia = fila.tipo === 'tarea' ? { tipo: 'tarea', id: fila.tarea.id } : { tipo: 'habito', id: fila.habito.id };
+      if (quedaHecha && faltaAntes(datosRef.current, ref, hoy).length) return;
       // Solo sale de la lista la tarea: el hábito se queda todo el día, tachado,
       // así que animarle la salida sería un parpadeo sin efecto.
       if (quedaHecha && fila.tipo === 'tarea') {

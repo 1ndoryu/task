@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { alternarDependencia, cierraCiclo, hilosPendientes, leerDependencias } from '../src/logica/dependencias.ts';
+import { alternarDependencia, cierraCiclo, hilosPendientes, leerDependencias, requisitosPendientes } from '../src/logica/dependencias.ts';
 import type { Dashboard } from '../src/logica/tipos.ts';
 
 const datos = {
@@ -39,4 +39,16 @@ test('hilosPendientes solo cuenta requisitos sin hacer y filas sin completar', (
   assert.equal(hilos.length, 2);
   assert.deepEqual(hilosPendientes(datos, () => true), []);
   assert.deepEqual(hilosPendientes(datos, () => undefined), []);
+});
+
+test('requisitosPendientes devuelve solo lo que aún no está hecho', () => {
+  // La tarea 1 espera a la 2; la 2 espera al hábito 7.
+  assert.deepEqual(requisitosPendientes(datos, { tipo: 'tarea', id: 1 }, () => false), [{ tipo: 'tarea', id: 2 }]);
+  // El hábito 7 ya cumplido no bloquea a la 2.
+  assert.deepEqual(requisitosPendientes(datos, { tipo: 'tarea', id: 2 }, (r) => r.tipo === 'habito'), []);
+  assert.deepEqual(requisitosPendientes(datos, { tipo: 'tarea', id: 2 }, () => false), [{ tipo: 'habito', id: 7 }]);
+  // Un requisito que ya no existe no bloquea.
+  assert.deepEqual(requisitosPendientes(datos, { tipo: 'tarea', id: 1 }, () => undefined), []);
+  // Fila inexistente: nada que esperar.
+  assert.deepEqual(requisitosPendientes(datos, { tipo: 'tarea', id: 99 }, () => false), []);
 });

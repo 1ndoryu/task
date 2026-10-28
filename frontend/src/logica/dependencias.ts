@@ -73,3 +73,12 @@ export function hilosPendientes(
   }
   return hilos;
 }
+
+/** Lo que falta hacer antes de `ref`, según `hecho`. Lista vacía: `ref` puede completarse. */
+export function requisitosPendientes(
+  datos: Dashboard,
+  ref: RefDependencia,
+  hecho: (requisito: RefDependencia) => boolean | undefined,
+): RefDependencia[] {
+  return dependenciasDe(datos, ref).filter((r) => hecho(r) === false);
+}
