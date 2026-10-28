@@ -112,14 +112,11 @@ export function Carril({
     [piezas, centro],
   );
 
-  /** Fija qué pieza manda y solo avisa cuando cambia de verdad. La barra
-   *  flotante se alinea con ella: al cambiar de caja cambia su ancho. */
+  /** Fija qué pieza manda y solo avisa cuando cambia de verdad. */
   const marcar = useCallback(
     (indice: number) => {
       if (centrada.current === indice) return;
       centrada.current = indice;
-      const pieza = piezas()[indice];
-      if (pieza) pista.current?.parentElement?.style.setProperty('--ancho-pieza-carril', `${pieza.offsetWidth}px`);
       alActivar.current?.(indice);
     },
     [piezas],

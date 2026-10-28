@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import type { Panel } from '../logica/paneles';
 import { MODOS_ORDEN, type ModoOrden } from '../logica/orden';
 import type { Preferencias } from '../logica/preferencias';
+import type { Vidrio } from './ConfigVidrio';
 import { ExploradorCajas } from './ExploradorCajas';
 import { IconoAjustes, IconoCarpeta, IconoNota, IconoOrden, IconoPrivacidad, IconoTema } from './Iconos';
 import { BotonPerfil } from './BotonPerfil';
@@ -34,6 +35,8 @@ interface Props {
   onAbrirAjustes: (abiertos: boolean) => void;
   /** Todas las cajas, también las apagadas, para el explorador. */
   todosPaneles: Panel[];
+  /** Cristal compartido con la barra: el explorador lo usa igual. */
+  vidrio: Vidrio;
 }
 
 export function AccionesBarra({
@@ -48,6 +51,7 @@ export function AccionesBarra({
   ajustesAbiertos,
   onAbrirAjustes,
   todosPaneles,
+  vidrio,
 }: Props) {
   const { tema, privacidad } = preferencias;
   return (
@@ -86,7 +90,7 @@ export function AccionesBarra({
       >
         <IconoCarpeta tam={13} />
       </button>
-      <ExploradorCajas todos={todosPaneles} preferencias={preferencias} onCambiar={onCambiar} />
+      <ExploradorCajas todos={todosPaneles} preferencias={preferencias} onCambiar={onCambiar} vidrio={vidrio} />
       <button
         type="button"
         className="barra__boton barra__icono"

@@ -31,35 +31,90 @@
   user-select: none;
 }
 
-/* La barra del carril no es la de una caja: va sobre el conjunto, alineada con
- * la caja centrada, y solo lleva los iconos de la derecha. Flota sobre el aire
- * que deja el carril al pegarse abajo, así no empuja la altura de las cajas.
- * Su sitio no se calcula con el alto de la caja —una caja puede enfermar o
- * llevar su propio alto—, sino que el carril mide dónde empieza la pieza
- * centrada y escribe `--alto-barra-carril`; si no llega, cae a 1.9rem. */
+/* La barra del carril no es la de una caja: solo lleva los iconos de la derecha
+ * y flota fija al pie de la ventana, centrada. Va sola, sin contar con la altura
+ * de las cajas ni del carril. `top` es el centro: LiquidGlass la desplaza -50 %
+ * en ambos ejes. */
 .barra--carril {
-  position: absolute;
-  /* Colgada del borde inferior de la pieza centrada: el aire de su relleno
-   * queda entre la caja y los iconos. */
-  top: calc(
-    (var(--alto-carril, 100%) + var(--alto-pieza-carril, var(--alto-cajas))) / 2 + 0.75rem
-  );
+  position: fixed;
+  top: calc(100vh - 1.5rem - 18px);
   left: 50%;
   z-index: 5;
   width: fit-content;
   max-width: calc(100% - 2.5rem);
-  transform: translateX(-50%);
-  /* En el carril los iconos van centrados sobre la caja: la barra se mueve con
-   * la pieza centrada, así que el centro de la pantalla es su centro, y el ojo
-   * los encuentra sin buscarlos en una esquina. */
+}
+
+/* Las capas de LiquidGlass son hermanas de la pastilla: copian su posición, pero
+ * sin `style` la librería les pone en línea `relative`, y entonces quedan en el
+ * flujo y empujan el diseño (dos fondos de brillo y dos bordes sueltos arriba).
+ * Se fijan aquí, en el mismo punto. */
+/* sentinel-disable-next-line claseHuerfana — falso positivo del scanner: la clase la pone liquid-glass-react en su JSX (node_modules), nunca aparece en src. */
+div.bg-black.pointer-events-none,
+main > span {
+  position: fixed !important;
+  top: calc(100vh - 1.5rem - 18px) !important;
+  left: 50% !important;
+}
+
+/* Los iconos dentro del cristal: alto fijo y centrados. Va con `.barra` delante
+ * para ganar a su padding derecho e inferior (listas.css), que los corría. */
+.barra.barra--carril-iconos {
+  padding: 0;
   justify-content: center;
-  /* Una pastilla de alto fijo, con el fondo y el borde de las cajas. */
-  box-sizing: border-box;
   height: 2.25rem;
+}
+
+/* Sin cristal (`CRISTAL_ACTIVO` en Cristal.tsx): la pastilla de la barra es una caja
+ * plana del tema. Su `top` es el centro, como con el cristal, así que se centra igual. */
+.barra--carril--plano {
+  transform: translate(-50%, -50%);
   padding: 0 1rem;
-  border: 1px solid var(--linea);
-  border-radius: var(--redondo);
   background: var(--panel);
+  border: 1px solid var(--linea);
+  border-radius: 1.1rem;
+}
+
+/* TEMPORAL: panel de parámetros del cristal (ver ConfigVidrio.tsx). Ya no se monta. */
+.config-vidrio {
+  position: fixed;
+  right: 1rem;
+  bottom: 3.5rem;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 15rem;
+  max-height: 70vh;
+  overflow: auto;
+  padding: 0.5rem;
+  font-size: 0.65rem;
+  color: var(--tinta);
+  background: var(--panel);
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+}
+
+.config-vidrio__titulo {
+  margin: 0 0 0.15rem;
+  font-size: 0.7rem;
+}
+
+.config-vidrio__fila {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr 2.6rem;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.config-vidrio__fila output {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.config-vidrio__fila input[type='text'],
+.config-vidrio__fila select {
+  grid-column: span 2;
+  font-size: 0.65rem;
 }
 
 /* Nombre del grupo, con la talla y el aire de una pestaña. */
@@ -629,25 +684,60 @@
   display: inline-flex;
 }
 
-.menu__panel.explorador__panel {
+/* El cristal lo pone LiquidGlass con los mismos parámetros que la barra. La raíz
+ * va fija en el centro; `transform` lo lleva la librería en línea (-50 %). */
+.explorador__capas > .explorador__panel {
   position: fixed;
   top: 50%;
-  right: auto;
   left: 50%;
   z-index: 40;
   width: min(22rem, calc(100vw - 2rem));
-  max-height: min(26rem, calc(100vh - 4rem));
-  overflow-y: auto;
-  transform: translate(-50%, -50%);
+  /* Flex: el cristal en línea dejaba un hueco de línea arriba y las capas de brillo
+   * quedaban 2-3 px fuera del vidrio. Así raíz, capas y cristal miden lo mismo. */
+  display: flex;
+  /* Sin overflow aquí: la sombra del cristal caería fuera de la caja y se cortaría
+   * como un fondo negro. El scroll va dentro, en el contenido. */
+  overflow: visible;
+  background: transparent;
+  border: 0;
 }
 
-.explorador__titulo {
-  margin: 0 0 0.4rem;
-  padding: 0 0.4rem;
-  color: var(--tinta-tenue);
-  font-size: var(--texto-etiqueta);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+/* Sin cristal: caja plana del tema, con el radio del menú y su scroll propio. Su
+ * `top`/`left` es el centro, así que el `translate` lo lleva esta regla (el cristal
+ * lo pone la librería). */
+.explorador__capas > .explorador__panel--plano {
+  transform: translate(-50%, -50%);
+  padding: 0.3rem;
+  overflow-y: auto;
+  max-height: min(26rem, calc(100vh - 4rem));
+  background: var(--panel);
+  border: 1px solid var(--linea);
+  border-radius: var(--redondoMenu);
+}
+
+/* El cristal interior (`inline-flex`, en línea) se encoge al contenido: sin esto la
+ * lista caía a una columna de 114 px. Se estira al ancho del panel y el contenido
+ * llena el cristal, para que la rejilla de cajas tenga ancho. */
+.explorador__capas > .explorador__panel > div {
+  width: 100%;
+}
+
+/* El alto máximo y el scroll van en el contenido, dentro del cristal redondeado. */
+.explorador__capas > .explorador__panel > div > div {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-height: min(26rem, calc(100vh - 4rem));
+  overflow-y: auto;
+}
+
+/* Las capas de brillo del panel van fijas en su centro, igual que su raíz. Esta
+ * regla va después de la de la barra y con el mismo peso, así la sustituye. */
+/* sentinel-disable-next-line claseHuerfana — falso positivo del scanner: la clase la pone liquid-glass-react en su JSX (node_modules), nunca aparece en src. */
+.explorador__capas > div.bg-black,
+.explorador__capas > span {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
 }
 
 .explorador__lista {

@@ -28,9 +28,13 @@ import { iconoDePanel } from './Paneles';
 import { Pestanas } from './Pestanas';
 
 import { usarLista } from './usarLista';
+import { VIDRIO_INICIAL } from './ConfigVidrio';
+import { Cristal } from './Cristal';
 import { usarVista } from './usarVista';
 
 export function Lista() {
+  // Parámetros del cristal de la barra y del panel de Cajas (ver Cristal.tsx).
+  const vidrio = VIDRIO_INICIAL;
   const lista = usarLista();
   // Lo que no es dato de la lista: qué menú, modal o renombrado está abierto.
   const vista = usarVista({
@@ -138,6 +142,7 @@ export function Lista() {
       ajustesAbiertos={lista.ajustesAbiertos}
       onAbrirAjustes={lista.abrirAjustes}
       todosPaneles={lista.todosPaneles}
+      vidrio={vidrio}
     />
   );
 
@@ -225,7 +230,11 @@ export function Lista() {
     return (
       <main className={`marco marco--cajas${escritorio ? ' marco--escritorio' : ''}`} data-tauri-drag-region>
         <BarraVentana />
-        <div className="barra barra--carril">{accionesBarra}</div>
+        {/* La pastilla flotante: cristal líquido o plana, según `CRISTAL_ACTIVO`. Su
+         * posición va en CSS (`.barra--carril`), no en `style`. */}
+        <Cristal className="barra--carril" vidrio={vidrio}>
+          <div className="barra barra--carril-iconos">{accionesBarra}</div>
+        </Cristal>
         <Carril
           etiqueta="Paneles en cajas"
           // La nota nueva se centra sola; después manda el gesto de quien mira.
