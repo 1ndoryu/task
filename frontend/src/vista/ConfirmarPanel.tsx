@@ -4,6 +4,7 @@
 import { limpiarGrupo } from '../logica/orden';
 import type { Panel } from '../logica/paneles';
 import { Modal, type BotonModal } from './Modal';
+import { seBorra } from './Paneles';
 
 export interface Borrado {
   panel: Panel;
@@ -21,7 +22,7 @@ interface Props {
 }
 
 export function ConfirmarPanel({ borrado, onNota, onGrupo, onCerrar }: Props) {
-  const esNota = borrado?.panel.tipo === 'nota';
+  const esNota = !!borrado && seBorra(borrado.panel);
   const nombre = borrado ? (limpiarGrupo(borrado.panel.id) ?? borrado.panel.etiqueta) : '';
   const filas = borrado?.filas ?? 0;
 

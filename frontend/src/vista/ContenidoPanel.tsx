@@ -74,6 +74,10 @@ export function ContenidoPanel({
 }: Props): ReactNode {
   const tipo = panel.tipo;
   const conMenu = contextoDe(panel);
+  // El asa de tamaño solo existe en el carril; el resto de formas no pasa nada.
+  const medida = redimensionable
+    ? { tamano: preferencias.tamanos[panel.id], onTamano: (tamano: TamanoCaja | undefined) => onTamano(panel.id, tamano) }
+    : {};
   // Sin carril no hay botón: allí solo se ve una caja y plegarla no deja nada.
   const minimizada = !!onMinimizar && preferencias.minimizadas.includes(panel.id);
   const botonMinimizar = onMinimizar && (
@@ -87,8 +91,7 @@ export function ContenidoPanel({
         hoy={hoy}
         preferencias={preferencias}
         acceso={diario}
-        tamano={redimensionable ? preferencias.tamanos[panel.id] : undefined}
-        onTamano={redimensionable ? (tamano) => onTamano(panel.id, tamano) : undefined}
+        {...medida}
         minimizada={minimizada}
         botonMinimizar={botonMinimizar}
       />
@@ -105,8 +108,7 @@ export function ContenidoPanel({
         texto={laNota.texto}
         onEscribir={laNota.escribir}
         onConfirmar={laNota.confirmar}
-        tamano={redimensionable ? preferencias.tamanos[panel.id] : undefined}
-        onTamano={redimensionable ? (tamano) => onTamano(panel.id, tamano) : undefined}
+        {...medida}
         // Mismo gesto que en la caja de lista: el clic derecho es del panel.
         onContexto={conMenu}
         minimizada={minimizada}
@@ -188,8 +190,7 @@ export function ContenidoPanel({
       onMenuAbierto={onMenuAbierto}
       plegadas={plegadas}
       onPlegar={onPlegar}
-      tamano={redimensionable ? preferencias.tamanos[panel.id] : undefined}
-      onTamano={redimensionable ? (tamano) => onTamano(panel.id, tamano) : undefined}
+      {...medida}
       minimizada={minimizada}
       progreso={tipo === 'habitos' ? progresoHabitos(datos, panel.grupo ?? null, hoy) : undefined}
       // Solo se reordena a mano lo que está en orden manual; completados y
