@@ -9,7 +9,7 @@ Repo separado `task` (rama `main`), independiente de WANDORIUS. Objetivo de pari
 
 ## Pendientes
 
-- [ ] `27AA-11` — **Terminar el registro de tipos de panel y las props agrupadas.** Hecho cuando `cajasActivas`, `menuPanel` y `usarVista` leen el registro en vez de `panel.tipo`, y `Modales`, `Caja`, `ContenidoPanel` y `Fila` reciben contextos en vez de 14–24 props, con gate limpio. Los archivos grandes van en su propia tarea.
+- [ ] `27AA-12` — **Terminar la deuda SOLID restante.** Hecho cuando `cajasActivas`, `menuPanel` y `usarVista` lean el registro de tipos en vez de `panel.tipo`; `Modales`, `Caja`, `ContenidoPanel` y `Fila` reciban contextos en vez de 14–24 props; y los archivos grandes (`usarLista`, `usarNotas`, `preferencias`, `Iconos`, `Ajustes`, `usarArrastreFilas`) queden partidos, con gate limpio. Informe: `Agente/documentacion/arquitectura/auditoria-solid-2026-10-28.md`.
 - [ ] `27AA-8` — **Recuperar la contraseña por correo.** Hecho cuando «Olvidé mi contraseña» envíe un enlace de un solo uso y permita fijar la nueva; pide un proveedor de correo y su credencial (reservado a la usuaria).
 
 
