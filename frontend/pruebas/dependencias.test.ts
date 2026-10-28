@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { alternarDependencia, cierraCiclo, hilosPendientes, leerDependencias, mensajeFalta, requisitosPendientes } from '../src/logica/dependencias.ts';
+import {
+  alternarDependencia,
+  cierraCiclo,
+  hilosPendientes,
+  leerDependencias,
+  mensajeFalta,
+  ordenarPorDependencias,
+  requisitosPendientes,
+} from '../src/logica/dependencias.ts';
 import type { Dashboard } from '../src/logica/tipos.ts';
 
 const datos = {
@@ -56,4 +64,26 @@ test('requisitosPendientes devuelve solo lo que aún no está hecho', () => {
 test('mensajeFalta nombra lo que falta con su texto o su nombre', () => {
   assert.equal(mensajeFalta(datos, [{ tipo: 'tarea', id: 2 }]), 'Antes hay que hacer: «b».');
   assert.equal(mensajeFalta(datos, [{ tipo: 'tarea', id: 2 }, { tipo: 'habito', id: 7 }]), 'Antes hay que hacer: «b», «h».');
+});
+
+test('ordenarPorDependencias sube el requisito y deja la puntuación en lo demás', () => {
+  // Entrada ya ordenada por puntuación: a (espera a c), b, c. La dependiente baja
+  // debajo de su requisito; b conserva su puesto y c solo sube lo necesario.
+  const filas = [
+    { clave: 'a', requisitos: ['c'] },
+    { clave: 'b', requisitos: [] },
+    { clave: 'c', requisitos: [] },
+  ];
+  const orden = ordenarPorDependencias(filas, (f) => f.clave, (f) => f.requisitos).map((f) => f.clave);
+  assert.deepEqual(orden, ['b', 'c', 'a']);
+});
+
+test('ordenarPorDependencias ignora requisitos fuera de la lista y no se bloquea con un ciclo', () => {
+  const filas = [
+    { clave: 'x', requisitos: ['fuera'] },
+    { clave: 'y', requisitos: ['z'] },
+    { clave: 'z', requisitos: ['y'] },
+  ];
+  const orden = ordenarPorDependencias(filas, (f) => f.clave, (f) => f.requisitos).map((f) => f.clave);
+  assert.deepEqual(orden, ['x', 'y', 'z']);
 });

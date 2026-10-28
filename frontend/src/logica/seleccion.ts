@@ -7,6 +7,7 @@ import { masRecienteHecho } from './completados';
 import { fechaLocal, hoyLogico } from './fechas';
 import { tocaHoy, type ConFrecuencia } from './frecuencia';
 import { contarProgreso } from './progreso';
+import { claveDep, dependenciasDe, ordenarPorDependencias } from './dependencias';
 import {
   comparador,
   entradaDeHabito,
@@ -153,6 +154,7 @@ export function seleccionar(
       : raices.map((tarea) => ({
           fila: { tipo: 'tarea', tarea, hijos: hijasDe.get(tarea.id) } as Fila,
           entrada: entradaDeTarea(tarea),
+          ref: { tipo: 'tarea' as const, id: tarea.id },
           hecho: tarea.configuracion?.fechaCompletado ?? '',
         }))),
     ...(opciones.solo === 'tareas'
@@ -161,6 +163,7 @@ export function seleccionar(
           // En completados no se esconde nada: los hijos van tal cual, como el padre.
           fila: { tipo: 'habito', habito, hijos: subfilas(habito, hoy, completados ? false : (opciones.ocultarHabitos ?? false)) } as Fila,
           entrada: entradaDeHabito(habito, hoy, opciones.valoracion),
+          ref: { tipo: 'habito' as const, id: habito.id },
           // Un hábito de la caja de completados está hecho hoy, por definición.
           hecho: hoy,
         }))),
@@ -171,6 +174,15 @@ export function seleccionar(
   // El comparador guarda los pesos calculados: se crea una sola vez.
   const comparar = comparador(opciones.orden, hoy, opciones.algoritmo);
   pares.sort(completados ? masRecienteHecho : (a, b) => comparar(a.entrada, b.entrada));
+  // Lo que hay que hacer antes queda arriba de lo que espera a otra fila; el
+  // resto conserva el orden de puntuación. Completados no tiene dependencias que mirar.
+  const ordenados = completados
+    ? pares
+    : ordenarPorDependencias(
+        pares,
+        (par) => claveDep(par.ref),
+        (par) => dependenciasDe(datos, par.ref).map(claveDep),
+      );
 
-  return { filas: pares.map((par) => par.fila), completados, aplazados };
+  return { filas: ordenados.map((par) => par.fila), completados, aplazados };
 }

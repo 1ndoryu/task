@@ -74,6 +74,30 @@ export function hilosPendientes(
   return hilos;
 }
 
+/** Reordena filas ya ordenadas por puntuación: quien depende de otra va debajo
+ *  de ella. Sale siempre la primera de la lista que ya puede ir (sus requisitos
+ *  están puestos), así la puntuación manda en todo lo que no depende de nada.
+ *  Los requisitos que no están en la lista no cuentan. Un ciclo (no debería
+ *  llegar: `cierraCiclo` lo impide) sale en su orden original en vez de colgarse. */
+export function ordenarPorDependencias<T>(filas: T[], claveDe: (fila: T) => string, requisitosDe: (fila: T) => string[]): T[] {
+  const indice = new Map(filas.map((fila, i) => [claveDe(fila), i]));
+  const necesita = filas.map((fila) =>
+    requisitosDe(fila)
+      .map((clave) => indice.get(clave))
+      .filter((i): i is number => i !== undefined),
+  );
+  const puesta = filas.map(() => false);
+  const salida: T[] = [];
+  while (salida.length < filas.length) {
+    let elegida = puesta.findIndex((ya, i) => !ya && necesita[i].every((j) => puesta[j] || j === i));
+    // Ciclo: no hay nadie libre; se toma la primera pendiente para no bloquearse.
+    if (elegida < 0) elegida = puesta.indexOf(false);
+    puesta[elegida] = true;
+    salida.push(filas[elegida]);
+  }
+  return salida;
+}
+
 /** Lo que falta hacer antes de `ref`, según `hecho`. Lista vacía: `ref` puede completarse. */
 export function requisitosPendientes(
   datos: Dashboard,
