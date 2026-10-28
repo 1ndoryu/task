@@ -21,10 +21,6 @@
   opacity: 0.85;
 }
 
-.hilos__extremo {
-  fill: var(--sangre);
-}
-
 /* El aviso mientras se tira del hilo: abajo y centrado, sin tapar las filas. */
 .enlace__ayuda {
   position: fixed;

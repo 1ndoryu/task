@@ -55,10 +55,8 @@ export function HilosDependencias({ hilos }: Props) {
         m.vy = (m.vy + (objetivo.y - m.y) * RIGIDEZ) * FRENO;
         m.x += m.vx;
         m.y += m.vy;
-        const [camino, extremo1, extremo2] = Array.from(nodo.children);
-        camino.setAttribute('d', `M${a.x} ${a.y}Q${m.x} ${m.y} ${b.x} ${b.y}`);
-        extremo1.setAttribute('transform', `translate(${a.x} ${a.y})`);
-        extremo2.setAttribute('transform', `translate(${b.x} ${b.y})`);
+        // Solo la cuerda: sin puntos en los extremos.
+        nodo.firstElementChild?.setAttribute('d', `M${a.x} ${a.y}Q${m.x} ${m.y} ${b.x} ${b.y}`);
       });
       cuadro = requestAnimationFrame(pintar);
     };
@@ -71,8 +69,6 @@ export function HilosDependencias({ hilos }: Props) {
       {hilos.map((hilo) => (
         <g key={`${hilo.desde}>${hilo.hasta}`} className="hilos__hilo">
           <path className="hilos__cuerda" />
-          <circle className="hilos__extremo" r="3.5" />
-          <circle className="hilos__extremo" r="3.5" />
         </g>
       ))}
     </svg>
