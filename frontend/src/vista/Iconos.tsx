@@ -292,6 +292,43 @@ export function IconoRestaurar({ tam = 10 }: PropsIcono) {
   );
 }
 
+/** Play: arrancar el cronómetro. */
+export function IconoPlay({ tam = 12 }: PropsIcono) {
+  return (
+    <svg width={tam} height={tam} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      <path d="M6 4l14 8-14 8Z" />
+    </svg>
+  );
+}
+
+/** Pausa: dos barras, el reloj deja de sumar. */
+export function IconoPausa({ tam = 12 }: PropsIcono) {
+  return (
+    <svg width={tam} height={tam} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" focusable="false">
+      <path d="M8 4v16M16 4v16" />
+    </svg>
+  );
+}
+
+/** Hecho: la marca de completar, en un botón propio dentro de la pastilla. */
+export function IconoHecho({ tam = 12 }: PropsIcono) {
+  return (
+    <svg width={tam} height={tam} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      <path d="M4 12.5l5.5 5.5L20 6" />
+    </svg>
+  );
+}
+
+/** Cronómetro: el vaso redondo con su botón, junto al nombre medido. */
+export function IconoCronometro({ tam = 12 }: PropsIcono) {
+  return (
+    <svg width={tam} height={tam} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="13" r="8" />
+      <path d="M12 9v4l2 2M9 2h6" />
+    </svg>
+  );
+}
+
 /** Cajas: cuatro baldosas, el explorador de todas las cajas. */
 export function IconoCajas({ tam = 12 }: PropsIcono) {
   return (

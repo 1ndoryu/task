@@ -9,7 +9,7 @@
  * qué pinta según `panel.tipo`. Un tipo nuevo es una rama más aquí y nada más.
  * Lo que no es reparto de paneles vive fuera: las ventanas abiertas en
  * `usarVista`, y la barra, los modales y el menú de caja en sus componentes. */
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { alternarMinimizada } from '../logica/minimizadas';
 import { limpiarGrupo } from '../logica/orden';
 import { panelDeNota, type Panel } from '../logica/paneles';
@@ -23,6 +23,8 @@ import { ContenidoPanel } from './ContenidoPanel';
 import { MenuCaja } from './MenuCaja';
 import { HilosDependencias } from './HilosDependencias';
 import { Modales } from './Modales';
+import { PastillaCronometro } from './PastillaCronometro';
+import { ProveedorCronometro, TituloCronometro, usarCronometro } from './usarCronometro';
 import { calcularRequisitos } from './requisitos';
 import { iconoDePanel } from './Paneles';
 import { Pestanas } from './Pestanas';
@@ -38,6 +40,33 @@ export function Lista() {
   const vidrio = VIDRIO_INICIAL;
   const [aviso, avisar] = usarAviso();
   const lista = usarLista(avisar);
+
+  /** Completa una fila por su identidad, como la pide la pastilla del
+   *  cronómetro. Se busca la fila viva en los datos: la sesión guarda un id y
+   *  un tipo, no una copia que podría estar vieja. Devuelve si se hizo, para
+   *  que el reloj no se cierre con una fila que sigue pendiente. */
+  const completarPorId = (tipo: 'tarea' | 'habito', id: number): boolean => {
+    if (lista.estado.fase !== 'listo') return false;
+    const datosVivos = lista.estado.datos;
+    if (tipo === 'tarea') {
+      const tarea = datosVivos.tareas.find((t) => t.id === id);
+      return tarea ? lista.completar({ tipo: 'tarea', tarea }) : false;
+    }
+    const habito = datosVivos.habitos.find((h) => h.id === id);
+    return habito ? lista.completar({ tipo: 'habito', habito }) : false;
+  };
+  // El cronómetro de la vista: uno solo por sesión, guardado en el equipo.
+  const cronometro = usarCronometro(completarPorId);
+  /** Envuelve la vista con el cronómetro y cuelga de él la pastilla del pie y
+   *  el título de la ventana. Las dos van fuera de `main` porque son fijas (o
+   *  invisibles) y así no cuentan para su reparto. */
+  const conCronometro = (contenido: ReactNode) => (
+    <ProveedorCronometro control={cronometro}>
+      {contenido}
+      <TituloCronometro />
+      <PastillaCronometro />
+    </ProveedorCronometro>
+  );
   // Lo que no es dato de la lista: qué menú, modal o renombrado está abierto.
   const vista = usarVista({
     renombrarPanel: lista.renombrarPanel,
@@ -206,6 +235,8 @@ export function Lista() {
       cambiarOrdenCaja={lista.cambiarOrdenCaja}
       crear={lista.crear}
       hoy={lista.hoy}
+      momento={lista.momento}
+      elegirMomento={lista.elegirMomento}
       saliendo={lista.saliendo}
       nota={lista.nota}
       diario={lista.diario}
@@ -234,7 +265,7 @@ export function Lista() {
   if (enCajas) {
     // El carril centra columnas, no cajas: la nota nueva es la de su columna.
     const indiceNueva = vista.notaNueva ? lista.columnas.findIndex((c) => c.includes(vista.notaNueva ?? '')) : -1;
-    return (
+    return conCronometro(
       <main className={`marco marco--cajas${escritorio ? ' marco--escritorio' : ''}`} data-tauri-drag-region>
         <BarraVentana />
         {/* La pastilla flotante: cristal líquido o plana, según `CRISTAL_ACTIVO`. Su
@@ -270,7 +301,7 @@ export function Lista() {
         {modales}
         {hilos}
         {toast}
-      </main>
+      </main>,
     );
   }
 
@@ -285,7 +316,7 @@ export function Lista() {
     ),
   }));
 
-  return (
+  return conCronometro(
     <main className={`marco${escritorio ? ' marco--escritorio' : ''}`} data-tauri-drag-region>
       <BarraVentana />
       <section className="marco__unica" aria-label="Tareas y hábitos">
@@ -326,6 +357,6 @@ export function Lista() {
       {modales}
       {hilos}
       {toast}
-    </main>
+    </main>,
   );
 }

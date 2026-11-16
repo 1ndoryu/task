@@ -20,6 +20,7 @@ import './estilos/algoritmo.css';
 import './estilos/arrastre.css';
 import './estilos/archivados.css';
 import './estilos/dependencias.css';
+import './estilos/cronometro.css';
 import './estilos/ventana.css';
 
 const raiz = document.getElementById('raiz');

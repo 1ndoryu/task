@@ -1,0 +1,193 @@
+/* Cronómetro: el play de la fila, el reloj que aparece mientras se mide y la
+ * pastilla fija del pie. Usa solo tokens de `listas.css` para que siga al tema
+ * claro y oscuro sin reglas duplicadas. */
+
+/* --- Play de la fila --- */
+/* Cuelga al final de la fila, justo a la izquierda de la flecha de plegar, y
+ * sin ocupar sitio en reposo: mide cero y sus márgenes negativos anulan el
+ * hueco que el `gap` de la fila deja a cada lado. Al aparecer se abre a su
+ * talla y el que cede es el texto (que es `flex: 1`), así que ni la flecha ni
+ * las notas se mueven. */
+.fila__play {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* La fila se alinea por la línea de texto; un botón sin texto apoyaría su
+   * borde en esa línea y quedaría más alto que la flecha, que es lo mismo pero
+   * con más alto. Centrado, los dos comparten eje y la marca. */
+  align-self: center;
+  /* Ajuste óptico del eje vertical: el centro geométrico no coincide con el
+   * que percibe el ojo. Un solo número para retocarlo sin tocar el reparto. */
+  --desnivel-play: 0px;
+  transform: translateY(var(--desnivel-play));
+  width: 0;
+  height: 1rem;
+  margin: 0 -0.375rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  overflow: hidden;
+  color: var(--tinta-tenue);
+  /* Nada en reposo: la lista se lee como una lista y el play es una acción.
+   * Sin fundido: aparece de golpe con el ratón, y así depende solo del estado,
+   * no de que la animación llegue a correr. */
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Solo con el ratón encima, con el foco puesto en el propio play o mientras
+ * mide. `:focus-within` de la fila no cuenta: tras un clic el foco se queda en
+ * la fila y el play se vería siempre. */
+.fila:hover .fila__play,
+.fila__play:focus-visible,
+.fila--midiendo .fila__play {
+  /* Un pelo del ancho de la flecha de plegar: se lee como una acción más de la
+   * fila. `--margen-play` la acerca a la flecha, que es la siguiente. */
+  width: 1.125rem;
+  margin: 0 var(--margen-play, -0.25rem) 0 0;
+  opacity: 1;
+}
+
+/* En una lista donde alguna fila despliega subhábitos, la flecha es una columna
+ * más de la derecha: el play de una fila sin flecha tiene que caer en esa misma
+ * vertical, no donde iría la suya. Sin flecha, el play es el último de la fila y
+ * sin margen su centro queda justo en la vertical de las flechas; solo se aplica
+ * al mostrarse, así que en reposo no ocupa ni un píxel. */
+.lista:has(.fila__plegar) .fila:not(:has(.fila__plegar)) {
+  --margen-play: -0.0625rem;
+}
+
+/* Midiendo: el icono es la pausa y el color dice que algo corre. */
+.fila__play[data-midiendo='true'] {
+  color: var(--sangre);
+}
+
+/* La fila medida se marca por la izquierda, sin mover nada: una raya de 2 px
+ * pegada al borde. `padding` no cambia, así que el texto no salta. */
+.fila--midiendo {
+  box-shadow: inset 2px 0 0 var(--sangre);
+}
+
+/* El reloj de la fila: misma talla que las notas, con los dígitos quietos. */
+.fila__reloj {
+  color: var(--sangre);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Pastilla del pie --- */
+/* Flota sobre la barra del carril: su centro está en
+ * `calc(100vh - 1.5rem - 18px)`, así que se apoya por encima, dejando aire. */
+.cronometro {
+  position: fixed;
+  /* Para la barra de objetivo, que va pegada al borde de abajo. */
+  left: 50%;
+  /* La barra del carril mide 38 px de alto y su centro está en
+   * `100vh - 1.5rem - 18px`: la pastilla se apoya justo encima, con 6 px de aire. */
+  bottom: calc(1.5rem + 18px + 19px + 6px);
+  transform: translateX(-50%);
+  z-index: 6;
+  width: fit-content;
+  max-width: calc(100% - 2.5rem);
+  border: 1px solid var(--linea);
+  border-radius: var(--redondo);
+  background: var(--panel);
+  overflow: hidden;
+  font-size: var(--texto-nota);
+}
+
+.cronometro__fila {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.55rem;
+}
+
+/* Nombre de lo medido: se recorta a lo ancho de la pastilla; el globo
+ * (`title`) dice el resto. */
+.cronometro__nombre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  max-width: 16rem;
+  color: var(--tinta-tenue);
+}
+
+.cronometro__texto {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* El reloj: botón porque se arrastra para ajustarlo. Los dígitos son de ancho
+ * fijo para que no baile al pasar de 9 a 10. */
+.cronometro__reloj {
+  flex: none;
+  padding: 0.05rem 0.15rem;
+  border: 0;
+  border-radius: calc(var(--redondo) / 2);
+  background: none;
+  color: var(--tinta);
+  font: inherit;
+  /* Del tamaño de una nota: el número informa, no preside la barra. */
+  font-size: var(--texto-nota);
+  font-variant-numeric: tabular-nums;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+/* Objetivo alcanzado: el número pasa a la tinta de acento. */
+.cronometro__reloj[data-alcanzado='true'] {
+  color: var(--sangre);
+}
+
+.cronometro__acciones {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.cronometro__boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--redondo) / 2);
+  background: none;
+  color: var(--tinta-tenue);
+  cursor: pointer;
+}
+
+/* Sin cambio al pasar el ratón: la pastilla se lee como un solo objeto y unos
+ * botones que se encienden la rompen en trozos. El foco del teclado sí se ve,
+ * que ahí no hay puntero que lo delate. */
+.cronometro__boton:focus-visible {
+  outline: 1px solid var(--tinta-tenue);
+  outline-offset: 1px;
+}
+
+/* Pausado: la pastilla entera baja de intensidad; el reloj no suma. */
+.cronometro--pausado .cronometro__reloj {
+  color: var(--tinta-tenue);
+}
+
+/* Barra de objetivo: solo existe cuando la sesión tiene objetivo, y se pega al
+ * borde inferior de la pastilla, sin robar altura. */
+.cronometro__progreso {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 2px;
+  background: var(--linea);
+}
+
+.cronometro__relleno {
+  display: block;
+  width: var(--avance, 0%);
+  height: 100%;
+  background: var(--sangre);
+}
+

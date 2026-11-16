@@ -1,7 +1,10 @@
 /* Una fila de la lista, sea tarea o hábito: marca de completar, texto que abre
  * la configuración y racha. El menú de acciones se abre con el clic derecho en
  * la fila; no hay botón visible. Vive aparte de `Lista` para que cada archivo
- * tenga una sola responsabilidad. */
+ * tenga una sola responsabilidad.
+ *
+ * El cronómetro también vive aquí: el play de la propia fila, el reloj que
+ * aparece cuando se está midiendo y el estado que hereda de la vista. */
 import { useState } from 'react';
 import { aplazadoHasta, fechaAplazo } from '../logica/aplazos';
 import { sumarDias } from '../logica/fechas';
@@ -11,12 +14,14 @@ import { leerMomentos } from '../logica/momentos';
 import { hechoHoy } from '../logica/seleccion';
 import type { Habito } from '../logica/tipos';
 import { Calendario } from './Calendario';
-import { IconoDesplegar, IconoPlegar } from './Iconos';
+import { IconoDesplegar, IconoPausa, IconoPlay, IconoPlegar } from './Iconos';
 import { IconoMomento } from './IconosMomento';
 import { Menu } from './Menu';
+import { RelojFila } from './RelojFila';
 import { opcionesFila, prioridadDe, type AccionesFila } from './accionesFila';
 import { claveFila } from './tiposLista';
 import type { Editando } from './usarLista';
+import { usarCronometroDeVista } from './usarCronometro';
 
 interface Props {
   fila: NonNullable<Editando>;
@@ -61,6 +66,8 @@ export function Fila({
   onPlegar,
 }: Props) {
   const [calendario, setCalendario] = useState<'aplazo' | 'limite' | null>(null);
+  // El cronómetro llega por contexto: la fila no sabe de qué caja cuelga.
+  const cronometro = usarCronometroDeVista();
   const esTarea = fila.tipo === 'tarea';
   const esSub = fila.tipo === 'subhabito';
   // El subhábito se lee como un hábito: mismo punto de nivel, misma racha.
@@ -74,6 +81,13 @@ export function Fila({
   const [momento] = leerMomentos(momentosGuardados);
   const hecho = fila.tipo === 'tarea' ? fila.tarea.completado : habito !== null && hechoHoy(habito, hoy);
   const texto = fila.tipo === 'tarea' ? fila.tarea.texto : (habito?.nombre ?? '');
+  // Se mide la tarea y el hábito, como en el legacy: el subhábito no tiene
+  // fila propia y su id solo vale dentro del padre, así que su play sería el
+  // de otra fila. Lo hecho ya no se mide, ni en completados.
+  const medible = !completados && !hecho && !esSub && !!cronometro;
+  const entidad = esTarea ? 'tarea' : 'habito';
+  const entidadId = esTarea ? fila.tarea.id : fila.tipo === 'habito' ? fila.habito.id : 0;
+  const midiendo = medible && !!cronometro?.mide(entidad, entidadId);
   // La racha se cuenta del historial: el `racha` del payload es del front viejo.
   const racha = habito !== null ? rachaDe(habito, hoy) : 0;
   // Lo ya hecho de un hábito no sale de la lista (solo se tacha), así que se
@@ -94,12 +108,18 @@ export function Fila({
         primera && 'fila--primera',
         `fila--nivel-${nivel}`,
         hecho && 'fila--hecho',
+        midiendo && 'fila--midiendo',
         saliendo && 'fila--saliendo',
       ]
         .filter(Boolean)
         .join(' ')}
       // Los hilos de dependencias buscan la marca de la fila por esta clave.
       data-fila={claveFila(fila)}
+      // El arrastre de un subhábito lo limita a sus hermanos: mismo padre y
+      // mismo nivel. Son sus únicos datos fuera de la clave.
+      data-padre={esSub ? fila.padre.id : undefined}
+      data-nivel={esSub ? nivel : undefined}
+      data-id={esSub ? fila.subhabito.id : undefined}
       // Clic derecho: el menú de acciones, en el punto pulsado.
       onContextMenu={(evento) => {
         evento.preventDefault();
@@ -113,7 +133,13 @@ export function Fila({
         data-momento={momento}
         aria-label={`Completar ${texto}`}
         title="Completar"
-        onClick={() => acciones.completar(fila)}
+        onClick={() => {
+          // Marcar por su propia marca también cierra el reloj, como el legacy:
+          // una fila hecha no sigue sumando. Solo al marcar y solo si la marca
+          // se aplicó (un requisito sin hacer la deja pendiente).
+          const aplicada = acciones.completar(fila);
+          if (aplicada && !hecho) cronometro?.cerrarSiMide(entidad, entidadId);
+        }}
       >
         {momento && <IconoMomento momento={momento} />}
       </button>
@@ -126,6 +152,7 @@ export function Fila({
       >
         {texto}
       </button>
+      {midiendo && <RelojFila />}
       {aplazado !== null ? (
         <span className="fila__nota">vuelve el {diaCorto(aplazado)}</span>
       ) : (
@@ -135,6 +162,26 @@ export function Fila({
         <span className={`fila__nota${limite < hoy ? ' fila__nota--vencida' : ''}`}>vence el {diaCorto(limite)}</span>
       )}
       {racha > 1 && <span className="fila__nota">{racha} días</span>}
+      {/* Play del cronómetro: va pegado a la izquierda de la flecha de plegar y
+          no ocupa sitio hasta que la fila se mira (`cronometro.css`). */}
+      {medible && (
+        <button
+          type="button"
+          className="fila__play"
+          data-midiendo={midiendo}
+          aria-pressed={midiendo}
+          aria-label={midiendo ? `Detener el cronómetro de ${texto}` : `Cronometrar ${texto}`}
+          title={midiendo ? 'Detener el cronómetro' : 'Cronometrar'}
+          onClick={() => {
+            if (!cronometro) return;
+            // Volver a pulsarla cierra sin completar, como el botón del legacy.
+            if (midiendo) cronometro.cancelar();
+            else cronometro.iniciar(entidad, entidadId, texto);
+          }}
+        >
+          {midiendo ? <IconoPausa tam={11} /> : <IconoPlay tam={11} />}
+        </button>
+      )}
       {/* La flecha es del padre: dice cuántos hijos hay y los pliega. Va a la
           derecha, después de las notas, para no moverse con ellas. */}
       {plegable && (
@@ -153,7 +200,7 @@ export function Fila({
       <Menu
         etiqueta={null}
         titulo={`Acciones de ${texto}`}
-        items={opcionesFila(fila, grupos, colores, aplazado !== null)}
+        items={opcionesFila(fila, grupos, colores, aplazado !== null, medible ? (midiendo ? 'midiendo' : 'detenido') : 'nada')}
         abierto={menuAbierto !== null}
         onAbierto={(abierto) => {
           if (!abierto) onMenuAbierto(null);
@@ -161,7 +208,11 @@ export function Fila({
         enPunto={menuAbierto}
         onElegir={(id) => {
           if (id === 'editar') acciones.editar(fila);
-          else if (id === 'borrar') acciones.borrar(fila);
+          else if (id === 'cronometro') {
+            if (!cronometro) return;
+            if (midiendo) cronometro.cancelar();
+            else cronometro.iniciar(entidad, entidadId, texto);
+          } else if (id === 'borrar') acciones.borrar(fila);
           else if (id === 'dependencias') acciones.dependencias(fila);
           else if (id === 'aplazar-quitar') acciones.aplazar(fila, null);
           else if (id === 'aplazar-fecha') setCalendario('aplazo');
