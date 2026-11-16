@@ -4,6 +4,7 @@
  * cabecera lo pone la vista: la caja solo sabe recortar y colocar. */
 import { Fragment, useRef, type CSSProperties, type ReactNode } from 'react';
 import type { ColoresNivel, Preferencias, TamanoCaja } from '../logica/preferencias';
+import type { Momento } from '../logica/momentos';
 import type { Fila as FilaDatos } from '../logica/seleccion';
 import { CarcasaCaja } from './CarcasaCaja';
 import { BarraMomento } from './BarraMomento';
@@ -11,7 +12,6 @@ import { Fila } from './Fila';
 import type { AccionesFila } from './accionesFila';
 import { claveFila, valorDe } from './usarLista';
 import { usarArrastreFilas } from './usarArrastreFilas';
-import { mover } from '../logica/reordenar';
 
 interface Props {
   /** Texto accesible: qué grupo muestra esta caja. */
@@ -47,9 +47,15 @@ interface Props {
   minimizada?: boolean;
   /** Progreso del día (hábitos hechos de los que tocan): barra al pie de la caja. */
   progreso?: { hechos: number; total: number };
+  /** Momento que manda en el orden, y cómo elegirlo a mano desde la barra. */
+  momento?: Momento;
+  onElegirMomento?: (momento: Momento | null) => void;
   /** Con esto las filas se arrastran para ordenarlas: solo en orden manual.
    *  Recibe las filas raíz ya en su orden nuevo. */
   onReordenar?: (filas: FilaDatos[]) => void;
+  /** Mismo gesto para los subhábitos: recibe los ids de los hermanos de un
+   *  nivel ya en su orden nuevo, nunca los que no estaban en pantalla. */
+  onReordenarSubs?: (padreId: number, ids: number[]) => void;
 }
 
 /** Una fila suelta dentro de la lista, con su clave y su menú. Va aparte porque
@@ -131,12 +137,26 @@ export function Caja({
   onTamano,
   minimizada,
   progreso,
+  momento,
+  onElegirMomento,
   onReordenar,
+  onReordenarSubs,
 }: Props) {
   const listaRef = useRef<HTMLUListElement>(null);
   // La lista solo existe con filas: sin ellas no hay nada que enganchar.
-  const ordenable = !!onReordenar && filas.length > 0;
-  usarArrastreFilas(listaRef, ordenable, (desde, hasta) => onReordenar?.(mover(filas, desde, hasta)));
+  const ordenable = !!(onReordenar || onReordenarSubs) && filas.length > 0;
+  usarArrastreFilas(listaRef, { raices: !!onReordenar, subs: !!onReordenarSubs }, (grupos, hijos) => {
+    const nodos = grupos.flat();
+    if (!hijos) {
+      // Filas raíz: se reordenan por su clave, sin fiarse de los índices.
+      const porClave = new Map(filas.map((f) => [claveFila(valorDe(f)), f]));
+      const nuevas = grupos.map((g) => porClave.get(g[0].dataset.fila ?? '')).filter((f): f is FilaDatos => !!f);
+      if (nuevas.length === filas.length) onReordenar?.(nuevas);
+      return;
+    }
+    const padre = Number(nodos[0]?.dataset.padre ?? NaN);
+    if (Number.isFinite(padre)) onReordenarSubs?.(padre, nodos.map((n) => Number(n.dataset.id)));
+  });
   return (
     <CarcasaCaja
       clases={[
@@ -184,7 +204,13 @@ export function Caja({
         {filas.length === 0 ? (
           <p className="aviso aviso--vacio">{completados ? 'Nada completado.' : 'Nada pendiente.'}</p>
         ) : (
-          <ul ref={listaRef} className={`lista${completados ? ' lista--completados' : ''}${ordenable ? ' lista--ordenable' : ''}`}>
+          <ul
+            ref={listaRef}
+            className={`lista${completados ? ' lista--completados' : ''}${ordenable ? ' lista--ordenable' : ''}`}
+            // Qué se puede agarrar aquí: la hoja pinta el cursor según esto, porque
+            // en orden manual arrastra todo y en los demás modos solo los subhábitos.
+            data-arrastre={onReordenar ? 'todo' : onReordenarSubs ? 'subs' : undefined}
+          >
             {filas.map((fila, indice) => {
               const clave = claveFila(valorDe(fila));
               // La clave lleva el panel: plegar en una caja no pliega la misma
@@ -224,7 +250,9 @@ export function Caja({
         )}
       </div>
       {/* Fuera del scroll: la barra se queda al pie aunque la lista ruede. */}
-      {progreso && progreso.total > 0 && <BarraMomento algoritmo={preferencias.algoritmo} />}
+      {progreso && progreso.total > 0 && momento && onElegirMomento && (
+        <BarraMomento algoritmo={preferencias.algoritmo} actual={momento} onElegir={onElegirMomento} />
+      )}
       {progreso && progreso.total > 0 && (
         <div
           className="progreso"

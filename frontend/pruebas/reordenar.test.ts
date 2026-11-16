@@ -1,7 +1,7 @@
 /* Reordenar a mano: destino de la fila arrastrada y números de orden nuevos. */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { destinoFila, mover, ordenesNuevos } from '../src/logica/reordenar.ts';
+import { destinoFila, mover, ordenarSubhabitos, ordenesNuevos, reordenarEntre } from '../src/logica/reordenar.ts';
 
 // Cuatro grupos de 10 de alto: centros en 5, 15, 25 y 35.
 const tramos = [0, 10, 20, 30].map((arriba) => ({ arriba, abajo: arriba + 10 }));
@@ -45,4 +45,31 @@ test('los órdenes nuevos reusan los números, ascendentes y sin repetir', () =>
   assert.deepEqual(ordenesNuevos([0, 0, 0]), [0, 1, 2]);
   assert.deepEqual(ordenesNuevos([3, 3, 4]), [3, 4, 5]);
   assert.deepEqual(ordenesNuevos([]), []);
+});
+
+test('los subhábitos se pintan por importancia y, a igual nivel, en su orden', () => {
+  const subs = [
+    { id: 1, importancia: 'Baja' },
+    { id: 2, importancia: 'Muy Alta' },
+    { id: 3 },
+    { id: 4, importancia: 'Muy Alta' },
+  ];
+  // Media (sin importancia) queda entre baja y alta; los de igual nivel no bailan.
+  assert.deepEqual(
+    ordenarSubhabitos(subs).map((s) => s.id),
+    [2, 4, 3, 1],
+  );
+  // No toca el array original: la copia viva del padre no se reordena sola.
+  assert.deepEqual(subs.map((s) => s.id), [1, 2, 3, 4]);
+});
+
+test('reordenar entre hermanos no mueve a los que no estaban en pantalla', () => {
+  const actuales = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }];
+  // Se mueve el 4 y el 2 (los visibles de un nivel); el 1, 3 y 5 se quedan.
+  assert.deepEqual(
+    reordenarEntre(actuales, [4, 2]).map((x) => x.id),
+    [1, 4, 3, 2, 5],
+  );
+  // Sin ids, nada cambia; como mucho, una copia.
+  assert.deepEqual(reordenarEntre(actuales, []).map((x) => x.id), [1, 2, 3, 4, 5]);
 });

@@ -228,13 +228,11 @@ body {
 }
 
 /* Subtareas y subhábitos: cuelgan de su padre, sangrados y con el punto más
- * pequeño, para que se lea la jerarquía sin añadir un icono más. La raya de la
- * izquierda es el «esto pertenece a lo de arriba», como en el legacy. */
+ * pequeño, para que se lea la jerarquía sin añadir un icono más. Sin raya
+ * vertical: la sangría ya dice de quién cuelga y la línea partía la caja. */
 /* sentinel-disable-next-line claseHuerfana — falso positivo del scanner: la clase se compone en un array condicional de `Fila.tsx`; el scanner solo ve literales className completos. */
 .fila--sub {
   padding-left: 1.25rem;
-  /* La raya guía el ojo hasta el padre: misma sangría que el nombre del padre. */
-  border-left: 1px solid var(--linea);
   margin-left: 0.4rem;
 }
 
@@ -251,6 +249,9 @@ body {
  * la fila y hereda la tinta tenue de las notas, para no competir con el texto. */
 .fila__plegar {
   flex: none;
+  /* Centrada en la fila, como el play que tiene al lado: con la línea de texto
+   * quedaría 1 px larga de alto y los dos iconos se verían desalineados. */
+  align-self: center;
   display: inline-flex;
   align-items: center;
   justify-content: center;

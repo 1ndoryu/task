@@ -81,6 +81,7 @@ export function accionesDeLista(lista: Lista, abrirDependencias: (objetivo: RefD
       else if (fila.tipo === 'habito') abrirDependencias({ tipo: 'habito', id: fila.habito.id });
     },
     reordenar: lista.reordenar,
+    reordenarSubs: lista.reordenarSubs,
   };
 
   return { acciones, guardarCambios };

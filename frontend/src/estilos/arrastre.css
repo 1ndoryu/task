@@ -2,9 +2,13 @@
  * fila agarrada sale como una copia que sigue al puntero, su sitio queda de
  * hueco y las vecinas ceden con una transición. Nada de arrastre nativo. */
 
-/* Con el orden manual la fila entera se agarra; las marcas y flechas conservan su clic. */
+/* La fila entera se agarra; las marcas y flechas conservan su clic. Con orden
+ * manual, cualquier fila. En los demás modos solo el subhábito, que se mueve
+ * entre hermanos de su nivel: el límite lo pone el gesto, que ve sus datos. */
 /* sentinel-disable-next-line claseHuerfana — falso positivo: `Caja.tsx` la compone en una plantilla condicional del `className`. */
-.lista--ordenable > .fila:not(.fila--sub) {
+.lista--ordenable[data-arrastre='todo'] > .fila,
+/* sentinel-disable-next-line claseHuerfana — falso positivo: la clase se compone en un array condicional de `Fila.tsx`. */
+.lista--ordenable[data-arrastre='subs'] > .fila--sub {
   cursor: grab;
   user-select: none;
   /* Con el dedo el gesto nace de una pulsación larga: sin menú ni lupa del sistema. */

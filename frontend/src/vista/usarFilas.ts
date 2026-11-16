@@ -5,7 +5,7 @@
 import { useCallback, type Dispatch, type SetStateAction } from 'react';
 import { hoyLogico } from '../logica/fechas';
 import { anotarGrupos } from '../logica/grupos';
-import { ordenesNuevos } from '../logica/reordenar';
+import { ordenesNuevos, ordenarSubhabitos, reordenarEntre } from '../logica/reordenar';
 import { desmarcarHabito, editarHabito, marcarHabito } from '../logica/habitos';
 import { fijarCompletado, fijarMarcaSubhabito } from '../logica/marcas';
 import { importanciaDeHabito } from '../logica/importancia';
@@ -108,8 +108,10 @@ export function usarFilas(d: Dependencias) {
     [escribirTarea, escribirHabito, anotarGrupo],
   );
 
+  /** Marca o desmarca; devuelve si se hizo. Lo usa el cronómetro: si la fila
+   *  no se pudo completar —le falta un requisito—, el reloj no se cierra. */
   const completar = useCallback(
-    (fila: NonNullable<Editando>) => {
+    (fila: NonNullable<Editando>): boolean => {
       const clave = claveFila(fila);
       // El subhábito no tiene fila en el backend: la ruta de historial solo
       // existe para hábitos de verdad. Se marca dentro del payload del padre,
@@ -123,7 +125,7 @@ export function usarFilas(d: Dependencias) {
           ...h,
           subhabitos: (h.subhabitos ?? []).map((s) => (s.id === idSub ? fijarMarcaSubhabito(s, quedaHecho, hoy) : s)),
         }));
-        return;
+        return true;
       }
       const quedaHecha = fila.tipo === 'tarea' ? !fila.tarea.completado : !hechoHoy(fila.habito, hoy);
       // Un requisito sin hacer impide completar; desmarcar siempre se puede. La fila ya muestra el «antes: …».
@@ -131,7 +133,7 @@ export function usarFilas(d: Dependencias) {
       const faltan = quedaHecha ? faltaAntes(datosRef.current, ref, hoy) : [];
       if (faltan.length) {
         avisar(mensajeFalta(datosRef.current, faltan));
-        return;
+        return false;
       }
       // Solo sale de la lista la tarea: el hábito se queda todo el día, tachado,
       // así que animarle la salida sería un parpadeo sin efecto.
@@ -148,7 +150,7 @@ export function usarFilas(d: Dependencias) {
       }
       if (fila.tipo === 'tarea') {
         void escribirTarea(fila.tarea.id, (t) => fijarCompletado(t, quedaHecha, hoy));
-        return;
+        return true;
       }
       // El hábito marca el día de hoy en su historial, no el campo `completado`.
       const id = fila.habito.id;
@@ -166,6 +168,7 @@ export function usarFilas(d: Dependencias) {
       void peticion.catch(() => {
         /* Queda en memoria: la próxima carga lo trae del servidor. */
       });
+      return true;
     },
     [escribirTarea, escribirHabito, avisar, hoy],
   );
@@ -217,6 +220,22 @@ export function usarFilas(d: Dependencias) {
     },
     [escribirTarea, escribirHabito],
   );
+  /** Orden manual de los subhábitos: viven en el payload del padre, así que el
+   *  orden nuevo se escribe ahí. `reordenarEntre` deja quietos a los que no
+   *  estaban en pantalla (pausados o ya hechos); los que sí venían viajan en el
+   *  orden que dejó el gesto, siempre dentro de su nivel. */
+  const reordenarSubs = useCallback(
+    (padreId: number, ids: number[]) => {
+      void escribirHabito(padreId, (h) => {
+        // La lista guardada se ordena por nivel antes de tocar nada: lo que
+        // escribe el gesto es el orden dentro de un nivel, y así no queda un
+        // array con los niveles mezclados.
+        const porNivel = ordenarSubhabitos(h.subhabitos ?? []);
+        return { ...h, subhabitos: reordenarEntre(porNivel, ids) };
+      });
+    },
+    [escribirHabito],
+  );
   /** Lo que debe hacerse antes de una fila: va en su payload, así que viaja con
    * el mismo PUT que cualquier cambio. Vacío borra el campo, no lo deja en `[]`. */
   const dependencias = useCallback(
@@ -230,5 +249,5 @@ export function usarFilas(d: Dependencias) {
     },
     [escribirTarea, escribirHabito],
   );
-  return { anotarGrupo, moverGrupo, crear, completar, aplazar, reordenar, dependencias };
+  return { anotarGrupo, moverGrupo, crear, completar, aplazar, reordenar, reordenarSubs, dependencias };
 }

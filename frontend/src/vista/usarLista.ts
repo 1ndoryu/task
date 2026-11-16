@@ -13,6 +13,7 @@ import { editarHabito } from '../logica/habitos';
 import { importanciaDeHabito } from '../logica/importancia';
 import { leerGruposArchivados, leerGruposConocidos, leerOrdenPestanas } from '../logica/grupos';
 import { CLAVES_VISTA, type ModoOrden } from '../logica/orden';
+import { momentoDe, type Momento } from '../logica/momentos';
 import { idDeNota, type Panel } from '../logica/paneles';
 import { guardarPreferencias, leerPreferencias, type Preferencias } from '../logica/preferencias';
 import { subirTodo } from '../logica/preferenciasRemotas';
@@ -28,6 +29,7 @@ import { usarGrupos } from './usarGrupos';
 import { usarNotas, type AccesoDiario } from './usarNotas';
 import { usarCarga } from './usarCarga';
 import { usarOrdenCajas, usarPaneles } from './usarPaneles';
+import { usarReloj } from './usarReloj';
 import { usarSincronia } from './usarSincronia';
 
 export type { CambiosFila, Editando } from './tiposLista';
@@ -82,6 +84,11 @@ export interface Lista {
   saliendo: ReadonlySet<string>;
   ajustesAbiertos: boolean;
   hoy: string;
+  /** Momento del día que manda en el orden: el elegido a mano o el del reloj.
+   *  Elegirlo a mano es cosa de la sesión; se suelta con el doble clic. */
+  momento: Momento;
+  /** Fija el momento a mano (`null` vuelve a seguir el reloj). */
+  elegirMomento: (momento: Momento | null) => void;
   cambiarOrden: (modo: ModoOrden) => void;
   cambiarGrupo: (grupo: string) => void;
   /** Mueve un grupo a otra posición de la fila de pestañas (arrastre). */
@@ -91,8 +98,9 @@ export interface Lista {
   /** Fila abierta en el modal de configuración; `null` si está cerrado. */
   editando: Editando;
   abrirEdicion: (fila: Editando) => void;
-  /** Marca o desmarca, según su estado de hoy. */
-  completar: (fila: NonNullable<Editando>) => void;
+  /** Marca o desmarca, según su estado de hoy. Devuelve si se hizo: el
+   *  cronómetro no cierra el reloj con una fila que sigue pendiente. */
+  completar: (fila: NonNullable<Editando>) => boolean;
   editarTarea: (id: number, cambios: CambiosFila) => void;
   editarHabito: (id: number, cambios: CambiosFila) => void;
   borrarTarea: (id: number) => void;
@@ -105,6 +113,9 @@ export interface Lista {
   aplazar: (fila: NonNullable<Editando>, hasta: string | null) => void;
   /** Orden manual: recibe las filas de una caja ya en su orden nuevo. */
   reordenar: (filas: NonNullable<Editando>[]) => void;
+  /** Orden manual de los subhábitos de un padre: sus ids ya en su orden nuevo,
+   *  solo los de un mismo nivel. */
+  reordenarSubs: (padreId: number, ids: number[]) => void;
   /** Fija lo que debe hacerse antes de una fila; lista vacía las quita. */
   dependencias: (objetivo: RefDependencia, lista: RefDependencia[]) => void;
   /** Da de alta una tarea o un hábito desde el campo de la lista. */
@@ -122,11 +133,20 @@ export function usarLista(avisar: (texto: string) => void): Lista {
   const [ajustes, setAjustes] = useState<Preferencias>(preferencias);
   const [ajustesAbiertos, setAjustesAbiertos] = useState(false);
   const [editando, setEditando] = useState<Editando>(null);
-  // «Hoy» sigue la hora de fin de día: cambiarla en ajustes lo recalcula.
+  // «Hoy» sigue la hora de fin de día y el reloj: cambiarla en ajustes lo
+  // recalcula, y al cruzar el fin de día salta solo, sin recargar. El mismo
+  // reloj despierta la vista en cada cambio de momento, que es lo que mueve el
+  // orden inteligente.
+  const ahora = usarReloj(ajustes.finDia, ajustes.algoritmo);
   const hoy = useMemo(() => {
     fijarFinDia(ajustes.finDia);
-    return hoyLogico();
-  }, [ajustes.finDia]);
+    return hoyLogico(ahora);
+  }, [ajustes.finDia, ahora]);
+  // Momento elegido a mano en la barra. Va aparte de los ajustes a propósito:
+  // es una mirada —«ordéname como si fuera de noche»—, no una preferencia, y
+  // por eso se pierde al cerrar y el doble clic lo devuelve al reloj.
+  const [momentoManual, setMomentoManual] = useState<Momento | null>(null);
+  const momento = momentoManual ?? momentoDe(ahora, ajustes.algoritmo);
   const [gruposConocidos, setGruposConocidos] = useState<string[]>(leerGruposConocidos);
   // Grupos archivados: nombres que no son paneles pero siguen en sus filas.
   const [gruposArchivados, setGruposArchivados] = useState<string[]>(leerGruposArchivados);
@@ -187,7 +207,7 @@ export function usarLista(avisar: (texto: string) => void): Lista {
 
   // Las mutaciones de fila (alta, completar, mover, aplazar) viven en
   // `usarFilas`: comparten las mismas dependencias y no tocan los paneles.
-  const { anotarGrupo, moverGrupo, crear, completar, aplazar, reordenar, dependencias } = usarFilas({
+  const { anotarGrupo, moverGrupo, crear, completar, aplazar, reordenar, reordenarSubs, dependencias } = usarFilas({
     datosRef,
     setEstado,
     setGruposConocidos,
@@ -277,6 +297,8 @@ export function usarLista(avisar: (texto: string) => void): Lista {
     saliendo,
     ajustesAbiertos,
     hoy,
+    momento,
+    elegirMomento: setMomentoManual,
     cambiarOrden: (modo) => {
       setOrden(modo);
       guardarPreferencias({ orden: modo });
@@ -322,6 +344,7 @@ export function usarLista(avisar: (texto: string) => void): Lista {
     operarSubhabitos: (padreId, operar) => {
       void escribirHabito(padreId, (h) => ({ ...h, subhabitos: operar(h.subhabitos ?? []) }));
     },
+    reordenarSubs,
     moverGrupo,
     aplazar,
     reordenar,

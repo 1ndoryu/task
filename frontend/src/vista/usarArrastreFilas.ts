@@ -9,7 +9,7 @@
  * `transform` sobre los nodos, sin repintar React mientras dura el gesto. */
 import { useEffect, useRef, type RefObject } from 'react';
 import { flushSync } from 'react-dom';
-import { destinoFila, type Tramo } from '../logica/reordenar';
+import { destinoFila, mover, type Tramo } from '../logica/reordenar';
 import { DURACION } from './carril/tipos';
 
 /** Píxeles que hay que mover el ratón para que un clic deje de serlo. */
@@ -20,7 +20,7 @@ const ESPERA_TACTIL = 250;
 const ZONA = 36;
 const VELOCIDAD = 14;
 /** Lo que no arrastra: la marca y la flecha tienen su propio clic. */
-const EXCLUIDO = '.fila__marca, .fila__plegar, [role="menu"]';
+const EXCLUIDO = '.fila__marca, .fila__plegar, .fila__play, [role="menu"]';
 const CURVA = 'cubic-bezier(.22,.61,.36,1)';
 
 interface Gesto {
@@ -32,6 +32,8 @@ interface Gesto {
   alto: number;
   /** Y del puntero dentro del grupo agarrado. */
   dentro: number;
+  /** Subhábitos: el grupo agarrado no lleva hijos y su sitio no se encoge. */
+  hijos: boolean;
   copia: HTMLElement;
   /** Último punto del puntero: el rodar de la lista lo reaplica sin moverlo. */
   y: number;
@@ -49,20 +51,56 @@ function gruposDe(lista: HTMLElement): HTMLElement[][] {
 }
 
 /** Y (dentro del `<ul>`) en que queda la fila agarrada si cae en `destino`: las que
- *  cruzó ceden su sitio, así que hacia abajo acaba al pie del tramo de destino. */
-function sitioDe(g: Pick<Gesto, 'tramos' | 'desde' | 'alto'>, destino: number): number {
+ *  cruzó ceden su sitio, así que hacia abajo acaba al pie del tramo de destino.
+ *  Con subhábitos su sitio no se encoge, así que se queda donde está y solo las
+ *  hermanas cruzan. */
+function sitioDe(g: Pick<Gesto, 'tramos' | 'desde' | 'alto' | 'hijos'>, destino: number): number {
+  if (g.hijos) return g.tramos[g.desde].arriba;
   if (destino > g.desde) return g.tramos[destino].abajo - g.alto;
   return g.tramos[destino].arriba;
 }
 
-/** `lista` es el `<ul>` de filas; `alSoltar(desde, hasta)` recibe los índices de
- *  grupo (de fila raíz) y debe aplicar el orden nuevo. Con `activo` falso no
- *  engancha nada: el orden no es manual y las filas no se mueven. */
+/** Las filas hermanas de un subhábito: el tramo seguido de subhábitos del mismo
+ *  padre y del mismo nivel de importancia. Mover solo se permite dentro de ese
+ *  tramo, así la importancia manda siempre en el orden y un subhábito no salta
+ *  a un grupo que no es el suyo. Se toma el tramo contiguo porque la lista ya
+ *  pinta juntos los de un mismo nivel: cruzar uno de otro nivel desordenaría
+ *  las vecinas que el gesto no mueve. */
+function gruposHermanosDe(ul: HTMLElement, nodo: HTMLElement): HTMLElement[][] {
+  const padre = nodo.dataset.padre ?? '';
+  const nivel = nodo.dataset.nivel ?? '';
+  const subs = (Array.from(ul.children) as HTMLElement[]).filter(
+    (fila) => fila.classList.contains('fila--sub') && fila.dataset.padre !== undefined,
+  );
+  const i = subs.indexOf(nodo);
+  if (i < 0) return [];
+  const igual = (fila: HTMLElement) => fila.dataset.padre === padre && fila.dataset.nivel === nivel;
+  let desde = i;
+  let hasta = i;
+  while (desde > 0 && igual(subs[desde - 1])) desde--;
+  while (hasta < subs.length - 1 && igual(subs[hasta + 1])) hasta++;
+  return subs.slice(desde, hasta + 1).map((fila) => [fila]);
+}
+
+/** Qué se puede agarrar: las filas raíz solo con orden manual, los subhábitos
+ *  siempre (su orden vive en el payload del padre y la importancia manda, así
+ *  que no choca con ningún modo de orden de la caja). */
+export interface Arrastrables {
+  raices: boolean;
+  subs: boolean;
+}
+
+/** `lista` es el `<ul>` de filas; `alSoltar(grupos, hijos)` recibe los nodos de
+ *  todos los grupos ya en su orden nuevo, y si lo agarrado era un subhábito. */
 export function usarArrastreFilas(
   lista: RefObject<HTMLUListElement>,
-  activo: boolean,
-  alSoltar: (desde: number, hasta: number) => void,
+  permitir: Arrastrables,
+  alSoltar: (grupos: HTMLElement[][], hijos: boolean) => void,
 ): void {
+  // Dentro del efecto basta con saber si hay algo agarrable.
+  const activo = permitir.raices || permitir.subs;
+  const permitirRef = useRef(permitir);
+  permitirRef.current = permitir;
   // La última versión del manejador sin reenganchar los eventos en cada render.
   const soltar = useRef(alSoltar);
   soltar.current = alSoltar;
@@ -73,7 +111,7 @@ export function usarArrastreFilas(
     const marco = ul.closest<HTMLElement>('.scroll') ?? ul;
     let gesto: Gesto | null = null;
     // Pulsado y aún sin gesto: espera a moverse lo bastante (o a la pulsación larga).
-    let pendiente: { id: number; x: number; y: number; nodo: HTMLElement; tactil: boolean; espera: number } | null = null;
+    let pendiente: { id: number; x: number; y: number; nodo: HTMLElement; hijos: boolean; tactil: boolean; espera: number } | null = null;
     let teclaEscape: ((e: KeyboardEvent) => void) | null = null;
     // La copia está volando a su sitio: aún no se acepta otro gesto.
     let volando = false;
@@ -119,8 +157,11 @@ export function usarArrastreFilas(
       g.marco = requestAnimationFrame(() => rodar(g));
     };
 
-    const comenzar = (nodo: HTMLElement, id: number, y: number) => {
-      const grupos = gruposDe(ul);
+    const comenzar = (nodo: HTMLElement, id: number, y: number, hijos: boolean) => {
+      // Agarrar un subhábito: los grupos son las filas hermanas que comparten
+      // padre y nivel. Su padre no entra, así que la fila arrastrada no puede
+      // caer fuera de ese tramo.
+      const grupos = hijos ? gruposHermanosDe(ul, nodo) : gruposDe(ul);
       const desde = grupos.findIndex((g) => g[0] === nodo);
       if (desde < 0) return;
       const cuerpo = ul.getBoundingClientRect();
@@ -149,7 +190,7 @@ export function usarArrastreFilas(
       } catch {
         /* El puntero ya se soltó: el gesto termina en el siguiente evento. */
       }
-      gesto = { id, grupos, tramos, desde, destino: desde, alto, dentro: y - (cuerpo.top + tramos[desde].arriba), copia, y, marco: 0 };
+      gesto = { id, grupos, tramos, desde, destino: desde, alto, dentro: y - (cuerpo.top + tramos[desde].arriba), copia, y, marco: 0, hijos };
       actualizar(gesto);
       rodar(gesto);
 
@@ -190,12 +231,20 @@ export function usarArrastreFilas(
       const cuerpo = ul.getBoundingClientRect();
       const sitio = sitioDe(g, destino);
       const origen = g.copia.style.transform;
+      // Un solo cierre: el vuelo puede terminar, cancelarse o quedarse parado
+      // (pestaña en segundo plano congela la línea de tiempo) y los tres casos
+      // acaban igual.
+      let cerrado = false;
       const fin = () => {
+        if (cerrado) return;
+        cerrado = true;
         // Sin transición y sin transformaciones antes de reordenar: si no, las
         // vecinas viajarían de nuevo a un sitio al que React ya las colocó.
         limpiar(g);
         volando = false;
-        if (destino !== g.desde) flushSync(() => soltar.current(g.desde, destino));
+        // Los grupos, ya en su orden nuevo: la lista de nodos lo es todo para
+        // quien aplica el cambio, y así no hay que traducir índices.
+        if (destino !== g.desde) flushSync(() => soltar.current([...mover(g.grupos, g.desde, destino)], g.hijos));
       };
       // Mientras vuela, el hueco va al sitio del destino: las vecinas ya están cedidas.
       if (reducido()) return fin();
@@ -205,6 +254,10 @@ export function usarArrastreFilas(
       );
       vuelo.onfinish = fin;
       vuelo.oncancel = fin;
+      // Respaldo: si la animación no termina (pestaña oculta, línea de tiempo
+      // parada), el soltar se pierde y la fila queda flotando. El orden se
+      // aplica igual, un pelo después de lo que duraría el vuelo.
+      window.setTimeout(fin, DURACION + 150);
     };
 
     const alMover = (e: PointerEvent) => {
@@ -221,10 +274,10 @@ export function usarArrastreFilas(
         return;
       }
       if (lejos) {
-        const { nodo, id, y } = pendiente;
+        const { nodo, id, y, hijos } = pendiente;
         soltarPendiente();
         // Se agarra por donde se pulsó (no por donde se supera el umbral) y la copia alcanza al puntero.
-        comenzar(nodo, id, y);
+        comenzar(nodo, id, y, hijos);
         if (gesto) {
           gesto.y = e.clientY;
           actualizar(gesto);
@@ -253,7 +306,11 @@ export function usarArrastreFilas(
       const destino = e.target instanceof Element ? e.target : null;
       if (!destino || destino.closest(EXCLUIDO)) return;
       const nodo = destino.closest<HTMLElement>('li.fila');
-      if (!nodo || nodo.parentElement !== ul || nodo.classList.contains('fila--sub')) return;
+      if (!nodo || nodo.parentElement !== ul) return;
+      // El subhábito lleva `data-padre`; una subtarea no, y por eso no arrastra.
+      // El subhábito sin hermanos de su nivel tampoco: no hay a dónde moverlo.
+      const hijos = nodo.dataset.padre !== undefined;
+      if (hijos ? !permitirRef.current.subs || gruposHermanosDe(ul, nodo).length < 2 : !permitirRef.current.raices) return;
       // La caja del carril también arrastra desde lo que no es botón: esto manda aquí.
       e.stopPropagation();
       const tactil = e.pointerType === 'touch';
@@ -262,13 +319,14 @@ export function usarArrastreFilas(
         x: e.clientX,
         y: e.clientY,
         nodo,
+        hijos,
         tactil,
         espera: tactil
           ? window.setTimeout(() => {
               const p = pendiente;
               if (!p) return;
               soltarPendiente();
-              comenzar(p.nodo, p.id, p.y);
+              comenzar(p.nodo, p.id, p.y, p.hijos);
             }, ESPERA_TACTIL)
           : 0,
       };

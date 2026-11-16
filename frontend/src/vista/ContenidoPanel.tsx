@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import type { Dashboard } from '../logica/tipos';
 import type { Preferencias, TamanoCaja } from '../logica/preferencias';
 import { UMBRALES, type ModoOrden } from '../logica/orden';
+import type { Momento } from '../logica/momentos';
 import type { Panel } from '../logica/paneles';
 import { progresoHabitos, seleccionar, type Fila as FilaDatos } from '../logica/seleccion';
 import type { AccionesFila } from './accionesFila';
@@ -31,6 +32,9 @@ interface Props {
   cambiarOrdenCaja: (panel: string, modo: ModoOrden) => void;
   crear: (fila: DatosNuevaFila) => void;
   hoy: string;
+  /** Momento que manda en el orden de todas las cajas, y cómo elegirlo. */
+  momento: Momento;
+  elegirMomento: (momento: Momento | null) => void;
   saliendo: ReadonlySet<string>;
   nota: (panel: string) => { texto: string; escribir: (contenido: string) => void; confirmar: () => void } | null;
   /** Entradas del diario por día, para la caja «Diario». */
@@ -62,6 +66,8 @@ export function ContenidoPanel({
   cambiarOrdenCaja,
   crear,
   hoy,
+  momento,
+  elegirMomento,
   saliendo,
   nota,
   diario,
@@ -152,6 +158,7 @@ export function ContenidoPanel({
     ocultarHabitos: preferencias.ocultarHabitos,
     valoracion: { umbrales: UMBRALES[preferencias.tolerancia], reinicio: preferencias.reinicioUrgencia },
     algoritmo: preferencias.algoritmo,
+    momento,
     solo,
     hoy,
     saliendo,
@@ -209,6 +216,8 @@ export function ContenidoPanel({
       {...medida}
       minimizada={minimizada}
       progreso={tipo === 'habitos' ? progresoHabitos(datos, panel.grupo ?? null, hoy) : undefined}
+      momento={momento}
+      onElegirMomento={elegirMomento}
       // Solo se reordena a mano lo que está en orden manual; completados y
       // aplazados tienen su propio orden (por fecha) y no se tocan.
       onReordenar={
@@ -216,6 +225,10 @@ export function ContenidoPanel({
           ? (nuevas) => acciones.reordenar(nuevas.map(valorDe))
           : undefined
       }
+      // Los subhábitos se mueven en cualquier modo de orden, también con el
+      // inteligente: su sitio lo manda la importancia, y dentro de ella el
+      // orden que deja el gesto. En completados no, que es solo lectura.
+      onReordenarSubs={tipo !== 'completados' ? acciones.reordenarSubs : undefined}
       // El menú del panel también nace de la caja: en cajas es la única vía
       // (no hay pestañas) y en la caja única es el mismo gesto de la pestaña.
       onContexto={conMenu}

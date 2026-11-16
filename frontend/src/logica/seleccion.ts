@@ -2,11 +2,13 @@
  * criterio (como el panel de ejecución del front original) y filtrados por la
  * pestaña activa. Lógica pura. */
 import type { Algoritmo } from './algoritmo';
+import type { Momento } from './momentos';
 import { aplazadoHasta } from './aplazos';
 import { masRecienteHecho } from './completados';
 import { fechaLocal, hoyLogico } from './fechas';
 import { tocaHoy, type ConFrecuencia } from './frecuencia';
 import { contarProgreso } from './progreso';
+import { ordenarSubhabitos } from './reordenar';
 import { claveDep, dependenciasDe, ordenarPorDependencias } from './dependencias';
 import {
   comparador,
@@ -34,9 +36,9 @@ export type Fila =
  *  algunos fantasma que no se podían ni borrar. Un subhábito pausado tampoco
  *  se pinta, igual que en el legacy. */
 export function subfilas(padre: Habito, hoy: string, ocultar: boolean): Fila[] {
-  return (padre.subhabitos ?? [])
-    .filter((s) => s.nombre?.trim() && !s.pausado && !ocultarCompletado(s, hoy, ocultar))
-    .map((subhabito) => ({ tipo: 'subhabito' as const, subhabito, padre }));
+  return ordenarSubhabitos(
+    (padre.subhabitos ?? []).filter((s) => s.nombre?.trim() && !s.pausado && !ocultarCompletado(s, hoy, ocultar)),
+  ).map((subhabito) => ({ tipo: 'subhabito' as const, subhabito, padre }));
 }
 
 export interface Vista {
@@ -97,6 +99,8 @@ export function seleccionar(
     valoracion?: ValoracionUrgencia;
     /** Pesos y horas del orden inteligente (ajustes); sin él, los de fábrica. */
     algoritmo?: Algoritmo;
+    /** Momento elegido a mano en la barra; sin él se lee el reloj. */
+    momento?: Momento;
     /** Solo una clase de fila: el panel de hábitos de la vista separada. Sin
      *  él, tareas y hábitos comparten lista como siempre. */
     solo?: 'tareas' | 'habitos';
@@ -172,7 +176,7 @@ export function seleccionar(
   // Completados tiene un solo orden, lo último hecho arriba; el modo elegido no
   // cuenta. `sort` es estable: dentro de un mismo día queda el orden de llegada.
   // El comparador guarda los pesos calculados: se crea una sola vez.
-  const comparar = comparador(opciones.orden, hoy, opciones.algoritmo);
+  const comparar = comparador(opciones.orden, hoy, opciones.algoritmo, opciones.momento);
   pares.sort(completados ? masRecienteHecho : (a, b) => comparar(a.entrada, b.entrada));
   // Lo que hay que hacer antes queda arriba de lo que espera a otra fila; el
   // resto conserva el orden de puntuación. Completados no tiene dependencias que mirar.

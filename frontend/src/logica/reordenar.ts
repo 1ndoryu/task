@@ -14,6 +14,44 @@ export function mover<T>(lista: readonly T[], desde: number, hasta: number): T[]
   return copia;
 }
 
+/* Peso de cada nivel de importancia, de menos a más: así un `sort` deja arriba
+ * el que más pesa. Por id y no por texto porque los hábitos guardan
+ * `Muy Alta` y las tareas `muy_alta`; el id normaliza las dos formas. */
+const PESO_NIVEL = { muy_baja: 0, baja: 1, media: 2, alta: 3, muy_alta: 4 } as const;
+type Nivel = keyof typeof PESO_NIVEL;
+
+/** El nivel de una importancia escrita de cualquiera de las dos formas; lo que
+ *  no sea un nivel cuenta como `media`, igual que en el resto, y sin depender
+ *  de `importancia.ts` (este módulo se prueba con `node --test`, sin resolver
+ *  rutas sin extensión). */
+function nivelDeTexto(valor: string | null | undefined): Nivel {
+  const id = (valor ?? '').trim().toLowerCase().replace(/\s+/g, '_') as Nivel;
+  return id in PESO_NIVEL ? id : 'media';
+}
+
+/** Los subhábitos de un hábito en el orden en que se pintan: por importancia,
+ *  de más a menos, y dentro de un mismo nivel, el orden guardado. Comparar por
+ *  nivel y no por texto es lo que deja al arrastre mover solo dentro del tramo
+ *  de un nivel: la importancia nunca cambia de sitio. Los de igual nivel
+ *  conservan su orden relativo (`sort` es estable), que es lo que reescribe el
+ *  gesto. */
+export function ordenarSubhabitos<T extends { importancia?: string }>(subs: readonly T[]): T[] {
+  return [...subs].sort((a, b) => PESO_NIVEL[nivelDeTexto(b.importancia)] - PESO_NIVEL[nivelDeTexto(a.importancia)]);
+}
+
+/** Reordena solo los elementos cuyos ids llegan en `ids` (el orden nuevo de los
+ *  que se ven). Los demás se quedan quietos en su sitio: así un subhábito
+ *  pausado o ya hecho —que no se pinta— no salta de lugar porque un hermano se
+ *  mueva. Sirve igual para guardar el array completo en el payload del padre. */
+export function reordenarEntre<T extends { id: number }>(actuales: readonly T[], ids: readonly number[]): T[] {
+  const pedido = new Set(ids);
+  const nuevos = ids
+    .map((id) => actuales.find((x) => x.id === id))
+    .filter((x): x is T => x !== undefined);
+  let k = 0;
+  return actuales.map((x) => (pedido.has(x.id) ? nuevos[k++] : x));
+}
+
 /** Sitio al que cae la fila arrastrada: una vecina cede solo cuando el borde de
  *  la arrastrada ya pasó su centro. Así no baila ante cualquier roce, y el
  *  mismo gesto de ida y vuelta lleva siempre al mismo destino. `tramos` son los

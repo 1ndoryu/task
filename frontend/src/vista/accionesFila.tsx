@@ -3,13 +3,14 @@
 import { APLAZOS } from '../logica/aplazos';
 import { nivelDe, type NivelPrioridad } from '../logica/importancia';
 import type { ColoresNivel } from '../logica/preferencias';
-import { IconoCarpeta } from './Iconos';
+import { IconoCarpeta, IconoCronometro } from './Iconos';
 import type { OpcionMenu } from './Menu';
 import { aplazosMenu, gruposMenu, IconoAplazar, IconoBorrar, IconoDependencias, IconoEditar, IconoFecha, prioridadesMenu } from './MenuOpciones';
 import type { Editando } from './usarLista';
 
 export interface AccionesFila {
-  completar: (fila: NonNullable<Editando>) => void;
+  /** Devuelve si la fila quedó marcada: el cronómetro no cierra si no. */
+  completar: (fila: NonNullable<Editando>) => boolean;
   editar: (fila: NonNullable<Editando>) => void;
   borrar: (fila: NonNullable<Editando>) => void;
   prioridad: (fila: NonNullable<Editando>, prioridad: string | null) => void;
@@ -22,6 +23,9 @@ export interface AccionesFila {
   dependencias: (fila: NonNullable<Editando>) => void;
   /** Orden manual: las filas de una caja, ya en su orden nuevo. */
   reordenar: (filas: NonNullable<Editando>[]) => void;
+  /** Orden manual de los subhábitos de un padre: sus ids ya en su orden nuevo.
+   *  Solo llegan los de un mismo nivel, y los que no se ven no se tocan. */
+  reordenarSubs: (padreId: number, ids: number[]) => void;
 }
 
 /** Nivel de la fila en el id común: la tarea ya lo trae y la importancia del
@@ -51,6 +55,8 @@ export function opcionesFila(
   colores: ColoresNivel,
   /** Hay un aplazo vigente: el submenú ofrece quitarlo. */
   aplazado = false,
+  /** La fila se puede medir (ni hecha ni en completados) y si mide ahora. */
+  cronometro: 'nada' | 'detenido' | 'midiendo' = 'nada',
 ): OpcionMenu[] {
   const esTarea = fila.tipo === 'tarea';
   const nombre = esTarea ? 'la tarea' : 'el hábito';
@@ -62,6 +68,18 @@ export function opcionesFila(
   }
   return [
     { id: 'editar', etiqueta: `Configurar ${nombre}`, accion: true, icono: <IconoEditar /> },
+    // El cronómetro también se maneja desde aquí: el play de la fila solo
+    // aparece al pasar el ratón, y quien abre el menú es porque lo buscaba.
+    ...(cronometro === 'nada'
+      ? []
+      : [
+          {
+            id: 'cronometro',
+            etiqueta: cronometro === 'midiendo' ? 'Detener el cronómetro' : 'Cronometrar',
+            accion: true,
+            icono: <IconoCronometro />,
+          },
+        ]),
     // Solo el hábito se aplaza: una tarea se completa o se deja.
     ...(esTarea
       ? []
