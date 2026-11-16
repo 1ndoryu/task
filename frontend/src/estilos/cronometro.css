@@ -65,6 +65,7 @@
 
 /* La fila medida se marca por la izquierda, sin mover nada: una raya de 2 px
  * pegada al borde. `padding` no cambia, así que el texto no salta. */
+/* sentinel-disable-next-line claseHuerfana — falso positivo del scanner: la clase se compone en un array condicional de `Fila.tsx`; el scanner solo ve literales className completos. */
 .fila--midiendo {
   box-shadow: inset 2px 0 0 var(--sangre);
 }

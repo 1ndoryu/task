@@ -82,7 +82,7 @@ export function PastillaCronometro() {
           )}
           <button
             type="button"
-            className="cronometro__boton cronometro__boton--hecho"
+            className="cronometro__boton"
             title="Completar"
             aria-label={`Completar ${sesion.nombre} y cerrar el cronómetro`}
             onClick={control.completar}

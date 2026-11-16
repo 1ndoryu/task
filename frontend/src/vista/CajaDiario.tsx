@@ -5,12 +5,13 @@
  * El día y el capítulo visibles viven aquí y no en `usarNotas`: son estado de la
  * vista. Lo escrito se guarda por capítulo a través de `acceso`. */
 import { useState, type ReactNode } from 'react';
-import { fechaEnPalabras, sumarDias } from '../logica/fechas';
+import { fechaEnPalabras } from '../logica/fechas';
 import type { Preferencias, TamanoCaja } from '../logica/preferencias';
 import { SelectorDia } from './SelectorDia';
 import { CajaNota } from './CajaNota';
 import { IconoAnterior, IconoSiguiente } from './IconosDiario';
 import type { AccesoDiario } from './usarNotas';
+import { usarPosicionDiario } from './usarPosicionDiario';
 
 interface Props {
   idPanel: string;
@@ -27,18 +28,7 @@ interface Props {
 
 export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTamano, minimizada, botonMinimizar }: Props) {
   // Arranca en hoy, capítulo 1: al abrir el diario se ve lo de hoy, no un día viejo.
-  const [fecha, setFecha] = useState(hoy);
-  const [capitulo, setCapitulo] = useState(1);
-  // Si el día cambia con el diario abierto, la caja pasa al día nuevo: quedarse
-  // en el de ayer la dejaba sin poder escribir en el de hoy hasta recargar.
-  const [diaAnterior, setDiaAnterior] = useState(hoy);
-  if (diaAnterior !== hoy) {
-    setDiaAnterior(hoy);
-    if (fecha === diaAnterior) {
-      setFecha(hoy);
-      setCapitulo(1);
-    }
-  }
+  const { fecha, capitulo, irA, mover, ponerCapitulo } = usarPosicionDiario(hoy);
   // Sube al borrar: el campo se monta de nuevo y no enseña el texto borrado.
   const [version, setVersion] = useState(0);
   const esHoy = fecha >= hoy;
@@ -50,12 +40,7 @@ export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTaman
   const posicion = capitulos.indexOf(actual);
   const ultimo = posicion === capitulos.length - 1;
 
-  const cambiarDia = (dias: number) => {
-    setFecha(sumarDias(fecha, dias));
-    setCapitulo(1);
-  };
-
-  const crearCapitulo = () => setCapitulo(acceso.nuevo(fecha));
+  const crearCapitulo = () => ponerCapitulo(acceso.nuevo(fecha));
 
   const borrarCapitulo = () => {
     // Un capítulo con texto se confirma antes: borrarlo no tiene vuelta atrás.
@@ -63,7 +48,7 @@ export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTaman
     if (tieneTexto && !window.confirm('¿Borrar este capítulo y su texto?')) return;
     acceso.borrar(fecha, actual);
     // Tras borrar se queda en el anterior; si era el 1, sigue el 1 (queda vacío).
-    setCapitulo(capitulos[Math.max(posicion - 1, 0)]);
+    ponerCapitulo(capitulos[Math.max(posicion - 1, 0)]);
     setVersion((v) => v + 1);
   };
 
@@ -90,7 +75,7 @@ export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTaman
               className="barra__boton barra__icono"
               aria-label="Día anterior"
               title="Día anterior"
-              onClick={() => cambiarDia(-1)}
+              onClick={() => mover(-1)}
             >
               <IconoAnterior />
             </button>
@@ -99,10 +84,7 @@ export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTaman
               fecha={fecha}
               hoy={hoy}
               marcados={acceso.diasEscritos()}
-              onElegir={(dia) => {
-                setFecha(dia);
-                setCapitulo(1);
-              }}
+              onElegir={irA}
             />
             <button
               type="button"
@@ -110,7 +92,7 @@ export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTaman
               aria-label="Día siguiente"
               title={esHoy ? 'Hoy: no hay días posteriores' : 'Día siguiente'}
               disabled={esHoy}
-              onClick={() => cambiarDia(1)}
+              onClick={() => mover(1)}
             >
               <IconoSiguiente />
             </button>
@@ -127,7 +109,7 @@ export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTaman
             aria-label="Capítulo anterior"
             title="Capítulo anterior"
             disabled={posicion === 0}
-            onClick={() => setCapitulo(capitulos[posicion - 1])}
+            onClick={() => ponerCapitulo(capitulos[posicion - 1])}
           >
             <IconoAnterior />
           </button>
@@ -148,7 +130,7 @@ export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTaman
             aria-label="Capítulo siguiente"
             title="Capítulo siguiente"
             disabled={ultimo}
-            onClick={() => setCapitulo(capitulos[posicion + 1])}
+            onClick={() => ponerCapitulo(capitulos[posicion + 1])}
           >
             <IconoSiguiente />
           </button>
