@@ -87,7 +87,8 @@ function ModalNumero({
     if (!nodo) return;
     nodo.showModal();
     const entrada = campo.current;
-    entrada?.focus();
+    // Sin `preventScroll`: el navegador arrastraría el carril para enseñar el campo.
+    entrada?.focus({ preventScroll: true });
     entrada?.select();
     const alCerrar = () => onCerrar();
     // Escape y el cierre nativo avisan por aquí; `onCerrar` solo desmonta.

@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { ALGORITMO_DEFECTO, leerAlgoritmo } from '../src/logica/algoritmo.ts';
-import { aplicarMomentos, elegirMomento, leerMomentos, momentoDe } from '../src/logica/momentos.ts';
+import { aplicarMomentos, elegirMomento, leerMomentos, momentoDe, type Momento } from '../src/logica/momentos.ts';
 
 test('el momento del día sale de la hora', () => {
   const a = (hora: number) => momentoDe(new Date(2026, 9, 26, hora), ALGORITMO_DEFECTO);
@@ -71,4 +71,14 @@ test('de tarde, temprano va antes que noche y tarde antes que ambos', () => {
   const peso = (m: 'temprano' | 'tarde' | 'noche') => aplicarMomentos(-200, [m], 'tarde', ALGORITMO_DEFECTO);
   assert.ok(peso('tarde') > peso('temprano'));
   assert.ok(peso('temprano') > peso('noche'));
+});
+
+test('elegir a mano cambia el momento que ordena, sin tocar el reloj', () => {
+  const algoritmo = { horaTemprano: 6, horaTarde: 13, horaNoche: 19 };
+  const reloj = new Date(2026, 10, 11, 10, 0);
+  assert.equal(momentoDe(reloj, algoritmo), 'temprano');
+  // La vista usa el elegido si lo hay; aquí el valor por defecto del reloj y el manual.
+  const efectivo = (manual: Momento | null) => manual ?? momentoDe(reloj, algoritmo);
+  assert.equal(efectivo(null), 'temprano');
+  assert.equal(efectivo('noche'), 'noche');
 });

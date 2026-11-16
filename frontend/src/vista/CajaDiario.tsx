@@ -29,6 +29,16 @@ export function CajaDiario({ idPanel, hoy, preferencias, acceso, tamano, onTaman
   // Arranca en hoy, capítulo 1: al abrir el diario se ve lo de hoy, no un día viejo.
   const [fecha, setFecha] = useState(hoy);
   const [capitulo, setCapitulo] = useState(1);
+  // Si el día cambia con el diario abierto, la caja pasa al día nuevo: quedarse
+  // en el de ayer la dejaba sin poder escribir en el de hoy hasta recargar.
+  const [diaAnterior, setDiaAnterior] = useState(hoy);
+  if (diaAnterior !== hoy) {
+    setDiaAnterior(hoy);
+    if (fecha === diaAnterior) {
+      setFecha(hoy);
+      setCapitulo(1);
+    }
+  }
   // Sube al borrar: el campo se monta de nuevo y no enseña el texto borrado.
   const [version, setVersion] = useState(0);
   const esHoy = fecha >= hoy;

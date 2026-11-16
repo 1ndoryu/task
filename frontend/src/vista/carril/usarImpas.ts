@@ -34,8 +34,17 @@ export function usarImpas({ pista, piezas, centro, marcar, centrar, moviendo }: 
   /** Temporizador que suelta la marca anterior al parar el desplazamiento. */
   const reposo = useRef<number | undefined>(undefined);
 
+  /** Si el desplazamiento en curso lo pidió la usuaria (rueda, arrastre del
+   *  fondo, teclado o nuestro propio centrado). El navegador también desplaza
+   *  el carril por su cuenta —al enfocar un campo que estaba fuera de vista,
+   *  al quitar contenido—, y esos movimientos no son un gesto: imantar tras
+   *  ellos devolvía el carril a otra pieza de un salto. */
+  const propio = useRef(false);
+
   /** Tras soltar, la pieza más cercana al centro es la que se centra. */
   const imantar = useCallback(() => {
+    // Consumido el gesto, los desplazamientos que lleguen ya no son suyos.
+    propio.current = false;
     const nodo = pista.current;
     if (!nodo) return;
     const mitad = nodo.scrollLeft + nodo.clientWidth / 2;
@@ -53,6 +62,7 @@ export function usarImpas({ pista, piezas, centro, marcar, centrar, moviendo }: 
   }, [pista, piezas, centro, marcar, centrar]);
 
   const aplazar = useCallback(() => {
+    propio.current = true;
     window.clearTimeout(iman.current);
     iman.current = window.setTimeout(imantar, ESPERA);
   }, [imantar]);
@@ -69,6 +79,9 @@ export function usarImpas({ pista, piezas, centro, marcar, centrar, moviendo }: 
       }, ESPERA * 2);
       return;
     }
+    // Un desplazamiento que no es gesto (el del navegador al enfocar, por
+    // ejemplo) se deja quieto: imantarlo sería mover el carril sin pedirlo.
+    if (!propio.current) return;
     aplazar();
   }, [aplazar, moviendo]);
 

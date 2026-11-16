@@ -260,7 +260,7 @@ export function leerPreferencias(): Preferencias {
     const interlineadoNota = texto('interlineadoNota', ['ajustado', 'normal', 'amplio']);
     const altura = texto('altura', ['compacta', 'normal', 'amplia']);
     const tema = texto('tema', ['claro', 'oscuro']);
-    return {
+    const leidas: Preferencias = {
       ...POR_DEFECTO,
       orden,
       ordenes: leerOrdenes(guardado.ordenes),
@@ -318,6 +318,11 @@ export function leerPreferencias(): Preferencias {
       tema: (tema as Tema) ?? POR_DEFECTO.tema,
       colores: leerColores(guardado.colores),
     };
+    // El «hoy» depende del fin de día y `hoyLogico()` lo lee de este módulo: se
+    // fija ya, antes de montar la vista, para que la primera lectura sea la de
+    // la usuaria y no la de fábrica.
+    fijarFinDia(leidas.finDia);
+    return leidas;
   } catch {
     return { ...POR_DEFECTO };
   }

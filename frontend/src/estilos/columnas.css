@@ -50,6 +50,37 @@
   border-radius: calc(var(--momento-alto) / 2);
   opacity: 0.35;
   transition: opacity 0.25s ease;
+  /* Es un botón: se limpia lo que trae la hoja del navegador y se deja con la
+     medida del tramo. El alcance del clic se agranda con `::before`, sin
+     engordar la barra: la pista sigue igual de fina. */
+  position: relative;
+  appearance: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.momento__tramo::before {
+  content: '';
+  position: absolute;
+  inset: -0.55rem -0.1rem;
+}
+
+.momento__tramo:hover {
+  opacity: 0.6;
+}
+
+.momento__tramo:focus-visible {
+  outline: 2px solid var(--tinta);
+  outline-offset: 3px;
+}
+
+/* Elegido a mano: un aro fino de tinta alrededor del tramo, separado por el
+ * fondo. Se distingue del real sin mover nada ni añadir texto; el nombre y la
+ * etiqueta accesible ya dicen cuál es. */
+.momento__tramo[data-elegido='true'] {
+  outline: 1px solid var(--tinta);
+  outline-offset: 2px;
 }
 
 .momento__tramo[data-activo='true'] {
@@ -84,6 +115,7 @@
   font-size: var(--texto-etiqueta);
   letter-spacing: 0.08em;
   color: var(--tinta-tenue);
+  white-space: nowrap;
 }
 
 /* Progreso del día al pie de la caja de hábitos: pista fina con el relleno en

@@ -44,7 +44,8 @@ export function TituloEditable({
     setBorrador(valor);
     const nodo = campo.current;
     if (!nodo) return;
-    nodo.focus();
+    // Sin `preventScroll` el navegador desplaza el carril al entrar en edición.
+    nodo.focus({ preventScroll: true });
     nodo.select();
   }, [editando, valor]);
 

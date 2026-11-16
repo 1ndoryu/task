@@ -100,7 +100,7 @@ export function Selector({ valor, opciones, onElegir, vacio, etiqueta, onCrear }
   const cerrar = (devolverFoco = false) => {
     setAbierto(false);
     setFiltro('');
-    if (devolverFoco) disparador.current?.focus();
+    if (devolverFoco) disparador.current?.focus({ preventScroll: true });
   };
 
   // Al abrir: el filtro vacío y el cursor sobre el valor vigente.
@@ -133,7 +133,7 @@ export function Selector({ valor, opciones, onElegir, vacio, etiqueta, onCrear }
 
   // Al abrir, el cursor va al filtro para poder escribir sin buscar el campo.
   useEffect(() => {
-    if (abierto) filtroRef.current?.focus();
+    if (abierto) filtroRef.current?.focus({ preventScroll: true });
   }, [abierto]);
 
   // Fuera del selector o Escape lo cierran (Escape en captura: no cierra también
@@ -144,7 +144,7 @@ export function Selector({ valor, opciones, onElegir, vacio, etiqueta, onCrear }
     alFuera: () => setAbierto(false),
     alEscape: () => {
       setAbierto(false);
-      disparador.current?.focus();
+      disparador.current?.focus({ preventScroll: true });
     },
     capturaEscape: true,
   });

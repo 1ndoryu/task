@@ -1,9 +1,14 @@
 /* Barra del día: temprano, tarde y noche en tres colores, con una marca en la
  * hora actual. Cada tramo mide lo que dura según las horas de los ajustes (de
- * fábrica 7 h, 7 h y 10 h) y el día empieza donde empieza «temprano». */
-import { useEffect, useState, type CSSProperties } from 'react';
+ * fábrica 7 h, 7 h y 10 h) y el día empieza donde empieza «temprano».
+ *
+ * Los tramos se pueden pulsar: elegir uno hace que el orden inteligente se
+ * ordene como si fuera ese momento, sin tocar el reloj. El doble clic devuelve
+ * la barra al momento de verdad; también se suelta sola al recargar, porque es
+ * una mirada, no un ajuste. */
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import type { Algoritmo } from '../logica/algoritmo';
-import { momentoDe, type Momento } from '../logica/momentos';
+import { MOMENTOS, momentoDe, type Momento } from '../logica/momentos';
 
 /* Las clases van enteras, no compuestas: la hoja y el índice casan el literal. */
 const TRAMOS: { id: Momento; clase: string; etiqueta: string }[] = [
@@ -33,28 +38,80 @@ function posicionDe(ahora: Date, inicio: number): number {
   return (((horas - inicio + 24) % 24) / 24) * 100;
 }
 
-export function BarraMomento({ algoritmo }: { algoritmo: Algoritmo }) {
+interface Props {
+  algoritmo: Algoritmo;
+  /** El que manda ahora mismo: el elegido a mano o el del reloj. */
+  actual: Momento;
+  /** `null` vuelve a seguir el reloj. */
+  onElegir: (momento: Momento | null) => void;
+}
+
+export function BarraMomento({ algoritmo, actual, onElegir }: Props) {
   const ahora = useAhora();
-  const actual = momentoDe(ahora, algoritmo);
-  const etiqueta = TRAMOS.find((tramo) => tramo.id === actual)?.etiqueta ?? '';
+  const real = momentoDe(ahora, algoritmo);
+  const elegido = actual !== real;
+  const etiqueta = MOMENTOS.find((m) => m.id === actual)?.etiqueta ?? '';
+  // Un clic seguido de otro llegarían como clic + doble clic: se retiene el
+  // primero lo justo para saber si era el principio de un doble.
+  const espera = useRef(0);
   const horas = duraciones(algoritmo);
+
+  useEffect(() => () => window.clearTimeout(espera.current), []);
+
+  const elegir = (id: Momento) => onElegir(id === actual ? null : id);
+  const soltar = () => {
+    window.clearTimeout(espera.current);
+    onElegir(null);
+  };
+
+  const alPulsar = (id: Momento) => {
+    window.clearTimeout(espera.current);
+    espera.current = window.setTimeout(() => elegir(id), 180);
+  };
+
+  // Con el teclado no hay doble clic: Enter y Espacio eligen, Escape suelta.
+  const alTeclear = (evento: KeyboardEvent<HTMLButtonElement>, id: Momento) => {
+    if (evento.key === 'Enter' || evento.key === ' ') {
+      evento.preventDefault();
+      elegir(id);
+    } else if (evento.key === 'Escape' && elegido) {
+      evento.preventDefault();
+      soltar();
+    }
+  };
+
   return (
-    <div className="momento" role="img" aria-label={`Momento del día: ${etiqueta}`}>
+    <div
+      className="momento"
+      role="group"
+      aria-label={elegido ? `Momento del día elegido a mano: ${etiqueta}. Doble clic para volver al real.` : `Momento del día: ${etiqueta}`}
+    >
       <div className="momento__pista">
         {TRAMOS.map((tramo) => (
-          <div
+          <button
             key={tramo.id}
+            type="button"
             className={tramo.clase}
             data-activo={tramo.id === actual}
+            data-elegido={tramo.id === actual && elegido}
+            aria-pressed={tramo.id === actual}
+            aria-label={`${tramo.etiqueta}${tramo.id === actual && elegido ? ', elegido a mano' : ''}`}
             style={{ '--horas': horas[tramo.id] } as CSSProperties}
+            onClick={() => alPulsar(tramo.id)}
+            onDoubleClick={soltar}
+            onKeyDown={(evento) => alTeclear(evento, tramo.id)}
           />
         ))}
+        {/* La marca es la hora real, también cuando se mira otro momento: es lo
+            que dice de dónde se ha salido. */}
         <span
           className="momento__marca"
           style={{ '--posicion': `${posicionDe(ahora, algoritmo.horaTemprano)}%` } as CSSProperties}
         />
       </div>
-      <span className="momento__nombre">{etiqueta}</span>
+      <span className="momento__nombre" title={elegido ? 'Elegido a mano · doble clic para volver al momento real' : undefined}>
+        {etiqueta}
+      </span>
     </div>
   );
 }

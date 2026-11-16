@@ -26,6 +26,7 @@ import type { Movimiento } from '../logica/destinoArrastre';
 import type { Gesto } from './carril/tipos';
 import { usarArrastre } from './carril/usarArrastre';
 import { usarDesplazamiento } from './carril/usarDesplazamiento';
+import { usarFoco } from './carril/usarFoco';
 import { usarImpas } from './carril/usarImpas';
 import { usarMedidas } from './carril/usarMedidas';
 
@@ -62,6 +63,9 @@ export function Carril({
   const moviendo = useRef(false);
   /** Índice de la pieza centrada: es lo que se restaura al redimensionar. */
   const centrada = useRef(0);
+  /** La pieza centrada, no su índice: al cambiar la lista de piezas se sigue a
+   *  ella aunque su índice sea otro. */
+  const piezaCentrada = useRef<HTMLElement | null>(null);
   /** Arrastre en curso, si lo hay: congela el imán mientras dura. */
   const gesto = useRef<Gesto | null>(null);
   // El callback se lee por referencia para que su identidad no obligue a
@@ -115,6 +119,7 @@ export function Carril({
   /** Fija qué pieza manda y solo avisa cuando cambia de verdad. */
   const marcar = useCallback(
     (indice: number) => {
+      piezaCentrada.current = piezas()[indice] ?? null;
       if (centrada.current === indice) return;
       centrada.current = indice;
       alActivar.current?.(indice);
@@ -124,7 +129,8 @@ export function Carril({
 
   const { iman, aplazar, alRodar } = usarImpas({ pista, piezas, centro, marcar, centrar, moviendo });
 
-  usarMedidas({ pista, piezas, centrar, centrada, gesto });
+  usarMedidas({ pista, piezas, centrar, centrada, piezaCentrada, gesto });
+  usarFoco({ pista, piezas, centrar, marcar, gesto });
   usarDesplazamiento({ pista, piezas, cajas, centrar, centrarRef, gesto, colocarRef, centrada, indiceActivo });
   usarArrastre({ pista, cajas, aplazar, iman, gesto, colocarRef, alMover, alSoltar, esFija });
 

@@ -22,6 +22,14 @@ export function hoyLogico(ahora: Date = new Date(), hora: number = horaFinDia): 
   return fechaLocal(new Date(ahora.getTime() - hora * 3_600_000));
 }
 
+/** Milisegundos que faltan para la próxima vez que la hora local sea `hora:00`.
+ *  Es lo que arma el reloj de la vista: un solo borde, no un intervalo. */
+export function msHastaLaHora(hora: number, ahora: Date = new Date()): number {
+  const siguiente = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate(), hora, 0, 0, 0);
+  if (siguiente.getTime() <= ahora.getTime()) siguiente.setDate(siguiente.getDate() + 1);
+  return siguiente.getTime() - ahora.getTime();
+}
+
 /** Suma días a una fecha `YYYY-MM-DD` en el calendario local. Se construye con
  *  componentes y no con texto para que el cambio de mes y de año salgan solos. */
 export function sumarDias(fecha: string, dias: number): string {
