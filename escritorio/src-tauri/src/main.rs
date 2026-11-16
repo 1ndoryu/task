@@ -15,6 +15,17 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use tauri::{Manager, RunEvent};
+// [por que] Un job object ata la vida del backend a la del lanzador: si la app
+// muere de golpe (taskkill, cuelgue, cierre del sistema) Windows cierra el backend
+// con ella. Sin esto, el hijo sobrevive sin ventana y el siguiente arranque
+// encuentra el puerto ocupado y se queda en «Arrancando…» (2026-11-10).
+use windows::Win32::Foundation::HANDLE;
+use windows::Win32::System::JobObjects::{
+    AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
+    SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
+    JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+};
+use windows::Win32::System::Threading::{OpenProcess, PROCESS_SET_QUOTA, PROCESS_TERMINATE};
 
 const PUERTO_BACKEND: u16 = 4190;
 const MAX_RESPALDOS: usize = 14;
@@ -32,10 +43,24 @@ const ESPERA_TRAS_RECUPERACION: Duration = Duration::from_secs(60);
 /// Procesos lanzados por esta app, en ranuras con nombre; se paran al salir.
 /// [por que] Con nombre y no en una lista porque el vigilante tiene que poder
 /// matar y relanzar *solo* el backend al recuperarse.
-#[derive(Default)]
 struct Hijos {
     backend: Mutex<Option<Child>>,
+    /// Job al que se asigna el backend; su cierre mata lo que quede dentro.
+    job: Job,
 }
+
+/// Handle del job, o nulo si Windows no lo dio. Se conserva vivo durante toda la
+/// ejecución: cerrarlo es justamente lo que mata al backend.
+/// [por que] El puntero va como `usize` y no como `HANDLE`: Tauri exige que el
+/// estado sea `Send + Sync` y el handle de Windows no lo declara. Un handle es
+/// válido en cualquier hilo, así que la conversión es segura y explícita.
+#[derive(Default, Clone, Copy)]
+struct Job(usize);
+
+// SAFETY: un handle de kernel de Windows no está atado a un hilo; solo se usa
+// para asignar procesos al job y para que el job viva mientras viva la app.
+unsafe impl Send for Job {}
+unsafe impl Sync for Job {}
 
 /// Ajustes de la instalación (`config.env` junto al exe, fuera del repo: lleva la
 /// contraseña de la BD). [por que] El lanzador no puede traerla compilada —el repo
@@ -128,7 +153,7 @@ mod esquinas {
 
 fn main() {
     let construida = tauri::Builder::default()
-        .manage(Hijos::default())
+        .manage(Hijos { backend: Mutex::new(None), job: crear_job() })
         // [por que] La región de recorte se queda con el tamaño viejo: se rehace
         // con cada redimensionado, y maximizar y restaurar entran por aquí.
         .on_window_event(|ventana, evento| {
@@ -319,6 +344,7 @@ fn lanzar_backend(app: &tauri::AppHandle, dir: &Path, ajustes: &Ajustes) -> Resu
         .stderr(log)
         .spawn()
         .map_err(|e| format!("no se pudo lanzar el backend: {e}"))?;
+    atar_al_job(app.state::<Hijos>().job, hijo.id());
     registrar_hijo(&app.state::<Hijos>().backend, hijo);
     Ok(())
 }
@@ -382,6 +408,46 @@ fn comando(programa: impl AsRef<OsStr>) -> Command {
     let mut c = Command::new(programa);
     c.creation_flags(SIN_VENTANA);
     c
+}
+
+/// Crea el job del lanzador con la regla de «muere conmigo».
+fn crear_job() -> Job {
+    // [por que] Un fallo aquí no impide arrancar: se pierde la red de seguridad,
+    // no la app. Queda anotado en app.log por si hiciera falta.
+    unsafe {
+        let Ok(job) = CreateJobObjectW(None, None) else {
+            registrar(&dir_app().unwrap_or_default(), "no se pudo crear el job del backend");
+            return Job::default();
+        };
+        let mut info = JOBOBJECT_EXTENDED_LIMIT_INFORMATION::default();
+        info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+        if SetInformationJobObject(
+            job,
+            JobObjectExtendedLimitInformation,
+            &info as *const _ as *const core::ffi::c_void,
+            std::mem::size_of::<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>() as u32,
+        )
+        .is_err()
+        {
+            registrar(&dir_app().unwrap_or_default(), "no se pudo configurar el job del backend");
+        }
+        Job(job.0 as usize)
+    }
+}
+
+/// Mete un proceso ya lanzado en el job: cuando el job se cierre, se irá con él.
+fn atar_al_job(job: Job, pid: u32) {
+    if job.0 == 0 {
+        return;
+    }
+    unsafe {
+        // Los dos permisos son los que pide `AssignProcessToJobObject`.
+        let Ok(proceso) = OpenProcess(PROCESS_SET_QUOTA | PROCESS_TERMINATE, false, pid) else {
+            return;
+        };
+        let _ = AssignProcessToJobObject(HANDLE(job.0 as *mut core::ffi::c_void), proceso);
+        let _ = windows::Win32::Foundation::CloseHandle(proceso);
+    }
 }
 
 fn registrar_hijo(slot: &Mutex<Option<Child>>, hijo: Child) {

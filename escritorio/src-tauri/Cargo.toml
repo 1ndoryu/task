@@ -24,6 +24,9 @@ windows = { version = "0.62", features = [
   "Win32_Graphics_Dwm",
   "Win32_Graphics_Gdi",
   "Win32_UI_WindowsAndMessaging",
+  "Win32_System_JobObjects",
+  "Win32_Security",
+  "Win32_System_Threading",
 ] }
 
 # [por que] Binario pequeño y poca RAM: sin símbolos, LTO y un solo hilo de codegen.
