@@ -72,17 +72,17 @@ export function PastillaCronometro() {
             botones se buscan a la derecha, donde acaba la lectura. */}
         <span className="cronometro__acciones">
           {pausado ? (
-            <button type="button" className="cronometro__boton" title="Reanudar" aria-label="Reanudar el cronómetro" onClick={control.reanudar}>
+            <button type="button" className="cronometro__accion" title="Reanudar" aria-label="Reanudar el cronómetro" onClick={control.reanudar}>
               <IconoPlay tam={11} />
             </button>
           ) : (
-            <button type="button" className="cronometro__boton" title="Pausar" aria-label="Pausar el cronómetro" onClick={control.pausar}>
+            <button type="button" className="cronometro__accion" title="Pausar" aria-label="Pausar el cronómetro" onClick={control.pausar}>
               <IconoPausa tam={11} />
             </button>
           )}
           <button
             type="button"
-            className="cronometro__boton"
+            className="cronometro__accion"
             title="Completar"
             aria-label={`Completar ${sesion.nombre} y cerrar el cronómetro`}
             onClick={control.completar}
@@ -91,7 +91,7 @@ export function PastillaCronometro() {
           </button>
           <button
             type="button"
-            className="cronometro__boton"
+            className="cronometro__accion"
             title="Cancelar"
             aria-label="Cancelar el cronómetro sin completar la fila"
             onClick={control.cancelar}

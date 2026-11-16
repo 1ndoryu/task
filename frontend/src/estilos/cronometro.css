@@ -38,10 +38,12 @@
 
 /* Solo con el ratón encima, con el foco puesto en el propio play o mientras
  * mide. `:focus-within` de la fila no cuenta: tras un clic el foco se queda en
- * la fila y el play se vería siempre. */
+ * la fila y el play se vería siempre. El estado de medir se lee en el propio
+ * botón (`data-midiendo`), no en la clase de la fila: así la clase aparece solo
+ * donde se define. */
 .fila:hover .fila__play,
 .fila__play:focus-visible,
-.fila--midiendo .fila__play {
+.fila__play[data-midiendo='true'] {
   /* Un pelo del ancho de la flecha de plegar: se lee como una acción más de la
    * fila. `--margen-play` la acerca a la flecha, que es la siguiente. */
   width: 1.125rem;
@@ -64,7 +66,8 @@
 }
 
 /* La fila medida se marca por la izquierda, sin mover nada: una raya de 2 px
- * pegada al borde. `padding` no cambia, así que el texto no salta. */
+ * pegada al borde. `padding` no cambia, así que el texto no salta. La pone
+ * `Fila.tsx` en un array condicional, de ahí que el scanner no la vea usada. */
 /* sentinel-disable-next-line claseHuerfana — falso positivo del scanner: la clase se compone en un array condicional de `Fila.tsx`; el scanner solo ve literales className completos. */
 .fila--midiendo {
   box-shadow: inset 2px 0 0 var(--sangre);
@@ -149,7 +152,7 @@
   gap: 0.15rem;
 }
 
-.cronometro__boton {
+.cronometro__accion {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -166,7 +169,7 @@
 /* Sin cambio al pasar el ratón: la pastilla se lee como un solo objeto y unos
  * botones que se encienden la rompen en trozos. El foco del teclado sí se ve,
  * que ahí no hay puntero que lo delate. */
-.cronometro__boton:focus-visible {
+.cronometro__accion:focus-visible {
   outline: 1px solid var(--tinta-tenue);
   outline-offset: 1px;
 }
